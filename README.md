@@ -54,7 +54,7 @@ $ npm run test
 # e2e tests
 $ npm run test:e2e
 
-# test coverage
+# test coveragee
 $ npm run test:cov
 ```
 
