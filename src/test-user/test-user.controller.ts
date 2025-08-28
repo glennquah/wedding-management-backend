@@ -1,8 +1,8 @@
 import { Body, Controller, Post } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { TestUserService } from './test-user.service';
-import { TestUser } from '@prisma/client';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateTestUserDto } from './dto/create-test-user.dto';
+import { TestUserResponseDto } from './dto/test-user-response.dto';
+import { TestUserService } from './test-user.service';
 
 @ApiTags('test-users')
 @Controller('test-users')
@@ -11,9 +11,13 @@ export class TestUserController {
 
   @Post()
   @ApiOperation({ summary: 'Create a new test user' })
-  @ApiResponse({ status: 201, description: 'The test user has been successfully created.' })
+  @ApiResponse({
+    status: 201,
+    description: 'The test user has been successfully created.',
+    type: TestUserResponseDto,
+  })
   @ApiResponse({ status: 400, description: 'Bad request.' })
-  async create(@Body() body: CreateTestUserDto): Promise<TestUser> {
+  async create(@Body() body: CreateTestUserDto): Promise<TestUserResponseDto> {
     return this.service.create(body);
   }
 }
