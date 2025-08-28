@@ -10,7 +10,10 @@ export class PrismaService
     try {
       await this.$connect();
     } catch (error) {
-      console.warn('Database connection failed, continuing without database:', error.message);
+      console.warn(
+        'Database connection failed, continuing without database:',
+        error.message,
+      );
     }
   }
 
