@@ -1,0 +1,37 @@
+import { ApiProperty } from '@nestjs/swagger';
+import { IsString, IsOptional, IsInt, IsEnum } from 'class-validator';
+
+export class CreateGuestDto {
+  @ApiProperty({ description: 'The name of the guest' })
+  @IsString()
+  name: string;
+
+  @ApiProperty({ description: 'Allergies or dietary restrictions', required: false })
+  @IsOptional()
+  @IsString()
+  allergies?: string;
+
+  @ApiProperty({ description: 'Group identifier for the guest', required: false })
+  @IsOptional()
+  @IsString()
+  group?: string;
+
+  @ApiProperty({ description: 'Wedding ID this guest belongs to' })
+  @IsInt()
+  weddingId: number;
+
+  @ApiProperty({ description: 'Primary guest ID if this is an accompanying guest', required: false })
+  @IsOptional()
+  @IsInt()
+  primaryGuestId?: number;
+
+  @ApiProperty({ 
+    description: 'Confirmation status of the guest', 
+    enum: ['pending', 'confirmed', 'rejected'], 
+    required: false, 
+    default: 'pending' 
+  })
+  @IsOptional()
+  @IsEnum(['pending', 'confirmed', 'rejected'])
+  confirmationStatus?: 'pending' | 'confirmed' | 'rejected';
+}
