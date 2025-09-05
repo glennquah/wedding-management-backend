@@ -7,6 +7,9 @@ export class TokensDto {
 
   @ApiProperty()
   refreshToken: string;
+
+  @ApiProperty()
+  expiresIn: number;
 }
 
 export class AuthResponseDto {
