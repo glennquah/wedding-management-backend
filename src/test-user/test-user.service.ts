@@ -1,7 +1,11 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTestUserDto } from './dto/create-test-user.dto';
-import { hash } from 'bcrypt'; 
+import { hash } from 'bcrypt';
 import { TestUser } from '@prisma/client';
 
 @Injectable()
@@ -9,10 +13,12 @@ export class TestUserService {
   constructor(private prisma: PrismaService) {}
 
   async create(dto: CreateTestUserDto): Promise<TestUser> {
-    const user = await this.prisma.testUser.findUnique({ where: { email: dto.email } });
+    const user = await this.prisma.testUser.findUnique({
+      where: { email: dto.email },
+    });
 
     if (user) throw new ConflictException('Email duplicated');
-    
+
     return this.prisma.testUser.create({
       data: {
         ...dto,
@@ -23,7 +29,8 @@ export class TestUserService {
 
   async findByEmail(email: string): Promise<TestUser> {
     const user = await this.prisma.testUser.findUnique({ where: { email } });
-    if (!user) throw new NotFoundException(`User with email ${email} not found`);
+    if (!user)
+      throw new NotFoundException(`User with email ${email} not found`);
     return user;
   }
 
