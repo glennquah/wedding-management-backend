@@ -12,9 +12,9 @@ export class UserResponseDto {
 
   @ApiProperty({ 
     description: 'Role of the user', 
-    enum: ['user', 'admin', 'vendor'] 
+    enum: ['admin', 'superAdmin', 'vendor'] 
   })
-  role: 'user' | 'admin' | 'vendor';
+  role: 'admin' | 'superAdmin' | 'vendor';
 
   @ApiProperty({ description: 'Creation timestamp' })
   createdAt: Date;

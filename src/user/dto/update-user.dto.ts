@@ -19,10 +19,10 @@ export class UpdateUserDto {
 
   @ApiProperty({ 
     description: 'Role of the user', 
-    enum: ['user', 'admin', 'vendor'], 
-    required: false 
+    enum: ['admin', 'superAdmin', 'vendor'], 
+    required: true
   })
   @IsOptional()
-  @IsEnum(['user', 'admin', 'vendor'])
-  role?: 'user' | 'admin' | 'vendor';
+  @IsEnum(['admin', 'superAdmin', 'vendor'])
+  role?: 'admin' | 'superAdmin' | 'vendor';
 }

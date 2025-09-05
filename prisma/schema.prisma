@@ -8,9 +8,49 @@ datasource db {
 }
 
 enum UserRole {
-  user
   admin
+  superAdmin
   vendor
+}
+
+enum WeddingType {
+  chinese
+  malay
+  indian
+  western
+  others
+}
+
+enum WeddingService {
+  venue
+  catering
+  photography
+  decoration
+  music
+  attire
+  makeup
+  transportation
+}
+
+enum WeddingStyle {
+  luxury
+  modern
+  traditional
+  rustic
+}
+
+// tentative numbers, need to market research to finalize
+enum BudgetBucket {
+  low // up to $10,000
+  medium // $10,000 to $30,000
+  high // $30,000 to $50,000
+  luxury // above $50,000
+}
+
+enum GuestCountBucket {
+  small // up to 50
+  medium // 50 to 150
+  large // above 150
 }
 
 model User {
@@ -18,22 +58,45 @@ model User {
   name      String
   email     String   @unique
   password  String
-  role      UserRole @default(user)
+  role      UserRole
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  admin      Admin?
+  superAdmin SuperAdmin?
+  vendor     Vendor?
+}
+
+model Admin {
+  userId Int  @unique
+  user   User @relation(fields: [userId], references: [id])
+
+  onboardedDate     DateTime         @default(now())
+  weddingType       WeddingType
+  budgetBucket      BudgetBucket
+  guestCountBucket  GuestCountBucket
+  preferredStyle    WeddingStyle
+  preferredServices WeddingService[]
+}
+
+model SuperAdmin {
+  userId Int  @unique
+  user   User @relation(fields: [userId], references: [id])
 }
 
 model Vendor {
-  id             Int      @id @default(autoincrement())
-  name           String
-  email          String   @unique
-  password       String
-  role           UserRole @default(vendor)
+  userId Int  @unique
+  user   User @relation(fields: [userId], references: [id])
+
   vendorWebsite  String?
   uenNumber      String?
-  onboardedDate  DateTime @default(now())
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  onboardedDate  DateTime       @default(now())
+  bio            String?
+  rating         Float?         @default(0)
+  serviceOffered WeddingService
+  styleOffered   WeddingStyle
+  weddingTypes   WeddingType[]
+  capacity       Int?
 }
 
 model TestUser {

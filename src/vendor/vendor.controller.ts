@@ -14,7 +14,6 @@ import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { CreateVendorDto } from './dto/create-vendor.dto';
 import { UpdateVendorDto } from './dto/update-vendor.dto';
 import { VendorResponseDto } from './dto/vendor-response.dto';
-import { toVendorResponseDto } from './vendor.mapper';
 import { VendorService } from './vendor.service';
 
 @ApiTags('vendors')
@@ -33,8 +32,7 @@ export class VendorController {
   @ApiResponse({ status: 400, description: 'Bad request.' })
   @ApiResponse({ status: 409, description: 'Vendor with this email already exists.' })
   async create(@Body() body: CreateVendorDto): Promise<VendorResponseDto> {
-    const vendor = await this.service.create(body);
-    return toVendorResponseDto(vendor);
+    return this.service.createVendor(body);
   }
 
   @Post('bulk')
@@ -46,8 +44,7 @@ export class VendorController {
   })
   @ApiResponse({ status: 400, description: 'Bad request.' })
   async createMultiple(@Body() body: CreateVendorDto[]): Promise<VendorResponseDto[]> {
-    const vendors = await this.service.createMultiple(body);
-    return vendors.map(toVendorResponseDto);
+    return this.service.createMultiple(body);
   }
 
   @Get()
@@ -58,8 +55,7 @@ export class VendorController {
     type: [VendorResponseDto],
   })
   async getAllVendors(): Promise<VendorResponseDto[]> {
-    const vendors = await this.service.findAll();
-    return vendors.map(toVendorResponseDto);
+    return this.service.findAllVendors();
   }
 
   @Get(':id')
@@ -71,8 +67,7 @@ export class VendorController {
   })
   @ApiResponse({ status: 404, description: 'Vendor not found.' })
   async getVendor(@Param('id', ParseIntPipe) id: number): Promise<VendorResponseDto> {
-    const vendor = await this.service.findById(id);
-    return toVendorResponseDto(vendor);
+    return this.service.findVendorById(id);
   }
 
   @Get('email/:email')
@@ -84,8 +79,7 @@ export class VendorController {
   })
   @ApiResponse({ status: 404, description: 'Vendor not found.' })
   async getVendorByEmail(@Param('email') email: string): Promise<VendorResponseDto> {
-    const vendor = await this.service.findByEmail(email);
-    return toVendorResponseDto(vendor);
+    return this.service.findVendorByEmail(email);
   }
 
   @Put(':id')
@@ -102,8 +96,7 @@ export class VendorController {
     @Param('id', ParseIntPipe) id: number,
     @Body() body: UpdateVendorDto
   ): Promise<VendorResponseDto> {
-    const vendor = await this.service.update(id, body);
-    return toVendorResponseDto(vendor);
+    return this.service.updateVendor(id, body);
   }
 
   @Delete(':id')
@@ -114,7 +107,7 @@ export class VendorController {
   })
   @ApiResponse({ status: 404, description: 'Vendor not found.' })
   async delete(@Param('id', ParseIntPipe) id: number): Promise<{ message: string }> {
-    await this.service.delete(id);
+    await this.service.deleteVendor(id);
     return { message: 'Vendor successfully deleted' };
   }
 }

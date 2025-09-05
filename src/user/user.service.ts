@@ -6,7 +6,7 @@ import { User, Prisma } from '@prisma/client';
 
 @Injectable()
 export class UserService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   private handlePrismaError(error: any): never {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
@@ -26,52 +26,47 @@ export class UserService {
     throw error;
   }
 
-  async create(dto: CreateUserDto): Promise<User> {
+  async createUser(dto: CreateUserDto): Promise<User> { // supposed to return UserResponseDto ? check
     try {
-      return await this.prisma.user.create({
-        data: {
-          ...dto,
-          role: dto.role || 'user',
-        },
-      });
+      return await this.prisma.user.create({ data: dto });
     } catch (error) {
       this.handlePrismaError(error);
     }
   }
 
-  async findAll(): Promise<User[]> {
+  async findAllUsers(): Promise<User[]> {
     return this.prisma.user.findMany({
       orderBy: { createdAt: 'desc' },
     });
   }
 
-  async findById(id: number): Promise<User> {
+  async findUserById(id: number): Promise<User> {
     const user = await this.prisma.user.findUnique({
       where: { id },
     });
-    
+
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
-    
+
     return user;
   }
 
-  async findByEmail(email: string): Promise<User> {
+  async findUserByEmail(email: string): Promise<User> {
     const user = await this.prisma.user.findUnique({
       where: { email },
     });
-    
+
     if (!user) {
       throw new NotFoundException(`User with email ${email} not found`);
     }
-    
+
     return user;
   }
 
-  async update(id: number, dto: UpdateUserDto): Promise<User> {
-    await this.findById(id);
-    
+  async updateUser(id: number, dto: UpdateUserDto): Promise<User> {
+    await this.findUserById(id);
+
     try {
       return await this.prisma.user.update({
         where: { id },
@@ -83,8 +78,8 @@ export class UserService {
   }
 
   async delete(id: number): Promise<void> {
-    await this.findById(id);
-    
+    await this.findUserById(id);
+
     try {
       await this.prisma.user.delete({
         where: { id },
@@ -94,9 +89,9 @@ export class UserService {
     }
   }
 
-  async createMultiple(users: CreateUserDto[]): Promise<User[]> {
+  async createMultipleUsers(users: CreateUserDto[]): Promise<User[]> {
     const createdUsers = await Promise.all(
-      users.map(user => this.create(user))
+      users.map(user => this.createUser(user))
     );
     return createdUsers;
   }
