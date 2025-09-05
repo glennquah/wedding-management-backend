@@ -6,9 +6,10 @@ import { PrismaModule } from './prisma/prisma.module';
 import { TestUserModule } from './test-user/test-user.module';
 import { AuthModule } from './auth/auth.module';
 import { GuestModule } from './guest/guest.module';
+import { WeddingModule } from './wedding/wedding.module';
 
 @Module({
-  imports: [PrismaModule, TestUserModule, ConfigModule.forRoot(), AuthModule, GuestModule],
+  imports: [PrismaModule, TestUserModule, ConfigModule.forRoot(), AuthModule, GuestModule, WeddingModule],
   controllers: [AppController],
   providers: [AppService],
 })
