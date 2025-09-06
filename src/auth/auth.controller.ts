@@ -1,36 +1,35 @@
 import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { TestUserService } from 'src/test-user/test-user.service';
 import { AuthService } from './auth.service';
-import { CreateTestUserDto } from 'src/test-user/dto/create-test-user.dto';
-import { TestUserResponseDto } from 'src/test-user/dto/test-user-response.dto';
 import { LoginDto } from './dto/auth.dto';
 import { AuthResponseDto, TokensDto } from './dto/auth-response.dto';
 import { RefreshJwtGuard } from './guards/refresh.guard';
-import { toTestUserResponseDto } from 'src/test-user/test-user.mapper';
 import { JwtPayload } from './dto/jwt-payload.interface';
+import { VendorResponseDto } from 'src/vendor/dto/vendor-response.dto';
+import { VendorService } from 'src/vendor/vendor.service';
+import { CreateVendorDto } from 'src/vendor/dto/create-vendor.dto';
 
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(
-    private testUserService: TestUserService,
+    private vendorService: VendorService,
     private authService: AuthService,
   ) {}
 
-  @Post('register')
-  @ApiOperation({ summary: 'Create a new test user' })
+  @Post('register/vendor')
+  @ApiOperation({ summary: 'Create a new vendor' })
   @ApiResponse({
     status: 201,
     description: 'The test user has been successfully created.',
-    type: TestUserResponseDto,
+    type: VendorResponseDto,
   })
   @ApiResponse({ status: 400, description: 'Bad request.' })
   async registerTestUser(
-    @Body() dto: CreateTestUserDto,
-  ): Promise<TestUserResponseDto> {
-    const user = await this.testUserService.create(dto);
-    return toTestUserResponseDto(user);
+    @Body() dto: CreateVendorDto,
+  ): Promise<VendorResponseDto> {
+    const vendor = await this.vendorService.createVendor(dto);
+    return vendor;
   }
 
   @Post('login')
