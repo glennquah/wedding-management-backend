@@ -10,7 +10,6 @@ export class TestUserResponseDto {
   name: string;
 
   @ApiProperty({ description: 'The email of the test user' })
-  @IsEmail()
   email: string;
 
   @ApiProperty({ description: 'The date when the test user was created' })
