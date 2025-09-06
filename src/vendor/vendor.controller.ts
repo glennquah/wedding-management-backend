@@ -32,7 +32,7 @@ export class VendorController {
   @ApiResponse({ status: 400, description: 'Bad request.' })
   @ApiResponse({ status: 409, description: 'Vendor with this email already exists.' })
   async create(@Body() body: CreateVendorDto): Promise<VendorResponseDto> {
-    return this.service.createVendor(body);
+    return this.service.create(body);
   }
 
   @Post('bulk')
@@ -55,7 +55,7 @@ export class VendorController {
     type: [VendorResponseDto],
   })
   async getAllVendors(): Promise<VendorResponseDto[]> {
-    return this.service.findAllVendors();
+    return this.service.findAll();
   }
 
   @Get(':id')
@@ -67,7 +67,7 @@ export class VendorController {
   })
   @ApiResponse({ status: 404, description: 'Vendor not found.' })
   async getVendor(@Param('id', ParseIntPipe) id: number): Promise<VendorResponseDto> {
-    return this.service.findVendorById(id);
+    return this.service.findById(id);
   }
 
   @Get('email/:email')
@@ -79,7 +79,7 @@ export class VendorController {
   })
   @ApiResponse({ status: 404, description: 'Vendor not found.' })
   async getVendorByEmail(@Param('email') email: string): Promise<VendorResponseDto> {
-    return this.service.findVendorByEmail(email);
+    return this.service.findByEmail(email);
   }
 
   @Put(':id')
@@ -96,7 +96,7 @@ export class VendorController {
     @Param('id', ParseIntPipe) id: number,
     @Body() body: UpdateVendorDto
   ): Promise<VendorResponseDto> {
-    return this.service.updateVendor(id, body);
+    return this.service.update(id, body);
   }
 
   @Delete(':id')
@@ -107,7 +107,7 @@ export class VendorController {
   })
   @ApiResponse({ status: 404, description: 'Vendor not found.' })
   async delete(@Param('id', ParseIntPipe) id: number): Promise<{ message: string }> {
-    await this.service.deleteVendor(id);
+    await this.service.delete(id);
     return { message: 'Vendor successfully deleted' };
   }
 }

@@ -6,7 +6,6 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateVendorDto } from './dto/create-vendor.dto';
 import { UpdateVendorDto } from './dto/update-vendor.dto';
-import { Vendor } from '@prisma/client';
 import { VendorResponseDto } from './dto/vendor-response.dto';
 import { toVendorResponseDto } from './vendor.mapper';
 
@@ -14,13 +13,13 @@ import { toVendorResponseDto } from './vendor.mapper';
 export class VendorService {
   constructor(
     private prisma: PrismaService,
-  ) {}
+  ) { }
 
-  async findOneVendor(vendorId: number): Promise<VendorResponseDto> {
+  async findOne(vendorId: number): Promise<VendorResponseDto> {
     // Fetch the vendor, including the related User
     const vendor = await this.prisma.vendor.findUnique({
       where: { userId: vendorId },
-      include: { user: true }, 
+      include: { user: true },
     });
 
     if (!vendor) {
@@ -31,7 +30,7 @@ export class VendorService {
     return toVendorResponseDto(vendor);
   }
 
-  async createVendor(dto: CreateVendorDto): Promise<VendorResponseDto> {
+  async create(dto: CreateVendorDto): Promise<VendorResponseDto> {
     // Check if user with the same email already exists
     const existingUser = await this.prisma.user.findUnique({
       where: { email: dto.email },
@@ -70,7 +69,7 @@ export class VendorService {
     return toVendorResponseDto(vendor);
   }
 
-  async findAllVendors(): Promise<VendorResponseDto[]> {
+  async findAll(): Promise<VendorResponseDto[]> {
     const vendors = await this.prisma.vendor.findMany({
       include: { user: true },
       orderBy: { onboardedDate: 'desc' },
@@ -79,7 +78,7 @@ export class VendorService {
     return vendors.map(toVendorResponseDto);
   }
 
-  async findVendorById(userId: number): Promise<VendorResponseDto> {
+  async findById(userId: number): Promise<VendorResponseDto> {
     const vendor = await this.prisma.vendor.findUnique({
       where: { userId },
       include: { user: true },
@@ -92,7 +91,7 @@ export class VendorService {
     return toVendorResponseDto(vendor);
   }
 
-  async findVendorByEmail(email: string): Promise<VendorResponseDto> {
+  async findByEmail(email: string): Promise<VendorResponseDto> {
     const user = await this.prisma.user.findUnique({
       where: { email },
     });
@@ -114,8 +113,8 @@ export class VendorService {
   }
 
 
-  async updateVendor(userId: number, dto: UpdateVendorDto): Promise<VendorResponseDto> {
-    await this.findVendorById(userId);
+  async update(userId: number, dto: UpdateVendorDto): Promise<VendorResponseDto> {
+    await this.findById(userId);
 
     if (dto.email) {
       const existingUser = await this.prisma.user.findUnique({
@@ -161,8 +160,8 @@ export class VendorService {
     return toVendorResponseDto(await updatedVendor);
   }
 
-  async deleteVendor(userId: number): Promise<void> {
-    await this.findVendorById(userId);
+  async delete(userId: number): Promise<void> {
+    await this.findById(userId);
 
     await this.prisma.$transaction([
       this.prisma.vendor.delete({ where: { userId } }),
@@ -172,7 +171,7 @@ export class VendorService {
 
   async createMultiple(vendors: CreateVendorDto[]): Promise<VendorResponseDto[]> {
     const createdVendors = await Promise.all(
-      vendors.map((vendor) => this.createVendor(vendor)), // returns VendorResponseDto
+      vendors.map((vendor) => this.create(vendor)), // returns VendorResponseDto
     );
     return createdVendors;
   }

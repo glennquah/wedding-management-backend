@@ -26,7 +26,7 @@ export class UserService {
     throw error;
   }
 
-  async createUser(dto: CreateUserDto): Promise<User> { // supposed to return UserResponseDto ? check
+  async create(dto: CreateUserDto): Promise<User> { // supposed to return UserResponseDto ? check
     try {
       return await this.prisma.user.create({ data: dto });
     } catch (error) {
@@ -34,13 +34,13 @@ export class UserService {
     }
   }
 
-  async findAllUsers(): Promise<User[]> {
+  async findAll(): Promise<User[]> {
     return this.prisma.user.findMany({
       orderBy: { createdAt: 'desc' },
     });
   }
 
-  async findUserById(id: number): Promise<User> {
+  async findById(id: number): Promise<User> {
     const user = await this.prisma.user.findUnique({
       where: { id },
     });
@@ -52,7 +52,7 @@ export class UserService {
     return user;
   }
 
-  async findUserByEmail(email: string): Promise<User> {
+  async findByEmail(email: string): Promise<User> {
     const user = await this.prisma.user.findUnique({
       where: { email },
     });
@@ -64,8 +64,8 @@ export class UserService {
     return user;
   }
 
-  async updateUser(id: number, dto: UpdateUserDto): Promise<User> {
-    await this.findUserById(id);
+  async update(id: number, dto: UpdateUserDto): Promise<User> {
+    await this.findById(id);
 
     try {
       return await this.prisma.user.update({
@@ -78,7 +78,7 @@ export class UserService {
   }
 
   async delete(id: number): Promise<void> {
-    await this.findUserById(id);
+    await this.findById(id);
 
     try {
       await this.prisma.user.delete({
@@ -89,9 +89,9 @@ export class UserService {
     }
   }
 
-  async createMultipleUsers(users: CreateUserDto[]): Promise<User[]> {
+  async createMultiple(users: CreateUserDto[]): Promise<User[]> {
     const createdUsers = await Promise.all(
-      users.map(user => this.createUser(user))
+      users.map(user => this.create(user))
     );
     return createdUsers;
   }

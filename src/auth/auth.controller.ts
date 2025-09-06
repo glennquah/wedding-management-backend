@@ -8,6 +8,9 @@ import { JwtPayload } from './dto/jwt-payload.interface';
 import { VendorResponseDto } from 'src/vendor/dto/vendor-response.dto';
 import { VendorService } from 'src/vendor/vendor.service';
 import { CreateVendorDto } from 'src/vendor/dto/create-vendor.dto';
+import { AdminResponseDto } from 'src/admin/dto/admin-response.dto';
+import { AdminService } from 'src/admin/admin.service';
+import { CreateAdminDto } from 'src/admin/dto/create-admin.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -15,6 +18,7 @@ export class AuthController {
   constructor(
     private vendorService: VendorService,
     private authService: AuthService,
+    private adminService: AdminService,
   ) {}
 
   @Post('register/vendor')
@@ -25,11 +29,26 @@ export class AuthController {
     type: VendorResponseDto,
   })
   @ApiResponse({ status: 400, description: 'Bad request.' })
-  async registerTestUser(
+  async registerVendor(
     @Body() dto: CreateVendorDto,
   ): Promise<VendorResponseDto> {
-    const vendor = await this.vendorService.createVendor(dto);
+    const vendor = await this.vendorService.create(dto);
     return vendor;
+  }
+
+  @Post('register/admin')
+  @ApiOperation({ summary: 'Create a new admin' })
+  @ApiResponse({
+    status: 201,
+    description: 'The admin has been successfully created.',
+    type: AdminResponseDto,
+  })
+  @ApiResponse({ status: 400, description: 'Bad request.' })
+  async registerAdmin(
+    @Body() dto: CreateAdminDto,
+  ): Promise<AdminResponseDto> {
+    const admin = await this.adminService.create(dto);
+    return admin;
   }
 
   @Post('login')

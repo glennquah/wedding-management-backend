@@ -71,6 +71,7 @@ model Admin {
   userId Int  @unique
   user   User @relation(fields: [userId], references: [id])
 
+  isCouple          Boolean          @default(true)
   onboardedDate     DateTime         @default(now())
   weddingType       WeddingType
   budgetBucket      BudgetBucket

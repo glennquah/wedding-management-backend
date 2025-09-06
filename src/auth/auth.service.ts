@@ -61,7 +61,7 @@ export class AuthService {
     };
   }
 
-  private async validateUser(dto: LoginDto): Promise<TestUserResponseDto> {
+  private async validateUser(dto: LoginDto): Promise<TestUserResponseDto> { // change this to User
     const user = await this.testUserService.findByEmail(dto.username);
 
     if (user && (await compare(dto.password, user.password))) {
