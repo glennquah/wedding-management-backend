@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Post, ParseIntPipe, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  ParseIntPipe,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { CreateTestUserDto } from './dto/create-test-user.dto';
@@ -34,7 +42,9 @@ export class TestUserController {
     type: TestUserResponseDto,
   })
   @ApiResponse({ status: 404, description: 'User not found.' })
-  async getUserProfile(@Param('id', ParseIntPipe) id: number): Promise<TestUserResponseDto> {
+  async getUserProfile(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<TestUserResponseDto> {
     const user = await this.service.findById(id);
     return toTestUserResponseDto(user);
   }
