@@ -12,8 +12,8 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateGuestDto } from './dto/create-guest.dto';
 import { UpdateGuestDto } from './dto/update-guest.dto';
 import { GuestResponseDto } from './dto/guest-response.dto';
-import { toGuestResponseDto } from './guest.mapper';
 import { GuestService } from './guest.service';
+import { ConfirmationStatus } from '../common/confirmation-status.enum';
 
 @ApiTags('guests')
 @Controller('guests')
@@ -31,7 +31,7 @@ export class GuestController {
   @ApiResponse({ status: 400, description: 'Bad request.' })
   async create(@Body() body: CreateGuestDto): Promise<GuestResponseDto> {
     const guest = await this.service.create(body);
-    return toGuestResponseDto(guest);
+    return this.service.toGuestResponseDto(guest);
   }
 
   @Post('bulk')
@@ -44,7 +44,7 @@ export class GuestController {
   @ApiResponse({ status: 400, description: 'Bad request.' })
   async createMultiple(@Body() body: CreateGuestDto[]): Promise<GuestResponseDto[]> {
     const guests = await this.service.createMultiple(body);
-    return guests.map(toGuestResponseDto);
+    return guests.map(guest => this.service.toGuestResponseDto(guest));
   }
 
   @Get('wedding/:weddingId')
@@ -57,7 +57,7 @@ export class GuestController {
   @ApiResponse({ status: 404, description: 'Wedding not found.' })
   async getGuestsByWedding(@Param('weddingId', ParseIntPipe) weddingId: number): Promise<GuestResponseDto[]> {
     const guests = await this.service.findByWeddingId(weddingId);
-    return guests.map(toGuestResponseDto);
+    return guests.map(guest => this.service.toGuestResponseDto(guest));
   }
 
   @Get(':id')
@@ -70,7 +70,7 @@ export class GuestController {
   @ApiResponse({ status: 404, description: 'Guest not found.' })
   async getGuest(@Param('id', ParseIntPipe) id: number): Promise<GuestResponseDto> {
     const guest = await this.service.findById(id);
-    return toGuestResponseDto(guest);
+    return this.service.toGuestResponseDto(guest);
   }
 
   @Put(':id')
@@ -87,7 +87,7 @@ export class GuestController {
     @Body() body: UpdateGuestDto
   ): Promise<GuestResponseDto> {
     const guest = await this.service.update(id, body);
-    return toGuestResponseDto(guest);
+    return this.service.toGuestResponseDto(guest);
   }
 
   @Delete(':id')
@@ -97,9 +97,8 @@ export class GuestController {
     description: 'The guest has been successfully deleted.',
   })
   @ApiResponse({ status: 404, description: 'Guest not found.' })
-  async delete(@Param('id', ParseIntPipe) id: number): Promise<{ message: string }> {
+  async delete(@Param('id', ParseIntPipe) id: number): Promise<void> {
     await this.service.delete(id);
-    return { message: 'Guest successfully deleted' };
   }
 
   @Delete('wedding/:weddingId')
@@ -108,9 +107,8 @@ export class GuestController {
     status: 200,
     description: 'All guests for the wedding have been successfully deleted.',
   })
-  async deleteGuestsByWedding(@Param('weddingId', ParseIntPipe) weddingId: number): Promise<{ message: string }> {
+  async deleteGuestsByWedding(@Param('weddingId', ParseIntPipe) weddingId: number): Promise<void> {
     await this.service.deleteByWeddingId(weddingId);
-    return { message: 'All guests for the wedding successfully deleted' };
   }
 
   @Put(':id/confirm')
@@ -122,8 +120,8 @@ export class GuestController {
   })
   @ApiResponse({ status: 404, description: 'Guest not found.' })
   async confirmGuest(@Param('id', ParseIntPipe) id: number): Promise<GuestResponseDto> {
-    const guest = await this.service.update(id, { confirmationStatus: 'confirmed' });
-    return toGuestResponseDto(guest);
+    const guest = await this.service.update(id, { confirmationStatus: ConfirmationStatus.CONFIRMED });
+    return this.service.toGuestResponseDto(guest);
   }
 
   @Put(':id/reject')
@@ -135,7 +133,7 @@ export class GuestController {
   })
   @ApiResponse({ status: 404, description: 'Guest not found.' })
   async rejectGuest(@Param('id', ParseIntPipe) id: number): Promise<GuestResponseDto> {
-    const guest = await this.service.update(id, { confirmationStatus: 'rejected' });
-    return toGuestResponseDto(guest);
+    const guest = await this.service.update(id, { confirmationStatus: ConfirmationStatus.REJECTED });
+    return this.service.toGuestResponseDto(guest);
   }
 }

@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsOptional, IsInt, IsEnum } from 'class-validator';
+import { ConfirmationStatus } from '../../common/confirmation-status.enum';
 
 export class CreateGuestDto {
   @ApiProperty({ description: 'The name of the guest' })
@@ -27,11 +28,11 @@ export class CreateGuestDto {
 
   @ApiProperty({ 
     description: 'Confirmation status of the guest', 
-    enum: ['pending', 'confirmed', 'rejected'], 
+    enum: ConfirmationStatus, 
     required: false, 
-    default: 'pending' 
+    default: ConfirmationStatus.PENDING 
   })
   @IsOptional()
-  @IsEnum(['pending', 'confirmed', 'rejected'])
-  confirmationStatus?: 'pending' | 'confirmed' | 'rejected';
+  @IsEnum(ConfirmationStatus)
+  confirmationStatus?: ConfirmationStatus;
 }

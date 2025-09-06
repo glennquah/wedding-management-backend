@@ -12,7 +12,6 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateWeddingDto } from './dto/create-wedding.dto';
 import { UpdateWeddingDto } from './dto/update-wedding.dto';
 import { WeddingResponseDto } from './dto/wedding-response.dto';
-import { toWeddingResponseDto } from './wedding.mapper';
 import { WeddingService } from './wedding.service';
 
 @ApiTags('weddings')
@@ -31,7 +30,7 @@ export class WeddingController {
   @ApiResponse({ status: 400, description: 'Bad request.' })
   async create(@Body() body: CreateWeddingDto): Promise<WeddingResponseDto> {
     const wedding = await this.service.create(body);
-    return toWeddingResponseDto(wedding);
+    return this.service.toWeddingResponseDto(wedding);
   }
 
   @Get()
@@ -43,7 +42,7 @@ export class WeddingController {
   })
   async findAll(): Promise<WeddingResponseDto[]> {
     const weddings = await this.service.findAll();
-    return weddings.map(toWeddingResponseDto);
+    return weddings.map(wedding => this.service.toWeddingResponseDto(wedding));
   }
 
   @Get(':id')
@@ -56,7 +55,7 @@ export class WeddingController {
   @ApiResponse({ status: 404, description: 'Wedding not found.' })
   async findOne(@Param('id', ParseIntPipe) id: number): Promise<WeddingResponseDto> {
     const wedding = await this.service.findById(id);
-    return toWeddingResponseDto(wedding);
+    return this.service.toWeddingResponseDto(wedding);
   }
 
   @Put(':id')
@@ -73,7 +72,7 @@ export class WeddingController {
     @Body() body: UpdateWeddingDto
   ): Promise<WeddingResponseDto> {
     const wedding = await this.service.update(id, body);
-    return toWeddingResponseDto(wedding);
+    return this.service.toWeddingResponseDto(wedding);
   }
 
   @Delete(':id')
@@ -83,8 +82,7 @@ export class WeddingController {
     description: 'The wedding has been successfully deleted.',
   })
   @ApiResponse({ status: 404, description: 'Wedding not found.' })
-  async remove(@Param('id', ParseIntPipe) id: number): Promise<{ message: string }> {
+  async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
     await this.service.delete(id);
-    return { message: 'Wedding successfully deleted' };
   }
 }

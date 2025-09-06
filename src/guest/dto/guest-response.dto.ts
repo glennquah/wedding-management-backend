@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { ConfirmationStatus } from '../../common/confirmation-status.enum';
 
 export class GuestResponseDto {
   @ApiProperty({ description: 'Guest ID' })
@@ -21,10 +22,10 @@ export class GuestResponseDto {
 
   @ApiProperty({ 
     description: 'Confirmation status of the guest', 
-    enum: ['pending', 'confirmed', 'rejected'], 
-    default: 'pending' 
+    enum: ConfirmationStatus, 
+    default: ConfirmationStatus.PENDING 
   })
-  confirmationStatus: 'pending' | 'confirmed' | 'rejected';
+  confirmationStatus: ConfirmationStatus;
 
   @ApiProperty({ description: 'List of accompanying guests', type: [GuestResponseDto], required: false })
   accompanyingGuests?: GuestResponseDto[];

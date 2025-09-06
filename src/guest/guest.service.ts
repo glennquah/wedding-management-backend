@@ -3,6 +3,12 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateGuestDto } from './dto/create-guest.dto';
 import { UpdateGuestDto } from './dto/update-guest.dto';
 import { Guest } from '@prisma/client';
+import { ConfirmationStatus } from '../common/confirmation-status.enum';
+import { GuestResponseDto } from './dto/guest-response.dto';
+
+type GuestWithAccompanying = Guest & {
+  accompanyingGuests?: Guest[];
+};
 
 @Injectable()
 export class GuestService {
@@ -47,10 +53,10 @@ export class GuestService {
   async update(id: number, dto: UpdateGuestDto): Promise<Guest> {
     await this.findById(id);
     
-    if (dto.confirmationStatus === 'confirmed') {
+    if (dto.confirmationStatus === ConfirmationStatus.CONFIRMED) {
       await this.prisma.guest.updateMany({
         where: { primaryGuestId: id },
-        data: { confirmationStatus: 'confirmed' },
+        data: { confirmationStatus: ConfirmationStatus.CONFIRMED },
       });
     }
     
@@ -83,5 +89,20 @@ export class GuestService {
       guests.map(guest => this.create(guest))
     );
     return createdGuests;
+  }
+
+  toGuestResponseDto(guest: GuestWithAccompanying): GuestResponseDto {
+    return {
+      id: guest.id,
+      name: guest.name,
+      allergies: guest.allergies,
+      group: guest.group,
+      confirmationStatus: guest.confirmationStatus as ConfirmationStatus,
+      weddingId: guest.weddingId,
+      primaryGuestId: guest.primaryGuestId,
+      accompanyingGuests: guest.accompanyingGuests?.map(g => this.toGuestResponseDto(g)),
+      createdAt: guest.createdAt,
+      updatedAt: guest.updatedAt,
+    };
   }
 }
