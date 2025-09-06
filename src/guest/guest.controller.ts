@@ -7,10 +7,8 @@ import {
   Post, 
   Put,
   ParseIntPipe, 
-  UseGuards 
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { CreateGuestDto } from './dto/create-guest.dto';
 import { UpdateGuestDto } from './dto/update-guest.dto';
 import { GuestResponseDto } from './dto/guest-response.dto';
