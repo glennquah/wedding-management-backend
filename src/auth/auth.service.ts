@@ -1,20 +1,19 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { compare } from 'bcrypt';
-import { TestUserService } from 'src/test-user/test-user.service';
 import { LoginDto } from './dto/auth.dto';
 import { AuthResponseDto, TokensDto } from './dto/auth-response.dto';
-import { toTestUserResponseDto } from 'src/test-user/test-user.mapper';
-import { TestUserResponseDto } from 'src/test-user/dto/test-user-response.dto';
 import { JwtPayload } from './dto/jwt-payload.interface';
+import { UserResponseDto } from 'src/user/dto/user-response.dto';
+import { UserService } from 'src/user/user.service';
 
 const EXPIRE_TIME = 5 * 60 * 60 * 1000; // 5H
 
 @Injectable()
 export class AuthService {
   constructor(
-    private testUserService: TestUserService,
     private jwtService: JwtService,
+    private userService: UserService, 
   ) {}
 
   async login(dto: LoginDto): Promise<AuthResponseDto> {
@@ -61,11 +60,11 @@ export class AuthService {
     };
   }
 
-  private async validateUser(dto: LoginDto): Promise<TestUserResponseDto> {
-    const user = await this.testUserService.findByEmail(dto.username);
+  private async validateUser(dto: LoginDto): Promise<UserResponseDto> {
+    const user = await this.userService.findRawByEmail(dto.username);
 
     if (user && (await compare(dto.password, user.password))) {
-      return toTestUserResponseDto(user);
+      return this.userService.toUserResponseDto(user);
     }
 
     throw new UnauthorizedException('Username or password is incorrect');
