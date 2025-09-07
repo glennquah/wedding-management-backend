@@ -7,8 +7,10 @@ import {
     Post,
     Put,
     ParseIntPipe,
+    UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { JwtGuard } from '../auth/guards/jwt.guard';
 import { CreateSuperAdminDto } from './dto/create-super-admin.dto';
 import { UpdateSuperAdminDto } from './dto/update-super-admin.dto';
 import { SuperAdminResponseDto } from './dto/super-admin-response.dto';
@@ -16,7 +18,7 @@ import { SuperAdminService } from './super-admin.service';
 
 @ApiTags('super-admins')
 @Controller('super-admins')
-// @UseGuards(JwtGuard) // Disabled for testing
+@UseGuards(JwtGuard) 
 export class SuperAdminController {
     constructor(private service: SuperAdminService) { }
 

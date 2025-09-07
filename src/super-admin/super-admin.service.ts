@@ -20,7 +20,7 @@ export class SuperAdminService {
         });
 
         if (!superAdmin) {
-            throw new NotFoundException(`SuperAdmin with id ${superAdminId} not found`);
+            throw new NotFoundException(`Super Admin with id ${superAdminId} not found`);
         }
 
         return toUserResponseDto(superAdmin.user);
@@ -71,7 +71,7 @@ export class SuperAdminService {
         });
 
         if (!superAdmin) {
-            throw new NotFoundException(`SuperAdmin with userId ${userId} not found`);
+            throw new NotFoundException(`Super Admin with userId ${userId} not found`);
         }
 
         return toUserResponseDto(superAdmin.user);
@@ -92,7 +92,7 @@ export class SuperAdminService {
         });
 
         if (!superAdmin) {
-            throw new NotFoundException(`SuperAdmin with email ${email} not found`);
+            throw new NotFoundException(`Super Admin with email ${email} not found`);
         }
 
         return toUserResponseDto(superAdmin.user);
@@ -105,7 +105,7 @@ export class SuperAdminService {
         });
 
         if (!superAdmin) {
-            throw new NotFoundException(`SuperAdmin with userId ${userId} not found`);
+            throw new NotFoundException(`Super Admin with userId ${userId} not found`);
         }
 
         if (dto.email) {
@@ -135,7 +135,7 @@ export class SuperAdminService {
         });
 
         if (!superAdmin) {
-            throw new NotFoundException(`SuperAdmin with userId ${userId} not found`);
+            throw new NotFoundException(`Super Admin with userId ${userId} not found`);
         }
 
         await this.prisma.$transaction([
