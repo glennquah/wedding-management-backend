@@ -6,6 +6,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { SuperAdminResponseDto } from './dto/super-admin-response.dto';
 import { toUserResponseDto } from '../user/user.mapper';
+import { hash } from 'bcrypt';
 
 @Injectable()
 export class SuperAdminService {
@@ -40,7 +41,7 @@ export class SuperAdminService {
             data: {
                 name: dto.name,
                 email: dto.email,
-                password: dto.password,
+                password: await hash(dto.password, 10),
                 role: 'superAdmin',
             },
         });

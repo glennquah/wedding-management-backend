@@ -8,6 +8,7 @@ import { CreateVendorDto } from './dto/create-vendor.dto';
 import { UpdateVendorDto } from './dto/update-vendor.dto';
 import { VendorResponseDto } from './dto/vendor-response.dto';
 import { toVendorResponseDto } from './vendor.mapper';
+import { hash } from 'bcrypt';
 
 @Injectable()
 export class VendorService {
@@ -44,7 +45,7 @@ export class VendorService {
       data: {
         name: dto.name,
         email: dto.email,
-        password: dto.password,
+        password: await hash(dto.password, 10),
         role: 'vendor',
       },
     });

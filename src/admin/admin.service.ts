@@ -8,6 +8,7 @@ import { CreateAdminDto } from './dto/create-admin.dto';
 import { UpdateAdminDto } from './dto/update-admin.dto';
 import { AdminResponseDto } from './dto/admin-response.dto';
 import { toAdminResponseDto } from './admin.mapper';
+import { hash } from 'bcrypt';
 
 @Injectable()
 export class AdminService {
@@ -44,7 +45,7 @@ export class AdminService {
             data: {
                 name: dto.name,
                 email: dto.email,
-                password: dto.password,
+                password: await hash(dto.password, 10),
                 role: 'admin',
             },
         });
