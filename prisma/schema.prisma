@@ -74,7 +74,8 @@ model User {
 }
 
 model Admin {
-  userId Int  @unique
+  id     Int @id @default(autoincrement())
+  userId Int @unique
   user   User @relation(fields: [userId], references: [id])
 
   isCouple          Boolean          @default(true)
@@ -84,6 +85,7 @@ model Admin {
   guestCountBucket  GuestCountBucket
   preferredStyle    WeddingStyle
   preferredServices WeddingService[]
+  weddings          Wedding[]        @relation("AdminWeddings")
 }
 
 model SuperAdmin {
@@ -110,8 +112,9 @@ model Wedding {
   id        Int      @id @default(autoincrement())
   name      String
   date      DateTime
-  location     String?
+  location  String?
   guests    Guest[]
+  admins    Admin[]  @relation("AdminWeddings")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
