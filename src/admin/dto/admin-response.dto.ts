@@ -1,5 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { UserResponseDto } from '../../user/dto/user-response.dto';
+import { BudgetBucket } from '../../common/budget-bucket.enum';
+import { GuestCountBucket } from '../../common/guest-count-bucket.enum';
+import { WeddingType } from '../../common/wedding-type.enum';
+import { WeddingStyle } from '../../common/wedding-style.enum';
+import { WeddingService } from '../../common/wedding-service.enum';
 
 export class AdminResponseDto extends UserResponseDto {
   @ApiProperty({
@@ -17,55 +22,37 @@ export class AdminResponseDto extends UserResponseDto {
 
   @ApiProperty({
     description: 'Wedding type',
-    enum: ['chinese', 'malay', 'indian', 'western', 'others'],
+    enum: WeddingType,
     required: true,
   })
-  weddingType: 'chinese' | 'malay' | 'indian' | 'western' | 'others';
+  weddingType: WeddingType;
 
   @ApiProperty({
     description: 'Budget bucket',
-    enum: ['low', 'medium', 'high', 'luxury'],
+    enum: BudgetBucket,
     required: true,
   })
-  budgetBucket: 'low' | 'medium' | 'high' | 'luxury';
+  budgetBucket: BudgetBucket;
 
   @ApiProperty({
     description: 'Guest count bucket',
-    enum: ['small', 'medium', 'large'],
+    enum: GuestCountBucket,
     required: true,
   })
-  guestCountBucket: 'small' | 'medium' | 'large';
+  guestCountBucket: GuestCountBucket;
 
   @ApiProperty({
     description: 'Preferred wedding style',
-    enum: ['luxury', 'modern', 'traditional', 'rustic'],
+    enum: WeddingStyle,
     required: true,
   })
-  preferredStyle: 'luxury' | 'modern' | 'traditional' | 'rustic';
+  preferredStyle: WeddingStyle;
 
   @ApiProperty({
     description: 'Preferred wedding services',
-    enum: [
-      'venue',
-      'catering',
-      'photography',
-      'decoration',
-      'music',
-      'attire',
-      'makeup',
-      'transportation',
-    ],
+    enum: WeddingService,
     isArray: true,
     required: true,
   })
-  preferredServices: (
-    | 'venue'
-    | 'catering'
-    | 'photography'
-    | 'decoration'
-    | 'music'
-    | 'attire'
-    | 'makeup'
-    | 'transportation'
-    )[];
+  preferredServices: WeddingService[];
 }

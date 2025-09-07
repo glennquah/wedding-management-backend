@@ -7,6 +7,9 @@ import {
   IsEnum,
 } from 'class-validator';
 import { UpdateUserDto } from '../../user/dto/update-user.dto';
+import { WeddingStyle } from '../../common/wedding-style.enum';
+import { WeddingService } from '../../common/wedding-service.enum';
+import { WeddingType } from '../../common/wedding-type.enum';
 
 export class UpdateVendorDto extends UpdateUserDto {
   @ApiProperty({ description: 'Vendor website URL', required: false })
@@ -36,57 +39,31 @@ export class UpdateVendorDto extends UpdateUserDto {
 
   @ApiProperty({
     description: 'Service offered by the vendor',
-    enum: [
-      'venue',
-      'catering',
-      'photography',
-      'decoration',
-      'music',
-      'attire',
-      'makeup',
-      'transportation',
-    ],
+    enum: WeddingService,
     required: false,
   })
   @IsOptional()
-  @IsEnum([
-    'venue',
-    'catering',
-    'photography',
-    'decoration',
-    'music',
-    'attire',
-    'makeup',
-    'transportation',
-  ])
-  serviceOffered?:
-    | 'venue'
-    | 'catering'
-    | 'photography'
-    | 'decoration'
-    | 'music'
-    | 'attire'
-    | 'makeup'
-    | 'transportation';
+  @IsEnum(WeddingService)
+  serviceOffered?: WeddingService;
 
   @ApiProperty({
     description: 'Wedding style specialization of the vendor',
-    enum: ['luxury', 'modern', 'traditional', 'rustic'],
+    enum: WeddingStyle,
     required: false,
   })
   @IsOptional()
-  @IsEnum(['luxury', 'modern', 'traditional', 'rustic'])
-  styleOffered?: 'luxury' | 'modern' | 'traditional' | 'rustic';
+  @IsEnum(WeddingStyle)
+  styleOffered?: WeddingStyle;
 
   @ApiProperty({
     description: 'Wedding type specialization of the vendor',
-    enum: ['chinese', 'malay', 'indian', 'western', 'others'],
+    enum: WeddingType,
     isArray: true,
     required: false,
   })
   @IsOptional()
-  @IsEnum(['chinese', 'malay', 'indian', 'western', 'others'], { each: true })
-  weddingTypes?: ('chinese' | 'malay' | 'indian' | 'western' | 'others')[];
+  @IsEnum(WeddingType, { each: true })
+  weddingTypes?: WeddingType[];
 
   @ApiProperty({
     description: 'Capacity the vendor can handle for venue',

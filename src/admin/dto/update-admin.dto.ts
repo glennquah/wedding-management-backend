@@ -6,6 +6,11 @@ import {
   IsEnum,
 } from 'class-validator';
 import { UpdateUserDto } from '../../user/dto/update-user.dto';
+import { BudgetBucket } from '../../common/budget-bucket.enum';
+import { GuestCountBucket } from '../../common/guest-count-bucket.enum';
+import { WeddingType } from '../../common/wedding-type.enum';
+import { WeddingStyle } from '../../common/wedding-style.enum';
+import { WeddingService } from '../../common/wedding-service.enum';
 
 export class UpdateAdminDto extends UpdateUserDto {
   @ApiProperty({
@@ -27,77 +32,50 @@ export class UpdateAdminDto extends UpdateUserDto {
 
   @ApiProperty({
     description: 'Wedding type',
-    enum: ['chinese', 'malay', 'indian', 'western', 'others'],
+    enum: WeddingType,
     required: false,
   })
   @IsOptional()
-  @IsEnum(['chinese', 'malay', 'indian', 'western', 'others'])
-  weddingType?: 'chinese' | 'malay' | 'indian' | 'western' | 'others';
+  @IsEnum(WeddingType)
+  weddingType?: WeddingType;
 
   @ApiProperty({
     description: 'Budget bucket',
-    enum: ['low', 'medium', 'high', 'luxury'],
+    enum: BudgetBucket,
     required: false,
   })
   @IsOptional()
-  @IsEnum(['low', 'medium', 'high', 'luxury'])
-  budgetBucket?: 'low' | 'medium' | 'high' | 'luxury';
+  @IsEnum(BudgetBucket)
+  budgetBucket?: BudgetBucket;
 
   @ApiProperty({
     description: 'Guest count bucket',
-    enum: ['small', 'medium', 'large'],
+    enum: GuestCountBucket,
     required: false,
   })
   @IsOptional()
-  @IsEnum(['small', 'medium', 'large'])
-  guestCountBucket?: 'small' | 'medium' | 'large';
+  @IsEnum(GuestCountBucket)
+  guestCountBucket?: GuestCountBucket;
 
   @ApiProperty({
     description: 'Preferred wedding style',
-    enum: ['luxury', 'modern', 'traditional', 'rustic'],
+    enum: WeddingStyle,
     required: false,
   })
   @IsOptional()
-  @IsEnum(['luxury', 'modern', 'traditional', 'rustic'])
-  preferredStyle?: 'luxury' | 'modern' | 'traditional' | 'rustic';
+  @IsEnum(WeddingStyle)
+  preferredStyle?: WeddingStyle;
 
   @ApiProperty({
     description: 'Preferred wedding services',
-    enum: [
-      'venue',
-      'catering',
-      'photography',
-      'decoration',
-      'music',
-      'attire',
-      'makeup',
-      'transportation',
-    ],
+    enum: WeddingService,
     isArray: true,
     required: false,
   })
   @IsOptional()
   @IsEnum(
-    [
-      'venue',
-      'catering',
-      'photography',
-      'decoration',
-      'music',
-      'attire',
-      'makeup',
-      'transportation',
-    ],
+    WeddingService,
     { each: true }
   )
-  preferredServices?: (
-    | 'venue'
-    | 'catering'
-    | 'photography'
-    | 'decoration'
-    | 'music'
-    | 'attire'
-    | 'makeup'
-    | 'transportation'
-    )[];
+  preferredServices?: WeddingService[];
 }

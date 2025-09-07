@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { UserRole } from '../../common/user-role.enum';
 
 export class UserResponseDto {
   @ApiProperty({ description: 'User ID' })
@@ -12,9 +13,9 @@ export class UserResponseDto {
 
   @ApiProperty({ 
     description: 'Role of the user', 
-    enum: ['admin', 'superAdmin', 'vendor'] 
+    enum: UserRole, 
   })
-  role: 'admin' | 'superAdmin' | 'vendor';
+  role: UserRole;
 
   @ApiProperty({ description: 'Creation timestamp' })
   createdAt: Date;

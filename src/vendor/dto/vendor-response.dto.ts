@@ -1,5 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { UserResponseDto } from '../../user/dto/user-response.dto';
+import { WeddingStyle } from '../../common/wedding-style.enum';
+import { WeddingService } from '../../common/wedding-service.enum';
+import { WeddingType } from '../../common/wedding-type.enum';
 
 export class VendorResponseDto extends UserResponseDto {
   @ApiProperty({ description: 'Vendor website URL', required: false })
@@ -19,42 +22,25 @@ export class VendorResponseDto extends UserResponseDto {
 
   @ApiProperty({
     description: 'Service offered by the vendor',
-    enum: [
-      'venue',
-      'catering',
-      'photography',
-      'decoration',
-      'music',
-      'attire',
-      'makeup',
-      'transportation',
-    ],
+    enum: WeddingService,
     required: true,
   })
-  serviceOffered:
-    | 'venue'
-    | 'catering'
-    | 'photography'
-    | 'decoration'
-    | 'music'
-    | 'attire'
-    | 'makeup'
-    | 'transportation';
+  serviceOffered: WeddingService;
 
   @ApiProperty({
     description: 'Wedding style specialization of the vendor',
-    enum: ['luxury', 'modern', 'traditional', 'rustic'],
+    enum: WeddingStyle,
     required: true,
   })
-  styleOffered: 'luxury' | 'modern' | 'traditional' | 'rustic';
+  styleOffered: WeddingStyle;
 
   @ApiProperty({
     description: 'Wedding type specialization of the vendor',
-    enum: ['chinese', 'malay', 'indian', 'western', 'others'],
+    enum: WeddingType,
     isArray: true,
     required: true,
   })
-  weddingTypes: ('chinese' | 'malay' | 'indian' | 'western' | 'others')[];
+  weddingTypes: WeddingType[];
 
   @ApiProperty({
     description: 'Capacity the vendor can handle for venue',
