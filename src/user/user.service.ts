@@ -2,7 +2,9 @@ import { Injectable, NotFoundException, ConflictException } from '@nestjs/common
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UserResponseDto } from './dto/user-response.dto';
 import { User, Prisma } from '@prisma/client';
+import { UserRole } from '../common/user-role.enum';
 
 @Injectable()
 export class UserService {
@@ -26,21 +28,35 @@ export class UserService {
     throw error;
   }
 
-  async create(dto: CreateUserDto): Promise<User> { // supposed to return UserResponseDto ? check
+  toUserResponseDto(user: User): UserResponseDto {
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role as UserRole,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    };
+  }
+
+
+  async create(dto: CreateUserDto): Promise<UserResponseDto> { // supposed to return UserResponseDto ? check
     try {
-      return await this.prisma.user.create({ data: dto });
+      const user = await this.prisma.user.create({ data: dto });
+      return this.toUserResponseDto(user);
     } catch (error) {
       this.handlePrismaError(error);
     }
   }
 
-  async findAll(): Promise<User[]> {
-    return this.prisma.user.findMany({
+  async findAll(): Promise<UserResponseDto[]> {
+    const users = await this.prisma.user.findMany({
       orderBy: { createdAt: 'desc' },
     });
+    return users.map(user => this.toUserResponseDto(user));
   }
 
-  async findById(id: number): Promise<User> {
+  async findById(id: number): Promise<UserResponseDto> {
     const user = await this.prisma.user.findUnique({
       where: { id },
     });
@@ -49,10 +65,10 @@ export class UserService {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
 
-    return user;
+    return this.toUserResponseDto(user);
   }
 
-  async findByEmail(email: string): Promise<User> {
+  async findByEmail(email: string): Promise<UserResponseDto> {
     const user = await this.prisma.user.findUnique({
       where: { email },
     });
@@ -61,17 +77,22 @@ export class UserService {
       throw new NotFoundException(`User with email ${email} not found`);
     }
 
-    return user;
+    return this.toUserResponseDto(user);
   }
 
-  async update(id: number, dto: UpdateUserDto): Promise<User> {
+  async findRawByEmail(email: string): Promise<User | null> { // need this for auth service
+    return this.prisma.user.findUnique({ where: { email } });
+  }
+
+  async update(id: number, dto: UpdateUserDto): Promise<UserResponseDto> {
     await this.findById(id);
 
     try {
-      return await this.prisma.user.update({
+      const user = await this.prisma.user.update({
         where: { id },
         data: dto,
       });
+      return this.toUserResponseDto(user);
     } catch (error) {
       this.handlePrismaError(error);
     }
@@ -89,7 +110,7 @@ export class UserService {
     }
   }
 
-  async createMultiple(users: CreateUserDto[]): Promise<User[]> {
+  async createMultiple(users: CreateUserDto[]): Promise<UserResponseDto[]> {
     const createdUsers = await Promise.all(
       users.map(user => this.create(user))
     );

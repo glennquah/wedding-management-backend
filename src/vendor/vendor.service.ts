@@ -7,14 +7,36 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateVendorDto } from './dto/create-vendor.dto';
 import { UpdateVendorDto } from './dto/update-vendor.dto';
 import { VendorResponseDto } from './dto/vendor-response.dto';
-import { toVendorResponseDto } from './vendor.mapper';
 import { hash } from 'bcrypt';
+import { Vendor, User } from '@prisma/client';
+import { UserService } from '../user/user.service';
+import { WeddingStyle } from '../common/wedding-style.enum';
+import { WeddingService } from '../common/wedding-service.enum';
+import { WeddingType } from '../common/wedding-type.enum';
 
 @Injectable()
 export class VendorService {
   constructor(
     private prisma: PrismaService,
+    private userService: UserService,
   ) { }
+
+  private toVendorResponseDto(vendor: Vendor & { user: User }): VendorResponseDto {
+    const userResponse = this.userService.toUserResponseDto(vendor.user);
+    return {
+      ...userResponse,
+      vendorWebsite: vendor.vendorWebsite,
+      uenNumber: vendor.uenNumber,
+      onboardedDate: vendor.onboardedDate,
+      bio: vendor.bio,    
+      rating: vendor.rating,
+      serviceOffered: vendor.serviceOffered as WeddingService,
+      styleOffered: vendor.styleOffered as WeddingStyle,
+      weddingTypes: vendor.weddingTypes as WeddingType[],
+      capacity: vendor.capacity,
+    };
+  }
+  
 
   async findOne(vendorId: number): Promise<VendorResponseDto> {
     // Fetch the vendor, including the related User
@@ -28,7 +50,7 @@ export class VendorService {
     }
 
     // Map to DTO
-    return toVendorResponseDto(vendor);
+    return this.toVendorResponseDto(vendor);
   }
 
   async create(dto: CreateVendorDto): Promise<VendorResponseDto> {
@@ -67,7 +89,7 @@ export class VendorService {
       include: { user: true }, // include the user relation for mapping
     });
 
-    return toVendorResponseDto(vendor);
+    return this.toVendorResponseDto(vendor);
   }
 
   async findAll(): Promise<VendorResponseDto[]> {
@@ -76,7 +98,7 @@ export class VendorService {
       orderBy: { onboardedDate: 'desc' },
     });
 
-    return vendors.map(toVendorResponseDto);
+    return vendors.map(vendor => this.toVendorResponseDto(vendor));
   }
 
   async findById(userId: number): Promise<VendorResponseDto> {
@@ -89,7 +111,7 @@ export class VendorService {
       throw new NotFoundException(`Vendor with userId ${userId} not found`);
     }
 
-    return toVendorResponseDto(vendor);
+    return this.toVendorResponseDto(vendor);
   }
 
   async findByEmail(email: string): Promise<VendorResponseDto> {
@@ -110,7 +132,7 @@ export class VendorService {
       throw new NotFoundException(`Vendor with email ${email} not found`);
     }
 
-    return toVendorResponseDto(vendor);
+    return this.toVendorResponseDto(vendor);
   }
 
 
@@ -158,7 +180,7 @@ export class VendorService {
       include: { user: true },
     });
 
-    return toVendorResponseDto(await updatedVendor);
+    return this.toVendorResponseDto(await updatedVendor);
   }
 
   async delete(userId: number): Promise<void> {

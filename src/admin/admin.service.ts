@@ -4,17 +4,39 @@ import {
     ConflictException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { UserService } from '../user/user.service';
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { UpdateAdminDto } from './dto/update-admin.dto';
 import { AdminResponseDto } from './dto/admin-response.dto';
-import { toAdminResponseDto } from './admin.mapper';
 import { hash } from 'bcrypt';
+import { UserRole } from 'src/common/user-role.enum';
+import { Admin, User } from '@prisma/client';
+import { WeddingType } from '../common/wedding-type.enum';
+import { BudgetBucket } from '../common/budget-bucket.enum';
+import { GuestCountBucket } from '../common/guest-count-bucket.enum';
+import { WeddingStyle } from '../common/wedding-style.enum';
+import { WeddingService } from '../common/wedding-service.enum';
 
 @Injectable()
 export class AdminService {
     constructor(
         private prisma: PrismaService,
+        private userService: UserService,
     ) { }
+
+    private toAdminResponseDto(admin: Admin & { user: User }): AdminResponseDto {
+        const userResponse = this.userService.toUserResponseDto(admin.user);
+        return {
+            ...userResponse,
+            isCouple: admin.isCouple,
+            onboardedDate: admin.onboardedDate,
+            weddingType: admin.weddingType as WeddingType,
+            budgetBucket: admin.budgetBucket as BudgetBucket,
+            guestCountBucket: admin.guestCountBucket as GuestCountBucket,
+            preferredStyle: admin.preferredStyle as WeddingStyle,
+            preferredServices: admin.preferredServices as WeddingService[],
+        };
+    }
 
     async findOne(adminId: number): Promise<AdminResponseDto> {
         // Fetch the admin, including the related User
@@ -28,7 +50,7 @@ export class AdminService {
         }
 
         // Map to DTO
-        return toAdminResponseDto(admin);
+        return this.toAdminResponseDto(admin);
     }
 
     async create(dto: CreateAdminDto): Promise<AdminResponseDto> {
@@ -41,13 +63,11 @@ export class AdminService {
         }
 
         // Create the user first
-        const user = await this.prisma.user.create({
-            data: {
-                name: dto.name,
-                email: dto.email,
-                password: await hash(dto.password, 10),
-                role: 'admin',
-            },
+        const user = await this.userService.create({
+            name: dto.name,
+            email: dto.email,
+            password: await hash(dto.password, 10),
+            role: 'admin' as UserRole,
         });
 
         // Create the admin profile
@@ -65,7 +85,7 @@ export class AdminService {
             include: { user: true }, // include the user relation for mapping
         });
 
-        return toAdminResponseDto(admin);
+        return this.toAdminResponseDto(admin);
     }
 
     async findAll(): Promise<AdminResponseDto[]> {
@@ -74,7 +94,7 @@ export class AdminService {
             orderBy: { onboardedDate: 'desc' },
         });
 
-        return admins.map(toAdminResponseDto);
+        return admins.map(admin => this.toAdminResponseDto(admin));
     }
 
 
@@ -88,7 +108,7 @@ export class AdminService {
             throw new NotFoundException(`Admin with userId ${userId} not found`);
         }
 
-        return toAdminResponseDto(admin);
+        return this.toAdminResponseDto(admin);
     }
 
     async findByEmail(email: string): Promise<AdminResponseDto> {
@@ -109,7 +129,7 @@ export class AdminService {
             throw new NotFoundException(`Admin with email ${email} not found`);
         }
 
-        return toAdminResponseDto(admin);
+        return this.toAdminResponseDto(admin);
     }
 
 
@@ -157,7 +177,7 @@ export class AdminService {
             include: { user: true },
         });
 
-        return toAdminResponseDto(updatedAdmin);
+        return this.toAdminResponseDto(updatedAdmin);
     }
 
     async deleteAdmin(userId: number): Promise<void> {

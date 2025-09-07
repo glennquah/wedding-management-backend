@@ -20,7 +20,7 @@ import { AdminService } from './admin.service';
 @Controller('admins')
 @UseGuards(JwtGuard) 
 export class AdminController {
-    constructor(private service: AdminService) { }
+    constructor(private adminService: AdminService) { }
 
     @Post()
     @ApiOperation({ summary: 'Create a new admin' })
@@ -32,7 +32,7 @@ export class AdminController {
     @ApiResponse({ status: 400, description: 'Bad request.' })
     @ApiResponse({ status: 409, description: 'Admin with this email already exists.' })
     async create(@Body() body: CreateAdminDto): Promise<AdminResponseDto> {
-        return this.service.create(body);
+        return this.adminService.create(body);
     }
 
     @Post('bulk')
@@ -44,7 +44,7 @@ export class AdminController {
     })
     @ApiResponse({ status: 400, description: 'Bad request.' })
     async createMultiple(@Body() body: CreateAdminDto[]): Promise<AdminResponseDto[]> {
-        return this.service.createMultiple(body);
+        return this.adminService.createMultiple(body);
     }
 
     @Get()
@@ -55,7 +55,7 @@ export class AdminController {
         type: [AdminResponseDto],
     })
     async getAllAdmins(): Promise<AdminResponseDto[]> {
-        return this.service.findAll();
+        return this.adminService.findAll();
     }
 
     @Get(':id')
@@ -67,7 +67,7 @@ export class AdminController {
     })
     @ApiResponse({ status: 404, description: 'Admin not found.' })
     async getAdmin(@Param('id', ParseIntPipe) id: number): Promise<AdminResponseDto> {
-        return this.service.findById(id);
+        return this.adminService.findById(id);
     }
 
     @Get('email/:email')
@@ -79,7 +79,7 @@ export class AdminController {
     })
     @ApiResponse({ status: 404, description: 'Admin not found.' })
     async getAdminByEmail(@Param('email') email: string): Promise<AdminResponseDto> {
-        return this.service.findByEmail(email);
+        return this.adminService.findByEmail(email);
     }
 
     @Put(':id')
@@ -96,7 +96,7 @@ export class AdminController {
         @Param('id', ParseIntPipe) id: number,
         @Body() body: UpdateAdminDto
     ): Promise<AdminResponseDto> {
-        return this.service.update(id, body);
+        return this.adminService.update(id, body);
     }
 
     @Delete(':id')
@@ -106,8 +106,7 @@ export class AdminController {
         description: 'The admin has been successfully deleted.',
     })
     @ApiResponse({ status: 404, description: 'Admin not found.' })
-    async delete(@Param('id', ParseIntPipe) id: number): Promise<{ message: string }> {
-        await this.service.deleteAdmin(id);
-        return { message: 'Admin successfully deleted' };
+    async delete(@Param('id', ParseIntPipe) id: number): Promise<void> {
+        await this.adminService.deleteAdmin(id);
     }
 }

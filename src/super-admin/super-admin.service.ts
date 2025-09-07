@@ -4,14 +4,16 @@ import {
     ConflictException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { UserService } from '../user/user.service';
 import { SuperAdminResponseDto } from './dto/super-admin-response.dto';
-import { toUserResponseDto } from '../user/user.mapper';
 import { hash } from 'bcrypt';
+import { UserRole } from 'src/common/user-role.enum';
 
 @Injectable()
 export class SuperAdminService {
     constructor(
         private prisma: PrismaService,
+        private userService: UserService,
     ) { }
 
     async findOne(superAdminId: number): Promise<SuperAdminResponseDto> {
@@ -24,7 +26,7 @@ export class SuperAdminService {
             throw new NotFoundException(`Super Admin with id ${superAdminId} not found`);
         }
 
-        return toUserResponseDto(superAdmin.user);
+        return this.userService.toUserResponseDto(superAdmin.user);
     }
 
     async create(dto: { name: string; email: string; password: string }): Promise<SuperAdminResponseDto> {
@@ -37,13 +39,11 @@ export class SuperAdminService {
         }
 
         // Create the user first
-        const user = await this.prisma.user.create({
-            data: {
-                name: dto.name,
-                email: dto.email,
-                password: await hash(dto.password, 10),
-                role: 'superAdmin',
-            },
+        const user = await this.userService.create({
+            name: dto.name,
+            email: dto.email,
+            password: await hash(dto.password, 10),
+            role: 'superAdmin' as UserRole,
         });
 
         // Create the super admin profile
@@ -54,7 +54,7 @@ export class SuperAdminService {
             include: { user: true },
         });
 
-        return toUserResponseDto(superAdmin.user);
+        return this.userService.toUserResponseDto(superAdmin.user);
     }
 
     async findAll(): Promise<SuperAdminResponseDto[]> {
@@ -62,7 +62,7 @@ export class SuperAdminService {
             include: { user: true },
         });
 
-        return superAdmins.map(sa => toUserResponseDto(sa.user));
+        return superAdmins.map(sa => this.userService.toUserResponseDto(sa.user));
     }
 
     async findById(userId: number): Promise<SuperAdminResponseDto> {
@@ -75,7 +75,7 @@ export class SuperAdminService {
             throw new NotFoundException(`Super Admin with userId ${userId} not found`);
         }
 
-        return toUserResponseDto(superAdmin.user);
+        return this.userService.toUserResponseDto(superAdmin.user);
     }
 
     async findByEmail(email: string): Promise<SuperAdminResponseDto> {
@@ -96,7 +96,7 @@ export class SuperAdminService {
             throw new NotFoundException(`Super Admin with email ${email} not found`);
         }
 
-        return toUserResponseDto(superAdmin.user);
+        return this.userService.toUserResponseDto(superAdmin.user);
     }
 
     async update(userId: number, dto: { name?: string; email?: string; password?: string }): Promise<SuperAdminResponseDto> {
@@ -127,7 +127,7 @@ export class SuperAdminService {
             },
         });
 
-        return toUserResponseDto(updatedUser);
+        return this.userService.toUserResponseDto(updatedUser);
     }
 
     async delete(userId: number): Promise<void> {
