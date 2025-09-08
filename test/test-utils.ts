@@ -77,7 +77,7 @@ export async function authenticateUsers(app: INestApplication): Promise<{
       username: superAdminData.email,
       password: superAdminData.password,
     })
-    .expect(200);
+    .expect(201);
 
   // Create and authenticate admin
   const adminData = {
@@ -105,7 +105,7 @@ export async function authenticateUsers(app: INestApplication): Promise<{
       username: adminData.email,
       password: adminData.password,
     })
-    .expect(200);
+    .expect(201);
 
   // Create and authenticate vendor
   const vendorData = {
@@ -135,7 +135,7 @@ export async function authenticateUsers(app: INestApplication): Promise<{
       username: vendorData.email,
       password: vendorData.password,
     })
-    .expect(200);
+    .expect(201);
 
   return {
     jwtTokenSuperAdmin: superAdminLoginResponse.body.tokens.accessToken,
