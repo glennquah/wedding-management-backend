@@ -1,7 +1,7 @@
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { ConfirmationStatus } from '../src/common/confirmation-status.enum';
-import { setupTestApp, teardownTestApp } from './test-utils';
+import { seedWeddings, setupTestApp, teardownTestApp } from './test-utils';
 
 describe('Guest (e2e)', () => {
   let app: INestApplication;
@@ -14,20 +14,13 @@ describe('Guest (e2e)', () => {
     app = testAppData.app;
     adminToken = testAppData.jwtTokenAdmin;
 
-    // Create a wedding for guest tests
-    const weddingData = {
-      name: 'Test Wedding',
-      date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
-      location: 'Test Venue',
-    };
-
-    const weddingResponse = await request(app.getHttpServer())
-      .post('/weddings')
-      .set('Authorization', `Bearer ${adminToken}`)
-      .send(weddingData)
-      .expect(201);
-
-    createdWeddingId = weddingResponse.body.id;
+    const weddings = await seedWeddings(
+      app,
+      testAppData.adminId,
+      1,
+      adminToken,
+    );
+    createdWeddingId = weddings[0].id;
   });
 
   afterAll(async () => {
@@ -145,7 +138,9 @@ describe('Guest (e2e)', () => {
         .put(`/guests/${createdGuestId}/confirm`)
         .expect(200);
 
-      expect(response.body.confirmationStatus).toBe(ConfirmationStatus.CONFIRMED);
+      expect(response.body.confirmationStatus).toBe(
+        ConfirmationStatus.CONFIRMED,
+      );
       expect(response.body.id).toBe(createdGuestId);
     });
   });
@@ -156,7 +151,9 @@ describe('Guest (e2e)', () => {
         .put(`/guests/${createdGuestId}/reject`)
         .expect(200);
 
-      expect(response.body.confirmationStatus).toBe(ConfirmationStatus.REJECTED);
+      expect(response.body.confirmationStatus).toBe(
+        ConfirmationStatus.REJECTED,
+      );
       expect(response.body.id).toBe(createdGuestId);
     });
   });
@@ -182,9 +179,7 @@ describe('Guest (e2e)', () => {
         .expect(200);
 
       // Verify the guest is deleted
-      await request(app.getHttpServer())
-        .get(`/guests/${guestId}`)
-        .expect(404);
+      await request(app.getHttpServer()).get(`/guests/${guestId}`).expect(404);
     });
   });
 

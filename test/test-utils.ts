@@ -170,6 +170,7 @@ export async function seedWeddings(
   app: INestApplication,
   adminId: string,
   count: number = 3,
+  authToken?: string,
 ) {
   const weddings = [];
   for (let i = 1; i <= count; i++) {
@@ -177,12 +178,15 @@ export async function seedWeddings(
       name: `Test Wedding ${i}`,
       date: new Date(Date.now() + i * 24 * 60 * 60 * 1000).toISOString(), // i days from now
       location: `Test Location ${i}`,
-      adminIds: [adminId],
     };
 
-    const response = await request(app.getHttpServer())
-      .post('/wedding')
-      .send(weddingData);
+    const requestBuilder = request(app.getHttpServer()).post('/weddings');
+
+    if (authToken) {
+      requestBuilder.set('Authorization', `Bearer ${authToken}`);
+    }
+
+    const response = await requestBuilder.send(weddingData);
 
     weddings.push(response.body);
   }
@@ -308,7 +312,7 @@ export async function seedGuests(
       weddingId: parseInt(weddingId),
     };
 
-    const request_builder = request(app.getHttpServer()).post('/guest');
+    const request_builder = request(app.getHttpServer()).post('/guests');
 
     if (authToken) {
       request_builder.set('Authorization', `Bearer ${authToken}`);
