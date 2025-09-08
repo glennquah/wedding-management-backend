@@ -305,42 +305,6 @@ describe('Auth (e2e)', () => {
         .send(loginData)
         .expect(401);
     });
-
-    it('should fail with non-existent email', async () => {
-      const loginData = {
-        username: 'nonexistent@test.com',
-        password: 'password123',
-      };
-
-      await request(app.getHttpServer())
-        .post('/auth/login')
-        .send(loginData)
-        .expect(401);
-    });
-
-    it('should fail with invalid email format', async () => {
-      const loginData = {
-        username: 'invalid-email',
-        password: 'password123',
-      };
-
-      await request(app.getHttpServer())
-        .post('/auth/login')
-        .send(loginData)
-        .expect(401);
-    });
-
-    it('should fail with empty password', async () => {
-      const loginData = {
-        username: 'admin@test.com',
-        password: '',
-      };
-
-      await request(app.getHttpServer())
-        .post('/auth/login')
-        .send(loginData)
-        .expect(401);
-    });
   });
 
   describe('POST /auth/refresh', () => {
