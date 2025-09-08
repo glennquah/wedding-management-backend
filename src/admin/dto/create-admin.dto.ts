@@ -1,10 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsEnum,
-  IsOptional,
-  IsBoolean,
-  IsDateString,
-} from 'class-validator';
+import { IsEnum, IsOptional, IsBoolean, IsDateString } from 'class-validator';
 import { CreateUserDto } from '../../user/dto/create-user.dto';
 import { BudgetBucket } from '../../common/budget-bucket.enum';
 import { GuestCountBucket } from '../../common/guest-count-bucket.enum';
@@ -67,9 +62,6 @@ export class CreateAdminDto extends CreateUserDto {
     isArray: true,
     required: true,
   })
-  @IsEnum(
-    WeddingService,
-    { each: true }
-  )
+  @IsEnum(WeddingService, { each: true })
   preferredServices: WeddingService[];
 }
