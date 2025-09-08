@@ -1,22 +1,27 @@
 import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
-import { ApiExcludeEndpoint, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiExcludeEndpoint,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import { LoginDto } from './dto/auth.dto';
 import { AuthResponseDto, TokensDto } from './dto/auth-response.dto';
-import { RefreshJwtGuard } from './guards/refresh.guard';
+import { LoginDto } from './dto/auth.dto';
 import { JwtPayload } from './dto/jwt-payload.interface';
+import { RefreshJwtGuard } from './guards/refresh.guard';
 
-import { VendorResponseDto } from 'src/vendor/dto/vendor-response.dto';
 import { AdminResponseDto } from 'src/admin/dto/admin-response.dto';
 import { SuperAdminResponseDto } from 'src/super-admin/dto/super-admin-response.dto';
+import { VendorResponseDto } from 'src/vendor/dto/vendor-response.dto';
 
-import { CreateVendorDto } from 'src/vendor/dto/create-vendor.dto';
 import { CreateAdminDto } from 'src/admin/dto/create-admin.dto';
 import { CreateSuperAdminDto } from 'src/super-admin/dto/create-super-admin.dto';
+import { CreateVendorDto } from 'src/vendor/dto/create-vendor.dto';
 
-import { VendorService } from 'src/vendor/vendor.service';
 import { AdminService } from 'src/admin/admin.service';
 import { SuperAdminService } from 'src/super-admin/super-admin.service';
+import { VendorService } from 'src/vendor/vendor.service';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -26,7 +31,7 @@ export class AuthController {
     private authService: AuthService,
     private adminService: AdminService,
     private superAdminService: SuperAdminService,
-  ) { }
+  ) {}
 
   @Post('register/vendor')
   @ApiOperation({ summary: 'Create a new vendor' })
@@ -51,9 +56,7 @@ export class AuthController {
     type: AdminResponseDto,
   })
   @ApiResponse({ status: 400, description: 'Bad request.' })
-  async registerAdmin(
-    @Body() dto: CreateAdminDto,
-  ): Promise<AdminResponseDto> {
+  async registerAdmin(@Body() dto: CreateAdminDto): Promise<AdminResponseDto> {
     const admin = await this.adminService.create(dto);
     return admin;
   }

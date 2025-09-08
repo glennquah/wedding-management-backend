@@ -1,14 +1,18 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { Prisma, User } from '@prisma/client';
+import { UserRole } from '../common/user-role.enum';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
-import { User, Prisma } from '@prisma/client';
-import { UserRole } from '../common/user-role.enum';
 
 @Injectable()
 export class UserService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
   private handlePrismaError(error: any): never {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
@@ -18,7 +22,9 @@ export class UserService {
         if (target?.includes('email')) {
           throw new ConflictException('User with this email already exists');
         }
-        throw new ConflictException('A user with this information already exists');
+        throw new ConflictException(
+          'A user with this information already exists',
+        );
       }
       if (error.code === 'P2025') {
         // Record not found
@@ -39,8 +45,8 @@ export class UserService {
     };
   }
 
-
-  async create(dto: CreateUserDto): Promise<UserResponseDto> { // supposed to return UserResponseDto ? check
+  async create(dto: CreateUserDto): Promise<UserResponseDto> {
+    // supposed to return UserResponseDto ? check
     try {
       const user = await this.prisma.user.create({ data: dto });
       return this.toUserResponseDto(user);
@@ -53,7 +59,7 @@ export class UserService {
     const users = await this.prisma.user.findMany({
       orderBy: { createdAt: 'desc' },
     });
-    return users.map(user => this.toUserResponseDto(user));
+    return users.map((user) => this.toUserResponseDto(user));
   }
 
   async findById(id: number): Promise<UserResponseDto> {
@@ -80,7 +86,8 @@ export class UserService {
     return this.toUserResponseDto(user);
   }
 
-  async findRawByEmail(email: string): Promise<User | null> { // need this for auth service
+  async findRawByEmail(email: string): Promise<User | null> {
+    // need this for auth service
     return this.prisma.user.findUnique({ where: { email } });
   }
 
@@ -112,7 +119,7 @@ export class UserService {
 
   async createMultiple(users: CreateUserDto[]): Promise<UserResponseDto[]> {
     const createdUsers = await Promise.all(
-      users.map(user => this.create(user))
+      users.map((user) => this.create(user)),
     );
     return createdUsers;
   }

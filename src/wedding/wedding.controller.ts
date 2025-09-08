@@ -1,12 +1,12 @@
-import { 
-  Body, 
-  Controller, 
-  Delete, 
-  Get, 
-  Param, 
-  Post, 
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
   Put,
-  ParseIntPipe, 
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateWeddingDto } from './dto/create-wedding.dto';
@@ -42,7 +42,9 @@ export class WeddingController {
   })
   async findAll(): Promise<WeddingResponseDto[]> {
     const weddings = await this.service.findAll();
-    return weddings.map(wedding => this.service.toWeddingResponseDto(wedding));
+    return weddings.map((wedding) =>
+      this.service.toWeddingResponseDto(wedding),
+    );
   }
 
   @Get(':id')
@@ -53,7 +55,9 @@ export class WeddingController {
     type: WeddingResponseDto,
   })
   @ApiResponse({ status: 404, description: 'Wedding not found.' })
-  async findOne(@Param('id', ParseIntPipe) id: number): Promise<WeddingResponseDto> {
+  async findOne(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<WeddingResponseDto> {
     const wedding = await this.service.findById(id);
     return this.service.toWeddingResponseDto(wedding);
   }
@@ -69,7 +73,7 @@ export class WeddingController {
   @ApiResponse({ status: 400, description: 'Bad request.' })
   async update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() body: UpdateWeddingDto
+    @Body() body: UpdateWeddingDto,
   ): Promise<WeddingResponseDto> {
     const wedding = await this.service.update(id, body);
     return this.service.toWeddingResponseDto(wedding);

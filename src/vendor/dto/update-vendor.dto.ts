@@ -1,15 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
-  IsString,
-  IsOptional,
   IsDateString,
-  IsNumber,
   IsEnum,
+  IsNumber,
+  IsOptional,
+  IsString,
 } from 'class-validator';
-import { UpdateUserDto } from '../../user/dto/update-user.dto';
-import { WeddingStyle } from '../../common/wedding-style.enum';
 import { WeddingService } from '../../common/wedding-service.enum';
+import { WeddingStyle } from '../../common/wedding-style.enum';
 import { WeddingType } from '../../common/wedding-type.enum';
+import { UpdateUserDto } from '../../user/dto/update-user.dto';
 
 export class UpdateVendorDto extends UpdateUserDto {
   @ApiProperty({ description: 'Vendor website URL', required: false })
@@ -17,22 +17,35 @@ export class UpdateVendorDto extends UpdateUserDto {
   @IsString()
   vendorWebsite?: string;
 
-  @ApiProperty({ description: 'Unique Entity Number (UEN) of the vendor', required: false })
+  @ApiProperty({
+    description: 'Unique Entity Number (UEN) of the vendor',
+    required: false,
+  })
   @IsOptional()
   @IsString()
   uenNumber?: string;
 
-  @ApiProperty({ description: 'Date when the vendor was onboarded', required: false })
+  @ApiProperty({
+    description: 'Date when the vendor was onboarded',
+    required: false,
+  })
   @IsOptional()
   @IsDateString()
   onboardedDate?: string;
 
-  @ApiProperty({ description: 'Short biography of the vendor', required: false })
+  @ApiProperty({
+    description: 'Short biography of the vendor',
+    required: false,
+  })
   @IsOptional()
   @IsString()
   bio?: string;
 
-  @ApiProperty({ description: 'Rating of the vendor', required: false, default: 0 })
+  @ApiProperty({
+    description: 'Rating of the vendor',
+    required: false,
+    default: 0,
+  })
   @IsOptional()
   @IsNumber()
   rating?: number;

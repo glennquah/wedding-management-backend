@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
+import { GuestModule } from '../guest/guest.module';
+import { PrismaModule } from '../prisma/prisma.module';
 import { WeddingController } from './wedding.controller';
 import { WeddingService } from './wedding.service';
-import { PrismaModule } from '../prisma/prisma.module';
-import { GuestModule } from '../guest/guest.module';
 
 @Module({
   imports: [PrismaModule, GuestModule],
