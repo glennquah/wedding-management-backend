@@ -1,6 +1,8 @@
+import { UserRole } from "src/common/user-role.enum";
+
 export interface JwtPayload {
-  username: string;
-  sub: {
-    name: string;
-  };
+  sub: number;
+  email: string;
+  name: string;
+  role: UserRole
 }

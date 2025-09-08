@@ -11,18 +11,24 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtGuard } from '../auth/guards/jwt.guard';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { Roles } from 'src/auth/decorators/roles.decorator';
+import { UserRole } from 'src/common/user-role.enum';
+
 import { CreateSuperAdminDto } from './dto/create-super-admin.dto';
 import { UpdateSuperAdminDto } from './dto/update-super-admin.dto';
 import { SuperAdminResponseDto } from './dto/super-admin-response.dto';
+
 import { SuperAdminService } from './super-admin.service';
 
 @ApiTags('super-admins')
 @Controller('super-admins')
-@UseGuards(JwtGuard) 
+@UseGuards(JwtGuard, RolesGuard) 
 export class SuperAdminController {
     constructor(private service: SuperAdminService) { }
 
     @Post()
+    @Roles(UserRole.SUPERADMIN)
     @ApiOperation({ summary: 'Create a new super admin' })
     @ApiResponse({
         status: 201,
