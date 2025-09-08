@@ -14,10 +14,10 @@ jobs:
       postgres:
         image: postgres:15
         env:
-          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          POSTGRES_USER: admin
+          POSTGRES_PASSWORD: password123
+          POSTGRES_DB: wedding_management
+          DATABASE_URL: postgresql://admin:password123@localhost:5432/wedding_management
           PORT: ${{ secrets.PORT }}
           JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
           JWT_REFRESH_KEY: ${{ secrets.JWT_REFRESH_KEY }}
@@ -45,12 +45,12 @@ jobs:
       - name: Generate Prisma client
         run: npx prisma generate
         env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/wedding_management_test
+          DATABASE_URL: postgresql://admin:password123@localhost:5432/wedding_management
 
       - name: Run database migrations
         run: npx prisma db push
         env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/wedding_management_test
+          DATABASE_URL: postgresql://admin:password123@localhost:5432/wedding_management
 
       - name: Run linter
         run: npm run lint:check
