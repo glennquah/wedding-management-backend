@@ -38,6 +38,7 @@ async function bootstrap() {
       },
       'access-token',
     )
+    .addServer('http://localhost:8080')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
