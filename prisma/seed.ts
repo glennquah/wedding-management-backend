@@ -42,7 +42,7 @@ async function main() {
   const ryanUser = await prisma.user.create({
     data: {
       name: 'Ryan Chen',
-      email: 'ryan.chen@email.com',
+      email: 'couple@wedding.com',
       password: hashedPassword,
       role: UserRole.admin,
       admin: {
@@ -178,7 +178,7 @@ async function main() {
   const vendorData = [
     {
       name: 'Marina Bay Grand Ballroom',
-      email: 'marina@venue.com',
+      email: 'vendor@wedding.com',
       service: WeddingService.venue,
       style: WeddingStyle.luxury,
       capacity: 300,
