@@ -30,6 +30,7 @@ jobs:
           --health-retries 5
 
     env:
+      # FIXME: Standardize this when CD is set up & hide all the impt env vars in GitHub Secrets
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: password123
       POSTGRES_DB: wedding_management
