@@ -7,8 +7,10 @@ import {
   ParseIntPipe,
   Post,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { CreateWeddingDto } from './dto/create-wedding.dto';
 import { UpdateWeddingDto } from './dto/update-wedding.dto';
 import { WeddingResponseDto } from './dto/wedding-response.dto';
@@ -16,7 +18,7 @@ import { WeddingService } from './wedding.service';
 
 @ApiTags('weddings')
 @Controller('weddings')
-// @UseGuards(JwtGuard) // Temporarily disabled for testing
+@UseGuards(JwtGuard)
 export class WeddingController {
   constructor(private service: WeddingService) {}
 
