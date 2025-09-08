@@ -1,22 +1,22 @@
 import {
+  BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
-  ConflictException,
-  BadRequestException,
 } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { UserService } from '../user/user.service';
-import { CreateAdminDto } from './dto/create-admin.dto';
-import { UpdateAdminDto } from './dto/update-admin.dto';
-import { AdminResponseDto } from './dto/admin-response.dto';
+import { Admin, User } from '@prisma/client';
 import { hash } from 'bcrypt';
 import { UserRole } from 'src/common/user-role.enum';
-import { Admin, User } from '@prisma/client';
-import { WeddingType } from '../common/wedding-type.enum';
 import { BudgetBucket } from '../common/budget-bucket.enum';
 import { GuestCountBucket } from '../common/guest-count-bucket.enum';
-import { WeddingStyle } from '../common/wedding-style.enum';
 import { WeddingService } from '../common/wedding-service.enum';
+import { WeddingStyle } from '../common/wedding-style.enum';
+import { WeddingType } from '../common/wedding-type.enum';
+import { PrismaService } from '../prisma/prisma.service';
+import { UserService } from '../user/user.service';
+import { AdminResponseDto } from './dto/admin-response.dto';
+import { CreateAdminDto } from './dto/create-admin.dto';
+import { UpdateAdminDto } from './dto/update-admin.dto';
 
 @Injectable()
 export class AdminService {
@@ -56,10 +56,18 @@ export class AdminService {
 
   async create(dto: CreateAdminDto): Promise<AdminResponseDto> {
     // Validate required fields manually (since ValidationPipe isn't working)
-    if (!dto.weddingType || !dto.budgetBucket || !dto.guestCountBucket || !dto.preferredStyle || !dto.preferredServices) {
-      throw new BadRequestException('Missing required fields: weddingType, budgetBucket, guestCountBucket, preferredStyle, and preferredServices are required');
+    if (
+      !dto.weddingType ||
+      !dto.budgetBucket ||
+      !dto.guestCountBucket ||
+      !dto.preferredStyle ||
+      !dto.preferredServices
+    ) {
+      throw new BadRequestException(
+        'Missing required fields: weddingType, budgetBucket, guestCountBucket, preferredStyle, and preferredServices are required',
+      );
     }
-    
+
     // Check if user with the same email already exists
     const existingUser = await this.prisma.user.findUnique({
       where: { email: dto.email },
