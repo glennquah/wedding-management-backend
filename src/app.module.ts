@@ -1,17 +1,21 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { AdminModule } from './admin/admin.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { GuestModule } from './guest/guest.module';
 import { PrismaModule } from './prisma/prisma.module';
-import { TestUserModule } from './test-user/test-user.module';
+import { UserModule } from './user/user.module';
+import { VendorModule } from './vendor/vendor.module';
 import { WeddingModule } from './wedding/wedding.module';
 
 @Module({
   imports: [
     PrismaModule,
-    TestUserModule,
+    UserModule,
+    VendorModule,
+    AdminModule,
     ConfigModule.forRoot(),
     AuthModule,
     GuestModule,

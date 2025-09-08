@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { TestUserResponseDto } from 'src/test-user/dto/test-user-response.dto';
+import { UserResponseDto } from 'src/user/dto/user-response.dto';
 
 export class TokensDto {
   @ApiProperty()
@@ -13,8 +13,8 @@ export class TokensDto {
 }
 
 export class AuthResponseDto {
-  @ApiProperty({ type: () => TestUserResponseDto })
-  user: TestUserResponseDto;
+  @ApiProperty({ type: () => UserResponseDto })
+  user: UserResponseDto;
 
   @ApiProperty({ type: () => TokensDto })
   backendTokens: TokensDto;
