@@ -47,16 +47,12 @@ jobs:
 
       - name: Run database migrations
         run: npx prisma db push
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/wedding_management_test
 
       - name: Run linter
         run: npm run lint:check
 
       - name: Run e2e tests
         run: npm run test:e2e
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/wedding_management_test
 
       - name: Build application
         run: npm run build
