@@ -1,4 +1,4 @@
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
@@ -24,6 +24,21 @@ export async function setupTestApp(): Promise<{
   }).compile();
 
   const app = moduleFixture.createNestApplication();
+
+  // Add ValidationPipe to test app
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      skipMissingProperties: false,
+      dismissDefaultMessages: false,
+      validationError: {
+        target: false,
+      },
+    }),
+  );
+
   await app.init();
 
   // Connect to test db & clean database
@@ -58,10 +73,14 @@ export async function authenticateUsers(app: INestApplication): Promise<{
   adminId: string;
   vendorId: string;
 }> {
+  // Use unique email addresses for each test run with random suffix
+  const timestamp = Date.now();
+  const randomSuffix = Math.random().toString(36).substring(2, 15);
+
   // Create and authenticate super admin
   const superAdminData = {
     name: 'Test Super Admin',
-    email: 'superadmin@test.com',
+    email: `superadmin-${timestamp}-${randomSuffix}@test.com`,
     password: 'password123',
     role: UserRole.SUPERADMIN,
   };
@@ -82,7 +101,7 @@ export async function authenticateUsers(app: INestApplication): Promise<{
   // Create and authenticate admin
   const adminData = {
     name: 'Test Admin',
-    email: 'admin@test.com',
+    email: `admin-${timestamp}-${randomSuffix}@test.com`,
     password: 'password123',
     role: UserRole.ADMIN,
     isCouple: true,
@@ -110,7 +129,7 @@ export async function authenticateUsers(app: INestApplication): Promise<{
   // Create and authenticate vendor
   const vendorData = {
     name: 'Test Vendor',
-    email: 'vendor@test.com',
+    email: `vendor-${timestamp}-${randomSuffix}@test.com`,
     password: 'password123',
     role: UserRole.VENDOR,
     vendorWebsite: 'https://testvendor.com',
@@ -138,9 +157,9 @@ export async function authenticateUsers(app: INestApplication): Promise<{
     .expect(201);
 
   return {
-    jwtTokenSuperAdmin: superAdminLoginResponse.body.tokens.accessToken,
-    jwtTokenAdmin: adminLoginResponse.body.tokens.accessToken,
-    jwtTokenVendor: vendorLoginResponse.body.tokens.accessToken,
+    jwtTokenSuperAdmin: superAdminLoginResponse.body.backendTokens.accessToken,
+    jwtTokenAdmin: adminLoginResponse.body.backendTokens.accessToken,
+    jwtTokenVendor: vendorLoginResponse.body.backendTokens.accessToken,
     superAdminId: superAdminResponse.body.id,
     adminId: adminResponse.body.id,
     vendorId: vendorResponse.body.id,
@@ -175,6 +194,7 @@ export async function seedVendors(
   count: number = 3,
 ): Promise<any[]> {
   const vendors = [];
+  const timestamp = Date.now();
   const services = [
     WeddingService.VENUE,
     WeddingService.CATERING,
@@ -189,7 +209,7 @@ export async function seedVendors(
   for (let i = 1; i <= count; i++) {
     const vendorData = {
       name: `Test Vendor ${i}`,
-      email: `vendor${i}@test.com`,
+      email: `vendor${i}-${timestamp}@test.com`,
       password: 'password123',
       role: UserRole.VENDOR,
       vendorWebsite: `https://testvendor${i}.com`,
@@ -218,13 +238,14 @@ export async function seedAdmins(
   count: number = 2,
 ): Promise<any[]> {
   const admins = [];
+  const timestamp = Date.now();
   const weddingTypes = [WeddingType.CHINESE, WeddingType.WESTERN];
   const budgets = [BudgetBucket.LOW, BudgetBucket.MEDIUM];
 
   for (let i = 1; i <= count; i++) {
     const adminData = {
       name: `Test Admin ${i}`,
-      email: `admin${i}@test.com`,
+      email: `admin${i}-${timestamp}@test.com`,
       password: 'password123',
       role: UserRole.ADMIN,
       isCouple: i % 2 === 1, // Alternate between couple and single
@@ -251,11 +272,12 @@ export async function seedSuperAdmins(
   count: number = 1,
 ): Promise<any[]> {
   const superAdmins = [];
+  const timestamp = Date.now();
 
   for (let i = 1; i <= count; i++) {
     const superAdminData = {
       name: `Test Super Admin ${i}`,
-      email: `superadmin${i}@test.com`,
+      email: `superadmin${i}-${timestamp}@test.com`,
       password: 'password123',
       role: UserRole.SUPERADMIN,
     };
@@ -300,13 +322,21 @@ export async function seedGuests(
 }
 
 export async function cleanDatabase(prismaService: PrismaService) {
-  // Delete in order to respect foreign key constraints
-  await prismaService.guest.deleteMany();
-  await prismaService.wedding.deleteMany();
-  await prismaService.admin.deleteMany();
-  await prismaService.vendor.deleteMany();
-  await prismaService.superAdmin.deleteMany();
-  await prismaService.user.deleteMany();
+  // Use raw SQL to truncate tables in proper order
+  const tableNames = [
+    'Guest',
+    'Wedding',
+    'Admin',
+    'Vendor',
+    'SuperAdmin',
+    'User',
+  ];
+
+  for (const tableName of tableNames) {
+    await prismaService.$executeRawUnsafe(
+      `TRUNCATE TABLE "${tableName}" RESTART IDENTITY CASCADE`,
+    );
+  }
 }
 
 export async function teardownTestApp(app: INestApplication) {

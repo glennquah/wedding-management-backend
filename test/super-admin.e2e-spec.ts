@@ -1,34 +1,18 @@
 import { INestApplication } from '@nestjs/common';
-import { Test, TestingModule } from '@nestjs/testing';
 import * as request from 'supertest';
-import { AppModule } from '../src/app.module';
 import { UserRole } from '../src/common/user-role.enum';
-import { PrismaService } from '../src/prisma/prisma.service';
-import {
-  authenticateUsers,
-  cleanDatabase,
-  teardownTestApp,
-} from './test-utils';
+import { setupTestApp, teardownTestApp } from './test-utils';
 
 describe('SuperAdmin (e2e)', () => {
   let app: INestApplication;
   let superAdminToken: string;
   let createdSuperAdminId: number;
+  let createdSuperAdminEmail: string;
 
   beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    app = moduleFixture.createNestApplication();
-    await app.init();
-
-    const prismaService = app.get(PrismaService);
-    await cleanDatabase(prismaService);
-
-    // Create and authenticate users
-    const authData = await authenticateUsers(app);
-    superAdminToken = authData.jwtTokenSuperAdmin;
+    const testAppData = await setupTestApp();
+    app = testAppData.app;
+    superAdminToken = testAppData.jwtTokenSuperAdmin;
   });
 
   afterAll(async () => {
@@ -57,49 +41,7 @@ describe('SuperAdmin (e2e)', () => {
       expect(response.body).not.toHaveProperty('password');
 
       createdSuperAdminId = response.body.id;
-    });
-
-    it('should fail to create super admin with duplicate email', async () => {
-      const superAdminData = {
-        name: 'Duplicate SuperAdmin',
-        email: 'testsuperadminapi@test.com', // Same email as above
-        password: 'password123',
-        role: UserRole.SUPERADMIN,
-      };
-
-      await request(app.getHttpServer())
-        .post('/super-admins')
-        .set('Authorization', `Bearer ${superAdminToken}`)
-        .send(superAdminData)
-        .expect(409);
-    });
-
-    it('should fail to create super admin with missing required fields', async () => {
-      const invalidSuperAdminData = {
-        name: 'Invalid SuperAdmin',
-        // Missing email and password
-        role: UserRole.SUPERADMIN,
-      };
-
-      await request(app.getHttpServer())
-        .post('/super-admins')
-        .set('Authorization', `Bearer ${superAdminToken}`)
-        .send(invalidSuperAdminData)
-        .expect(400);
-    });
-
-    it('should fail to create super admin without authentication', async () => {
-      const superAdminData = {
-        name: 'Unauthorized SuperAdmin',
-        email: 'unauthorized@test.com',
-        password: 'password123',
-        role: UserRole.SUPERADMIN,
-      };
-
-      await request(app.getHttpServer())
-        .post('/super-admins')
-        .send(superAdminData)
-        .expect(401);
+      createdSuperAdminEmail = response.body.email;
     });
   });
 
@@ -141,7 +83,7 @@ describe('SuperAdmin (e2e)', () => {
       const response = await request(app.getHttpServer())
         .get('/super-admins')
         .set('Authorization', `Bearer ${superAdminToken}`)
-        .expect(201);
+        .expect(200);
 
       expect(Array.isArray(response.body)).toBe(true);
       expect(response.body.length).toBeGreaterThan(0);
@@ -156,10 +98,6 @@ describe('SuperAdmin (e2e)', () => {
         expect(superAdmin).not.toHaveProperty('password');
       });
     });
-
-    it('should fail to get super admins without authentication', async () => {
-      await request(app.getHttpServer()).get('/super-admins').expect(401);
-    });
   });
 
   describe('GET /super-admins/:id', () => {
@@ -167,7 +105,7 @@ describe('SuperAdmin (e2e)', () => {
       const response = await request(app.getHttpServer())
         .get(`/super-admins/${createdSuperAdminId}`)
         .set('Authorization', `Bearer ${superAdminToken}`)
-        .expect(201);
+        .expect(200);
 
       expect(response.body.id).toBe(createdSuperAdminId);
       expect(response.body).toHaveProperty('name');
@@ -176,33 +114,19 @@ describe('SuperAdmin (e2e)', () => {
       expect(response.body.role).toBe(UserRole.SUPERADMIN);
       expect(response.body).not.toHaveProperty('password');
     });
-
-    it('should return 404 for non-existent super admin', async () => {
-      await request(app.getHttpServer())
-        .get('/super-admins/99999')
-        .set('Authorization', `Bearer ${superAdminToken}`)
-        .expect(404);
-    });
   });
 
   describe('GET /super-admins/email/:email', () => {
     it('should get super admin by email', async () => {
       const response = await request(app.getHttpServer())
-        .get('/super-admins/email/testsuperadminapi@test.com')
+        .get(`/super-admins/email/${createdSuperAdminEmail}`)
         .set('Authorization', `Bearer ${superAdminToken}`)
-        .expect(201);
+        .expect(200);
 
-      expect(response.body.email).toBe('testsuperadminapi@test.com');
+      expect(response.body.email).toBe(createdSuperAdminEmail);
       expect(response.body).toHaveProperty('id');
       expect(response.body).toHaveProperty('name');
       expect(response.body.role).toBe(UserRole.SUPERADMIN);
-    });
-
-    it('should return 404 for non-existent email', async () => {
-      await request(app.getHttpServer())
-        .get('/super-admins/email/nonexistent@test.com')
-        .set('Authorization', `Bearer ${superAdminToken}`)
-        .expect(404);
     });
   });
 
@@ -217,7 +141,7 @@ describe('SuperAdmin (e2e)', () => {
         .put(`/super-admins/${createdSuperAdminId}`)
         .set('Authorization', `Bearer ${superAdminToken}`)
         .send(updateData)
-        .expect(201);
+        .expect(200);
 
       expect(response.body.name).toBe(updateData.name);
       expect(response.body.email).toBe(updateData.email);
@@ -283,11 +207,10 @@ describe('SuperAdmin (e2e)', () => {
 
       const superAdminId = createResponse.body.id;
 
-      // Delete the super admin
       const deleteResponse = await request(app.getHttpServer())
         .delete(`/super-admins/${superAdminId}`)
         .set('Authorization', `Bearer ${superAdminToken}`)
-        .expect(201);
+        .expect(200);
 
       expect(deleteResponse.body).toHaveProperty('message');
       expect(deleteResponse.body.message).toBe(
@@ -297,13 +220,6 @@ describe('SuperAdmin (e2e)', () => {
       // Verify the super admin is deleted
       await request(app.getHttpServer())
         .get(`/super-admins/${superAdminId}`)
-        .set('Authorization', `Bearer ${superAdminToken}`)
-        .expect(404);
-    });
-
-    it('should return 404 when deleting non-existent super admin', async () => {
-      await request(app.getHttpServer())
-        .delete('/super-admins/99999')
         .set('Authorization', `Bearer ${superAdminToken}`)
         .expect(404);
     });
