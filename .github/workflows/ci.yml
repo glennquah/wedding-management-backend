@@ -57,6 +57,14 @@ jobs:
 
       - name: Run e2e tests
         run: npm run test:e2e
+        env:
+          DATABASE_URL: postgresql://admin:password123@localhost:5432/wedding_management
+          POSTGRES_USER: admin
+          POSTGRES_PASSWORD: password123
+          POSTGRES_DB: wedding_management
+          PORT: ${{ secrets.PORT }}
+          JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+          JWT_REFRESH_KEY: ${{ secrets.JWT_REFRESH_KEY }}
 
       - name: Build application
         run: npm run build
