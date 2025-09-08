@@ -74,7 +74,7 @@ export async function authenticateUsers(app: INestApplication): Promise<{
   const superAdminLoginResponse = await request(app.getHttpServer())
     .post('/auth/login')
     .send({
-      email: superAdminData.email,
+      username: superAdminData.email,
       password: superAdminData.password,
     })
     .expect(200);
@@ -102,7 +102,7 @@ export async function authenticateUsers(app: INestApplication): Promise<{
   const adminLoginResponse = await request(app.getHttpServer())
     .post('/auth/login')
     .send({
-      email: adminData.email,
+      username: adminData.email,
       password: adminData.password,
     })
     .expect(200);
@@ -132,7 +132,7 @@ export async function authenticateUsers(app: INestApplication): Promise<{
   const vendorLoginResponse = await request(app.getHttpServer())
     .post('/auth/login')
     .send({
-      email: vendorData.email,
+      username: vendorData.email,
       password: vendorData.password,
     })
     .expect(200);
@@ -299,7 +299,7 @@ export async function seedGuests(
   return guests;
 }
 
-async function cleanDatabase(prismaService: PrismaService) {
+export async function cleanDatabase(prismaService: PrismaService) {
   // Delete in order to respect foreign key constraints
   await prismaService.guest.deleteMany();
   await prismaService.wedding.deleteMany();
@@ -310,7 +310,9 @@ async function cleanDatabase(prismaService: PrismaService) {
 }
 
 export async function teardownTestApp(app: INestApplication) {
-  const prismaService = app.get(PrismaService);
-  await cleanDatabase(prismaService);
-  await app.close();
+  if (app) {
+    const prismaService = app.get(PrismaService);
+    await cleanDatabase(prismaService);
+    await app.close();
+  }
 }

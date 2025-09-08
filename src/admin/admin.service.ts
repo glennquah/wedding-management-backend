@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   ConflictException,
+  BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { UserService } from '../user/user.service';
@@ -54,6 +55,11 @@ export class AdminService {
   }
 
   async create(dto: CreateAdminDto): Promise<AdminResponseDto> {
+    // Validate required fields manually (since ValidationPipe isn't working)
+    if (!dto.weddingType || !dto.budgetBucket || !dto.guestCountBucket || !dto.preferredStyle || !dto.preferredServices) {
+      throw new BadRequestException('Missing required fields: weddingType, budgetBucket, guestCountBucket, preferredStyle, and preferredServices are required');
+    }
+    
     // Check if user with the same email already exists
     const existingUser = await this.prisma.user.findUnique({
       where: { email: dto.email },

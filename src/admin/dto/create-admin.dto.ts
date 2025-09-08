@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsOptional, IsBoolean, IsDateString } from 'class-validator';
+import { IsEnum, IsOptional, IsBoolean, IsDateString, IsNotEmpty } from 'class-validator';
 import { CreateUserDto } from '../../user/dto/create-user.dto';
 import { BudgetBucket } from '../../common/budget-bucket.enum';
 import { GuestCountBucket } from '../../common/guest-count-bucket.enum';
@@ -21,6 +21,7 @@ export class CreateAdminDto extends CreateUserDto {
     description: 'Date when the admin was onboarded',
     required: true,
   })
+  @IsNotEmpty()
   @IsDateString()
   onboardedDate: string;
 
@@ -29,6 +30,7 @@ export class CreateAdminDto extends CreateUserDto {
     enum: WeddingType,
     required: true,
   })
+  @IsNotEmpty()
   @IsEnum(WeddingType)
   weddingType: WeddingType;
 
@@ -37,6 +39,7 @@ export class CreateAdminDto extends CreateUserDto {
     enum: BudgetBucket,
     required: true,
   })
+  @IsNotEmpty()
   @IsEnum(BudgetBucket)
   budgetBucket: BudgetBucket;
 
@@ -45,6 +48,7 @@ export class CreateAdminDto extends CreateUserDto {
     enum: GuestCountBucket,
     required: true,
   })
+  @IsNotEmpty()
   @IsEnum(GuestCountBucket)
   guestCountBucket: GuestCountBucket;
 
@@ -53,6 +57,7 @@ export class CreateAdminDto extends CreateUserDto {
     enum: WeddingStyle,
     required: true,
   })
+  @IsNotEmpty()
   @IsEnum(WeddingStyle)
   preferredStyle: WeddingStyle;
 
@@ -62,6 +67,7 @@ export class CreateAdminDto extends CreateUserDto {
     isArray: true,
     required: true,
   })
+  @IsNotEmpty()
   @IsEnum(WeddingService, { each: true })
   preferredServices: WeddingService[];
 }
