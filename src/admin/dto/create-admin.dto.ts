@@ -34,7 +34,7 @@ export class CreateAdminDto extends CreateUserDto {
   @ApiProperty({
     description: 'Wedding type',
     enum: WeddingType,
-    enumName: "WeddingType",
+    enumName: 'WeddingType',
     required: true,
   })
   @IsNotEmpty()
@@ -44,7 +44,7 @@ export class CreateAdminDto extends CreateUserDto {
   @ApiProperty({
     description: 'Budget bucket',
     enum: BudgetBucket,
-    enumName: "BudgetBucket",
+    enumName: 'BudgetBucket',
     required: true,
   })
   @IsNotEmpty()
@@ -54,7 +54,7 @@ export class CreateAdminDto extends CreateUserDto {
   @ApiProperty({
     description: 'Guest count bucket',
     enum: GuestCountBucket,
-    enumName: "GuestCountBucket",
+    enumName: 'GuestCountBucket',
     required: true,
   })
   @IsNotEmpty()
@@ -64,7 +64,7 @@ export class CreateAdminDto extends CreateUserDto {
   @ApiProperty({
     description: 'Preferred wedding style',
     enum: WeddingStyle,
-    enumName: "WeddingStyle",
+    enumName: 'WeddingStyle',
     required: true,
   })
   @IsNotEmpty()
@@ -74,7 +74,7 @@ export class CreateAdminDto extends CreateUserDto {
   @ApiProperty({
     description: 'Preferred wedding services',
     enum: WeddingService,
-    enumName: "WeddingService",
+    enumName: 'WeddingService',
     isArray: true,
     required: true,
   })
