@@ -10,15 +10,20 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Roles } from 'src/auth/decorators/roles.decorator';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { UserRole } from 'src/common/user-role.enum';
 import { JwtGuard } from '../auth/guards/jwt.guard';
+
 import { CreateVendorDto } from './dto/create-vendor.dto';
 import { UpdateVendorDto } from './dto/update-vendor.dto';
 import { VendorResponseDto } from './dto/vendor-response.dto';
+
 import { VendorService } from './vendor.service';
 
 @ApiTags('vendors')
 @Controller('vendors')
-@UseGuards(JwtGuard)
+@UseGuards(JwtGuard, RolesGuard)
 export class VendorController {
   constructor(private service: VendorService) {}
 
@@ -53,6 +58,7 @@ export class VendorController {
   }
 
   @Get()
+  @Roles(UserRole.VENDOR, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Get all vendors' })
   @ApiResponse({
     status: 200,

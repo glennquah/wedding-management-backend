@@ -18,11 +18,11 @@ export class AuthService {
 
   async login(dto: LoginDto): Promise<AuthResponseDto> {
     const user = await this.validateUser(dto);
-    const payload = {
-      username: user.email,
-      sub: {
-        name: user.name,
-      },
+    const payload: JwtPayload = {
+      sub: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role
     };
 
     return {
@@ -43,8 +43,10 @@ export class AuthService {
 
   async refreshToken(user: JwtPayload): Promise<TokensDto> {
     const payload = {
-      username: user.username,
       sub: user.sub,
+      email: user.email,
+      name: user.name,
+      role: user.role
     };
 
     return {

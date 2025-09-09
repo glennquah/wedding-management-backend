@@ -4,21 +4,26 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Post,
   Put,
-  ParseIntPipe,
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Roles } from 'src/auth/decorators/roles.decorator';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { UserRole } from 'src/common/user-role.enum';
 import { JwtGuard } from '../auth/guards/jwt.guard';
+
+import { AdminResponseDto } from './dto/admin-response.dto';
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { UpdateAdminDto } from './dto/update-admin.dto';
-import { AdminResponseDto } from './dto/admin-response.dto';
+
 import { AdminService } from './admin.service';
 
 @ApiTags('admins')
 @Controller('admins')
-@UseGuards(JwtGuard)
+@UseGuards(JwtGuard, RolesGuard)
 export class AdminController {
   constructor(private adminService: AdminService) {}
 
@@ -64,6 +69,7 @@ export class AdminController {
   }
 
   @Get(':id')
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Get an admin by ID' })
   @ApiResponse({
     status: 200,
