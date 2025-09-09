@@ -1,11 +1,11 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { compare } from 'bcrypt';
-import { LoginDto } from './dto/auth.dto';
-import { AuthResponseDto, TokensDto } from './dto/auth-response.dto';
-import { JwtPayload } from './dto/jwt-payload.interface';
 import { UserResponseDto } from 'src/user/dto/user-response.dto';
 import { UserService } from 'src/user/user.service';
+import { AuthResponseDto, TokensDto } from './dto/auth-response.dto';
+import { LoginDto } from './dto/auth.dto';
+import { JwtPayload } from './dto/jwt-payload.interface';
 
 const EXPIRE_TIME = 5 * 60 * 60 * 1000; // 5H
 
@@ -13,7 +13,7 @@ const EXPIRE_TIME = 5 * 60 * 60 * 1000; // 5H
 export class AuthService {
   constructor(
     private jwtService: JwtService,
-    private userService: UserService, 
+    private userService: UserService,
   ) {}
 
   async login(dto: LoginDto): Promise<AuthResponseDto> {
@@ -22,7 +22,7 @@ export class AuthService {
       sub: user.id,
       email: user.email,
       name: user.name,
-      role: user.role
+      role: user.role,
     };
 
     return {
@@ -46,7 +46,7 @@ export class AuthService {
       sub: user.sub,
       email: user.email,
       name: user.name,
-      role: user.role
+      role: user.role,
     };
 
     return {

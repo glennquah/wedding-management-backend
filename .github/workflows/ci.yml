@@ -14,9 +14,9 @@ jobs:
       postgres:
         image: postgres:15
         env:
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_USER: postgres
-          POSTGRES_DB: wedding_management_test
+          POSTGRES_USER: admin
+          POSTGRES_PASSWORD: password123
+          POSTGRES_DB: wedding_management
         ports:
           - 5432:5432
         options: >-
@@ -24,6 +24,16 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+
+    env:
+      # FIXME: Standardize this when CD is set up & hide all the impt env vars in GitHub Secrets
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: wedding_management
+      DATABASE_URL: postgresql://admin:password123@localhost:5432/wedding_management
+      PORT: ${{ secrets.PORT }}
+      JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+      JWT_REFRESH_KEY: ${{ secrets.JWT_REFRESH_KEY }}
 
     steps:
       - name: Checkout code
@@ -43,16 +53,12 @@ jobs:
 
       - name: Run database migrations
         run: npx prisma db push
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/wedding_management_test
 
       - name: Run linter
-        run: npm run lint
+        run: npm run lint:check
 
       - name: Run e2e tests
         run: npm run test:e2e
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/wedding_management_test
 
       - name: Build application
         run: npm run build

@@ -1,15 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
-  IsString,
-  IsOptional,
   IsDateString,
-  IsNumber,
   IsEnum,
+  IsNumber,
+  IsOptional,
+  IsString,
 } from 'class-validator';
-import { CreateUserDto } from '../../user/dto/create-user.dto';
-import { WeddingStyle } from '../../common/wedding-style.enum';
 import { WeddingService } from '../../common/wedding-service.enum';
+import { WeddingStyle } from '../../common/wedding-style.enum';
 import { WeddingType } from '../../common/wedding-type.enum';
+import { CreateUserDto } from '../../user/dto/create-user.dto';
 
 export class CreateVendorDto extends CreateUserDto {
   @ApiProperty({ description: 'Vendor website URL', required: false })
@@ -53,7 +53,7 @@ export class CreateVendorDto extends CreateUserDto {
   @ApiProperty({
     description: 'Service offered by the vendor',
     enum: WeddingService,
-    enumName: "WeddingService",
+    enumName: 'WeddingService',
     required: true,
   })
   @IsEnum(WeddingService)
@@ -62,7 +62,7 @@ export class CreateVendorDto extends CreateUserDto {
   @ApiProperty({
     description: 'Wedding style specialization of the vendor',
     enum: WeddingStyle,
-    enumName: "WeddingStyle",
+    enumName: 'WeddingStyle',
     required: true,
   })
   @IsEnum(WeddingStyle)
@@ -71,7 +71,7 @@ export class CreateVendorDto extends CreateUserDto {
   @ApiProperty({
     description: 'Wedding type specialization of the vendor',
     enum: WeddingType,
-    enumName: "WeddingType",
+    enumName: 'WeddingType',
     isArray: true,
     required: true,
   })

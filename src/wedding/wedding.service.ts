@@ -1,10 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { Guest, Wedding } from '@prisma/client';
+import { GuestService } from '../guest/guest.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateWeddingDto } from './dto/create-wedding.dto';
 import { UpdateWeddingDto } from './dto/update-wedding.dto';
-import { Wedding, Guest } from '@prisma/client';
 import { WeddingResponseDto } from './dto/wedding-response.dto';
-import { GuestService } from '../guest/guest.service';
 
 type WeddingWithGuests = Wedding & {
   guests?: Guest[];
@@ -14,7 +14,7 @@ type WeddingWithGuests = Wedding & {
 export class WeddingService {
   constructor(
     private prisma: PrismaService,
-    private guestService: GuestService
+    private guestService: GuestService,
   ) {}
 
   async create(dto: CreateWeddingDto): Promise<Wedding> {
@@ -40,22 +40,22 @@ export class WeddingService {
         guests: true,
       },
     });
-    
+
     if (!wedding) {
       throw new NotFoundException(`Wedding with ID ${id} not found`);
     }
-    
+
     return wedding;
   }
 
   async update(id: number, dto: UpdateWeddingDto): Promise<Wedding> {
     await this.findById(id);
-    
+
     const updateData: Partial<Wedding> = {};
     if (dto.name !== undefined) updateData.name = dto.name;
     if (dto.date !== undefined) updateData.date = new Date(dto.date);
     if (dto.location !== undefined) updateData.location = dto.location;
-    
+
     return this.prisma.wedding.update({
       where: { id },
       data: updateData,
@@ -64,7 +64,7 @@ export class WeddingService {
 
   async delete(id: number): Promise<void> {
     await this.findById(id);
-    
+
     await this.prisma.wedding.delete({
       where: { id },
     });
@@ -76,7 +76,9 @@ export class WeddingService {
       name: wedding.name,
       date: wedding.date.toISOString(),
       location: wedding.location,
-      guests: wedding.guests?.map(guest => this.guestService.toGuestResponseDto(guest)),
+      guests: wedding.guests?.map((guest) =>
+        this.guestService.toGuestResponseDto(guest),
+      ),
       createdAt: wedding.createdAt.toISOString(),
       updatedAt: wedding.updatedAt.toISOString(),
     };

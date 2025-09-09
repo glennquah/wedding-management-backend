@@ -14,7 +14,11 @@ export class WeddingResponseDto {
   @ApiProperty({ description: 'Wedding location', required: false })
   location?: string;
 
-  @ApiProperty({ description: 'List of guests for this wedding', type: [GuestResponseDto], required: false })
+  @ApiProperty({
+    description: 'List of guests for this wedding',
+    type: [GuestResponseDto],
+    required: false,
+  })
   guests?: GuestResponseDto[];
 
   @ApiProperty({ description: 'Creation timestamp' })

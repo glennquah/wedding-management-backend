@@ -1,19 +1,19 @@
-import { 
-  Body, 
-  Controller, 
-  Delete, 
-  Get, 
-  Param, 
-  Post, 
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
   Put,
-  ParseIntPipe, 
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { CreateGuestDto } from './dto/create-guest.dto';
-import { UpdateGuestDto } from './dto/update-guest.dto';
-import { GuestResponseDto } from './dto/guest-response.dto';
-import { GuestService } from './guest.service';
 import { ConfirmationStatus } from '../common/confirmation-status.enum';
+import { CreateGuestDto } from './dto/create-guest.dto';
+import { GuestResponseDto } from './dto/guest-response.dto';
+import { UpdateGuestDto } from './dto/update-guest.dto';
+import { GuestService } from './guest.service';
 
 @ApiTags('guests')
 @Controller('guests')
@@ -42,9 +42,11 @@ export class GuestController {
     type: [GuestResponseDto],
   })
   @ApiResponse({ status: 400, description: 'Bad request.' })
-  async createMultiple(@Body() body: CreateGuestDto[]): Promise<GuestResponseDto[]> {
+  async createMultiple(
+    @Body() body: CreateGuestDto[],
+  ): Promise<GuestResponseDto[]> {
     const guests = await this.service.createMultiple(body);
-    return guests.map(guest => this.service.toGuestResponseDto(guest));
+    return guests.map((guest) => this.service.toGuestResponseDto(guest));
   }
 
   @Get('wedding/:weddingId')
@@ -55,9 +57,11 @@ export class GuestController {
     type: [GuestResponseDto],
   })
   @ApiResponse({ status: 404, description: 'Wedding not found.' })
-  async getGuestsByWedding(@Param('weddingId', ParseIntPipe) weddingId: number): Promise<GuestResponseDto[]> {
+  async getGuestsByWedding(
+    @Param('weddingId', ParseIntPipe) weddingId: number,
+  ): Promise<GuestResponseDto[]> {
     const guests = await this.service.findByWeddingId(weddingId);
-    return guests.map(guest => this.service.toGuestResponseDto(guest));
+    return guests.map((guest) => this.service.toGuestResponseDto(guest));
   }
 
   @Get(':id')
@@ -68,7 +72,9 @@ export class GuestController {
     type: GuestResponseDto,
   })
   @ApiResponse({ status: 404, description: 'Guest not found.' })
-  async getGuest(@Param('id', ParseIntPipe) id: number): Promise<GuestResponseDto> {
+  async getGuest(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<GuestResponseDto> {
     const guest = await this.service.findById(id);
     return this.service.toGuestResponseDto(guest);
   }
@@ -84,7 +90,7 @@ export class GuestController {
   @ApiResponse({ status: 400, description: 'Bad request.' })
   async update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() body: UpdateGuestDto
+    @Body() body: UpdateGuestDto,
   ): Promise<GuestResponseDto> {
     const guest = await this.service.update(id, body);
     return this.service.toGuestResponseDto(guest);
@@ -107,7 +113,9 @@ export class GuestController {
     status: 200,
     description: 'All guests for the wedding have been successfully deleted.',
   })
-  async deleteGuestsByWedding(@Param('weddingId', ParseIntPipe) weddingId: number): Promise<void> {
+  async deleteGuestsByWedding(
+    @Param('weddingId', ParseIntPipe) weddingId: number,
+  ): Promise<void> {
     await this.service.deleteByWeddingId(weddingId);
   }
 
@@ -119,8 +127,12 @@ export class GuestController {
     type: GuestResponseDto,
   })
   @ApiResponse({ status: 404, description: 'Guest not found.' })
-  async confirmGuest(@Param('id', ParseIntPipe) id: number): Promise<GuestResponseDto> {
-    const guest = await this.service.update(id, { confirmationStatus: ConfirmationStatus.CONFIRMED });
+  async confirmGuest(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<GuestResponseDto> {
+    const guest = await this.service.update(id, {
+      confirmationStatus: ConfirmationStatus.CONFIRMED,
+    });
     return this.service.toGuestResponseDto(guest);
   }
 
@@ -132,8 +144,12 @@ export class GuestController {
     type: GuestResponseDto,
   })
   @ApiResponse({ status: 404, description: 'Guest not found.' })
-  async rejectGuest(@Param('id', ParseIntPipe) id: number): Promise<GuestResponseDto> {
-    const guest = await this.service.update(id, { confirmationStatus: ConfirmationStatus.REJECTED });
+  async rejectGuest(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<GuestResponseDto> {
+    const guest = await this.service.update(id, {
+      confirmationStatus: ConfirmationStatus.REJECTED,
+    });
     return this.service.toGuestResponseDto(guest);
   }
 }

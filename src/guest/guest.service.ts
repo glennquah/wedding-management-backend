@@ -1,10 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { CreateGuestDto } from './dto/create-guest.dto';
-import { UpdateGuestDto } from './dto/update-guest.dto';
 import { Guest } from '@prisma/client';
 import { ConfirmationStatus } from '../common/confirmation-status.enum';
+import { PrismaService } from '../prisma/prisma.service';
+import { CreateGuestDto } from './dto/create-guest.dto';
 import { GuestResponseDto } from './dto/guest-response.dto';
+import { UpdateGuestDto } from './dto/update-guest.dto';
 
 type GuestWithAccompanying = Guest & {
   accompanyingGuests?: Guest[];
@@ -42,24 +42,24 @@ export class GuestService {
         primaryGuest: true,
       },
     });
-    
+
     if (!guest) {
       throw new NotFoundException(`Guest with ID ${id} not found`);
     }
-    
+
     return guest;
   }
 
   async update(id: number, dto: UpdateGuestDto): Promise<Guest> {
     await this.findById(id);
-    
+
     if (dto.confirmationStatus === ConfirmationStatus.CONFIRMED) {
       await this.prisma.guest.updateMany({
         where: { primaryGuestId: id },
         data: { confirmationStatus: ConfirmationStatus.CONFIRMED },
       });
     }
-    
+
     return this.prisma.guest.update({
       where: { id },
       data: dto,
@@ -72,7 +72,7 @@ export class GuestService {
 
   async delete(id: number): Promise<void> {
     await this.findById(id);
-    
+
     await this.prisma.guest.delete({
       where: { id },
     });
@@ -86,7 +86,7 @@ export class GuestService {
 
   async createMultiple(guests: CreateGuestDto[]): Promise<Guest[]> {
     const createdGuests = await Promise.all(
-      guests.map(guest => this.create(guest))
+      guests.map((guest) => this.create(guest)),
     );
     return createdGuests;
   }
@@ -100,7 +100,9 @@ export class GuestService {
       confirmationStatus: guest.confirmationStatus as ConfirmationStatus,
       weddingId: guest.weddingId,
       primaryGuestId: guest.primaryGuestId,
-      accompanyingGuests: guest.accompanyingGuests?.map(g => this.toGuestResponseDto(g)),
+      accompanyingGuests: guest.accompanyingGuests?.map((g) =>
+        this.toGuestResponseDto(g),
+      ),
       createdAt: guest.createdAt,
       updatedAt: guest.updatedAt,
     };
