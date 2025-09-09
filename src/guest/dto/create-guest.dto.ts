@@ -1,8 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsInt, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsEnum, IsInt, IsOptional, IsString } from 'class-validator';
 import { ConfirmationStatus } from '../../common/confirmation-status.enum';
 
 export class CreateGuestDto {
+  @ApiProperty({ description: 'The ID of the guest', required: false })
+  @IsOptional()
+  @IsInt()
+  id?: number;
+
   @ApiProperty({ description: 'The name of the guest' })
   @IsString()
   name: string;
@@ -44,4 +49,14 @@ export class CreateGuestDto {
   @IsOptional()
   @IsEnum(ConfirmationStatus)
   confirmationStatus?: ConfirmationStatus;
+
+  @ApiProperty({
+    description: 'Names of accompanying guests',
+    type: [String],
+    required: false,
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  accompanyingGuestNames?: string[];
 }
