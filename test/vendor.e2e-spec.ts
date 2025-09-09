@@ -157,7 +157,7 @@ describe('Vendor (e2e)', () => {
     it('should get all vendors', async () => {
       const response = await request(app.getHttpServer())
         .get('/vendors')
-        .set('Authorization', `Bearer ${adminToken}`)
+        .set('Authorization', `Bearer ${superAdminToken}`)
         .expect(200);
 
       expect(Array.isArray(response.body)).toBe(true);
