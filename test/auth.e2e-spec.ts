@@ -361,7 +361,7 @@ describe('Auth (e2e)', () => {
 
       await request(app.getHttpServer())
         .post('/auth/refresh')
-        .set('Authorization', `Bearer ${invalidToken}`)
+        .set('Authorization', `Refresh ${invalidToken}`)
         .expect(401);
     });
 
