@@ -23,7 +23,8 @@
     "test:e2e": "jest --config ./test/jest-e2e.json --verbose",
     "docker:dev:up": "docker-compose up -d",
     "prisma:gui": "npx prisma studio",
-    "prisma:schema:update": "npx prisma db push"
+    "prisma:schema:update": "npx prisma db push",
+    "prisma:seed:dev": "ts-node prisma/seed.ts"
   },
   "dependencies": {
     "@nestjs/common": "^10.4.20",
@@ -82,5 +83,8 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
+  },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
   }
 }
