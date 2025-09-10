@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
+import { JwtModule } from '@nestjs/jwt';
+import { GuestModule } from '../guest/guest.module';
+import { PrismaModule } from '../prisma/prisma.module';
 import { WeddingController } from './wedding.controller';
 import { WeddingService } from './wedding.service';
-import { PrismaModule } from '../prisma/prisma.module';
-import { GuestModule } from '../guest/guest.module';
 
 @Module({
-  imports: [PrismaModule, GuestModule],
+  imports: [PrismaModule, GuestModule, JwtModule],
   controllers: [WeddingController],
   providers: [WeddingService],
   exports: [WeddingService],

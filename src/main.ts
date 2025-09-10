@@ -1,3 +1,4 @@
+import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
@@ -5,8 +6,21 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      skipMissingProperties: false,
+      dismissDefaultMessages: false,
+      validationError: {
+        target: false,
+      },
+    }),
+  );
+
   app.enableCors({
-    origin: 'http://localhost:3000',
+    origin: ['http://localhost:3000', 'http://localhost:3001'],
     credentials: true,
   });
 
@@ -15,8 +29,20 @@ async function bootstrap() {
     .setDescription('Backend API for wedding management system')
     .setVersion('1.0')
     .addTag('wedding')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        in: 'header',
+      },
+      'access-token',
+    )
+    .addServer('http://localhost:8080')
     .build();
+
   const document = SwaggerModule.createDocument(app, config);
+
   SwaggerModule.setup('api', app, document, {
     jsonDocumentUrl: 'api-json',
     yamlDocumentUrl: 'api-yaml',

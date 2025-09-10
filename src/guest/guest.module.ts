@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
+import { JwtModule } from '@nestjs/jwt';
 import { GuestController } from './guest.controller';
 import { GuestService } from './guest.service';
 
 @Module({
+  imports: [JwtModule],
   controllers: [GuestController],
-  providers: [GuestService, JwtService],
+  providers: [GuestService],
   exports: [GuestService],
 })
 export class GuestModule {}

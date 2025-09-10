@@ -1,34 +1,36 @@
 import {
+  ConflictException,
   Injectable,
   NotFoundException,
-  ConflictException,
 } from '@nestjs/common';
+import { User, Vendor } from '@prisma/client';
+import { hash } from 'bcrypt';
+import { WeddingService } from '../common/wedding-service.enum';
+import { WeddingStyle } from '../common/wedding-style.enum';
+import { WeddingType } from '../common/wedding-type.enum';
 import { PrismaService } from '../prisma/prisma.service';
+import { UserService } from '../user/user.service';
 import { CreateVendorDto } from './dto/create-vendor.dto';
 import { UpdateVendorDto } from './dto/update-vendor.dto';
 import { VendorResponseDto } from './dto/vendor-response.dto';
-import { hash } from 'bcrypt';
-import { Vendor, User } from '@prisma/client';
-import { UserService } from '../user/user.service';
-import { WeddingStyle } from '../common/wedding-style.enum';
-import { WeddingService } from '../common/wedding-service.enum';
-import { WeddingType } from '../common/wedding-type.enum';
 
 @Injectable()
 export class VendorService {
   constructor(
     private prisma: PrismaService,
     private userService: UserService,
-  ) { }
+  ) {}
 
-  private toVendorResponseDto(vendor: Vendor & { user: User }): VendorResponseDto {
+  private toVendorResponseDto(
+    vendor: Vendor & { user: User },
+  ): VendorResponseDto {
     const userResponse = this.userService.toUserResponseDto(vendor.user);
     return {
       ...userResponse,
       vendorWebsite: vendor.vendorWebsite,
       uenNumber: vendor.uenNumber,
       onboardedDate: vendor.onboardedDate,
-      bio: vendor.bio,    
+      bio: vendor.bio,
       rating: vendor.rating,
       serviceOffered: vendor.serviceOffered as WeddingService,
       styleOffered: vendor.styleOffered as WeddingStyle,
@@ -36,7 +38,6 @@ export class VendorService {
       capacity: vendor.capacity,
     };
   }
-  
 
   async findOne(vendorId: number): Promise<VendorResponseDto> {
     // Fetch the vendor, including the related User
@@ -78,7 +79,9 @@ export class VendorService {
         userId: user.id,
         vendorWebsite: dto.vendorWebsite,
         uenNumber: dto.uenNumber,
-        onboardedDate: dto.onboardedDate ? new Date(dto.onboardedDate) : undefined,
+        onboardedDate: dto.onboardedDate
+          ? new Date(dto.onboardedDate)
+          : undefined,
         bio: dto.bio,
         rating: dto.rating,
         serviceOffered: dto.serviceOffered,
@@ -98,7 +101,7 @@ export class VendorService {
       orderBy: { onboardedDate: 'desc' },
     });
 
-    return vendors.map(vendor => this.toVendorResponseDto(vendor));
+    return vendors.map((vendor) => this.toVendorResponseDto(vendor));
   }
 
   async findById(userId: number): Promise<VendorResponseDto> {
@@ -135,8 +138,10 @@ export class VendorService {
     return this.toVendorResponseDto(vendor);
   }
 
-
-  async update(userId: number, dto: UpdateVendorDto): Promise<VendorResponseDto> {
+  async update(
+    userId: number,
+    dto: UpdateVendorDto,
+  ): Promise<VendorResponseDto> {
     await this.findById(userId);
 
     if (dto.email) {
@@ -192,7 +197,9 @@ export class VendorService {
     ]);
   }
 
-  async createMultiple(vendors: CreateVendorDto[]): Promise<VendorResponseDto[]> {
+  async createMultiple(
+    vendors: CreateVendorDto[],
+  ): Promise<VendorResponseDto[]> {
     const createdVendors = await Promise.all(
       vendors.map((vendor) => this.create(vendor)), // returns VendorResponseDto
     );

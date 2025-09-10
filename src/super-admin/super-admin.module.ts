@@ -1,14 +1,14 @@
 import { Module } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
+import { JwtModule } from '@nestjs/jwt';
+import { UserModule } from '../user/user.module';
+import { UserService } from '../user/user.service';
 import { SuperAdminController } from './super-admin.controller';
 import { SuperAdminService } from './super-admin.service';
-import { UserService } from '../user/user.service';
-import { UserModule } from '../user/user.module';
 
 @Module({
-  imports: [UserModule],
+  imports: [UserModule, JwtModule],
   controllers: [SuperAdminController],
-  providers: [SuperAdminService, UserService, JwtService],
+  providers: [SuperAdminService, UserService],
   exports: [SuperAdminService],
 })
-export class AdminModule {}
+export class SuperAdminModule {}
