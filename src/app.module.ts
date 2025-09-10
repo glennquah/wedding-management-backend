@@ -9,9 +9,10 @@ import { AdminModule } from './admin/admin.module';
 import { AuthModule } from './auth/auth.module';
 import { GuestModule } from './guest/guest.module';
 import { WeddingModule } from './wedding/wedding.module';
+import { ListingModule } from './listing/listing.module';
 
 @Module({
-  imports: [PrismaModule, UserModule, VendorModule, AdminModule, ConfigModule.forRoot(), AuthModule, GuestModule, WeddingModule],
+  imports: [PrismaModule, UserModule, VendorModule, AdminModule, ConfigModule.forRoot(), AuthModule, GuestModule, WeddingModule, ListingModule],
   controllers: [AppController],
   providers: [AppService],
 })

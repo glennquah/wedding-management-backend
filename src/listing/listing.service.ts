@@ -2,8 +2,6 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateListingDto } from './dto/create-listing.dto';
 import { UpdateListingDto } from './dto/update-listing.dto';
-import { ListingResponseDto } from './dto/listing-response.dto';
-
 
 @Injectable()
 export class ListingService {
@@ -13,6 +11,7 @@ export class ListingService {
     return this.prisma.listing.create({
       data: {
         ...dto,
+        availabilities: dto.availabilities.map(date => new Date(date)),
         vendorId, // ensures vendor is set from auth/context
       },
     });
@@ -24,9 +23,15 @@ export class ListingService {
       throw new NotFoundException('Listing not found or not owned by vendor');
     }
 
+    const { availabilities, ...restDto } = dto;
+    const updateData = {
+      ...restDto,
+      ...(availabilities && { availabilities: availabilities.map(date => new Date(date)) }),
+    };
+
     return this.prisma.listing.update({
       where: { id },
-      data: dto,
+      data: updateData,
     });
   }
 
