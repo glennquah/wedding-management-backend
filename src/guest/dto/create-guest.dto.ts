@@ -47,6 +47,7 @@ export class CreateGuestDto {
   @ApiProperty({
     description: 'Confirmation status of the guest',
     enum: ConfirmationStatus,
+    enumName: 'ConfirmationStatus',
     required: false,
     default: ConfirmationStatus.PENDING,
   })
