@@ -12,12 +12,6 @@ export class GuestResponseDto {
   email: string;
 
   @ApiProperty({
-    description: 'Email address of the guest',
-    required: false,
-  })
-  email?: string;
-
-  @ApiProperty({
     description: 'Allergies or dietary restrictions',
     required: false,
   })
