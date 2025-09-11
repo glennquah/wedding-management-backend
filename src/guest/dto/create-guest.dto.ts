@@ -12,6 +12,11 @@ export class CreateGuestDto {
   @IsString()
   name: string;
 
+  @ApiProperty({ description: 'The email of the guest', required: false })
+  @IsOptional()
+  @IsString()
+  email?: string;
+
   @ApiProperty({
     description: 'Allergies or dietary restrictions',
     required: false,
@@ -43,6 +48,7 @@ export class CreateGuestDto {
   @ApiProperty({
     description: 'Confirmation status of the guest',
     enum: ConfirmationStatus,
+    enumName: 'ConfirmationStatus',
     required: false,
     default: ConfirmationStatus.PENDING,
   })

@@ -17,7 +17,7 @@ import { GuestService } from './guest.service';
 
 @ApiTags('guests')
 @Controller('guests')
-// @UseGuards(JwtGuard) // Temporarily disabled for testing
+// @UseGuards(JwtGuard)
 export class GuestController {
   constructor(private service: GuestService) {}
 
