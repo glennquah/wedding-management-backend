@@ -33,6 +33,7 @@ export class GuestResponseDto {
     description: 'Confirmation status of the guest',
     enum: ConfirmationStatus,
     default: ConfirmationStatus.PENDING,
+    enumName: 'ConfirmationStatus',
   })
   confirmationStatus: ConfirmationStatus;
 
