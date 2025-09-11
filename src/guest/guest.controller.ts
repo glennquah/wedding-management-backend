@@ -7,8 +7,10 @@ import {
   ParseIntPipe,
   Post,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { ConfirmationStatus } from '../common/confirmation-status.enum';
 import { CreateGuestDto } from './dto/create-guest.dto';
 import { GuestResponseDto } from './dto/guest-response.dto';
@@ -17,9 +19,9 @@ import { GuestService } from './guest.service';
 
 @ApiTags('guests')
 @Controller('guests')
-// @UseGuards(JwtGuard) // Temporarily disabled for testing
+@UseGuards(JwtGuard)
 export class GuestController {
-  constructor(private service: GuestService) {}
+  constructor(private guestService: GuestService) {}
 
   @Post()
   @ApiOperation({ summary: 'Create a new guest' })
@@ -30,8 +32,8 @@ export class GuestController {
   })
   @ApiResponse({ status: 400, description: 'Bad request.' })
   async create(@Body() body: CreateGuestDto): Promise<GuestResponseDto> {
-    const guest = await this.service.create(body);
-    return this.service.toGuestResponseDto(guest);
+    const guest = await this.guestService.create(body);
+    return this.guestService.toGuestResponseDto(guest);
   }
 
   @Post('bulk')
@@ -45,8 +47,21 @@ export class GuestController {
   async createMultiple(
     @Body() body: CreateGuestDto[],
   ): Promise<GuestResponseDto[]> {
-    const guests = await this.service.createMultiple(body);
-    return guests.map((guest) => this.service.toGuestResponseDto(guest));
+    const guests = await this.guestService.createMultiple(body);
+    return guests.map((guest) => this.guestService.toGuestResponseDto(guest));
+  }
+
+  @Get('')
+  @ApiOperation({ summary: 'Get all guests for all weddings' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of guests for all weddings',
+    type: [GuestResponseDto],
+  })
+  @ApiResponse({ status: 404, description: 'Wedding not found.' })
+  async getAllGuests(): Promise<GuestResponseDto[]> {
+    const guests = await this.guestService.findAllGuest();
+    return guests.map((guest) => this.guestService.toGuestResponseDto(guest));
   }
 
   @Get('wedding/:weddingId')
@@ -60,8 +75,8 @@ export class GuestController {
   async getGuestsByWedding(
     @Param('weddingId', ParseIntPipe) weddingId: number,
   ): Promise<GuestResponseDto[]> {
-    const guests = await this.service.findByWeddingId(weddingId);
-    return guests.map((guest) => this.service.toGuestResponseDto(guest));
+    const guests = await this.guestService.findByWeddingId(weddingId);
+    return guests.map((guest) => this.guestService.toGuestResponseDto(guest));
   }
 
   @Get(':id')
@@ -75,8 +90,8 @@ export class GuestController {
   async getGuest(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<GuestResponseDto> {
-    const guest = await this.service.findById(id);
-    return this.service.toGuestResponseDto(guest);
+    const guest = await this.guestService.findById(id);
+    return this.guestService.toGuestResponseDto(guest);
   }
 
   @Put(':id')
@@ -92,8 +107,8 @@ export class GuestController {
     @Param('id', ParseIntPipe) id: number,
     @Body() body: UpdateGuestDto,
   ): Promise<GuestResponseDto> {
-    const guest = await this.service.update(id, body);
-    return this.service.toGuestResponseDto(guest);
+    const guest = await this.guestService.update(id, body);
+    return this.guestService.toGuestResponseDto(guest);
   }
 
   @Delete(':id')
@@ -104,7 +119,7 @@ export class GuestController {
   })
   @ApiResponse({ status: 404, description: 'Guest not found.' })
   async delete(@Param('id', ParseIntPipe) id: number): Promise<void> {
-    await this.service.delete(id);
+    await this.guestService.delete(id);
   }
 
   @Delete('wedding/:weddingId')
@@ -116,7 +131,7 @@ export class GuestController {
   async deleteGuestsByWedding(
     @Param('weddingId', ParseIntPipe) weddingId: number,
   ): Promise<void> {
-    await this.service.deleteByWeddingId(weddingId);
+    await this.guestService.deleteByWeddingId(weddingId);
   }
 
   @Put(':id/confirm')
@@ -130,10 +145,10 @@ export class GuestController {
   async confirmGuest(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<GuestResponseDto> {
-    const guest = await this.service.update(id, {
+    const guest = await this.guestService.update(id, {
       confirmationStatus: ConfirmationStatus.CONFIRMED,
     });
-    return this.service.toGuestResponseDto(guest);
+    return this.guestService.toGuestResponseDto(guest);
   }
 
   @Put(':id/reject')
@@ -147,9 +162,9 @@ export class GuestController {
   async rejectGuest(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<GuestResponseDto> {
-    const guest = await this.service.update(id, {
+    const guest = await this.guestService.update(id, {
       confirmationStatus: ConfirmationStatus.REJECTED,
     });
-    return this.service.toGuestResponseDto(guest);
+    return this.guestService.toGuestResponseDto(guest);
   }
 }

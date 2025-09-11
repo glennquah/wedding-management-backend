@@ -34,6 +34,16 @@ export class GuestService {
     });
   }
 
+  async findAllGuest(): Promise<Guest[]> {
+    return this.prisma.guest.findMany({
+      include: {
+        accompanyingGuests: true,
+        primaryGuest: true,
+      },
+      orderBy: { createdAt: 'asc' },
+    });
+  }
+
   async findById(id: number): Promise<Guest> {
     const guest = await this.prisma.guest.findUnique({
       where: { id },
