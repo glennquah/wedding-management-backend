@@ -10,7 +10,9 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Roles } from 'src/auth/decorators/roles.decorator';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
+import { UserRole } from 'src/common/user-role.enum';
 import { ConfirmationStatus } from '../common/confirmation-status.enum';
 import { CreateGuestDto } from './dto/create-guest.dto';
 import { GuestResponseDto } from './dto/guest-response.dto';
@@ -58,6 +60,7 @@ export class GuestController {
     description: 'List of guests for all weddings',
     type: [GuestResponseDto],
   })
+  @Roles(UserRole.SUPERADMIN)
   @ApiResponse({ status: 404, description: 'Wedding not found.' })
   async getAllGuests(): Promise<GuestResponseDto[]> {
     const guests = await this.guestService.findAllGuest();
