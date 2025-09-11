@@ -8,6 +8,15 @@ export class ListingService {
   constructor(private prisma: PrismaService) {}
 
   async create(vendorId: number, dto: CreateListingDto) {
+    // Verify vendor exists
+    const vendor = await this.prisma.vendor.findUnique({
+      where: { userId: vendorId }
+    });
+    
+    if (!vendor) {
+      throw new NotFoundException(`Vendor with ID ${vendorId} not found`);
+    }
+
     return this.prisma.listing.create({
       data: {
         ...dto,
