@@ -23,7 +23,7 @@ import { ListingModule } from './listing/listing.module';
     AuthModule,
     GuestModule,
     WeddingModule,
-    ListingModule
+    ListingModule,
   ],
   controllers: [AppController],
   providers: [AppService],

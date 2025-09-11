@@ -11,7 +11,7 @@ export class ListingService {
     return this.prisma.listing.create({
       data: {
         ...dto,
-        availabilities: dto.availabilities.map(date => new Date(date)),
+        availabilities: dto.availabilities.map((date) => new Date(date)),
         vendorId, // ensures vendor is set from auth/context
       },
     });
@@ -26,7 +26,9 @@ export class ListingService {
     const { availabilities, ...restDto } = dto;
     const updateData = {
       ...restDto,
-      ...(availabilities && { availabilities: availabilities.map(date => new Date(date)) }),
+      ...(availabilities && {
+        availabilities: availabilities.map((date) => new Date(date)),
+      }),
     };
 
     return this.prisma.listing.update({

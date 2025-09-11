@@ -29,15 +29,19 @@ export class UpdateListingDto {
   @IsDateString({}, { each: true })
   availabilities?: string[];
 
-  @ApiProperty({ description: 'Additional remarks about the listing', required: false })
+  @ApiProperty({
+    description: 'Additional remarks about the listing',
+    required: false,
+  })
   @IsOptional()
   @IsString()
   remarks?: string;
 
-
-  @ApiProperty({ description: 'Vendor ID linked to this listing', required: false })
+  @ApiProperty({
+    description: 'Vendor ID linked to this listing',
+    required: false,
+  })
   @IsOptional()
   @IsNumber()
   vendorId?: number;
-
 }

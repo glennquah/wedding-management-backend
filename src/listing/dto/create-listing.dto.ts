@@ -4,7 +4,6 @@ import {
   IsNumber,
   IsArray,
   IsDateString,
-  IsOptional,
 } from 'class-validator';
 
 export class CreateListingDto {
