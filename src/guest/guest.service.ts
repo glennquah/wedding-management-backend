@@ -15,6 +15,15 @@ export class GuestService {
   constructor(private prisma: PrismaService) {}
 
   async create(dto: CreateGuestDto): Promise<Guest> {
+    // Validate that the wedding exists
+    const wedding = await this.prisma.wedding.findUnique({
+      where: { id: dto.weddingId },
+    });
+
+    if (!wedding) {
+      throw new NotFoundException(`Wedding with ID ${dto.weddingId} not found`);
+    }
+
     return this.prisma.guest.create({
       data: dto,
       include: {

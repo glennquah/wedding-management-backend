@@ -4,7 +4,7 @@ import { GuestController } from './guest.controller';
 import { GuestService } from './guest.service';
 
 @Module({
-  imports: [JwtModule],
+  // imports: [JwtModule],
   controllers: [GuestController],
   providers: [GuestService],
   exports: [GuestService],

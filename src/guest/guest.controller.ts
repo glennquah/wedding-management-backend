@@ -7,8 +7,10 @@ import {
   ParseIntPipe,
   Post,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { JwtGuard } from '../auth/guards/jwt.guard';
 import { ConfirmationStatus } from '../common/confirmation-status.enum';
 import { CreateGuestDto } from './dto/create-guest.dto';
 import { GuestResponseDto } from './dto/guest-response.dto';
@@ -17,7 +19,7 @@ import { GuestService } from './guest.service';
 
 @ApiTags('guests')
 @Controller('guests')
-// @UseGuards(JwtGuard) // Temporarily disabled for testing
+// @UseGuards(JwtGuard)
 export class GuestController {
   constructor(private service: GuestService) {}
 

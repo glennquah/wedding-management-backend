@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Guest, Wedding } from '@prisma/client';
-import { GuestService } from '../guest/guest.service';
+import { ConfirmationStatus } from '../common/confirmation-status.enum';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateWeddingDto } from './dto/create-wedding.dto';
 import { UpdateWeddingDto } from './dto/update-wedding.dto';
@@ -12,10 +12,7 @@ type WeddingWithGuests = Wedding & {
 
 @Injectable()
 export class WeddingService {
-  constructor(
-    private prisma: PrismaService,
-    private guestService: GuestService,
-  ) {}
+  constructor(private prisma: PrismaService) {}
 
   async create(dto: CreateWeddingDto): Promise<Wedding> {
     return this.prisma.wedding.create({
@@ -76,9 +73,17 @@ export class WeddingService {
       name: wedding.name,
       date: wedding.date.toISOString(),
       location: wedding.location,
-      guests: wedding.guests?.map((guest) =>
-        this.guestService.toGuestResponseDto(guest),
-      ),
+      guests: wedding.guests?.map((guest) => ({
+        id: guest.id,
+        name: guest.name,
+        allergies: guest.allergies,
+        group: guest.group,
+        confirmationStatus: guest.confirmationStatus as ConfirmationStatus,
+        weddingId: guest.weddingId,
+        primaryGuestId: guest.primaryGuestId,
+        createdAt: guest.createdAt,
+        updatedAt: guest.updatedAt,
+      })),
       createdAt: wedding.createdAt.toISOString(),
       updatedAt: wedding.updatedAt.toISOString(),
     };
