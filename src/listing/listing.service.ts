@@ -12,7 +12,6 @@ export class ListingService {
       data: {
         ...dto,
         availabilities: dto.availabilities.map((date) => new Date(date)),
-        vendorId, // ensures vendor is set from auth/context
       },
     });
   }

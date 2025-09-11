@@ -19,29 +19,33 @@ import { ApiTags } from '@nestjs/swagger';
 export class ListingController {
   constructor(private readonly listingService: ListingService) {}
 
-  // In a real app, vendorId would come from auth token/user context
-  private mockVendorId = 1;
-
   @Post()
   async create(@Body() dto: CreateListingDto) {
-    return this.listingService.create(this.mockVendorId, dto);
+    return this.listingService.create(dto.vendorId, dto);
   }
 
-  @Patch(':id')
+  @Patch(':vendorId/:id')
   async update(
+    @Param('vendorId', ParseIntPipe) vendorId: number,
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateListingDto,
   ) {
-    return this.listingService.update(this.mockVendorId, id, dto);
+    return this.listingService.update(vendorId, id, dto);
   }
 
-  @Delete(':id')
-  async delete(@Param('id', ParseIntPipe) id: number) {
-    return this.listingService.delete(this.mockVendorId, id);
+  @Delete(':vendorId/:id')
+  async delete(
+    @Param('vendorId', ParseIntPipe) vendorId: number,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    return this.listingService.delete(vendorId, id);
   }
 
-  @Get('search')
-  async search(@Query('listingName') listingName: string) {
-    return this.listingService.searchByName(this.mockVendorId, listingName);
+  @Get(':vendorId/search')
+  async search(
+    @Param('vendorId', ParseIntPipe) vendorId: number,
+    @Query('listingName') listingName: string,
+  ) {
+    return this.listingService.searchByName(vendorId, listingName);
   }
 }
