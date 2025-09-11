@@ -1,10 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsString,
-  IsNumber,
-  IsArray,
-  IsDateString,
-} from 'class-validator';
+import { IsString, IsNumber, IsArray, IsDateString } from 'class-validator';
 
 export class CreateListingDto {
   @ApiProperty({ description: 'The name of the listing' })
