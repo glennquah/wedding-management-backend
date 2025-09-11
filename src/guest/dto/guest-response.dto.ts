@@ -8,6 +8,9 @@ export class GuestResponseDto {
   @ApiProperty({ description: 'The name of the guest' })
   name: string;
 
+  @ApiProperty({ description: 'The email of the guest' })
+  email: string;
+
   @ApiProperty({
     description: 'Allergies or dietary restrictions',
     required: false,
