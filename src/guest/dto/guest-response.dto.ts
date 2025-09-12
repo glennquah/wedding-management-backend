@@ -8,11 +8,8 @@ export class GuestResponseDto {
   @ApiProperty({ description: 'The name of the guest' })
   name: string;
 
-  @ApiProperty({
-    description: 'Email address of the guest',
-    required: false,
-  })
-  email?: string;
+  @ApiProperty({ description: 'The email of the guest' })
+  email: string;
 
   @ApiProperty({
     description: 'Allergies or dietary restrictions',
@@ -39,6 +36,7 @@ export class GuestResponseDto {
     description: 'Confirmation status of the guest',
     enum: ConfirmationStatus,
     default: ConfirmationStatus.PENDING,
+    enumName: 'ConfirmationStatus',
   })
   confirmationStatus: ConfirmationStatus;
 

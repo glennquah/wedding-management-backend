@@ -82,6 +82,7 @@ export class AuthController {
   @ApiResponse({
     status: 200,
     description: 'The user has been successfully logged in.',
+    type: AuthResponseDto,
   })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   async login(@Body() dto: LoginDto): Promise<AuthResponseDto> {

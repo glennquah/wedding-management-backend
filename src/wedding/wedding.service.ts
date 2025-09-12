@@ -76,6 +76,7 @@ export class WeddingService {
       guests: wedding.guests?.map((guest) => ({
         id: guest.id,
         name: guest.name,
+        email: guest.email,
         allergies: guest.allergies,
         group: guest.group,
         confirmationStatus: guest.confirmationStatus as ConfirmationStatus,

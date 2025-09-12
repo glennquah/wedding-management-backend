@@ -8,10 +8,7 @@ export class UpdateGuestDto {
   @IsString()
   name?: string;
 
-  @ApiProperty({
-    description: 'Email address of the guest',
-    required: false,
-  })
+  @ApiProperty({ description: 'The email of the guest', required: false })
   @IsOptional()
   @IsString()
   email?: string;

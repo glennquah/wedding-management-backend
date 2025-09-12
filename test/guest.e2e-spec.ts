@@ -31,6 +31,7 @@ describe('Guest (e2e)', () => {
     it('should create a new guest successfully', async () => {
       const guestData = {
         name: 'John Doe',
+        email: 'john.doe@example.com',
         allergies: 'Nuts',
         group: 'Family',
         weddingId: createdWeddingId,
@@ -38,6 +39,7 @@ describe('Guest (e2e)', () => {
 
       const response = await request(app.getHttpServer())
         .post('/guests')
+        .set('Authorization', `Bearer ${adminToken}`)
         .send(guestData)
         .expect(201);
 
@@ -57,11 +59,13 @@ describe('Guest (e2e)', () => {
       const guestsData = [
         {
           name: 'Jane Smith',
+          email: 'jane.smith@example.com',
           group: 'Friends',
           weddingId: createdWeddingId,
         },
         {
           name: 'Bob Johnson',
+          email: 'bob.johnson@example.com',
           allergies: 'Shellfish',
           group: 'Family',
           weddingId: createdWeddingId,
@@ -70,6 +74,7 @@ describe('Guest (e2e)', () => {
 
       const response = await request(app.getHttpServer())
         .post('/guests/bulk')
+        .set('Authorization', `Bearer ${adminToken}`)
         .send(guestsData)
         .expect(201);
 
@@ -85,6 +90,7 @@ describe('Guest (e2e)', () => {
     it('should get all guests for a wedding', async () => {
       const response = await request(app.getHttpServer())
         .get(`/guests/wedding/${createdWeddingId}`)
+        .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
       expect(Array.isArray(response.body)).toBe(true);
@@ -103,6 +109,7 @@ describe('Guest (e2e)', () => {
     it('should get a specific guest by id', async () => {
       const response = await request(app.getHttpServer())
         .get(`/guests/${createdGuestId}`)
+        .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
       expect(response.body.id).toBe(createdGuestId);
@@ -122,6 +129,7 @@ describe('Guest (e2e)', () => {
 
       const response = await request(app.getHttpServer())
         .put(`/guests/${createdGuestId}`)
+        .set('Authorization', `Bearer ${adminToken}`)
         .send(updateData)
         .expect(200);
 
@@ -136,6 +144,7 @@ describe('Guest (e2e)', () => {
     it('should confirm guest attendance', async () => {
       const response = await request(app.getHttpServer())
         .put(`/guests/${createdGuestId}/confirm`)
+        .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
       expect(response.body.confirmationStatus).toBe(
@@ -149,6 +158,7 @@ describe('Guest (e2e)', () => {
     it('should reject guest attendance', async () => {
       const response = await request(app.getHttpServer())
         .put(`/guests/${createdGuestId}/reject`)
+        .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
       expect(response.body.confirmationStatus).toBe(
@@ -163,11 +173,13 @@ describe('Guest (e2e)', () => {
       // First create a guest to delete
       const guestToDelete = {
         name: 'Guest To Delete',
+        email: 'guest.delete@example.com',
         weddingId: createdWeddingId,
       };
 
       const createResponse = await request(app.getHttpServer())
         .post('/guests')
+        .set('Authorization', `Bearer ${adminToken}`)
         .send(guestToDelete)
         .expect(201);
 
@@ -176,10 +188,14 @@ describe('Guest (e2e)', () => {
       // Delete the guest
       await request(app.getHttpServer())
         .delete(`/guests/${guestId}`)
+        .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
       // Verify the guest is deleted
-      await request(app.getHttpServer()).get(`/guests/${guestId}`).expect(404);
+      await request(app.getHttpServer())
+        .get(`/guests/${guestId}`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(404);
     });
   });
 
@@ -202,23 +218,26 @@ describe('Guest (e2e)', () => {
 
       // Create guests for this wedding
       const guestsData = [
-        { name: 'Guest 1', weddingId },
-        { name: 'Guest 2', weddingId },
+        { name: 'Guest 1', email: 'guest1@example.com', weddingId },
+        { name: 'Guest 2', email: 'guest2@example.com', weddingId },
       ];
 
       await request(app.getHttpServer())
         .post('/guests/bulk')
+        .set('Authorization', `Bearer ${adminToken}`)
         .send(guestsData)
         .expect(201);
 
       // Delete all guests for the wedding
       await request(app.getHttpServer())
         .delete(`/guests/wedding/${weddingId}`)
+        .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
       // Verify guests are deleted
       const response = await request(app.getHttpServer())
         .get(`/guests/wedding/${weddingId}`)
+        .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
       expect(response.body).toHaveLength(0);

@@ -43,6 +43,16 @@ export class GuestService {
     });
   }
 
+  async findAllGuest(): Promise<Guest[]> {
+    return this.prisma.guest.findMany({
+      include: {
+        accompanyingGuests: true,
+        primaryGuest: true,
+      },
+      orderBy: { createdAt: 'asc' },
+    });
+  }
+
   async findById(id: number): Promise<Guest> {
     const guest = await this.prisma.guest.findUnique({
       where: { id },
@@ -104,6 +114,7 @@ export class GuestService {
     return {
       id: guest.id,
       name: guest.name,
+      email: guest.email,
       allergies: guest.allergies,
       group: guest.group,
       confirmationStatus: guest.confirmationStatus as ConfirmationStatus,

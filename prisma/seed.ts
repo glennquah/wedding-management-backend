@@ -507,6 +507,7 @@ async function main() {
       const name = `${guestNames[j % guestNames.length]} ${j > guestNames.length ? j : ''}`;
       guestData.push({
         name: name.trim(),
+        email: `guest${i + 1}_${j + 1}@example.com`,
         allergies:
           Math.random() > 0.7
             ? allergies[Math.floor(Math.random() * allergies.length)]

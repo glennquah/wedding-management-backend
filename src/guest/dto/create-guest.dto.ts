@@ -12,10 +12,9 @@ export class CreateGuestDto {
   @IsString()
   name: string;
 
-  @ApiProperty({ description: 'The email of the guest', required: false })
-  @IsOptional()
+  @ApiProperty({ description: 'The email of the guest' })
   @IsString()
-  email?: string;
+  email: string;
 
   @ApiProperty({
     description: 'Allergies or dietary restrictions',
