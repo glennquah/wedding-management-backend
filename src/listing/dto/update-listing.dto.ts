@@ -36,12 +36,4 @@ export class UpdateListingDto {
   @IsOptional()
   @IsString()
   remarks?: string;
-
-  @ApiProperty({
-    description: 'Vendor ID linked to this listing',
-    required: false,
-  })
-  @IsOptional()
-  @IsNumber()
-  vendorId?: number;
 }
