@@ -40,7 +40,7 @@ export class UpdateGuestDto {
   @ApiProperty({
     description: 'Confirmation status of the guest',
     enum: ConfirmationStatus,
-    enumName: "ConfirmationStatus",
+    enumName: 'ConfirmationStatus',
     required: false,
   })
   @IsOptional()
