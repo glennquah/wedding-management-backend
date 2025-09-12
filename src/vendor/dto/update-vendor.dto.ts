@@ -53,6 +53,7 @@ export class UpdateVendorDto extends UpdateUserDto {
   @ApiProperty({
     description: 'Service offered by the vendor',
     enum: WeddingService,
+    enumName: 'WeddingService',
     required: false,
   })
   @IsOptional()
@@ -62,6 +63,7 @@ export class UpdateVendorDto extends UpdateUserDto {
   @ApiProperty({
     description: 'Wedding style specialization of the vendor',
     enum: WeddingStyle,
+    enumName: 'WeddingStyle',
     required: false,
   })
   @IsOptional()
@@ -71,6 +73,7 @@ export class UpdateVendorDto extends UpdateUserDto {
   @ApiProperty({
     description: 'Wedding type specialization of the vendor',
     enum: WeddingType,
+    enumName: 'WeddingType',
     isArray: true,
     required: false,
   })

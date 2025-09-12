@@ -36,6 +36,7 @@ export class VendorResponseDto extends UserResponseDto {
   @ApiProperty({
     description: 'Service offered by the vendor',
     enum: WeddingService,
+    enumName: 'WeddingService',
     required: true,
   })
   serviceOffered: WeddingService;
@@ -43,6 +44,7 @@ export class VendorResponseDto extends UserResponseDto {
   @ApiProperty({
     description: 'Wedding style specialization of the vendor',
     enum: WeddingStyle,
+    enumName: 'WeddingStyle',
     required: true,
   })
   styleOffered: WeddingStyle;
@@ -50,6 +52,7 @@ export class VendorResponseDto extends UserResponseDto {
   @ApiProperty({
     description: 'Wedding type specialization of the vendor',
     enum: WeddingType,
+    enumName: 'WeddingType',
     isArray: true,
     required: true,
   })
