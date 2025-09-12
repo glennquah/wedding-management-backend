@@ -59,6 +59,14 @@ enum GuestCountBucket {
   large // above 150
 }
 
+enum OrderStatus {
+  PENDING
+  PAID
+  CANCELLED
+  COMPLETED
+}
+
+
 model User {
   id        Int      @id @default(autoincrement())
   name      String
@@ -105,6 +113,7 @@ model Vendor {
   styleOffered   WeddingStyle
   weddingTypes   WeddingType[]
   capacity       Int?
+  listings       Listing[]
 }
 
 model Wedding {
@@ -116,6 +125,7 @@ model Wedding {
   admins    Admin[]  @relation("AdminWeddings")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  orders    Order[]
 }
 
 model Guest {
@@ -132,4 +142,51 @@ model Guest {
   accompanyingGuests Guest[]            @relation("AccompanyingGuests")
   createdAt          DateTime           @default(now())
   updatedAt          DateTime           @updatedAt
+}
+
+model Listing {
+  id            Int       @id @default(autoincrement())
+  listingName   String
+  price         Float
+  availabilities DateTime[] 
+  remarks       String
+
+  // Relations
+  vendorId      Int
+  vendor        Vendor   @relation(fields: [vendorId], references: [userId], onDelete: Cascade)
+
+  // Many-to-many with Orders
+  orders        OrderListing[]
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Order {
+  id            Int       @id @default(autoincrement())
+  orderStatus   OrderStatus @default(PENDING)
+  paymentMethod String
+  purchaseDate  DateTime   @default(now())
+  remark        String?
+
+  // Relations
+  weddingId     Int
+  wedding       Wedding  @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+
+  // Many-to-many with Listings
+  listings      OrderListing[]
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+
+model OrderListing {
+  orderId   Int
+  listingId Int
+
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@id([orderId, listingId])
 }
