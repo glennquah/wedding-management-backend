@@ -7,10 +7,15 @@ import {
   ParseIntPipe,
   Post,
   Put,
+  Request,
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { Roles } from 'src/auth/decorators/roles.decorator';
+import { UserRole } from 'src/common/user-role.enum';
+import { JwtPayload } from 'src/auth/dto/jwt-payload.interface';
 import { CreateWeddingDto } from './dto/create-wedding.dto';
 import { UpdateWeddingDto } from './dto/update-wedding.dto';
 import { WeddingResponseDto } from './dto/wedding-response.dto';
@@ -44,6 +49,24 @@ export class WeddingController {
   })
   async findAll(): Promise<WeddingResponseDto[]> {
     const weddings = await this.service.findAll();
+    return weddings.map((wedding) =>
+      this.service.toWeddingResponseDto(wedding),
+    );
+  }
+
+  @Get('admin/my-weddings')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Get weddings associated with the logged-in admin' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of weddings associated with the admin',
+    type: [WeddingResponseDto],
+  })
+  async getAdminWeddings(
+    @Request() req: Request & { user: JwtPayload },
+  ): Promise<WeddingResponseDto[]> {
+    const weddings = await this.service.findByAdminId(req.user.sub);
     return weddings.map((wedding) =>
       this.service.toWeddingResponseDto(wedding),
     );

@@ -30,6 +30,19 @@ export class WeddingService {
     });
   }
 
+  async findByAdminId(adminId: number): Promise<Wedding[]> {
+    return this.prisma.wedding.findMany({
+      where: {
+        admins: {
+          some: {
+            userId: adminId,
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
   async findById(id: number): Promise<Wedding> {
     const wedding = await this.prisma.wedding.findUnique({
       where: { id },
