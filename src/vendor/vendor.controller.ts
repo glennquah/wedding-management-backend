@@ -13,6 +13,7 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { UserRole } from 'src/common/user-role.enum';
+import { VendorOnboardingStatus } from 'src/common/vendor-onboarding-status.enum';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 
 import { CreateVendorDto } from './dto/create-vendor.dto';
@@ -129,5 +130,37 @@ export class VendorController {
   ): Promise<{ message: string }> {
     await this.service.delete(id);
     return { message: 'Vendor successfully deleted' };
+  }
+
+  @Put(':id/accept')
+  @ApiOperation({ summary: 'Accept vendor onboarding' })
+  @ApiResponse({
+    status: 200,
+    description: 'The vendor has been marked as onboarded.',
+    type: VendorResponseDto,
+  })
+  @ApiResponse({ status: 404, description: 'Vendor not found.' })
+  async onboardVendor(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<VendorResponseDto> {
+    return this.service.update(id, {
+      onboardingStatus: VendorOnboardingStatus.ONBOARDED,
+    });
+  }
+
+  @Put(':id/reject')
+  @ApiOperation({ summary: 'Reject vendor onboarding' })
+  @ApiResponse({
+    status: 200,
+    description: 'The vendor has been marked as rejected.',
+    type: VendorResponseDto,
+  })
+  @ApiResponse({ status: 404, description: 'Vendor not found.' })
+  async rejectVendor(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<VendorResponseDto> {
+    return this.service.update(id, {
+      onboardingStatus: VendorOnboardingStatus.REJECTED,
+    });
   }
 }

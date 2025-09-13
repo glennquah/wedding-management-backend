@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { User, Vendor } from '@prisma/client';
 import { hash } from 'bcrypt';
+import { VendorOnboardingStatus } from 'src/common/vendor-onboarding-status.enum';
 import { WeddingService } from '../common/wedding-service.enum';
 import { WeddingStyle } from '../common/wedding-style.enum';
 import { WeddingType } from '../common/wedding-type.enum';
@@ -36,6 +37,7 @@ export class VendorService {
       styleOffered: vendor.styleOffered as WeddingStyle,
       weddingTypes: vendor.weddingTypes as WeddingType[],
       capacity: vendor.capacity,
+      onboardingStatus: vendor.onboardingStatus as VendorOnboardingStatus,
     };
   }
 
