@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { VendorOnboardingStatus } from 'src/common/vendor-onboarding-status.enum';
 import { WeddingService } from '../../common/wedding-service.enum';
 import { WeddingStyle } from '../../common/wedding-style.enum';
 import { WeddingType } from '../../common/wedding-type.enum';
@@ -36,6 +37,7 @@ export class VendorResponseDto extends UserResponseDto {
   @ApiProperty({
     description: 'Service offered by the vendor',
     enum: WeddingService,
+    enumName: 'WeddingService',
     required: true,
   })
   serviceOffered: WeddingService;
@@ -43,6 +45,7 @@ export class VendorResponseDto extends UserResponseDto {
   @ApiProperty({
     description: 'Wedding style specialization of the vendor',
     enum: WeddingStyle,
+    enumName: 'WeddingStyle',
     required: true,
   })
   styleOffered: WeddingStyle;
@@ -50,6 +53,7 @@ export class VendorResponseDto extends UserResponseDto {
   @ApiProperty({
     description: 'Wedding type specialization of the vendor',
     enum: WeddingType,
+    enumName: 'WeddingType',
     isArray: true,
     required: true,
   })
@@ -61,4 +65,12 @@ export class VendorResponseDto extends UserResponseDto {
     default: null,
   })
   capacity?: number;
+
+  @ApiProperty({
+    description: 'Onboarding status of the vendor',
+    enum: VendorOnboardingStatus,
+    enumName: 'VendorOnboardingStatus',
+    default: VendorOnboardingStatus.PENDING,
+  })
+  onboardingStatus: VendorOnboardingStatus;
 }

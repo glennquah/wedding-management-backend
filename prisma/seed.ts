@@ -4,6 +4,7 @@ import {
   GuestCountBucket,
   PrismaClient,
   UserRole,
+  VendorOnboardingStatus,
   WeddingService,
   WeddingStyle,
   WeddingType,
@@ -185,6 +186,7 @@ async function main() {
       bio: 'Luxurious waterfront venue',
       rating: 4.8,
       types: [WeddingType.western],
+      onboardingStatus: VendorOnboardingStatus.onboarded
     },
     {
       name: 'Garden Paradise Resort',
@@ -195,6 +197,7 @@ async function main() {
       bio: 'Beautiful outdoor venue',
       rating: 4.6,
       types: [WeddingType.western],
+      onboardingStatus: VendorOnboardingStatus.onboarded
     },
     {
       name: 'Heritage Temple Hall',
@@ -205,6 +208,7 @@ async function main() {
       bio: 'Traditional cultural venue',
       rating: 4.7,
       types: [WeddingType.chinese],
+      onboardingStatus: VendorOnboardingStatus.onboarded
     },
     {
       name: 'Gourmet Delights Catering',
@@ -215,6 +219,7 @@ async function main() {
       bio: 'Fine dining catering',
       rating: 4.9,
       types: [WeddingType.western],
+      onboardingStatus: VendorOnboardingStatus.onboarded
     },
     {
       name: 'Traditional Feast Co.',
@@ -225,6 +230,7 @@ async function main() {
       bio: 'Authentic cuisine',
       rating: 4.5,
       types: [WeddingType.chinese],
+      onboardingStatus: VendorOnboardingStatus.onboarded
     },
     {
       name: 'Modern Bistro Catering',
@@ -235,6 +241,7 @@ async function main() {
       bio: 'Contemporary fusion',
       rating: 4.7,
       types: [WeddingType.western],
+      onboardingStatus: VendorOnboardingStatus.onboarded
     },
     {
       name: 'Spice Route Catering',
@@ -245,6 +252,7 @@ async function main() {
       bio: 'Asian spices specialist',
       rating: 4.6,
       types: [WeddingType.indian],
+      onboardingStatus: VendorOnboardingStatus.onboarded
     },
     {
       name: 'Eternal Moments Photography',
@@ -255,6 +263,7 @@ async function main() {
       bio: 'Award-winning photographers',
       rating: 4.9,
       types: [WeddingType.western],
+      onboardingStatus: VendorOnboardingStatus.onboarded
     },
     {
       name: 'Candid Stories Studio',
@@ -265,6 +274,7 @@ async function main() {
       bio: 'Creative storytelling',
       rating: 4.8,
       types: [WeddingType.western],
+      onboardingStatus: VendorOnboardingStatus.onboarded
     },
     {
       name: 'Heritage Lens Photography',
@@ -275,6 +285,7 @@ async function main() {
       bio: 'Traditional photography',
       rating: 4.7,
       types: [WeddingType.chinese],
+      onboardingStatus: VendorOnboardingStatus.onboarded
     },
     {
       name: 'Floral Elegance Designs',
@@ -395,6 +406,7 @@ async function main() {
             styleOffered: vendor.style,
             weddingTypes: vendor.types,
             capacity: vendor.capacity,
+            onboardingStatus: vendor.onboardingStatus
           },
         },
       },
