@@ -6,6 +6,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
+import { VendorOnboardingStatus } from 'src/common/vendor-onboarding-status.enum';
 import { WeddingService } from '../../common/wedding-service.enum';
 import { WeddingStyle } from '../../common/wedding-style.enum';
 import { WeddingType } from '../../common/wedding-type.enum';
@@ -86,4 +87,15 @@ export class CreateVendorDto extends CreateUserDto {
   @IsOptional()
   @IsNumber()
   capacity?: number;
+
+  @ApiProperty({
+    description: 'Onboarding status of vendor',
+    enum: VendorOnboardingStatus,
+    enumName: 'VendorOnboardingStatus',
+    required: false,
+    default: VendorOnboardingStatus.PENDING,
+  })
+  @IsOptional()
+  @IsEnum(VendorOnboardingStatus)
+  onboardingStatus: VendorOnboardingStatus;
 }

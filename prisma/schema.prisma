@@ -66,6 +66,11 @@ enum OrderStatus {
   COMPLETED
 }
 
+enum VendorOnboardingStatus {
+  pending
+  rejected
+  onboarded
+}
 
 model User {
   id        Int      @id @default(autoincrement())
@@ -104,16 +109,17 @@ model Vendor {
   userId Int  @unique
   user   User @relation(fields: [userId], references: [id])
 
-  vendorWebsite  String?
-  uenNumber      String?
-  onboardedDate  DateTime       @default(now())
-  bio            String?
-  rating         Float?         @default(0)
-  serviceOffered WeddingService
-  styleOffered   WeddingStyle
-  weddingTypes   WeddingType[]
-  capacity       Int?
-  listings       Listing[]
+  vendorWebsite    String?
+  uenNumber        String?
+  onboardedDate    DateTime               @default(now())
+  bio              String?
+  rating           Float?                 @default(0)
+  serviceOffered   WeddingService
+  styleOffered     WeddingStyle
+  weddingTypes     WeddingType[]
+  capacity         Int?
+  listings         Listing[]
+  onboardingStatus VendorOnboardingStatus @default(pending)
 }
 
 model Wedding {
