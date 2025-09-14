@@ -109,7 +109,7 @@ export class AdminService {
         preferredStyle: dto.preferredStyle,
         preferredServices: dto.preferredServices,
       },
-      include: { user: true }, // include the user relation for mapping
+      include: { user: true, weddings: true }, // include the user relation for mapping
     });
 
     return this.toAdminResponseDto(admin);
@@ -117,7 +117,7 @@ export class AdminService {
 
   async findAll(): Promise<AdminResponseDto[]> {
     const admins = await this.prisma.admin.findMany({
-      include: { user: true },
+      include: { user: true, weddings: true },
       orderBy: { onboardedDate: 'desc' },
     });
 
@@ -127,7 +127,7 @@ export class AdminService {
   async findById(userId: number): Promise<AdminResponseDto> {
     const admin = await this.prisma.admin.findUnique({
       where: { userId },
-      include: { user: true },
+      include: { user: true, weddings: true },
     });
 
     if (!admin) {
@@ -148,7 +148,7 @@ export class AdminService {
 
     const admin = await this.prisma.admin.findUnique({
       where: { userId: user.id },
-      include: { user: true },
+      include: { user: true, weddings: true },
     });
 
     if (!admin) {
@@ -199,7 +199,7 @@ export class AdminService {
     const updatedAdmin = await this.prisma.admin.update({
       where: { userId },
       data: updateData,
-      include: { user: true },
+      include: { user: true, weddings: true },
     });
 
     return this.toAdminResponseDto(updatedAdmin);
