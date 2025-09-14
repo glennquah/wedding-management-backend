@@ -120,6 +120,7 @@ async function main() {
       email2: 'emma.johnson@email.com',
       type: WeddingType.western,
       style: WeddingStyle.modern,
+      isSuspended: true,
     },
   ];
 
@@ -135,6 +136,7 @@ async function main() {
           admin: {
             create: {
               isCouple: true,
+              isSuspended: couple.isSuspended,
               weddingType: couple.type,
               budgetBucket: BudgetBucket.medium,
               guestCountBucket: GuestCountBucket.large,
@@ -157,6 +159,7 @@ async function main() {
           admin: {
             create: {
               isCouple: true,
+              isSuspended: couple.isSuspended,
               weddingType: couple.type,
               budgetBucket: BudgetBucket.medium,
               guestCountBucket: GuestCountBucket.large,
@@ -241,7 +244,8 @@ async function main() {
       bio: 'Contemporary fusion',
       rating: 4.7,
       types: [WeddingType.western],
-      onboardingStatus: VendorOnboardingStatus.onboarded
+      onboardingStatus: VendorOnboardingStatus.onboarded,
+      isSuspended: true,
     },
     {
       name: 'Spice Route Catering',
@@ -252,7 +256,8 @@ async function main() {
       bio: 'Asian spices specialist',
       rating: 4.6,
       types: [WeddingType.indian],
-      onboardingStatus: VendorOnboardingStatus.onboarded
+      onboardingStatus: VendorOnboardingStatus.onboarded,
+      isSuspended: true,
     },
     {
       name: 'Eternal Moments Photography',
@@ -263,7 +268,8 @@ async function main() {
       bio: 'Award-winning photographers',
       rating: 4.9,
       types: [WeddingType.western],
-      onboardingStatus: VendorOnboardingStatus.onboarded
+      onboardingStatus: VendorOnboardingStatus.onboarded,
+      isSuspended: true,
     },
     {
       name: 'Candid Stories Studio',
@@ -274,7 +280,8 @@ async function main() {
       bio: 'Creative storytelling',
       rating: 4.8,
       types: [WeddingType.western],
-      onboardingStatus: VendorOnboardingStatus.onboarded
+      onboardingStatus: VendorOnboardingStatus.onboarded,
+      isSuspended: true,
     },
     {
       name: 'Heritage Lens Photography',
@@ -285,7 +292,8 @@ async function main() {
       bio: 'Traditional photography',
       rating: 4.7,
       types: [WeddingType.chinese],
-      onboardingStatus: VendorOnboardingStatus.onboarded
+      onboardingStatus: VendorOnboardingStatus.onboarded,
+      isSuspended: true,
     },
     {
       name: 'Floral Elegance Designs',
@@ -406,7 +414,8 @@ async function main() {
             styleOffered: vendor.style,
             weddingTypes: vendor.types,
             capacity: vendor.capacity,
-            onboardingStatus: vendor.onboardingStatus
+            onboardingStatus: vendor.onboardingStatus,
+            isSuspended: vendor.isSuspended,
           },
         },
       },

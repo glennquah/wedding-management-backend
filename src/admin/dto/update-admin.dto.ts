@@ -18,6 +18,13 @@ export class UpdateAdminDto extends UpdateUserDto {
   isCouple?: boolean;
 
   @ApiProperty({
+    description: 'Is the admin suspended?',
+    required: false,
+    default: false,
+  })
+  isSuspended?: boolean;
+
+  @ApiProperty({
     description: 'Date when the admin was onboarded',
     required: false,
   })
