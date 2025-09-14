@@ -33,6 +33,7 @@ export class AdminService {
     return {
       ...userResponse,
       isCouple: admin.isCouple,
+      isSuspended: admin.isSuspended,
       onboardedDate: admin.onboardedDate,
       weddingType: admin.weddingType as WeddingType,
       budgetBucket: admin.budgetBucket as BudgetBucket,

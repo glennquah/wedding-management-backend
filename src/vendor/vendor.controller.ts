@@ -163,4 +163,36 @@ export class VendorController {
       onboardingStatus: VendorOnboardingStatus.REJECTED,
     });
   }
+
+  @Put(':id/suspend')
+  @ApiOperation({ summary: 'Suspend vendor' })
+  @ApiResponse({
+    status: 200,
+    description: 'The vendor has been marked as suspended.',
+    type: VendorResponseDto,
+  })
+  @ApiResponse({ status: 404, description: 'Vendor not found.' })
+  async suspendVendor(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<VendorResponseDto> {
+    return this.service.update(id, {
+      isSuspended: true,
+    });
+  }
+
+  @Put(':id/unsuspend')
+  @ApiOperation({ summary: 'Unsuspend vendor' })
+  @ApiResponse({
+    status: 200,
+    description: 'The vendor has been marked as unsuspended.',
+    type: VendorResponseDto,
+  })
+  @ApiResponse({ status: 404, description: 'Vendor not found.' })
+  async unsuspendVendor(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<VendorResponseDto> {
+    return this.service.update(id, {
+      isSuspended: false,
+    });
+  }
 }
