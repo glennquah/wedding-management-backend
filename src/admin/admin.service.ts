@@ -4,9 +4,10 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Admin, User } from '@prisma/client';
+import { Admin, User, Wedding } from '@prisma/client';
 import { hash } from 'bcrypt';
 import { UserRole } from 'src/common/user-role.enum';
+import { WeddingDetailsDto } from 'src/wedding/dto/wedding-details.dto';
 import { BudgetBucket } from '../common/budget-bucket.enum';
 import { GuestCountBucket } from '../common/guest-count-bucket.enum';
 import { WeddingService } from '../common/wedding-service.enum';
@@ -25,7 +26,9 @@ export class AdminService {
     private userService: UserService,
   ) {}
 
-  private toAdminResponseDto(admin: Admin & { user: User }): AdminResponseDto {
+  private toAdminResponseDto(
+    admin: Admin & { user: User; weddings?: Wedding[] },
+  ): AdminResponseDto {
     const userResponse = this.userService.toUserResponseDto(admin.user);
     return {
       ...userResponse,
@@ -36,6 +39,14 @@ export class AdminService {
       guestCountBucket: admin.guestCountBucket as GuestCountBucket,
       preferredStyle: admin.preferredStyle as WeddingStyle,
       preferredServices: admin.preferredServices as WeddingService[],
+      weddings:
+        admin.weddings?.map(
+          (wedding) =>
+            ({
+              id: wedding.id,
+              name: wedding.name,
+            }) satisfies WeddingDetailsDto,
+        ) || [],
     };
   }
 
@@ -43,7 +54,7 @@ export class AdminService {
     // Fetch the admin, including the related User
     const admin = await this.prisma.admin.findUnique({
       where: { userId: adminId },
-      include: { user: true },
+      include: { user: true, weddings: true },
     });
 
     if (!admin) {
@@ -98,7 +109,7 @@ export class AdminService {
         preferredStyle: dto.preferredStyle,
         preferredServices: dto.preferredServices,
       },
-      include: { user: true }, // include the user relation for mapping
+      include: { user: true, weddings: true }, // include the user relation for mapping
     });
 
     return this.toAdminResponseDto(admin);
@@ -106,7 +117,7 @@ export class AdminService {
 
   async findAll(): Promise<AdminResponseDto[]> {
     const admins = await this.prisma.admin.findMany({
-      include: { user: true },
+      include: { user: true, weddings: true },
       orderBy: { onboardedDate: 'desc' },
     });
 
@@ -116,7 +127,7 @@ export class AdminService {
   async findById(userId: number): Promise<AdminResponseDto> {
     const admin = await this.prisma.admin.findUnique({
       where: { userId },
-      include: { user: true },
+      include: { user: true, weddings: true },
     });
 
     if (!admin) {
@@ -137,7 +148,7 @@ export class AdminService {
 
     const admin = await this.prisma.admin.findUnique({
       where: { userId: user.id },
-      include: { user: true },
+      include: { user: true, weddings: true },
     });
 
     if (!admin) {
@@ -188,7 +199,7 @@ export class AdminService {
     const updatedAdmin = await this.prisma.admin.update({
       where: { userId },
       data: updateData,
-      include: { user: true },
+      include: { user: true, weddings: true },
     });
 
     return this.toAdminResponseDto(updatedAdmin);

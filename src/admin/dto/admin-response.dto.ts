@@ -1,10 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { UserResponseDto } from '../../user/dto/user-response.dto';
+import { WeddingDetailsDto } from 'src/wedding/dto/wedding-details.dto';
 import { BudgetBucket } from '../../common/budget-bucket.enum';
 import { GuestCountBucket } from '../../common/guest-count-bucket.enum';
-import { WeddingType } from '../../common/wedding-type.enum';
-import { WeddingStyle } from '../../common/wedding-style.enum';
 import { WeddingService } from '../../common/wedding-service.enum';
+import { WeddingStyle } from '../../common/wedding-style.enum';
+import { WeddingType } from '../../common/wedding-type.enum';
+import { UserResponseDto } from '../../user/dto/user-response.dto';
 
 export class AdminResponseDto extends UserResponseDto {
   @ApiProperty({
@@ -55,4 +56,11 @@ export class AdminResponseDto extends UserResponseDto {
     required: true,
   })
   preferredServices: WeddingService[];
+
+  @ApiProperty({
+    description: 'List of weddings associated with the admin',
+    type: [WeddingDetailsDto],
+    required: false,
+  })
+  weddings?: WeddingDetailsDto[];
 }
