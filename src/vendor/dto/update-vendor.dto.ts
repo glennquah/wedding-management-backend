@@ -100,4 +100,11 @@ export class UpdateVendorDto extends UpdateUserDto {
   @IsOptional()
   @IsEnum(VendorOnboardingStatus)
   onboardingStatus?: VendorOnboardingStatus;
+
+  @ApiProperty({
+    description: 'Is the vendor suspended?',
+    required: false,
+    default: false,
+  })
+  isSuspended?: boolean;
 }

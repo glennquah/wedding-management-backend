@@ -38,6 +38,7 @@ export class VendorService {
       weddingTypes: vendor.weddingTypes as WeddingType[],
       capacity: vendor.capacity,
       onboardingStatus: vendor.onboardingStatus as VendorOnboardingStatus,
+      isSuspended: vendor.isSuspended,
     };
   }
 

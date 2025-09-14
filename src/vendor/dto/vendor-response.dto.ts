@@ -73,4 +73,11 @@ export class VendorResponseDto extends UserResponseDto {
     default: VendorOnboardingStatus.PENDING,
   })
   onboardingStatus: VendorOnboardingStatus;
+
+  @ApiProperty({
+    description: 'Is the vendor suspended?',
+    required: false,
+    default: false,
+  })
+  isSuspended?: boolean;
 }

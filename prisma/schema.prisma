@@ -91,6 +91,7 @@ model Admin {
   user   User @relation(fields: [userId], references: [id])
 
   isCouple          Boolean          @default(true)
+  isSuspended       Boolean          @default(false)
   onboardedDate     DateTime         @default(now())
   weddingType       WeddingType
   budgetBucket      BudgetBucket
@@ -114,6 +115,7 @@ model Vendor {
   onboardedDate    DateTime               @default(now())
   bio              String?
   rating           Float?                 @default(0)
+  isSuspended      Boolean                @default(false)
   serviceOffered   WeddingService
   styleOffered     WeddingStyle
   weddingTypes     WeddingType[]

@@ -127,4 +127,36 @@ export class AdminController {
   async delete(@Param('id', ParseIntPipe) id: number): Promise<void> {
     await this.adminService.deleteAdmin(id);
   }
+
+  @Put(':id/suspend')
+  @ApiOperation({ summary: 'Suspend admin' })
+  @ApiResponse({
+    status: 200,
+    description: 'The admin has been marked as suspended.',
+    type: AdminResponseDto,
+  })
+  @ApiResponse({ status: 404, description: 'Admin not found.' })
+  async suspendAdmin(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<AdminResponseDto> {
+    return this.adminService.update(id, {
+      isSuspended: true,
+    });
+  }
+
+  @Put(':id/unsuspend')
+  @ApiOperation({ summary: 'Unsuspend admin' })
+  @ApiResponse({
+    status: 200,
+    description: 'The admin has been marked as unsuspended.',
+    type: AdminResponseDto,
+  })
+  @ApiResponse({ status: 404, description: 'Admin not found.' })
+  async unsuspendAdmin(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<AdminResponseDto> {
+    return this.adminService.update(id, {
+      isSuspended: false,
+    });
+  }
 }
