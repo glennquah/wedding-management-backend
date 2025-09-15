@@ -16,15 +16,19 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('✅ Seeding database...');
 
-  // Clear existing data first
+  // Clear existing data first (if tables exist)
   console.log('✅ Clearing existing data...');
-  await prisma.guest.deleteMany();
-  await prisma.wedding.deleteMany();
-  await prisma.vendor.deleteMany();
-  await prisma.admin.deleteMany();
-  await prisma.superAdmin.deleteMany();
-  await prisma.user.deleteMany();
-  console.log('✅ Existing data cleared');
+  try {
+    await prisma.guest.deleteMany();
+    await prisma.wedding.deleteMany();
+    await prisma.vendor.deleteMany();
+    await prisma.admin.deleteMany();
+    await prisma.superAdmin.deleteMany();
+    await prisma.user.deleteMany();
+    console.log('✅ Existing data cleared');
+  } catch (error) {
+    console.log('✅ Database is fresh, no data to clear');
+  }
 
   const hashedPassword = await bcrypt.hash('password123', 10);
 
@@ -520,34 +524,60 @@ async function main() {
 
   for (let i = 0; i < weddings.length; i++) {
     const wedding = weddings[i];
-    const guestCount = 120;
+    const primaryGuestCount = 80; // Reduce primary guests to make room for accompanying guests
 
-    // Create guest data in batches
-    const guestData = [];
-    for (let j = 0; j < guestCount; j++) {
+    for (let j = 0; j < primaryGuestCount; j++) {
       const name = `${guestNames[j % guestNames.length]} ${j > guestNames.length ? j : ''}`;
-      guestData.push({
-        name: name.trim(),
-        email: `guest${i + 1}_${j + 1}@example.com`,
-        allergies:
-          Math.random() > 0.7
-            ? allergies[Math.floor(Math.random() * allergies.length)]
-            : null,
-        group: groups[Math.floor(Math.random() * groups.length)],
-        confirmationStatus:
-          Math.random() > 0.2
-            ? ConfirmationStatus.confirmed
-            : ConfirmationStatus.pending,
-        weddingId: wedding.id,
+
+      // Create primary guest
+      const primaryGuest = await prisma.guest.create({
+        data: {
+          name: name.trim(),
+          email: `guest${i + 1}_${j + 1}@example.com`,
+          allergies:
+            Math.random() > 0.7
+              ? allergies[Math.floor(Math.random() * allergies.length)]
+              : null,
+          group: groups[Math.floor(Math.random() * groups.length)],
+          confirmationStatus:
+            Math.random() > 0.2
+              ? ConfirmationStatus.confirmed
+              : ConfirmationStatus.pending,
+          weddingId: wedding.id,
+        },
       });
+
+      // 30% chance to have accompanying guests
+      if (Math.random() < 0.3) {
+        const numAccompanying = Math.floor(Math.random() * 3) + 1; // 1-3 accompanying guests
+
+        for (let k = 0; k < numAccompanying; k++) {
+          const accompanyingName = `${guestNames[(j + k + 1) % guestNames.length]} ${Math.floor(Math.random() * 100)}`;
+
+          await prisma.guest.create({
+            data: {
+              name: accompanyingName.trim(),
+              email: '', // Accompanying guests often don't have individual emails
+              allergies:
+                Math.random() > 0.6
+                  ? allergies[Math.floor(Math.random() * allergies.length)]
+                  : null,
+              group: primaryGuest.group, // Same group as primary guest
+              confirmationStatus:
+                Math.random() > 0.3
+                  ? ConfirmationStatus.confirmed
+                  : Math.random() > 0.5
+                    ? ConfirmationStatus.pending
+                    : ConfirmationStatus.rejected,
+              weddingId: wedding.id,
+              primaryGuestId: primaryGuest.id, // Link to primary guest
+            },
+          });
+        }
+      }
     }
 
-    // Batch create guests
-    await prisma.guest.createMany({
-      data: guestData,
-    });
-
-    console.log(`✅ Created ${guestCount} guests for ${wedding.name}`);
+    console.log(`✅ Created ~${primaryGuestCount} primary guests with accompanying guests for ${wedding.name}`);
   }
 
   console.log('Database seeded successfully!');
@@ -556,7 +586,9 @@ async function main() {
   console.log(`- 10 Admin users (5 couples)`);
   console.log(`- 20 Vendor users`);
   console.log(`- 5 Weddings`);
-  console.log(`- 600 Guests total (120 per wedding)`);
+  console.log(`- ~80 primary guests per wedding (some with accompanying guests)`);
+  console.log(`- ~30% of primary guests have 1-3 accompanying guests each`);
+  console.log(`- Accompanying guests have individual confirmation status and dietary requirements`);
 }
 
 main()
