@@ -1,18 +1,12 @@
 import {
-  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Admin, User, Wedding } from '@prisma/client';
+import { Admin, Prisma, User, Wedding } from '@prisma/client';
 import { hash } from 'bcrypt';
 import { UserRole } from 'src/common/user-role.enum';
 import { WeddingDetailsDto } from 'src/wedding/dto/wedding-details.dto';
-import { BudgetBucket } from '../common/budget-bucket.enum';
-import { GuestCountBucket } from '../common/guest-count-bucket.enum';
-import { WeddingService } from '../common/wedding-service.enum';
-import { WeddingStyle } from '../common/wedding-style.enum';
-import { WeddingType } from '../common/wedding-type.enum';
 import { PrismaService } from '../prisma/prisma.service';
 import { UserService } from '../user/user.service';
 import { AdminResponseDto } from './dto/admin-response.dto';
@@ -32,14 +26,8 @@ export class AdminService {
     const userResponse = this.userService.toUserResponseDto(admin.user);
     return {
       ...userResponse,
-      isCouple: admin.isCouple,
       isSuspended: admin.isSuspended,
       onboardedDate: admin.onboardedDate,
-      weddingType: admin.weddingType as WeddingType,
-      budgetBucket: admin.budgetBucket as BudgetBucket,
-      guestCountBucket: admin.guestCountBucket as GuestCountBucket,
-      preferredStyle: admin.preferredStyle as WeddingStyle,
-      preferredServices: admin.preferredServices as WeddingService[],
       weddings:
         admin.weddings?.map(
           (wedding) =>
@@ -67,19 +55,6 @@ export class AdminService {
   }
 
   async create(dto: CreateAdminDto): Promise<AdminResponseDto> {
-    // Validate required fields manually (since ValidationPipe isn't working)
-    if (
-      !dto.weddingType ||
-      !dto.budgetBucket ||
-      !dto.guestCountBucket ||
-      !dto.preferredStyle ||
-      !dto.preferredServices
-    ) {
-      throw new BadRequestException(
-        'Missing required fields: weddingType, budgetBucket, guestCountBucket, preferredStyle, and preferredServices are required',
-      );
-    }
-
     // Check if user with the same email already exists
     const existingUser = await this.prisma.user.findUnique({
       where: { email: dto.email },
@@ -96,24 +71,54 @@ export class AdminService {
       role: 'admin' as UserRole,
     });
 
-    // Create the admin profile
+    // Create the admin profile first
     const admin = await this.prisma.admin.create({
       data: {
         userId: user.id,
-        isCouple: dto.isCouple,
         onboardedDate: dto.onboardedDate
           ? new Date(dto.onboardedDate)
           : undefined,
-        weddingType: dto.weddingType,
-        budgetBucket: dto.budgetBucket,
-        guestCountBucket: dto.guestCountBucket,
-        preferredStyle: dto.preferredStyle,
-        preferredServices: dto.preferredServices,
       },
-      include: { user: true, weddings: true }, // include the user relation for mapping
+      include: { user: true, weddings: true },
     });
 
-    return this.toAdminResponseDto(admin);
+    // Connect to the wedding via AdminWeddings relation
+    await this.prisma.wedding.update({
+      where: { id: dto.weddingId },
+      data: {
+        admins: {
+          connect: { userId: admin.userId },
+        },
+      },
+    });
+
+    // If isCouple is true, also set this admin as the main couple for the wedding
+    if (dto.isCouple) {
+      await this.prisma.wedding.update({
+        where: { id: dto.weddingId },
+        data: {
+          mainCouple: {
+            connect: { userId: admin.userId },
+          },
+        },
+      });
+
+      // Also update the admin's mainWeddingId
+      await this.prisma.admin.update({
+        where: { userId: admin.userId },
+        data: {
+          mainWeddingId: dto.weddingId,
+        },
+      });
+    }
+
+    // Fetch the updated admin with all relationships
+    const updatedAdmin = await this.prisma.admin.findUnique({
+      where: { userId: admin.userId },
+      include: { user: true, weddings: true },
+    });
+
+    return this.toAdminResponseDto(updatedAdmin!);
   }
 
   async findAll(): Promise<AdminResponseDto[]> {
@@ -187,15 +192,25 @@ export class AdminService {
       });
     }
 
-    const updateData: any = { ...dto };
+    const updateData: Prisma.AdminUpdateInput = {};
+    if (dto.isSuspended !== undefined) updateData.isSuspended = dto.isSuspended;
     if (dto.onboardedDate) {
       updateData.onboardedDate = new Date(dto.onboardedDate);
     }
-    // Remove user fields from updateData
-    delete updateData.email;
-    delete updateData.name;
-    delete updateData.password;
-    delete updateData.role;
+
+    // Handle wedding connection separately
+    if (dto.weddingId !== undefined) {
+      if (dto.weddingId) {
+        updateData.weddings = {
+          connect: { id: dto.weddingId },
+        };
+      } else {
+        // If weddingId is null, disconnect from weddings
+        updateData.weddings = {
+          set: [],
+        };
+      }
+    }
 
     const updatedAdmin = await this.prisma.admin.update({
       where: { userId },
