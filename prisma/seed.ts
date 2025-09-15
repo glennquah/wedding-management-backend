@@ -189,7 +189,7 @@ async function main() {
       bio: 'Luxurious waterfront venue',
       rating: 4.8,
       types: [WeddingType.western],
-      onboardingStatus: VendorOnboardingStatus.onboarded
+      onboardingStatus: VendorOnboardingStatus.onboarded,
     },
     {
       name: 'Garden Paradise Resort',
@@ -200,7 +200,7 @@ async function main() {
       bio: 'Beautiful outdoor venue',
       rating: 4.6,
       types: [WeddingType.western],
-      onboardingStatus: VendorOnboardingStatus.onboarded
+      onboardingStatus: VendorOnboardingStatus.onboarded,
     },
     {
       name: 'Heritage Temple Hall',
@@ -211,7 +211,7 @@ async function main() {
       bio: 'Traditional cultural venue',
       rating: 4.7,
       types: [WeddingType.chinese],
-      onboardingStatus: VendorOnboardingStatus.onboarded
+      onboardingStatus: VendorOnboardingStatus.onboarded,
     },
     {
       name: 'Gourmet Delights Catering',
@@ -222,7 +222,7 @@ async function main() {
       bio: 'Fine dining catering',
       rating: 4.9,
       types: [WeddingType.western],
-      onboardingStatus: VendorOnboardingStatus.onboarded
+      onboardingStatus: VendorOnboardingStatus.onboarded,
     },
     {
       name: 'Traditional Feast Co.',
@@ -233,7 +233,7 @@ async function main() {
       bio: 'Authentic cuisine',
       rating: 4.5,
       types: [WeddingType.chinese],
-      onboardingStatus: VendorOnboardingStatus.onboarded
+      onboardingStatus: VendorOnboardingStatus.onboarded,
     },
     {
       name: 'Modern Bistro Catering',
