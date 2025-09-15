@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsDateString, IsNotEmpty, IsNumber } from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsNumber } from 'class-validator';
 import { CreateUserDto } from '../../user/dto/create-user.dto';
 
 export class CreateAdminDto extends CreateUserDto {
@@ -11,14 +11,6 @@ export class CreateAdminDto extends CreateUserDto {
   @IsNotEmpty()
   @IsBoolean()
   isCouple: boolean;
-
-  @ApiProperty({
-    description: 'Date when the admin was onboarded',
-    required: true,
-  })
-  @IsNotEmpty()
-  @IsDateString()
-  onboardedDate: string;
 
   @ApiProperty({
     description: 'Wedding ID to associate with this admin',

@@ -75,9 +75,7 @@ export class AdminService {
     const admin = await this.prisma.admin.create({
       data: {
         userId: user.id,
-        onboardedDate: dto.onboardedDate
-          ? new Date(dto.onboardedDate)
-          : undefined,
+        onboardedDate: new Date(Date.now()),
       },
       include: { user: true, weddings: true },
     });
