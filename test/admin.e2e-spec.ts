@@ -29,7 +29,6 @@ describe('Admin (e2e)', () => {
         password: 'password123',
         role: UserRole.ADMIN,
         isCouple: true,
-        onboardedDate: new Date().toISOString(),
         weddingId: testWeddingId,
       };
 
@@ -56,7 +55,6 @@ describe('Admin (e2e)', () => {
         password: 'password123',
         role: UserRole.ADMIN,
         isCouple: false,
-        onboardedDate: new Date().toISOString(),
         weddingId: testWeddingId,
       };
 
@@ -77,7 +75,6 @@ describe('Admin (e2e)', () => {
           password: 'password123',
           role: UserRole.ADMIN,
           isCouple: true,
-          onboardedDate: new Date().toISOString(),
           weddingId: testWeddingId,
         },
         {
@@ -86,7 +83,6 @@ describe('Admin (e2e)', () => {
           password: 'password123',
           role: UserRole.ADMIN,
           isCouple: false,
-          onboardedDate: new Date().toISOString(),
           weddingId: testWeddingId,
         },
       ];
@@ -181,7 +177,6 @@ describe('Admin (e2e)', () => {
         password: 'password123',
         role: UserRole.ADMIN,
         isCouple: true,
-        onboardedDate: new Date().toISOString(),
         weddingId: testWeddingId,
       };
 

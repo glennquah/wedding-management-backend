@@ -130,7 +130,6 @@ export async function authenticateUsers(app: INestApplication): Promise<{
     password: 'password123',
     role: UserRole.ADMIN,
     isCouple: true,
-    onboardedDate: new Date().toISOString(),
     weddingId: testWeddingResponse.body.id,
   };
 
@@ -279,7 +278,6 @@ export async function seedAdmins(
       password: 'password123',
       role: UserRole.ADMIN,
       isCouple: i % 2 === 1, // Alternate between couple and single
-      onboardedDate: new Date().toISOString(),
       weddingId: weddingId,
     };
 

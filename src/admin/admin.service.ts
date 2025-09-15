@@ -194,9 +194,6 @@ export class AdminService {
 
     const updateData: Prisma.AdminUpdateInput = {};
     if (dto.isSuspended !== undefined) updateData.isSuspended = dto.isSuspended;
-    if (dto.onboardedDate) {
-      updateData.onboardedDate = new Date(dto.onboardedDate);
-    }
 
     // Handle wedding connection separately
     if (dto.weddingId !== undefined) {
