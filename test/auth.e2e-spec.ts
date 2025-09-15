@@ -96,7 +96,6 @@ describe('Auth (e2e)', () => {
         password: 'password123',
         role: UserRole.ADMIN,
         isCouple: true,
-        onboardedDate: new Date().toISOString(),
         weddingId: testWeddingId,
       };
 
@@ -122,7 +121,6 @@ describe('Auth (e2e)', () => {
           password: 'password123',
           role: UserRole.ADMIN,
           isCouple: true,
-          onboardedDate: new Date().toISOString(),
           weddingId: testWeddingId,
         })
         .expect(201);
@@ -134,7 +132,6 @@ describe('Auth (e2e)', () => {
         password: 'password123',
         role: UserRole.ADMIN,
         isCouple: true,
-        onboardedDate: new Date().toISOString(),
         weddingId: testWeddingId,
       };
 
@@ -254,7 +251,6 @@ describe('Auth (e2e)', () => {
           password: 'password123',
           role: UserRole.ADMIN,
           isCouple: true,
-          onboardedDate: new Date().toISOString(),
           weddingId: testWeddingId,
         })
         .expect(201);
@@ -360,7 +356,6 @@ describe('Auth (e2e)', () => {
           password: 'password123',
           role: UserRole.ADMIN,
           isCouple: true,
-          onboardedDate: new Date().toISOString(),
           weddingId: testWeddingId,
         })
         .expect(201);
