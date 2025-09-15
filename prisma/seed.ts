@@ -44,92 +44,143 @@ async function main() {
     },
   });
 
-  const ryanUser = await prisma.user.create({
-    data: {
-      name: 'Ryan Chen',
-      email: 'couple@wedding.com',
-      password: hashedPassword,
-      role: UserRole.admin,
-      admin: {
-        create: {
-          isCouple: true,
-          weddingType: WeddingType.western,
-          budgetBucket: BudgetBucket.luxury,
-          guestCountBucket: GuestCountBucket.large,
-          preferredStyle: WeddingStyle.luxury,
-          preferredServices: [
-            WeddingService.venue,
-            WeddingService.photography,
-            WeddingService.catering,
-            WeddingService.decoration,
-          ],
-        },
-      },
+  // First, create all weddings without couples
+  const weddingThemes = [
+    {
+      name: "Ryan & Ranae's Enchanted Garden Wedding",
+      date: new Date('2024-12-15T14:00:00.000Z'),
+      location: 'Marina Bay Grand Ballroom',
+      weddingType: WeddingType.western,
+      budgetBucket: BudgetBucket.luxury,
+      guestCountBucket: GuestCountBucket.large,
+      preferredStyle: WeddingStyle.luxury,
+      preferredServices: [
+        WeddingService.venue,
+        WeddingService.photography,
+        WeddingService.catering,
+        WeddingService.decoration,
+      ],
     },
-  });
-
-  const ranaeUser = await prisma.user.create({
-    data: {
-      name: 'Ranae Lim',
-      email: 'ranae.lim@email.com',
-      password: hashedPassword,
-      role: UserRole.admin,
-      admin: {
-        create: {
-          isCouple: true,
-          weddingType: WeddingType.western,
-          budgetBucket: BudgetBucket.luxury,
-          guestCountBucket: GuestCountBucket.large,
-          preferredStyle: WeddingStyle.luxury,
-          preferredServices: [
-            WeddingService.venue,
-            WeddingService.photography,
-            WeddingService.catering,
-            WeddingService.decoration,
-          ],
-        },
-      },
+    {
+      name: "Marcus & Sarah's Traditional Chinese Tea Ceremony",
+      date: new Date('2024-11-08T10:00:00.000Z'),
+      location: 'Heritage Temple Hall',
+      weddingType: WeddingType.chinese,
+      budgetBucket: BudgetBucket.medium,
+      guestCountBucket: GuestCountBucket.large,
+      preferredStyle: WeddingStyle.traditional,
+      preferredServices: [
+        WeddingService.venue,
+        WeddingService.photography,
+        WeddingService.catering,
+      ],
     },
-  });
+    {
+      name: "Amir & Siti's Malay Cultural Celebration",
+      date: new Date('2024-10-20T16:00:00.000Z'),
+      location: 'Garden Paradise Resort',
+      weddingType: WeddingType.malay,
+      budgetBucket: BudgetBucket.medium,
+      guestCountBucket: GuestCountBucket.large,
+      preferredStyle: WeddingStyle.traditional,
+      preferredServices: [
+        WeddingService.venue,
+        WeddingService.photography,
+        WeddingService.catering,
+      ],
+    },
+    {
+      name: "Raj & Priya's Grand Indian Wedding",
+      date: new Date('2025-01-25T12:00:00.000Z'),
+      location: 'Heritage Temple Hall',
+      weddingType: WeddingType.indian,
+      budgetBucket: BudgetBucket.medium,
+      guestCountBucket: GuestCountBucket.large,
+      preferredStyle: WeddingStyle.traditional,
+      preferredServices: [
+        WeddingService.venue,
+        WeddingService.photography,
+        WeddingService.catering,
+      ],
+    },
+    {
+      name: "David & Emma's Modern Beach Wedding",
+      date: new Date('2024-09-30T17:00:00.000Z'),
+      location: 'Garden Paradise Resort',
+      weddingType: WeddingType.western,
+      budgetBucket: BudgetBucket.medium,
+      guestCountBucket: GuestCountBucket.large,
+      preferredStyle: WeddingStyle.modern,
+      preferredServices: [
+        WeddingService.venue,
+        WeddingService.photography,
+        WeddingService.catering,
+      ],
+    },
+  ];
 
+  const weddings = [];
+  for (const theme of weddingThemes) {
+    const wedding = await prisma.wedding.create({
+      data: {
+        name: theme.name,
+        date: theme.date,
+        location: theme.location,
+        weddingType: theme.weddingType,
+        budgetBucket: theme.budgetBucket,
+        guestCountBucket: theme.guestCountBucket,
+        preferredStyle: theme.preferredStyle,
+        preferredServices: theme.preferredServices,
+      },
+    });
+    weddings.push(wedding);
+  }
+
+  console.log('✅ Created 5 weddings');
+
+  // Now create the couple users and associate them with weddings
   const couples = [
+    {
+      name1: 'Ryan Chen',
+      email1: 'couple@wedding.com',
+      name2: 'Ranae Lim',
+      email2: 'ranae.lim@email.com',
+      weddingIndex: 0,
+    },
     {
       name1: 'Marcus Tan',
       email1: 'marcus.tan@email.com',
       name2: 'Sarah Wong',
       email2: 'sarah.wong@email.com',
-      type: WeddingType.chinese,
-      style: WeddingStyle.traditional,
+      weddingIndex: 1,
     },
     {
       name1: 'Amir Rahman',
       email1: 'amir.rahman@email.com',
       name2: 'Siti Abdullah',
       email2: 'siti.abdullah@email.com',
-      type: WeddingType.malay,
-      style: WeddingStyle.traditional,
+      weddingIndex: 2,
     },
     {
       name1: 'Raj Kumar',
       email1: 'raj.kumar@email.com',
       name2: 'Priya Sharma',
       email2: 'priya.sharma@email.com',
-      type: WeddingType.indian,
-      style: WeddingStyle.traditional,
+      weddingIndex: 3,
     },
     {
       name1: 'David Lee',
       email1: 'david.lee@email.com',
       name2: 'Emma Johnson',
       email2: 'emma.johnson@email.com',
-      type: WeddingType.western,
-      style: WeddingStyle.modern,
+      weddingIndex: 4,
       isSuspended: true,
     },
   ];
 
   const coupleUsers = [];
   for (const couple of couples) {
+    const wedding = weddings[couple.weddingIndex];
     const [user1, user2] = await Promise.all([
       prisma.user.create({
         data: {
@@ -139,17 +190,8 @@ async function main() {
           role: UserRole.admin,
           admin: {
             create: {
-              isCouple: true,
-              isSuspended: couple.isSuspended,
-              weddingType: couple.type,
-              budgetBucket: BudgetBucket.medium,
-              guestCountBucket: GuestCountBucket.large,
-              preferredStyle: couple.style,
-              preferredServices: [
-                WeddingService.venue,
-                WeddingService.photography,
-                WeddingService.catering,
-              ],
+              isSuspended: couple.isSuspended || false,
+              mainWeddingId: wedding.id,
             },
           },
         },
@@ -162,26 +204,31 @@ async function main() {
           role: UserRole.admin,
           admin: {
             create: {
-              isCouple: true,
-              isSuspended: couple.isSuspended,
-              weddingType: couple.type,
-              budgetBucket: BudgetBucket.medium,
-              guestCountBucket: GuestCountBucket.large,
-              preferredStyle: couple.style,
-              preferredServices: [
-                WeddingService.venue,
-                WeddingService.photography,
-                WeddingService.catering,
-              ],
+              isSuspended: couple.isSuspended || false,
+              mainWeddingId: wedding.id,
             },
           },
         },
       }),
     ]);
+
+    // Connect both admins to the wedding as admins and as main couple
+    await prisma.wedding.update({
+      where: { id: wedding.id },
+      data: {
+        admins: {
+          connect: [{ userId: user1.id }, { userId: user2.id }],
+        },
+        mainCouple: {
+          connect: [{ userId: user1.id }, { userId: user2.id }],
+        },
+      },
+    });
+
     coupleUsers.push([user1, user2]);
   }
 
-  console.log('✅ Created couples');
+  console.log('✅ Created couples and associated with weddings');
 
   const vendorData = [
     {
@@ -193,7 +240,7 @@ async function main() {
       bio: 'Luxurious waterfront venue',
       rating: 4.8,
       types: [WeddingType.western],
-      onboardingStatus: VendorOnboardingStatus.onboarded
+      onboardingStatus: VendorOnboardingStatus.onboarded,
     },
     {
       name: 'Garden Paradise Resort',
@@ -204,7 +251,7 @@ async function main() {
       bio: 'Beautiful outdoor venue',
       rating: 4.6,
       types: [WeddingType.western],
-      onboardingStatus: VendorOnboardingStatus.onboarded
+      onboardingStatus: VendorOnboardingStatus.onboarded,
     },
     {
       name: 'Heritage Temple Hall',
@@ -215,7 +262,7 @@ async function main() {
       bio: 'Traditional cultural venue',
       rating: 4.7,
       types: [WeddingType.chinese],
-      onboardingStatus: VendorOnboardingStatus.onboarded
+      onboardingStatus: VendorOnboardingStatus.onboarded,
     },
     {
       name: 'Gourmet Delights Catering',
@@ -226,7 +273,7 @@ async function main() {
       bio: 'Fine dining catering',
       rating: 4.9,
       types: [WeddingType.western],
-      onboardingStatus: VendorOnboardingStatus.onboarded
+      onboardingStatus: VendorOnboardingStatus.onboarded,
     },
     {
       name: 'Traditional Feast Co.',
@@ -237,7 +284,7 @@ async function main() {
       bio: 'Authentic cuisine',
       rating: 4.5,
       types: [WeddingType.chinese],
-      onboardingStatus: VendorOnboardingStatus.onboarded
+      onboardingStatus: VendorOnboardingStatus.onboarded,
     },
     {
       name: 'Modern Bistro Catering',
@@ -427,56 +474,6 @@ async function main() {
   }
 
   console.log('✅ Created 20 vendors');
-
-  const weddingThemes = [
-    {
-      name: "Ryan & Ranae's Enchanted Garden Wedding",
-      date: new Date('2024-12-15T14:00:00.000Z'),
-      location: 'Marina Bay Grand Ballroom',
-      couple: [ryanUser, ranaeUser],
-    },
-    {
-      name: "Marcus & Sarah's Traditional Chinese Tea Ceremony",
-      date: new Date('2024-11-08T10:00:00.000Z'),
-      location: 'Heritage Temple Hall',
-      couple: coupleUsers[0],
-    },
-    {
-      name: "Amir & Siti's Malay Cultural Celebration",
-      date: new Date('2024-10-20T16:00:00.000Z'),
-      location: 'Garden Paradise Resort',
-      couple: coupleUsers[1],
-    },
-    {
-      name: "Raj & Priya's Grand Indian Wedding",
-      date: new Date('2025-01-25T12:00:00.000Z'),
-      location: 'Heritage Temple Hall',
-      couple: coupleUsers[2],
-    },
-    {
-      name: "David & Emma's Modern Beach Wedding",
-      date: new Date('2024-09-30T17:00:00.000Z'),
-      location: 'Garden Paradise Resort',
-      couple: coupleUsers[3],
-    },
-  ];
-
-  const weddings = [];
-  for (const theme of weddingThemes) {
-    const wedding = await prisma.wedding.create({
-      data: {
-        name: theme.name,
-        date: theme.date,
-        location: theme.location,
-        admins: {
-          connect: theme.couple.map((user) => ({ userId: user.id })),
-        },
-      },
-    });
-    weddings.push(wedding);
-  }
-
-  console.log('✅ Created 5 weddings');
 
   const guestNames = [
     'Michael Chen',

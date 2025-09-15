@@ -1,4 +1,4 @@
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
@@ -13,6 +13,7 @@ import { cleanDatabase, teardownTestApp } from './test-utils';
 
 describe('Auth (e2e)', () => {
   let app: INestApplication;
+  let testWeddingId: number;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -20,10 +21,67 @@ describe('Auth (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+
+    // Add ValidationPipe to test app
+    app.useGlobalPipes(
+      new ValidationPipe({
+        transform: true,
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        skipMissingProperties: false,
+        dismissDefaultMessages: false,
+        validationError: {
+          target: false,
+        },
+      }),
+    );
+
     await app.init();
 
     const prismaService = app.get(PrismaService);
     await cleanDatabase(prismaService);
+
+    // Create a test wedding for admin registration
+    const testWeddingData = {
+      name: 'Test Wedding for Auth',
+      date: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+      location: 'Test Location',
+      weddingType: WeddingType.WESTERN,
+      budgetBucket: BudgetBucket.MEDIUM,
+      guestCountBucket: GuestCountBucket.MEDIUM,
+      preferredStyle: WeddingStyle.MODERN,
+      preferredServices: [WeddingService.VENUE, WeddingService.CATERING],
+    };
+
+    // Create super admin first to create wedding
+    await request(app.getHttpServer())
+      .post('/auth/register/super-admin')
+      .send({
+        name: 'Setup Super Admin',
+        email: 'setup-superadmin@test.com',
+        password: 'password123',
+        role: UserRole.SUPERADMIN,
+      })
+      .expect(201);
+
+    const superAdminLoginResponse = await request(app.getHttpServer())
+      .post('/auth/login')
+      .send({
+        username: 'setup-superadmin@test.com',
+        password: 'password123',
+      })
+      .expect(201);
+
+    const testWeddingResponse = await request(app.getHttpServer())
+      .post('/weddings')
+      .set(
+        'Authorization',
+        `Bearer ${superAdminLoginResponse.body.backendTokens.accessToken}`,
+      )
+      .send(testWeddingData)
+      .expect(201);
+
+    testWeddingId = testWeddingResponse.body.id;
   });
 
   afterEach(async () => {
@@ -38,12 +96,7 @@ describe('Auth (e2e)', () => {
         password: 'password123',
         role: UserRole.ADMIN,
         isCouple: true,
-        onboardedDate: new Date().toISOString(),
-        weddingType: WeddingType.CHINESE,
-        budgetBucket: BudgetBucket.MEDIUM,
-        guestCountBucket: GuestCountBucket.MEDIUM,
-        preferredStyle: WeddingStyle.MODERN,
-        preferredServices: [WeddingService.VENUE, WeddingService.CATERING],
+        weddingId: testWeddingId,
       };
 
       const response = await request(app.getHttpServer())
@@ -68,12 +121,7 @@ describe('Auth (e2e)', () => {
           password: 'password123',
           role: UserRole.ADMIN,
           isCouple: true,
-          onboardedDate: new Date().toISOString(),
-          weddingType: WeddingType.CHINESE,
-          budgetBucket: BudgetBucket.MEDIUM,
-          guestCountBucket: GuestCountBucket.MEDIUM,
-          preferredStyle: WeddingStyle.MODERN,
-          preferredServices: [WeddingService.VENUE],
+          weddingId: testWeddingId,
         })
         .expect(201);
 
@@ -84,12 +132,7 @@ describe('Auth (e2e)', () => {
         password: 'password123',
         role: UserRole.ADMIN,
         isCouple: true,
-        onboardedDate: new Date().toISOString(),
-        weddingType: WeddingType.CHINESE,
-        budgetBucket: BudgetBucket.MEDIUM,
-        guestCountBucket: GuestCountBucket.MEDIUM,
-        preferredStyle: WeddingStyle.MODERN,
-        preferredServices: [WeddingService.VENUE],
+        weddingId: testWeddingId,
       };
 
       await request(app.getHttpServer())
@@ -208,12 +251,7 @@ describe('Auth (e2e)', () => {
           password: 'password123',
           role: UserRole.ADMIN,
           isCouple: true,
-          onboardedDate: new Date().toISOString(),
-          weddingType: WeddingType.CHINESE,
-          budgetBucket: BudgetBucket.MEDIUM,
-          guestCountBucket: GuestCountBucket.MEDIUM,
-          preferredStyle: WeddingStyle.MODERN,
-          preferredServices: [WeddingService.VENUE, WeddingService.CATERING],
+          weddingId: testWeddingId,
         })
         .expect(201);
 
@@ -318,12 +356,7 @@ describe('Auth (e2e)', () => {
           password: 'password123',
           role: UserRole.ADMIN,
           isCouple: true,
-          onboardedDate: new Date().toISOString(),
-          weddingType: WeddingType.CHINESE,
-          budgetBucket: BudgetBucket.MEDIUM,
-          guestCountBucket: GuestCountBucket.MEDIUM,
-          preferredStyle: WeddingStyle.MODERN,
-          preferredServices: [WeddingService.VENUE, WeddingService.CATERING],
+          weddingId: testWeddingId,
         })
         .expect(201);
     });

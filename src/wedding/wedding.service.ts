@@ -1,6 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Guest, Wedding } from '@prisma/client';
+import { BudgetBucket } from '../common/budget-bucket.enum';
 import { ConfirmationStatus } from '../common/confirmation-status.enum';
+import { GuestCountBucket } from '../common/guest-count-bucket.enum';
+import { WeddingService as WeddingServiceEnum } from '../common/wedding-service.enum';
+import { WeddingStyle } from '../common/wedding-style.enum';
+import { WeddingType } from '../common/wedding-type.enum';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateWeddingDto } from './dto/create-wedding.dto';
 import { UpdateWeddingDto } from './dto/update-wedding.dto';
@@ -20,6 +25,11 @@ export class WeddingService {
         name: dto.name,
         date: new Date(dto.date),
         location: dto.location,
+        weddingType: dto.weddingType,
+        budgetBucket: dto.budgetBucket,
+        guestCountBucket: dto.guestCountBucket,
+        preferredStyle: dto.preferredStyle,
+        preferredServices: dto.preferredServices,
       },
     });
   }
@@ -65,6 +75,15 @@ export class WeddingService {
     if (dto.name !== undefined) updateData.name = dto.name;
     if (dto.date !== undefined) updateData.date = new Date(dto.date);
     if (dto.location !== undefined) updateData.location = dto.location;
+    if (dto.weddingType !== undefined) updateData.weddingType = dto.weddingType;
+    if (dto.budgetBucket !== undefined)
+      updateData.budgetBucket = dto.budgetBucket;
+    if (dto.guestCountBucket !== undefined)
+      updateData.guestCountBucket = dto.guestCountBucket;
+    if (dto.preferredStyle !== undefined)
+      updateData.preferredStyle = dto.preferredStyle;
+    if (dto.preferredServices !== undefined)
+      updateData.preferredServices = dto.preferredServices;
 
     return this.prisma.wedding.update({
       where: { id },
@@ -98,6 +117,11 @@ export class WeddingService {
         createdAt: guest.createdAt,
         updatedAt: guest.updatedAt,
       })),
+      weddingType: wedding.weddingType as WeddingType,
+      budgetBucket: wedding.budgetBucket as BudgetBucket,
+      guestCountBucket: wedding.guestCountBucket as GuestCountBucket,
+      preferredStyle: wedding.preferredStyle as WeddingStyle,
+      preferredServices: wedding.preferredServices as WeddingServiceEnum[],
       createdAt: wedding.createdAt.toISOString(),
       updatedAt: wedding.updatedAt.toISOString(),
     };

@@ -87,18 +87,13 @@ model User {
 }
 
 model Admin {
-  userId Int  @id
-  user   User @relation(fields: [userId], references: [id])
-
-  isCouple          Boolean          @default(true)
-  isSuspended       Boolean          @default(false)
-  onboardedDate     DateTime         @default(now())
-  weddingType       WeddingType
-  budgetBucket      BudgetBucket
-  guestCountBucket  GuestCountBucket
-  preferredStyle    WeddingStyle
-  preferredServices WeddingService[]
-  weddings          Wedding[]        @relation("AdminWeddings")
+  userId        Int       @id
+  user          User      @relation(fields: [userId], references: [id])
+  isSuspended   Boolean   @default(false)
+  onboardedDate DateTime  @default(now())
+  weddings      Wedding[] @relation("AdminWeddings")
+  mainWedding   Wedding?  @relation("MainCouple", fields: [mainWeddingId], references: [id])
+  mainWeddingId Int?
 }
 
 model SuperAdmin {
@@ -125,15 +120,21 @@ model Vendor {
 }
 
 model Wedding {
-  id        Int      @id @default(autoincrement())
-  name      String
-  date      DateTime
-  location  String?
-  guests    Guest[]
-  admins    Admin[]  @relation("AdminWeddings")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  orders    Order[]
+  id                Int              @id @default(autoincrement())
+  mainCouple        Admin[]          @relation("MainCouple")
+  name              String
+  date              DateTime
+  location          String?
+  guests            Guest[]
+  admins            Admin[]          @relation("AdminWeddings")
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  weddingType       WeddingType
+  budgetBucket      BudgetBucket
+  guestCountBucket  GuestCountBucket
+  preferredStyle    WeddingStyle
+  preferredServices WeddingService[]
+  orders            Order[]
 }
 
 model Guest {
@@ -153,48 +154,47 @@ model Guest {
 }
 
 model Listing {
-  id            Int       @id @default(autoincrement())
-  listingName   String
-  price         Float
-  availabilities DateTime[] 
-  remarks       String
+  id             Int        @id @default(autoincrement())
+  listingName    String
+  price          Float
+  availabilities DateTime[]
+  remarks        String
 
   // Relations
-  vendorId      Int
-  vendor        Vendor   @relation(fields: [vendorId], references: [userId], onDelete: Cascade)
+  vendorId Int
+  vendor   Vendor @relation(fields: [vendorId], references: [userId], onDelete: Cascade)
 
   // Many-to-many with Orders
-  orders        OrderListing[]
+  orders OrderListing[]
 
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Order {
-  id            Int       @id @default(autoincrement())
+  id            Int         @id @default(autoincrement())
   orderStatus   OrderStatus @default(PENDING)
   paymentMethod String
-  purchaseDate  DateTime   @default(now())
+  purchaseDate  DateTime    @default(now())
   remark        String?
 
   // Relations
-  weddingId     Int
-  wedding       Wedding  @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+  weddingId Int
+  wedding   Wedding @relation(fields: [weddingId], references: [id], onDelete: Cascade)
 
   // Many-to-many with Listings
-  listings      OrderListing[]
+  listings OrderListing[]
 
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
-
 
 model OrderListing {
   orderId   Int
   listingId Int
 
-  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
 
   @@id([orderId, listingId])
 }

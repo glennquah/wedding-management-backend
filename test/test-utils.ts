@@ -18,6 +18,7 @@ export async function setupTestApp(): Promise<{
   superAdminId: string;
   adminId: string;
   vendorId: string;
+  testWeddingId: number;
 }> {
   const moduleFixture: TestingModule = await Test.createTestingModule({
     imports: [AppModule],
@@ -52,6 +53,7 @@ export async function setupTestApp(): Promise<{
     superAdminId,
     adminId,
     vendorId,
+    testWeddingId,
   } = await authenticateUsers(app);
 
   return {
@@ -62,6 +64,7 @@ export async function setupTestApp(): Promise<{
     superAdminId,
     adminId,
     vendorId,
+    testWeddingId,
   };
 }
 
@@ -72,6 +75,7 @@ export async function authenticateUsers(app: INestApplication): Promise<{
   superAdminId: string;
   adminId: string;
   vendorId: string;
+  testWeddingId: number;
 }> {
   // Use unique email addresses for each test run with random suffix
   const timestamp = Date.now();
@@ -98,19 +102,35 @@ export async function authenticateUsers(app: INestApplication): Promise<{
     })
     .expect(201);
 
-  // Create and authenticate admin
+  // First create a wedding
+  const testWeddingData = {
+    name: 'Test Wedding for Setup',
+    date: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+    location: 'Test Location',
+    weddingType: WeddingType.CHINESE,
+    budgetBucket: BudgetBucket.MEDIUM,
+    guestCountBucket: GuestCountBucket.MEDIUM,
+    preferredStyle: WeddingStyle.MODERN,
+    preferredServices: [WeddingService.VENUE, WeddingService.CATERING],
+  };
+
+  const testWeddingResponse = await request(app.getHttpServer())
+    .post('/weddings')
+    .set(
+      'Authorization',
+      `Bearer ${superAdminLoginResponse.body.backendTokens.accessToken}`,
+    )
+    .send(testWeddingData)
+    .expect(201);
+
+  // Create and authenticate admin with wedding reference
   const adminData = {
     name: 'Test Admin',
     email: `admin-${timestamp}-${randomSuffix}@test.com`,
     password: 'password123',
     role: UserRole.ADMIN,
     isCouple: true,
-    onboardedDate: new Date().toISOString(),
-    weddingType: WeddingType.CHINESE,
-    budgetBucket: BudgetBucket.MEDIUM,
-    guestCountBucket: GuestCountBucket.MEDIUM,
-    preferredStyle: WeddingStyle.MODERN,
-    preferredServices: [WeddingService.VENUE, WeddingService.CATERING],
+    weddingId: testWeddingResponse.body.id,
   };
 
   const adminResponse = await request(app.getHttpServer())
@@ -163,6 +183,7 @@ export async function authenticateUsers(app: INestApplication): Promise<{
     superAdminId: superAdminResponse.body.id,
     adminId: adminResponse.body.id,
     vendorId: vendorResponse.body.id,
+    testWeddingId: testWeddingResponse.body.id,
   };
 }
 
@@ -178,6 +199,11 @@ export async function seedWeddings(
       name: `Test Wedding ${i}`,
       date: new Date(Date.now() + i * 24 * 60 * 60 * 1000).toISOString(), // i days from now
       location: `Test Location ${i}`,
+      weddingType: WeddingType.WESTERN,
+      budgetBucket: BudgetBucket.MEDIUM,
+      guestCountBucket: GuestCountBucket.MEDIUM,
+      preferredStyle: WeddingStyle.MODERN,
+      preferredServices: [WeddingService.VENUE, WeddingService.CATERING],
     };
 
     const requestBuilder = request(app.getHttpServer()).post('/weddings');
@@ -239,12 +265,11 @@ export async function seedVendors(
 
 export async function seedAdmins(
   app: INestApplication,
+  weddingId: number,
   count: number = 2,
 ): Promise<any[]> {
   const admins = [];
   const timestamp = Date.now();
-  const weddingTypes = [WeddingType.CHINESE, WeddingType.WESTERN];
-  const budgets = [BudgetBucket.LOW, BudgetBucket.MEDIUM];
 
   for (let i = 1; i <= count; i++) {
     const adminData = {
@@ -253,12 +278,7 @@ export async function seedAdmins(
       password: 'password123',
       role: UserRole.ADMIN,
       isCouple: i % 2 === 1, // Alternate between couple and single
-      onboardedDate: new Date().toISOString(),
-      weddingType: weddingTypes[i - 1] || WeddingType.CHINESE,
-      budgetBucket: budgets[i - 1] || BudgetBucket.MEDIUM,
-      guestCountBucket: GuestCountBucket.MEDIUM,
-      preferredStyle: WeddingStyle.MODERN,
-      preferredServices: [WeddingService.VENUE, WeddingService.CATERING],
+      weddingId: weddingId,
     };
 
     const response = await request(app.getHttpServer())

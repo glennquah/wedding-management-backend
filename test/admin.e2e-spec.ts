@@ -1,11 +1,6 @@
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
-import { BudgetBucket } from '../src/common/budget-bucket.enum';
-import { GuestCountBucket } from '../src/common/guest-count-bucket.enum';
 import { UserRole } from '../src/common/user-role.enum';
-import { WeddingService } from '../src/common/wedding-service.enum';
-import { WeddingStyle } from '../src/common/wedding-style.enum';
-import { WeddingType } from '../src/common/wedding-type.enum';
 import { setupTestApp, teardownTestApp } from './test-utils';
 
 describe('Admin (e2e)', () => {
@@ -13,11 +8,13 @@ describe('Admin (e2e)', () => {
   let adminToken: string;
   let createdAdminId: number;
   let createdAdminEmail: string;
+  let testWeddingId: number;
 
   beforeAll(async () => {
     const testAppData = await setupTestApp();
     app = testAppData.app;
     adminToken = testAppData.jwtTokenAdmin;
+    testWeddingId = testAppData.testWeddingId;
   });
 
   afterAll(async () => {
@@ -32,12 +29,7 @@ describe('Admin (e2e)', () => {
         password: 'password123',
         role: UserRole.ADMIN,
         isCouple: true,
-        onboardedDate: new Date().toISOString(),
-        weddingType: WeddingType.CHINESE,
-        budgetBucket: BudgetBucket.MEDIUM,
-        guestCountBucket: GuestCountBucket.MEDIUM,
-        preferredStyle: WeddingStyle.MODERN,
-        preferredServices: [WeddingService.VENUE, WeddingService.CATERING],
+        weddingId: testWeddingId,
       };
 
       const response = await request(app.getHttpServer())
@@ -50,14 +42,6 @@ describe('Admin (e2e)', () => {
       expect(response.body.name).toBe(adminData.name);
       expect(response.body.email).toBe(adminData.email);
       expect(response.body.role).toBe(UserRole.ADMIN);
-      expect(response.body.isCouple).toBe(adminData.isCouple);
-      expect(response.body.weddingType).toBe(adminData.weddingType);
-      expect(response.body.budgetBucket).toBe(adminData.budgetBucket);
-      expect(response.body.guestCountBucket).toBe(adminData.guestCountBucket);
-      expect(response.body.preferredStyle).toBe(adminData.preferredStyle);
-      expect(response.body.preferredServices).toEqual(
-        adminData.preferredServices,
-      );
       expect(response.body).not.toHaveProperty('password');
 
       createdAdminId = response.body.id;
@@ -71,12 +55,7 @@ describe('Admin (e2e)', () => {
         password: 'password123',
         role: UserRole.ADMIN,
         isCouple: false,
-        onboardedDate: new Date().toISOString(),
-        weddingType: WeddingType.WESTERN,
-        budgetBucket: BudgetBucket.HIGH,
-        guestCountBucket: GuestCountBucket.LARGE,
-        preferredStyle: WeddingStyle.LUXURY,
-        preferredServices: [WeddingService.PHOTOGRAPHY],
+        weddingId: testWeddingId,
       };
 
       await request(app.getHttpServer())
@@ -96,12 +75,7 @@ describe('Admin (e2e)', () => {
           password: 'password123',
           role: UserRole.ADMIN,
           isCouple: true,
-          onboardedDate: new Date().toISOString(),
-          weddingType: WeddingType.CHINESE,
-          budgetBucket: BudgetBucket.LOW,
-          guestCountBucket: GuestCountBucket.SMALL,
-          preferredStyle: WeddingStyle.TRADITIONAL,
-          preferredServices: [WeddingService.VENUE],
+          weddingId: testWeddingId,
         },
         {
           name: 'Bulk Admin 2',
@@ -109,15 +83,7 @@ describe('Admin (e2e)', () => {
           password: 'password123',
           role: UserRole.ADMIN,
           isCouple: false,
-          onboardedDate: new Date().toISOString(),
-          weddingType: WeddingType.WESTERN,
-          budgetBucket: BudgetBucket.HIGH,
-          guestCountBucket: GuestCountBucket.LARGE,
-          preferredStyle: WeddingStyle.MODERN,
-          preferredServices: [
-            WeddingService.CATERING,
-            WeddingService.PHOTOGRAPHY,
-          ],
+          weddingId: testWeddingId,
         },
       ];
 
@@ -188,8 +154,7 @@ describe('Admin (e2e)', () => {
     it('should update an admin successfully', async () => {
       const updateData = {
         name: 'Updated Admin Name',
-        budgetBucket: BudgetBucket.LUXURY,
-        preferredStyle: WeddingStyle.RUSTIC,
+        isSuspended: true,
       };
 
       const response = await request(app.getHttpServer())
@@ -199,8 +164,6 @@ describe('Admin (e2e)', () => {
         .expect(200);
 
       expect(response.body.name).toBe(updateData.name);
-      expect(response.body.budgetBucket).toBe(updateData.budgetBucket);
-      expect(response.body.preferredStyle).toBe(updateData.preferredStyle);
       expect(response.body.id).toBe(createdAdminId);
     });
   });
@@ -214,12 +177,7 @@ describe('Admin (e2e)', () => {
         password: 'password123',
         role: UserRole.ADMIN,
         isCouple: true,
-        onboardedDate: new Date().toISOString(),
-        weddingType: WeddingType.MALAY,
-        budgetBucket: BudgetBucket.MEDIUM,
-        guestCountBucket: GuestCountBucket.MEDIUM,
-        preferredStyle: WeddingStyle.TRADITIONAL,
-        preferredServices: [WeddingService.MUSIC],
+        weddingId: testWeddingId,
       };
 
       const createResponse = await request(app.getHttpServer())
