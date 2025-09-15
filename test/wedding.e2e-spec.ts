@@ -1,5 +1,10 @@
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
+import { BudgetBucket } from '../src/common/budget-bucket.enum';
+import { GuestCountBucket } from '../src/common/guest-count-bucket.enum';
+import { WeddingService } from '../src/common/wedding-service.enum';
+import { WeddingStyle } from '../src/common/wedding-style.enum';
+import { WeddingType } from '../src/common/wedding-type.enum';
 import { setupTestApp, teardownTestApp } from './test-utils';
 
 describe('Wedding (e2e)', () => {
@@ -23,6 +28,11 @@ describe('Wedding (e2e)', () => {
         name: 'Test Wedding API',
         date: '2025-06-15T10:00:00.000Z',
         location: 'Marina Bay Sands',
+        weddingType: WeddingType.WESTERN,
+        budgetBucket: BudgetBucket.LUXURY,
+        guestCountBucket: GuestCountBucket.LARGE,
+        preferredStyle: WeddingStyle.LUXURY,
+        preferredServices: [WeddingService.VENUE, WeddingService.CATERING],
       };
 
       const response = await request(app.getHttpServer())
@@ -35,6 +45,13 @@ describe('Wedding (e2e)', () => {
       expect(response.body.name).toBe(weddingData.name);
       expect(response.body.date).toBe(weddingData.date);
       expect(response.body.location).toBe(weddingData.location);
+      expect(response.body.weddingType).toBe(weddingData.weddingType);
+      expect(response.body.budgetBucket).toBe(weddingData.budgetBucket);
+      expect(response.body.guestCountBucket).toBe(weddingData.guestCountBucket);
+      expect(response.body.preferredStyle).toBe(weddingData.preferredStyle);
+      expect(response.body.preferredServices).toEqual(
+        weddingData.preferredServices,
+      );
       expect(response.body).toHaveProperty('createdAt');
       expect(response.body).toHaveProperty('updatedAt');
 

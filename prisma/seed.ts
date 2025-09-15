@@ -47,19 +47,7 @@ async function main() {
       password: hashedPassword,
       role: UserRole.admin,
       admin: {
-        create: {
-          isCouple: true,
-          weddingType: WeddingType.western,
-          budgetBucket: BudgetBucket.luxury,
-          guestCountBucket: GuestCountBucket.large,
-          preferredStyle: WeddingStyle.luxury,
-          preferredServices: [
-            WeddingService.venue,
-            WeddingService.photography,
-            WeddingService.catering,
-            WeddingService.decoration,
-          ],
-        },
+        create: {},
       },
     },
   });
@@ -71,19 +59,7 @@ async function main() {
       password: hashedPassword,
       role: UserRole.admin,
       admin: {
-        create: {
-          isCouple: true,
-          weddingType: WeddingType.western,
-          budgetBucket: BudgetBucket.luxury,
-          guestCountBucket: GuestCountBucket.large,
-          preferredStyle: WeddingStyle.luxury,
-          preferredServices: [
-            WeddingService.venue,
-            WeddingService.photography,
-            WeddingService.catering,
-            WeddingService.decoration,
-          ],
-        },
+        create: {},
       },
     },
   });
@@ -135,17 +111,7 @@ async function main() {
           role: UserRole.admin,
           admin: {
             create: {
-              isCouple: true,
               isSuspended: couple.isSuspended,
-              weddingType: couple.type,
-              budgetBucket: BudgetBucket.medium,
-              guestCountBucket: GuestCountBucket.large,
-              preferredStyle: couple.style,
-              preferredServices: [
-                WeddingService.venue,
-                WeddingService.photography,
-                WeddingService.catering,
-              ],
             },
           },
         },
@@ -158,17 +124,7 @@ async function main() {
           role: UserRole.admin,
           admin: {
             create: {
-              isCouple: true,
               isSuspended: couple.isSuspended,
-              weddingType: couple.type,
-              budgetBucket: BudgetBucket.medium,
-              guestCountBucket: GuestCountBucket.large,
-              preferredStyle: couple.style,
-              preferredServices: [
-                WeddingService.venue,
-                WeddingService.photography,
-                WeddingService.catering,
-              ],
             },
           },
         },
@@ -430,30 +386,76 @@ async function main() {
       date: new Date('2024-12-15T14:00:00.000Z'),
       location: 'Marina Bay Grand Ballroom',
       couple: [ryanUser, ranaeUser],
+      weddingType: WeddingType.western,
+      budgetBucket: BudgetBucket.luxury,
+      guestCountBucket: GuestCountBucket.large,
+      preferredStyle: WeddingStyle.luxury,
+      preferredServices: [
+        WeddingService.venue,
+        WeddingService.photography,
+        WeddingService.catering,
+        WeddingService.decoration,
+      ],
     },
     {
       name: "Marcus & Sarah's Traditional Chinese Tea Ceremony",
       date: new Date('2024-11-08T10:00:00.000Z'),
       location: 'Heritage Temple Hall',
       couple: coupleUsers[0],
+      weddingType: WeddingType.chinese,
+      budgetBucket: BudgetBucket.medium,
+      guestCountBucket: GuestCountBucket.large,
+      preferredStyle: WeddingStyle.traditional,
+      preferredServices: [
+        WeddingService.venue,
+        WeddingService.photography,
+        WeddingService.catering,
+      ],
     },
     {
       name: "Amir & Siti's Malay Cultural Celebration",
       date: new Date('2024-10-20T16:00:00.000Z'),
       location: 'Garden Paradise Resort',
       couple: coupleUsers[1],
+      weddingType: WeddingType.malay,
+      budgetBucket: BudgetBucket.medium,
+      guestCountBucket: GuestCountBucket.large,
+      preferredStyle: WeddingStyle.traditional,
+      preferredServices: [
+        WeddingService.venue,
+        WeddingService.photography,
+        WeddingService.catering,
+      ],
     },
     {
       name: "Raj & Priya's Grand Indian Wedding",
       date: new Date('2025-01-25T12:00:00.000Z'),
       location: 'Heritage Temple Hall',
       couple: coupleUsers[2],
+      weddingType: WeddingType.indian,
+      budgetBucket: BudgetBucket.medium,
+      guestCountBucket: GuestCountBucket.large,
+      preferredStyle: WeddingStyle.traditional,
+      preferredServices: [
+        WeddingService.venue,
+        WeddingService.photography,
+        WeddingService.catering,
+      ],
     },
     {
       name: "David & Emma's Modern Beach Wedding",
       date: new Date('2024-09-30T17:00:00.000Z'),
       location: 'Garden Paradise Resort',
       couple: coupleUsers[3],
+      weddingType: WeddingType.western,
+      budgetBucket: BudgetBucket.medium,
+      guestCountBucket: GuestCountBucket.large,
+      preferredStyle: WeddingStyle.modern,
+      preferredServices: [
+        WeddingService.venue,
+        WeddingService.photography,
+        WeddingService.catering,
+      ],
     },
   ];
 
@@ -464,11 +466,28 @@ async function main() {
         name: theme.name,
         date: theme.date,
         location: theme.location,
+        weddingType: theme.weddingType,
+        budgetBucket: theme.budgetBucket,
+        guestCountBucket: theme.guestCountBucket,
+        preferredStyle: theme.preferredStyle,
+        preferredServices: theme.preferredServices,
         admins: {
+          connect: theme.couple.map((user) => ({ userId: user.id })),
+        },
+        mainCouple: {
           connect: theme.couple.map((user) => ({ userId: user.id })),
         },
       },
     });
+
+    // Update each admin's mainWeddingId to point back to this wedding
+    for (const user of theme.couple) {
+      await prisma.admin.update({
+        where: { userId: user.id },
+        data: { mainWeddingId: wedding.id },
+      });
+    }
+
     weddings.push(wedding);
   }
 
