@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDateString, IsOptional, IsNumber } from 'class-validator';
+import { IsBoolean, IsDateString, IsOptional, IsNumber } from 'class-validator';
 import { UpdateUserDto } from '../../user/dto/update-user.dto';
 
 export class UpdateAdminDto extends UpdateUserDto {
@@ -8,6 +8,8 @@ export class UpdateAdminDto extends UpdateUserDto {
     required: false,
     default: false,
   })
+  @IsOptional()
+  @IsBoolean()
   isSuspended?: boolean;
 
   @ApiProperty({

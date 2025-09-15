@@ -266,12 +266,11 @@ export async function seedVendors(
 
 export async function seedAdmins(
   app: INestApplication,
+  weddingId: number,
   count: number = 2,
 ): Promise<any[]> {
   const admins = [];
   const timestamp = Date.now();
-  const weddingTypes = [WeddingType.CHINESE, WeddingType.WESTERN];
-  const budgets = [BudgetBucket.LOW, BudgetBucket.MEDIUM];
 
   for (let i = 1; i <= count; i++) {
     const adminData = {
@@ -281,11 +280,7 @@ export async function seedAdmins(
       role: UserRole.ADMIN,
       isCouple: i % 2 === 1, // Alternate between couple and single
       onboardedDate: new Date().toISOString(),
-      weddingType: weddingTypes[i - 1] || WeddingType.CHINESE,
-      budgetBucket: budgets[i - 1] || BudgetBucket.MEDIUM,
-      guestCountBucket: GuestCountBucket.MEDIUM,
-      preferredStyle: WeddingStyle.MODERN,
-      preferredServices: [WeddingService.VENUE, WeddingService.CATERING],
+      weddingId: weddingId,
     };
 
     const response = await request(app.getHttpServer())

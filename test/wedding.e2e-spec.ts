@@ -146,6 +146,11 @@ describe('Wedding (e2e)', () => {
         name: 'Wedding To Delete',
         date: '2025-08-10T16:00:00.000Z',
         location: 'Temporary Venue',
+        weddingType: WeddingType.WESTERN,
+        budgetBucket: BudgetBucket.MEDIUM,
+        guestCountBucket: GuestCountBucket.MEDIUM,
+        preferredStyle: WeddingStyle.MODERN,
+        preferredServices: [WeddingService.VENUE, WeddingService.CATERING],
       };
 
       const createResponse = await request(app.getHttpServer())

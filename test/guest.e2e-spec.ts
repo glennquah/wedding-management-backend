@@ -1,6 +1,11 @@
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
+import { BudgetBucket } from '../src/common/budget-bucket.enum';
 import { ConfirmationStatus } from '../src/common/confirmation-status.enum';
+import { GuestCountBucket } from '../src/common/guest-count-bucket.enum';
+import { WeddingService } from '../src/common/wedding-service.enum';
+import { WeddingStyle } from '../src/common/wedding-style.enum';
+import { WeddingType } from '../src/common/wedding-type.enum';
 import { seedWeddings, setupTestApp, teardownTestApp } from './test-utils';
 
 describe('Guest (e2e)', () => {
@@ -206,6 +211,11 @@ describe('Guest (e2e)', () => {
         name: 'Wedding To Clear',
         date: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000).toISOString(),
         location: 'Test Location',
+        weddingType: WeddingType.WESTERN,
+        budgetBucket: BudgetBucket.MEDIUM,
+        guestCountBucket: GuestCountBucket.MEDIUM,
+        preferredStyle: WeddingStyle.MODERN,
+        preferredServices: [WeddingService.VENUE, WeddingService.CATERING],
       };
 
       const weddingResponse = await request(app.getHttpServer())

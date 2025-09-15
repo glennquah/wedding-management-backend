@@ -83,17 +83,19 @@ export class AdminService {
     });
 
     // Connect to the wedding via AdminWeddings relation
-    await this.prisma.wedding.update({
-      where: { id: dto.weddingId },
-      data: {
-        admins: {
-          connect: { userId: admin.userId },
+    if (dto.weddingId) {
+      await this.prisma.wedding.update({
+        where: { id: dto.weddingId },
+        data: {
+          admins: {
+            connect: { userId: admin.userId },
+          },
         },
-      },
-    });
+      });
+    }
 
     // If isCouple is true, also set this admin as the main couple for the wedding
-    if (dto.isCouple) {
+    if (dto.isCouple && dto.weddingId) {
       await this.prisma.wedding.update({
         where: { id: dto.weddingId },
         data: {
