@@ -23,7 +23,7 @@ export class WeddingService {
     return this.prisma.wedding.create({
       data: {
         name: dto.name,
-        date: new Date(dto.date),
+        date: dto.date ? new Date(dto.date) : undefined,
         location: dto.location,
         weddingType: dto.weddingType,
         budgetBucket: dto.budgetBucket,
@@ -103,7 +103,7 @@ export class WeddingService {
     return {
       id: wedding.id,
       name: wedding.name,
-      date: wedding.date.toISOString(),
+      date: wedding.date?.toISOString(),
       location: wedding.location,
       guests: wedding.guests?.map((guest) => ({
         id: guest.id,

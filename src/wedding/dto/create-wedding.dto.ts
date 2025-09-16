@@ -17,9 +17,10 @@ export class CreateWeddingDto {
   @IsString()
   name: string;
 
-  @ApiProperty({ description: 'Wedding date' })
+  @ApiProperty({ description: 'Wedding date', required: false })
+  @IsOptional()
   @IsDateString()
-  date: string;
+  date?: string;
 
   @ApiProperty({ description: 'Wedding location', required: false })
   @IsOptional()
