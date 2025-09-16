@@ -23,11 +23,12 @@ import { WeddingService } from './wedding.service';
 
 @ApiTags('weddings')
 @Controller('weddings')
-@UseGuards(JwtGuard)
+@UseGuards(JwtGuard, RolesGuard)
 export class WeddingController {
   constructor(private service: WeddingService) {}
 
   @Post()
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Create a new wedding' })
   @ApiResponse({
     status: 201,
@@ -41,6 +42,7 @@ export class WeddingController {
   }
 
   @Get()
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Get all weddings' })
   @ApiResponse({
     status: 200,
@@ -55,8 +57,7 @@ export class WeddingController {
   }
 
   @Get('admin/my-weddings')
-  @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Get weddings associated with the logged-in admin' })
   @ApiResponse({
     status: 200,
@@ -73,6 +74,7 @@ export class WeddingController {
   }
 
   @Get(':id')
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Get a wedding by ID' })
   @ApiResponse({
     status: 200,
@@ -88,6 +90,7 @@ export class WeddingController {
   }
 
   @Put(':id')
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Update a wedding' })
   @ApiResponse({
     status: 200,
@@ -105,6 +108,7 @@ export class WeddingController {
   }
 
   @Delete(':id')
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Delete a wedding' })
   @ApiResponse({
     status: 200,

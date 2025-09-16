@@ -12,6 +12,7 @@ import {
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { UserRole } from 'src/common/user-role.enum';
 import { ConfirmationStatus } from '../common/confirmation-status.enum';
 import { CreateGuestDto } from './dto/create-guest.dto';
@@ -21,11 +22,12 @@ import { GuestService } from './guest.service';
 
 @ApiTags('guests')
 @Controller('guests')
-@UseGuards(JwtGuard)
+@UseGuards(JwtGuard, RolesGuard)
 export class GuestController {
   constructor(private guestService: GuestService) {}
 
   @Post()
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Create a new guest' })
   @ApiResponse({
     status: 201,
@@ -39,6 +41,7 @@ export class GuestController {
   }
 
   @Post('bulk')
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Create multiple guests' })
   @ApiResponse({
     status: 201,
@@ -54,6 +57,7 @@ export class GuestController {
   }
 
   @Get('')
+  @Roles(UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Get all guests for all weddings' })
   @ApiResponse({
     status: 200,
@@ -68,6 +72,7 @@ export class GuestController {
   }
 
   @Get('wedding/:weddingId')
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Get all guests for a specific wedding' })
   @ApiResponse({
     status: 200,
@@ -83,6 +88,7 @@ export class GuestController {
   }
 
   @Get(':id')
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Get a guest by ID' })
   @ApiResponse({
     status: 200,
@@ -98,6 +104,7 @@ export class GuestController {
   }
 
   @Put(':id')
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Update a guest' })
   @ApiResponse({
     status: 200,
@@ -115,6 +122,7 @@ export class GuestController {
   }
 
   @Delete(':id')
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Delete a guest' })
   @ApiResponse({
     status: 200,
@@ -126,6 +134,7 @@ export class GuestController {
   }
 
   @Delete('wedding/:weddingId')
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Delete all guests for a specific wedding' })
   @ApiResponse({
     status: 200,
@@ -138,6 +147,7 @@ export class GuestController {
   }
 
   @Put(':id/confirm')
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Confirm guest attendance' })
   @ApiResponse({
     status: 200,
@@ -155,6 +165,7 @@ export class GuestController {
   }
 
   @Put(':id/reject')
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Reject guest attendance' })
   @ApiResponse({
     status: 200,

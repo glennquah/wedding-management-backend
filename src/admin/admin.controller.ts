@@ -44,6 +44,7 @@ export class AdminController {
   }
 
   @Post('bulk')
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Create multiple admins' })
   @ApiResponse({
     status: 201,
@@ -58,6 +59,7 @@ export class AdminController {
   }
 
   @Get()
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Get all admins' })
   @ApiResponse({
     status: 200,
@@ -84,6 +86,7 @@ export class AdminController {
   }
 
   @Get('email/:email')
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Get an admin by email' })
   @ApiResponse({
     status: 200,
@@ -98,6 +101,7 @@ export class AdminController {
   }
 
   @Put(':id')
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Update an admin' })
   @ApiResponse({
     status: 200,
@@ -118,6 +122,7 @@ export class AdminController {
   }
 
   @Delete(':id')
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Delete an admin' })
   @ApiResponse({
     status: 200,
@@ -129,6 +134,7 @@ export class AdminController {
   }
 
   @Put(':id/suspend')
+  @Roles(UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Suspend admin' })
   @ApiResponse({
     status: 200,
@@ -145,6 +151,7 @@ export class AdminController {
   }
 
   @Put(':id/unsuspend')
+  @Roles(UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Unsuspend admin' })
   @ApiResponse({
     status: 200,
