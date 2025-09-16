@@ -14,7 +14,7 @@ export class WeddingResponseDto {
   name: string;
 
   @ApiProperty({ description: 'Wedding date' })
-  date: string;
+  date?: string;
 
   @ApiProperty({ description: 'Wedding location', required: false })
   location?: string;

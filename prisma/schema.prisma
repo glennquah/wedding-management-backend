@@ -123,7 +123,7 @@ model Wedding {
   id                Int              @id @default(autoincrement())
   mainCouple        Admin[]          @relation("MainCouple")
   name              String
-  date              DateTime
+  date              DateTime?
   location          String?
   guests            Guest[]
   admins            Admin[]          @relation("AdminWeddings")
