@@ -45,6 +45,7 @@ export class VendorController {
   }
 
   @Post('bulk')
+  @Roles(UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Create multiple vendors' })
   @ApiResponse({
     status: 201,
@@ -59,7 +60,7 @@ export class VendorController {
   }
 
   @Get()
-  @Roles(UserRole.VENDOR, UserRole.SUPERADMIN)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Get all vendors' })
   @ApiResponse({
     status: 200,
@@ -71,6 +72,7 @@ export class VendorController {
   }
 
   @Get(':id')
+  @Roles(UserRole.ADMIN, UserRole.VENDOR, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Get a vendor by ID' })
   @ApiResponse({
     status: 200,
@@ -85,6 +87,7 @@ export class VendorController {
   }
 
   @Get('email/:email')
+  @Roles(UserRole.ADMIN, UserRole.VENDOR, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Get a vendor by email' })
   @ApiResponse({
     status: 200,
@@ -99,6 +102,7 @@ export class VendorController {
   }
 
   @Put(':id')
+  @Roles(UserRole.VENDOR, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Update a vendor' })
   @ApiResponse({
     status: 200,
@@ -119,6 +123,7 @@ export class VendorController {
   }
 
   @Delete(':id')
+  @Roles(UserRole.VENDOR, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Delete a vendor' })
   @ApiResponse({
     status: 200,
@@ -133,6 +138,7 @@ export class VendorController {
   }
 
   @Put(':id/accept')
+  @Roles(UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Accept vendor onboarding' })
   @ApiResponse({
     status: 200,
@@ -149,6 +155,7 @@ export class VendorController {
   }
 
   @Put(':id/reject')
+  @Roles(UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Reject vendor onboarding' })
   @ApiResponse({
     status: 200,
@@ -165,6 +172,7 @@ export class VendorController {
   }
 
   @Put(':id/suspend')
+  @Roles(UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Suspend vendor' })
   @ApiResponse({
     status: 200,
@@ -181,6 +189,7 @@ export class VendorController {
   }
 
   @Put(':id/unsuspend')
+  @Roles(UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Unsuspend vendor' })
   @ApiResponse({
     status: 200,

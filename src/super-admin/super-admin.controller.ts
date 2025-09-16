@@ -47,6 +47,7 @@ export class SuperAdminController {
   }
 
   @Post('bulk')
+  @Roles(UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Create multiple super admins' })
   @ApiResponse({
     status: 201,
@@ -61,6 +62,7 @@ export class SuperAdminController {
   }
 
   @Get()
+  @Roles(UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Get all super admins' })
   @ApiResponse({
     status: 200,
@@ -72,6 +74,7 @@ export class SuperAdminController {
   }
 
   @Get(':id')
+  @Roles(UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Get a super admin by ID' })
   @ApiResponse({
     status: 200,
@@ -86,6 +89,7 @@ export class SuperAdminController {
   }
 
   @Get('email/:email')
+  @Roles(UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Get a super admin by email' })
   @ApiResponse({
     status: 200,
@@ -100,6 +104,7 @@ export class SuperAdminController {
   }
 
   @Put(':id')
+  @Roles(UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Update a super admin' })
   @ApiResponse({
     status: 200,
@@ -120,6 +125,7 @@ export class SuperAdminController {
   }
 
   @Delete(':id')
+  @Roles(UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Delete a super admin' })
   @ApiResponse({
     status: 200,
