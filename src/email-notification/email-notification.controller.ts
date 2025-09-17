@@ -20,8 +20,8 @@ export class EmailNotificationController {
     status: 201,
     description: 'The email has been successfully sent.',
   })
-  async sendEmail(@Body() emailData: SendSingleEmailDto) {
-    return await this.emailNotificationService.sendEmail(
+  async sendEmail(@Body() emailData: SendSingleEmailDto): Promise<void> {
+    await this.emailNotificationService.sendEmail(
       emailData.to,
       emailData.subject,
       emailData.text,
@@ -35,7 +35,7 @@ export class EmailNotificationController {
     status: 201,
     description: 'The emails have been successfully sent.',
   })
-  async sendBulkEmail(@Body() bulkEmailData: SendBulkEmailDto) {
-    return await this.emailNotificationService.sendBulkEmail(bulkEmailData);
+  async sendBulkEmail(@Body() bulkEmailData: SendBulkEmailDto): Promise<void> {
+    await this.emailNotificationService.sendBulkEmail(bulkEmailData);
   }
 }

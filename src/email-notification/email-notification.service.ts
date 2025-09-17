@@ -12,7 +12,12 @@ export class EmailNotificationService {
     sgMail.setApiKey(key);
   }
 
-  async sendEmail(to: string, subject: string, text: string, html: string) {
+  async sendEmail(
+    to: string,
+    subject: string,
+    text: string,
+    html: string,
+  ): Promise<void> {
     const msg = {
       to,
       from: 'hello.knotly@gmail.com',
@@ -23,15 +28,13 @@ export class EmailNotificationService {
 
     try {
       await sgMail.send(msg);
-      console.log('Email sent');
-      return { success: true, message: 'Email sent successfully' };
     } catch (error) {
       console.error(error);
       throw error;
     }
   }
 
-  async sendBulkEmail(bulkEmailData: SendBulkEmailDto) {
+  async sendBulkEmail(bulkEmailData: SendBulkEmailDto): Promise<void> {
     const messages = bulkEmailData.emails.map((email) => ({
       to: email,
       from: 'hello.knotly@gmail.com',
@@ -42,12 +45,6 @@ export class EmailNotificationService {
 
     try {
       await sgMail.send(messages);
-      console.log(`${messages.length} emails sent`);
-      return {
-        success: true,
-        message: `${messages.length} emails sent successfully`,
-        count: messages.length,
-      };
     } catch (error) {
       console.error(error);
       throw error;
