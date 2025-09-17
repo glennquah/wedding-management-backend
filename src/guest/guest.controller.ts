@@ -68,7 +68,10 @@ export class GuestController {
   @ApiResponse({ status: 404, description: 'Wedding not found.' })
   async getAllGuests(): Promise<GuestResponseDto[]> {
     const guests = await this.guestService.findAllGuest();
-    return guests.map((guest) => this.guestService.toGuestResponseDto(guest));
+    const guestsDto = guests.map((guest) =>
+      this.guestService.toGuestResponseDto(guest),
+    );
+    return guestsDto;
   }
 
   @Get('wedding/:weddingId')
