@@ -26,6 +26,7 @@ async function main() {
     await prisma.superAdmin.deleteMany();
     await prisma.user.deleteMany();
     console.log('✅ Existing data cleared');
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     console.log('✅ Database is fresh, no data to clear');
   }
@@ -574,7 +575,9 @@ async function main() {
       }
     }
 
-    console.log(`✅ Created ~${primaryGuestCount} primary guests with accompanying guests for ${wedding.name}`);
+    console.log(
+      `✅ Created ~${primaryGuestCount} primary guests with accompanying guests for ${wedding.name}`,
+    );
   }
 
   console.log('Database seeded successfully!');
@@ -583,9 +586,13 @@ async function main() {
   console.log(`- 10 Admin users (5 couples)`);
   console.log(`- 20 Vendor users`);
   console.log(`- 5 Weddings`);
-  console.log(`- ~80 primary guests per wedding (some with accompanying guests)`);
+  console.log(
+    `- ~80 primary guests per wedding (some with accompanying guests)`,
+  );
   console.log(`- ~30% of primary guests have 1-3 accompanying guests each`);
-  console.log(`- Accompanying guests have individual confirmation status and dietary requirements`);
+  console.log(
+    `- Accompanying guests have individual confirmation status and dietary requirements`,
+  );
 }
 
 main()

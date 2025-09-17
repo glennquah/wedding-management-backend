@@ -8,6 +8,7 @@ import { UpdateGuestDto } from './dto/update-guest.dto';
 
 type GuestWithAccompanying = Guest & {
   accompanyingGuests?: Guest[];
+  wedding?: { name: string };
 };
 
 @Injectable()
@@ -48,6 +49,7 @@ export class GuestService {
       include: {
         accompanyingGuests: true,
         primaryGuest: true,
+        wedding: true,
       },
       orderBy: { createdAt: 'asc' },
     });
@@ -119,6 +121,7 @@ export class GuestService {
       group: guest.group,
       confirmationStatus: guest.confirmationStatus as ConfirmationStatus,
       weddingId: guest.weddingId,
+      weddingName: guest.wedding?.name,
       primaryGuestId: guest.primaryGuestId,
       accompanyingGuests: guest.accompanyingGuests?.map((g) =>
         this.toGuestResponseDto(g),
