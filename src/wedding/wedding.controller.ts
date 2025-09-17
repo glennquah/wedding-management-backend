@@ -11,11 +11,11 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Roles } from 'src/auth/decorators/roles.decorator';
+import { JwtPayload } from 'src/auth/dto/jwt-payload.interface';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
-import { Roles } from 'src/auth/decorators/roles.decorator';
 import { UserRole } from 'src/common/user-role.enum';
-import { JwtPayload } from 'src/auth/dto/jwt-payload.interface';
 import { CreateWeddingDto } from './dto/create-wedding.dto';
 import { UpdateWeddingDto } from './dto/update-wedding.dto';
 import { WeddingResponseDto } from './dto/wedding-response.dto';
@@ -50,9 +50,10 @@ export class WeddingController {
   })
   async findAll(): Promise<WeddingResponseDto[]> {
     const weddings = await this.service.findAll();
-    return weddings.map((wedding) =>
+    const weddingsDto = weddings.map((wedding) =>
       this.service.toWeddingResponseDto(wedding),
     );
+    return weddingsDto;
   }
 
   @Get('admin/my-weddings')
