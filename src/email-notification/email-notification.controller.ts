@@ -1,8 +1,14 @@
-import { Body, Controller, Post } from '@nestjs/common';
-import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { JwtGuard } from 'src/auth/guards/jwt.guard';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { SendBulkEmailDto } from './dto/send-bulk-email.dto';
+import { SendSingleEmailDto } from './dto/send-single-email.dto';
 import { EmailNotificationService } from './email-notification.service';
 
+@ApiTags('email-notification')
 @Controller('email-notification')
+@UseGuards(JwtGuard, RolesGuard)
 export class EmailNotificationController {
   constructor(
     private readonly emailNotificationService: EmailNotificationService,
@@ -14,20 +20,22 @@ export class EmailNotificationController {
     status: 201,
     description: 'The email has been successfully sent.',
   })
-  async sendEmail(
-    @Body()
-    emailData: {
-      to: string;
-      subject: string;
-      text: string;
-      html: string;
-    },
-  ) {
+  async sendEmail(@Body() emailData: SendSingleEmailDto) {
     return await this.emailNotificationService.sendEmail(
       emailData.to,
       emailData.subject,
       emailData.text,
       emailData.html,
     );
+  }
+
+  @Post('send-bulk')
+  @ApiOperation({ summary: 'Send bulk email notifications' })
+  @ApiResponse({
+    status: 201,
+    description: 'The emails have been successfully sent.',
+  })
+  async sendBulkEmail(@Body() bulkEmailData: SendBulkEmailDto) {
+    return await this.emailNotificationService.sendBulkEmail(bulkEmailData);
   }
 }
