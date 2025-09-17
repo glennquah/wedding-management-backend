@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import sgMail from '@sendgrid/mail';
+import * as sgMail from '@sendgrid/mail';
 
 @Injectable()
 export class EmailNotificationService {
@@ -14,7 +14,7 @@ export class EmailNotificationService {
   async sendEmail(to: string, subject: string, text: string, html: string) {
     const msg = {
       to,
-      from: 'test@example.com',
+      from: 'hello.knotly@gmail.com',
       subject,
       text,
       html,
