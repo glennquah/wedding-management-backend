@@ -25,6 +25,7 @@ export class UpdateWeddingDto {
   @ApiProperty({
     description: 'Wedding type',
     enum: WeddingType,
+    enumName: 'WeddingType',
     required: false,
   })
   @IsOptional()
@@ -34,6 +35,7 @@ export class UpdateWeddingDto {
   @ApiProperty({
     description: 'Budget bucket',
     enum: BudgetBucket,
+    enumName: 'BudgetBucket',
     required: false,
   })
   @IsOptional()
@@ -43,6 +45,7 @@ export class UpdateWeddingDto {
   @ApiProperty({
     description: 'Guest count bucket',
     enum: GuestCountBucket,
+    enumName: 'GuestCountBucket',
     required: false,
   })
   @IsOptional()
@@ -52,6 +55,7 @@ export class UpdateWeddingDto {
   @ApiProperty({
     description: 'Preferred wedding style',
     enum: WeddingStyle,
+    enumName: 'WeddingStyle',
     required: false,
   })
   @IsOptional()
@@ -61,6 +65,7 @@ export class UpdateWeddingDto {
   @ApiProperty({
     description: 'Preferred wedding services',
     enum: WeddingService,
+    enumName: 'WeddingService',
     isArray: true,
     required: false,
   })
