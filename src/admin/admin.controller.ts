@@ -85,10 +85,10 @@ export class AdminController {
         mainWeddingId: {
           type: 'number',
           nullable: true,
-          description: 'The ID of the main wedding, or null if not set'
-        }
-      }
-    }
+          description: 'The ID of the main wedding, or null if not set',
+        },
+      },
+    },
   })
   @ApiResponse({ status: 404, description: 'Admin not found.' })
   async getMyMainWedding(
@@ -193,5 +193,4 @@ export class AdminController {
       isSuspended: false,
     });
   }
-
 }
