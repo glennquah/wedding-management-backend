@@ -9,7 +9,12 @@ import {
   ParseIntPipe,
   HttpCode,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
+import { JwtGuard } from 'src/auth/guards/jwt.guard';
+import { UserRole } from 'src/common/user-role.enum';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { Roles } from 'src/auth/decorators/roles.decorator';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { SeatingArrangementService } from './seating-arrangement.service';
 import { CreateSeatingArrangementDto } from './dto/create-seating-arrangement.dto';
@@ -24,6 +29,8 @@ export class SeatingArrangementController {
   ) {}
 
   @Post()
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Create seating arrangement for a wedding' })
   @ApiParam({ name: 'weddingId', type: 'number', description: 'Wedding ID' })
   @ApiResponse({
@@ -47,6 +54,8 @@ export class SeatingArrangementController {
   }
 
   @Get()
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Get seating arrangement for a wedding' })
   @ApiParam({ name: 'weddingId', type: 'number', description: 'Wedding ID' })
   @ApiResponse({
@@ -62,6 +71,8 @@ export class SeatingArrangementController {
   }
 
   @Patch()
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Update seating arrangement for a wedding' })
   @ApiParam({ name: 'weddingId', type: 'number', description: 'Wedding ID' })
   @ApiResponse({
@@ -81,6 +92,8 @@ export class SeatingArrangementController {
   }
 
   @Delete()
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete seating arrangement for a wedding' })
   @ApiParam({ name: 'weddingId', type: 'number', description: 'Wedding ID' })

@@ -45,7 +45,7 @@ export class SeatingArrangementService {
       },
     });
 
-    return this.formatResponse(seatingArrangement);
+    return this.toSeatingArrangementResponseDto(seatingArrangement);
   }
 
   async findByWeddingId(
@@ -59,7 +59,7 @@ export class SeatingArrangementService {
       return null;
     }
 
-    return this.formatResponse(seatingArrangement);
+    return this.toSeatingArrangementResponseDto(seatingArrangement);
   }
 
   async update(
@@ -96,7 +96,7 @@ export class SeatingArrangementService {
         data: updateData,
       });
 
-    return this.formatResponse(updatedSeatingArrangement);
+    return this.toSeatingArrangementResponseDto(updatedSeatingArrangement);
   }
 
   async remove(weddingId: number): Promise<void> {
@@ -115,7 +115,7 @@ export class SeatingArrangementService {
     });
   }
 
-  private formatResponse(
+  private toSeatingArrangementResponseDto(
     seatingArrangement: any,
   ): SeatingArrangementResponseDto {
     return {

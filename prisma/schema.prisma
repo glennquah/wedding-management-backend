@@ -17,7 +17,6 @@ enum UserRole {
   admin
   superAdmin
   vendor
-  user
 }
 
 enum WeddingType {
