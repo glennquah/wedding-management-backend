@@ -37,6 +37,9 @@ export class WeddingService {
   async findAll(): Promise<Wedding[]> {
     return this.prisma.wedding.findMany({
       orderBy: { createdAt: 'desc' },
+      include: {
+        guests: true,
+      },
     });
   }
 
@@ -113,6 +116,7 @@ export class WeddingService {
         group: guest.group,
         confirmationStatus: guest.confirmationStatus as ConfirmationStatus,
         weddingId: guest.weddingId,
+        weddingName: wedding.name,
         primaryGuestId: guest.primaryGuestId,
         createdAt: guest.createdAt,
         updatedAt: guest.updatedAt,

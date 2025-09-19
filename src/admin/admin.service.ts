@@ -233,4 +233,19 @@ export class AdminService {
     );
     return createdAdmins;
   }
+
+  async getMainWeddingId(
+    userId: number,
+  ): Promise<{ mainWeddingId: number | null }> {
+    const admin = await this.prisma.admin.findUnique({
+      where: { userId },
+      select: { mainWeddingId: true },
+    });
+
+    if (!admin) {
+      throw new NotFoundException(`Admin with userId ${userId} not found`);
+    }
+
+    return { mainWeddingId: admin.mainWeddingId };
+  }
 }

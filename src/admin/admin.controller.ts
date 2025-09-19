@@ -7,6 +7,7 @@ import {
   ParseIntPipe,
   Post,
   Put,
+  Request,
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -20,6 +21,8 @@ import { CreateAdminDto } from './dto/create-admin.dto';
 import { UpdateAdminDto } from './dto/update-admin.dto';
 
 import { AdminService } from './admin.service';
+
+import { JwtPayload } from 'src/auth/dto/jwt-payload.interface';
 
 @ApiTags('admins')
 @Controller('admins')
@@ -68,6 +71,30 @@ export class AdminController {
   })
   async getAllAdmins(): Promise<AdminResponseDto[]> {
     return this.adminService.findAll();
+  }
+
+  @Get('my-main-wedding')
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Get the main wedding ID for the logged-in admin' })
+  @ApiResponse({
+    status: 200,
+    description: 'The main wedding ID associated with the admin',
+    schema: {
+      type: 'object',
+      properties: {
+        mainWeddingId: {
+          type: 'number',
+          nullable: true,
+          description: 'The ID of the main wedding, or null if not set',
+        },
+      },
+    },
+  })
+  @ApiResponse({ status: 404, description: 'Admin not found.' })
+  async getMyMainWedding(
+    @Request() req: Request & { user: JwtPayload },
+  ): Promise<{ mainWeddingId: number | null }> {
+    return this.adminService.getMainWeddingId(req.user.sub);
   }
 
   @Get(':id')

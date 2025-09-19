@@ -26,6 +26,9 @@ export class GuestResponseDto {
   @ApiProperty({ description: 'Wedding ID this guest belongs to' })
   weddingId: number;
 
+  @ApiProperty({ description: 'Wedding name this guest belongs to' })
+  weddingName: string;
+
   @ApiProperty({
     description: 'Primary guest ID if this is an accompanying guest',
     required: false,
