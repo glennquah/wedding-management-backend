@@ -11,11 +11,13 @@ import { UserModule } from './user/user.module';
 import { VendorModule } from './vendor/vendor.module';
 import { WeddingModule } from './wedding/wedding.module';
 import { ListingModule } from './listing/listing.module';
+import { MicrositeModule } from './microsite/microsite.module';
 
 @Module({
   imports: [
     PrismaModule,
     UserModule,
+    MicrositeModule,
     VendorModule,
     AdminModule,
     SuperAdminModule,
