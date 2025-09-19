@@ -126,7 +126,9 @@ export class VendorController {
 
   @Post('delete-self')
   @Roles(UserRole.VENDOR)
-  @ApiOperation({ summary: 'Delete own vendor profile (requires password confirmation)' })
+  @ApiOperation({
+    summary: 'Delete own vendor profile (requires password confirmation)',
+  })
   @ApiResponse({
     status: 200,
     description: 'The vendor profile has been successfully deleted.',
@@ -151,7 +153,9 @@ export class VendorController {
 
   @Delete(':id')
   @Roles(UserRole.SUPERADMIN)
-  @ApiOperation({ summary: 'Delete a vendor (super admin only, no password required)' })
+  @ApiOperation({
+    summary: 'Delete a vendor (super admin only, no password required)',
+  })
   @ApiResponse({
     status: 200,
     description: 'The vendor has been successfully deleted.',

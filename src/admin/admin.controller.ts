@@ -150,7 +150,9 @@ export class AdminController {
 
   @Post('delete-self')
   @Roles(UserRole.ADMIN)
-  @ApiOperation({ summary: 'Delete own admin profile (requires password confirmation)' })
+  @ApiOperation({
+    summary: 'Delete own admin profile (requires password confirmation)',
+  })
   @ApiResponse({
     status: 200,
     description: 'The admin profile has been successfully deleted.',
@@ -175,7 +177,9 @@ export class AdminController {
 
   @Delete(':id')
   @Roles(UserRole.SUPERADMIN)
-  @ApiOperation({ summary: 'Delete an admin (super admin only, no password required)' })
+  @ApiOperation({
+    summary: 'Delete an admin (super admin only, no password required)',
+  })
   @ApiResponse({
     status: 200,
     description: 'The admin has been successfully deleted.',
