@@ -56,6 +56,25 @@ export class MicrositeService {
     return this.toMicrositeResponseDto(microsite);
   }
 
+  async getMicrositeByWeddingId(
+    weddingId: number,
+  ): Promise<MicrositeResponseDto> {
+    const microsite = await this.prisma.microsite.findUnique({
+      where: { weddingId: weddingId },
+      include: {
+        wedding: true,
+      },
+    });
+
+    if (!microsite) {
+      throw new NotFoundException(
+        `Microsite for wedding ID ${weddingId} not found`,
+      );
+    }
+
+    return this.toMicrositeResponseDto(microsite);
+  }
+
   async validateMicrositePassword(
     micrositeSlug: string,
     password: string,

@@ -50,6 +50,27 @@ export class MicrositeController {
     return this.micrositeService.getMicrositeBySlug(slug);
   }
 
+  @Get('wedding/:weddingId')
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Get microsite details by wedding ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Microsite details retrieved successfully',
+    type: MicrositeResponseDto,
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Admin role required.' })
+  @ApiResponse({
+    status: 404,
+    description: 'Microsite not found for the wedding.',
+  })
+  async getMicrositeByWeddingId(
+    @Param('weddingId', ParseIntPipe) weddingId: number,
+  ): Promise<MicrositeResponseDto> {
+    return this.micrositeService.getMicrositeByWeddingId(weddingId);
+  }
+
   @Post('login')
   @ApiOperation({ summary: 'Validate microsite password' })
   @ApiResponse({
