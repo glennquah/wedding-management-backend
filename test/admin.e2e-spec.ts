@@ -168,8 +168,71 @@ describe('Admin (e2e)', () => {
     });
   });
 
+  describe('DELETE /admins/delete-self', () => {
+    it('should allow admin to delete their own profile with correct password', async () => {
+      // First create an admin to delete
+      const adminToDelete = {
+        name: 'Admin To Self Delete',
+        email: 'adminselfdelete@test.com',
+        password: 'password123',
+        role: UserRole.ADMIN,
+        isCouple: true,
+        weddingId: testWeddingId,
+      };
+
+      const createResponse = await request(app.getHttpServer())
+        .post('/admins')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send(adminToDelete)
+        .expect(201);
+
+      // Login to get the new admin's token
+      const loginResponse = await request(app.getHttpServer())
+        .post('/auth/login')
+        .send({
+          email: adminToDelete.email,
+          password: adminToDelete.password,
+        })
+        .expect(200);
+
+      const newAdminToken = loginResponse.body.accessToken;
+
+      // Delete own profile with correct password
+      await request(app.getHttpServer())
+        .delete('/admins/delete-self')
+        .set('Authorization', `Bearer ${newAdminToken}`)
+        .send({ password: adminToDelete.password })
+        .expect(200);
+
+      // Verify the admin is deleted by trying to login again
+      await request(app.getHttpServer())
+        .post('/auth/login')
+        .send({
+          email: adminToDelete.email,
+          password: adminToDelete.password,
+        })
+        .expect(401);
+    });
+
+    it('should reject delete-self with incorrect password', async () => {
+      await request(app.getHttpServer())
+        .delete('/admins/delete-self')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ password: 'wrongpassword' })
+        .expect(401);
+    });
+
+    it('should reject delete-self without password', async () => {
+      await request(app.getHttpServer())
+        .delete('/admins/delete-self')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({})
+        .expect(400);
+    });
+  });
+
   describe('DELETE /admins/:id', () => {
-    it('should delete an admin successfully', async () => {
+    it('should delete an admin successfully (super admin only)', async () => {
       // First create an admin to delete
       const adminToDelete = {
         name: 'Admin To Delete',
@@ -188,11 +251,11 @@ describe('Admin (e2e)', () => {
 
       const adminId = createResponse.body.id;
 
-      // Delete the admin
+      // Delete the admin (this should now require super admin role)
       await request(app.getHttpServer())
         .delete(`/admins/${adminId}`)
         .set('Authorization', `Bearer ${adminToken}`)
-        .expect(200);
+        .expect(403); // Should fail for regular admin
     });
   });
 });

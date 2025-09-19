@@ -148,7 +148,7 @@ export class AdminController {
     return this.adminService.update(id, body);
   }
 
-  @Post('delete-self')
+  @Delete('delete-self')
   @Roles(UserRole.ADMIN)
   @ApiOperation({
     summary: 'Delete own admin profile (requires password confirmation)',

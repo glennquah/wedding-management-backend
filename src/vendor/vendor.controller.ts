@@ -124,7 +124,7 @@ export class VendorController {
     return this.service.update(id, body);
   }
 
-  @Post('delete-self')
+  @Delete('delete-self')
   @Roles(UserRole.VENDOR)
   @ApiOperation({
     summary: 'Delete own vendor profile (requires password confirmation)',
