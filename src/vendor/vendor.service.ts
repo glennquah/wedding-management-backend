@@ -2,9 +2,10 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { User, Vendor } from '@prisma/client';
-import { hash } from 'bcrypt';
+import { compare, hash } from 'bcrypt';
 import { VendorOnboardingStatus } from 'src/common/vendor-onboarding-status.enum';
 import { WeddingService } from '../common/wedding-service.enum';
 import { WeddingStyle } from '../common/wedding-style.enum';
@@ -188,6 +189,28 @@ export class VendorService {
     });
 
     return this.toVendorResponseDto(await updatedVendor);
+  }
+
+  async deleteSelf(userId: number, password: string): Promise<void> {
+    // Get the raw user data with password for validation
+    const rawUser = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!rawUser) {
+      throw new NotFoundException(`User with id ${userId} not found`);
+    }
+
+    // Validate password
+    const isValidPassword = await compare(password, rawUser.password);
+    if (!isValidPassword) {
+      throw new UnauthorizedException('Invalid password');
+    }
+
+    await this.prisma.$transaction([
+      this.prisma.vendor.delete({ where: { userId } }),
+      this.prisma.user.delete({ where: { id: userId } }),
+    ]);
   }
 
   async delete(userId: number): Promise<void> {

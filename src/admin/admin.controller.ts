@@ -10,7 +10,7 @@ import {
   Request,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { UserRole } from 'src/common/user-role.enum';
@@ -148,16 +148,41 @@ export class AdminController {
     return this.adminService.update(id, body);
   }
 
+  @Post('delete-self')
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Delete own admin profile (requires password confirmation)' })
+  @ApiResponse({
+    status: 200,
+    description: 'The admin profile has been successfully deleted.',
+  })
+  @ApiResponse({ status: 401, description: 'Invalid password.' })
+  @ApiResponse({ status: 404, description: 'Admin not found.' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        password: { type: 'string', example: 'mypassword123' },
+      },
+      required: ['password'],
+    },
+  })
+  async deleteSelf(
+    @Request() req: Request & { user: JwtPayload },
+    @Body() body: { password: string },
+  ): Promise<void> {
+    await this.adminService.deleteSelf(req.user.sub, body.password);
+  }
+
   @Delete(':id')
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
-  @ApiOperation({ summary: 'Delete an admin' })
+  @Roles(UserRole.SUPERADMIN)
+  @ApiOperation({ summary: 'Delete an admin (super admin only, no password required)' })
   @ApiResponse({
     status: 200,
     description: 'The admin has been successfully deleted.',
   })
   @ApiResponse({ status: 404, description: 'Admin not found.' })
   async delete(@Param('id', ParseIntPipe) id: number): Promise<void> {
-    await this.adminService.deleteAdmin(id);
+    await this.adminService.delete(id);
   }
 
   @Put(':id/suspend')
