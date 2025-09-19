@@ -167,6 +167,13 @@ export class AdminService {
   async update(userId: number, dto: UpdateAdminDto): Promise<AdminResponseDto> {
     await this.findById(userId);
 
+    // Prepare user update data
+    const userUpdateData: any = {};
+    if (dto.name) userUpdateData.name = dto.name;
+    if (dto.email) userUpdateData.email = dto.email;
+    if (dto.password) userUpdateData.password = await hash(dto.password, 10);
+
+    // Check if email is being updated and if it conflicts
     if (dto.email) {
       const existingUser = await this.prisma.user.findUnique({
         where: { email: dto.email },
@@ -174,21 +181,13 @@ export class AdminService {
       if (existingUser && existingUser.id !== userId) {
         throw new ConflictException('User with this email already exists');
       }
+    }
+
+    // Update user data if there are changes
+    if (Object.keys(userUpdateData).length > 0) {
       await this.prisma.user.update({
         where: { id: userId },
-        data: {
-          email: dto.email,
-          name: dto.name,
-          password: dto.password,
-        },
-      });
-    } else if (dto.name || dto.password) {
-      await this.prisma.user.update({
-        where: { id: userId },
-        data: {
-          name: dto.name,
-          password: dto.password,
-        },
+        data: userUpdateData,
       });
     }
 
