@@ -180,7 +180,7 @@ describe('Admin (e2e)', () => {
         weddingId: testWeddingId,
       };
 
-      const createResponse = await request(app.getHttpServer())
+      await request(app.getHttpServer())
         .post('/admins')
         .set('Authorization', `Bearer ${adminToken}`)
         .send(adminToDelete)

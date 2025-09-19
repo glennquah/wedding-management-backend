@@ -263,7 +263,7 @@ describe('Vendor (e2e)', () => {
         weddingTypes: [WeddingType.WESTERN],
       };
 
-      const createResponse = await request(app.getHttpServer())
+      await request(app.getHttpServer())
         .post('/vendors')
         .set('Authorization', `Bearer ${superAdminToken}`)
         .send(vendorToDelete)
