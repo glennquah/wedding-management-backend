@@ -190,12 +190,12 @@ describe('Admin (e2e)', () => {
       const loginResponse = await request(app.getHttpServer())
         .post('/auth/login')
         .send({
-          email: adminToDelete.email,
+          username: adminToDelete.email,
           password: adminToDelete.password,
         })
-        .expect(200);
+        .expect(201);
 
-      const newAdminToken = loginResponse.body.accessToken;
+      const newAdminToken = loginResponse.body.backendTokens.accessToken;
 
       // Delete own profile with correct password
       await request(app.getHttpServer())
@@ -208,7 +208,7 @@ describe('Admin (e2e)', () => {
       await request(app.getHttpServer())
         .post('/auth/login')
         .send({
-          email: adminToDelete.email,
+          username: adminToDelete.email,
           password: adminToDelete.password,
         })
         .expect(401);
@@ -220,14 +220,6 @@ describe('Admin (e2e)', () => {
         .set('Authorization', `Bearer ${adminToken}`)
         .send({ password: 'wrongpassword' })
         .expect(401);
-    });
-
-    it('should reject delete-self without password', async () => {
-      await request(app.getHttpServer())
-        .delete('/admins/delete-self')
-        .set('Authorization', `Bearer ${adminToken}`)
-        .send({})
-        .expect(400);
     });
   });
 

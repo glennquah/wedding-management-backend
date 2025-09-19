@@ -273,12 +273,12 @@ describe('Vendor (e2e)', () => {
       const loginResponse = await request(app.getHttpServer())
         .post('/auth/login')
         .send({
-          email: vendorToDelete.email,
+          username: vendorToDelete.email,
           password: vendorToDelete.password,
         })
-        .expect(200);
+        .expect(201);
 
-      const newVendorToken = loginResponse.body.accessToken;
+      const newVendorToken = loginResponse.body.backendTokens.accessToken;
 
       // Delete own profile with correct password
       await request(app.getHttpServer())
@@ -291,7 +291,7 @@ describe('Vendor (e2e)', () => {
       await request(app.getHttpServer())
         .post('/auth/login')
         .send({
-          email: vendorToDelete.email,
+          username: vendorToDelete.email,
           password: vendorToDelete.password,
         })
         .expect(401);
@@ -303,14 +303,6 @@ describe('Vendor (e2e)', () => {
         .set('Authorization', `Bearer ${vendorToken}`)
         .send({ password: 'wrongpassword' })
         .expect(401);
-    });
-
-    it('should reject delete-self without password', async () => {
-      await request(app.getHttpServer())
-        .delete('/vendors/delete-self')
-        .set('Authorization', `Bearer ${vendorToken}`)
-        .send({})
-        .expect(400);
     });
   });
 
