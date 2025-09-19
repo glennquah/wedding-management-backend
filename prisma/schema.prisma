@@ -135,11 +135,12 @@ model Wedding {
   preferredStyle    WeddingStyle
   preferredServices WeddingService[]
   orders            Order[]
+  seatingArrangement SeatingArrangement?
 }
 
 model Guest {
   id                 Int                @id @default(autoincrement())
-  email              String             
+  email              String
   name               String
   allergies          String?
   group              String?
@@ -197,4 +198,14 @@ model OrderListing {
   listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
 
   @@id([orderId, listingId])
+}
+
+model SeatingArrangement {
+  id              Int      @id @default(autoincrement())
+  weddingId       Int      @unique
+  wedding         Wedding  @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+  groupPriorities Json?
+  tables          Json
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }
