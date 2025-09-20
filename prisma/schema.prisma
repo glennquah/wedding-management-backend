@@ -66,6 +66,23 @@ enum OrderStatus {
   COMPLETED
 }
 
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  SUCCEEDED
+  FAILED
+  CANCELLED
+  REFUNDED
+  PARTIALLY_REFUNDED
+}
+
+enum PaymentMethod {
+  CARD
+  GOOGLE_PAY
+  APPLE_PAY
+  BANK_TRANSFER
+}
+
 enum VendorOnboardingStatus {
   pending
   rejected
@@ -175,7 +192,8 @@ model Listing {
 model Order {
   id            Int         @id @default(autoincrement())
   orderStatus   OrderStatus @default(PENDING)
-  paymentMethod String
+  totalAmount   Float
+  currency      String      @default("SGD")
   purchaseDate  DateTime    @default(now())
   remark        String?
 
@@ -185,6 +203,9 @@ model Order {
 
   // Many-to-many with Listings
   listings OrderListing[]
+
+  // Payment relation
+  payments Payment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -198,6 +219,30 @@ model OrderListing {
   listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
 
   @@id([orderId, listingId])
+}
+
+model Payment {
+  id                    Int           @id @default(autoincrement())
+  stripePaymentIntentId String        @unique
+  stripeClientSecret    String?
+  amount                Float
+  currency              String        @default("SGD")
+  paymentMethod         PaymentMethod
+  paymentStatus         PaymentStatus @default(PENDING)
+  stripeChargeId        String?
+  receiptUrl            String?
+  failureReason         String?
+  refundedAmount        Float?        @default(0)
+
+  // Relations
+  orderId Int
+  order   Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([stripePaymentIntentId])
+  @@index([paymentStatus])
 }
 
 model SeatingArrangement {

@@ -12,6 +12,7 @@ import { UserModule } from './user/user.module';
 import { VendorModule } from './vendor/vendor.module';
 import { WeddingModule } from './wedding/wedding.module';
 import { ListingModule } from './listing/listing.module';
+import { PaymentModule } from './payment/payment.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { ListingModule } from './listing/listing.module';
     WeddingModule,
     SeatingArrangementModule,
     ListingModule,
+    PaymentModule,
   ],
   controllers: [AppController],
   providers: [AppService],
