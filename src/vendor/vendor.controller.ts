@@ -7,10 +7,12 @@ import {
   ParseIntPipe,
   Post,
   Put,
+  Request,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Roles } from 'src/auth/decorators/roles.decorator';
+import { JwtPayload } from 'src/auth/dto/jwt-payload.interface';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { UserRole } from 'src/common/user-role.enum';
 import { VendorOnboardingStatus } from 'src/common/vendor-onboarding-status.enum';
@@ -122,9 +124,38 @@ export class VendorController {
     return this.service.update(id, body);
   }
 
+  @Delete('delete-self')
+  @Roles(UserRole.VENDOR)
+  @ApiOperation({
+    summary: 'Delete own vendor profile (requires password confirmation)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'The vendor profile has been successfully deleted.',
+  })
+  @ApiResponse({ status: 401, description: 'Invalid password.' })
+  @ApiResponse({ status: 404, description: 'Vendor not found.' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        password: { type: 'string', example: 'mypassword123' },
+      },
+      required: ['password'],
+    },
+  })
+  async deleteSelf(
+    @Request() req: Request & { user: JwtPayload },
+    @Body() body: { password: string },
+  ): Promise<void> {
+    await this.service.deleteSelf(req.user.sub, body.password);
+  }
+
   @Delete(':id')
-  @Roles(UserRole.VENDOR, UserRole.SUPERADMIN)
-  @ApiOperation({ summary: 'Delete a vendor' })
+  @Roles(UserRole.SUPERADMIN)
+  @ApiOperation({
+    summary: 'Delete a vendor (super admin only, no password required)',
+  })
   @ApiResponse({
     status: 200,
     description: 'The vendor has been successfully deleted.',
