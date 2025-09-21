@@ -149,7 +149,10 @@ export class EmailNotificationService {
   ): Promise<void> {
     const msg = {
       to,
-      from: 'hello.knotly@gmail.com',
+      from: {
+        email: 'hello@knotly.app',
+        name: 'Knotly Team',
+      },
       subject,
       text,
       html,
