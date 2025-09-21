@@ -73,6 +73,17 @@ export class NotificationDetailsController {
     );
   }
 
+  @Get('email-templates')
+  @Roles(UserRole.SUPERADMIN)
+  @ApiOperation({ summary: 'Get all email templates' })
+  @ApiResponse({
+    status: 200,
+    description: 'Email templates retrieved successfully.',
+  })
+  async getAllEmailTemplates() {
+    return this.notificationDetailsService.getAllEmailTemplates();
+  }
+
   @Put('email-templates/:emailTemplateId')
   @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Update email template by ID' })

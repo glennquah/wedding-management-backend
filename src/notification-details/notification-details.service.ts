@@ -72,6 +72,18 @@ export class NotificationDetailsService {
     return template;
   }
 
+  async getAllEmailTemplates() {
+    return this.prisma.emailTemplate.findMany({
+      include: {
+        NotificationDetails: {
+          include: {
+            wedding: true,
+          },
+        },
+      },
+    });
+  }
+
   async deleteEmailTemplate(emailTemplateId: number) {
     const existingTemplate = await this.prisma.emailTemplate.findUnique({
       where: { id: emailTemplateId },
