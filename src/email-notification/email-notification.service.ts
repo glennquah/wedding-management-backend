@@ -171,7 +171,10 @@ export class EmailNotificationService {
     Website: https://knotly.app`;
   }
 
-  async sendVerifyEmailTemplate(to: string, templateData: VerifyEmailData): Promise<void> {
+  async sendVerifyEmailTemplate(
+    to: string,
+    templateData: VerifyEmailData,
+  ): Promise<void> {
     const html = this.renderTemplate(EmailTemplate.VERIFY_EMAIL, templateData);
     const text = this.generateVerifyEmailPlainText(templateData);
 
@@ -192,14 +195,27 @@ Knotly - Your Perfect Wedding, Perfectly Planned
 Website: https://knotly.app`;
   }
 
-  async sendCreateAccountTemplate(to: string, templateData: CreateAccountData): Promise<void> {
-    const html = this.renderTemplate(EmailTemplate.CREATE_ACCOUNT, templateData);
+  async sendCreateAccountTemplate(
+    to: string,
+    templateData: CreateAccountData,
+  ): Promise<void> {
+    const html = this.renderTemplate(
+      EmailTemplate.CREATE_ACCOUNT,
+      templateData,
+    );
     const text = this.generateCreateAccountPlainText(templateData);
 
-    await this.sendEmail(to, "You've Been Invited to Plan a Wedding!", text, html);
+    await this.sendEmail(
+      to,
+      "You've Been Invited to Plan a Wedding!",
+      text,
+      html,
+    );
   }
 
-  private generateCreateAccountPlainText(templateData: CreateAccountData): string {
+  private generateCreateAccountPlainText(
+    templateData: CreateAccountData,
+  ): string {
     return `Hello ${templateData.name}!
 
 Great news! You've been invited to help plan and coordinate an upcoming wedding. Join the team and be part of making this special day perfect!

@@ -128,30 +128,30 @@ model Vendor {
 }
 
 model EmailTemplate {
-  id                     Int                  @id @default(autoincrement())
-  name                   String               @unique
-  subject                String
-  htmlContent            String
-  createdAt              DateTime             @default(now())
-  updatedAt              DateTime             @updatedAt
-  NotificationSettings   NotificationSettings @relation(fields: [notificationSettingsId], references: [id])
-  notificationSettingsId Int
+  id                    Int                 @id @default(autoincrement())
+  name                  String              @unique
+  subject               String
+  htmlContent           String
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  NotificationDetails   NotificationDetails @relation(fields: [notificationDetailsId], references: [id])
+  notificationDetailsId Int
 }
 
 model EmailNotificationHistory {
-  id                     Int                  @id @default(autoincrement())
-  to                     String[]
-  subject                String
-  body                   String
-  sentAt                 DateTime             @default(now())
-  type                   EmailTemplateType
-  createdAt              DateTime             @default(now())
-  updatedAt              DateTime             @updatedAt
-  NotificationSettings   NotificationSettings @relation(fields: [notificationSettingsId], references: [id])
-  notificationSettingsId Int
+  id                    Int                 @id @default(autoincrement())
+  to                    String[]
+  subject               String
+  body                  String
+  sentAt                DateTime            @default(now())
+  type                  EmailTemplateType
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  NotificationDetails   NotificationDetails @relation(fields: [notificationDetailsId], references: [id])
+  notificationDetailsId Int
 }
 
-model Notification {
+model NotificationDetails {
   id                       Int                        @id @default(autoincrement())
   emailTemplates           EmailTemplate[]
   emailNotificationHistory EmailNotificationHistory[]
@@ -161,23 +161,23 @@ model Notification {
 }
 
 model Wedding {
-  id                Int              @id @default(autoincrement())
-  mainCouple        Admin[]          @relation("MainCouple")
-  name              String
-  date              DateTime?
-  location          String?
-  guests            Guest[]
-  admins            Admin[]          @relation("AdminWeddings")
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
-  weddingType       WeddingType
-  budgetBucket      BudgetBucket
-  guestCountBucket  GuestCountBucket
-  preferredStyle    WeddingStyle
-  preferredServices WeddingService[]
-  orders            Order[]
-  notification      Notification     @relation(fields: [notificationId], references: [id])
-  notificationId    Int
+  id                    Int                 @id @default(autoincrement())
+  mainCouple            Admin[]             @relation("MainCouple")
+  name                  String
+  date                  DateTime?
+  location              String?
+  guests                Guest[]
+  admins                Admin[]             @relation("AdminWeddings")
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  weddingType           WeddingType
+  budgetBucket          BudgetBucket
+  guestCountBucket      GuestCountBucket
+  preferredStyle        WeddingStyle
+  preferredServices     WeddingService[]
+  orders                Order[]
+  notificationDetails   NotificationDetails @relation(fields: [notificationDetailsId], references: [id])
+  notificationDetailsId Int                 @unique
 }
 
 model Guest {
