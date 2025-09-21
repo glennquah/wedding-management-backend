@@ -60,27 +60,27 @@ enum GuestCountBucket {
 }
 
 enum OrderStatus {
-  PENDING
-  PAID
-  CANCELLED
-  COMPLETED
+  pending
+  paid
+  cancelled
+  completed
 }
 
 enum PaymentStatus {
-  PENDING
-  PROCESSING
-  SUCCEEDED
-  FAILED
-  CANCELLED
-  REFUNDED
-  PARTIALLY_REFUNDED
+  pending
+  processing
+  succeeded
+  failed
+  cancelled
+  refunded
+  partiallyRefunded
 }
 
 enum PaymentMethod {
-  CARD
-  GOOGLE_PAY
-  APPLE_PAY
-  BANK_TRANSFER
+  card
+  googlePay
+  applePay
+  bankTransfer
 }
 
 enum VendorOnboardingStatus {
@@ -191,10 +191,11 @@ model Listing {
 
 model Order {
   id            Int         @id @default(autoincrement())
-  orderStatus   OrderStatus @default(PENDING)
+  orderStatus   OrderStatus @default(pending)
   totalAmount   Float
   currency      String      @default("SGD")
   purchaseDate  DateTime    @default(now())
+  expiresAt     DateTime?
   remark        String?
 
   // Relations
@@ -214,6 +215,7 @@ model Order {
 model OrderListing {
   orderId   Int
   listingId Int
+  bookedDates DateTime[]
 
   order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
@@ -224,11 +226,10 @@ model OrderListing {
 model Payment {
   id                    Int           @id @default(autoincrement())
   stripePaymentIntentId String        @unique
-  stripeClientSecret    String?
   amount                Float
   currency              String        @default("SGD")
   paymentMethod         PaymentMethod
-  paymentStatus         PaymentStatus @default(PENDING)
+  paymentStatus         PaymentStatus @default(pending)
   stripeChargeId        String?
   receiptUrl            String?
   failureReason         String?

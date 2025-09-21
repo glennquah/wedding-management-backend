@@ -12,6 +12,7 @@ import { UserModule } from './user/user.module';
 import { VendorModule } from './vendor/vendor.module';
 import { WeddingModule } from './wedding/wedding.module';
 import { ListingModule } from './listing/listing.module';
+import { OrderModule } from './order/order.module';
 import { PaymentModule } from './payment/payment.module';
 
 @Module({
@@ -27,6 +28,7 @@ import { PaymentModule } from './payment/payment.module';
     WeddingModule,
     SeatingArrangementModule,
     ListingModule,
+    OrderModule,
     PaymentModule,
   ],
   controllers: [AppController],

@@ -1,7 +1,14 @@
 import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
-import { PaymentMethod, PaymentStatus } from '@prisma/client';
 import Stripe from 'stripe';
+import { OrderStatus } from '../common/order-status.enum';
+import { PaymentMethod } from '../common/payment-method.enum';
+import { PaymentStatus } from '../common/payment-status.enum';
 import { PrismaService } from '../prisma/prisma.service';
+import { ConfirmPaymentDto } from './dto/confirm-payment.dto';
+import { CreatePaymentIntentDto } from './dto/create-payment-intent.dto';
+import { RefundPaymentDto } from './dto/refund-payment.dto';
+import { PaymentIntentResponseDto } from './dto/payment-intent-response.dto';
+import { PaymentResponseDto } from './dto/payment-response.dto';
 
 @Injectable()
 export class PaymentService {
@@ -13,37 +20,36 @@ export class PaymentService {
     });
   }
 
-  async createPaymentIntent(orderId: number, paymentMethod: PaymentMethod) {
+  async createPaymentIntent(dto: CreatePaymentIntentDto): Promise<PaymentIntentResponseDto> {
     try {
       const order = await this.prisma.order.findUnique({
-        where: { id: orderId },
-        include: { listings: { include: { listing: true } } },
+        where: { id: dto.orderId },
+        include: { listings: true },
       });
 
       if (!order) {
         throw new BadRequestException('Order not found');
       }
 
-      const paymentMethods = this.getStripePaymentMethods(paymentMethod);
+      const paymentMethods = this.getStripePaymentMethods(dto.paymentMethod);
 
       const paymentIntent = await this.stripe.paymentIntents.create({
         amount: Math.round(order.totalAmount * 100), // Convert to cents
         currency: order.currency.toLowerCase(),
         payment_method_types: paymentMethods,
         metadata: {
-          orderId: orderId.toString(),
+          orderId: dto.orderId.toString(),
         },
       });
 
       const payment = await this.prisma.payment.create({
         data: {
           stripePaymentIntentId: paymentIntent.id,
-          stripeClientSecret: paymentIntent.client_secret,
           amount: order.totalAmount,
           currency: order.currency,
-          paymentMethod,
+          paymentMethod: dto.paymentMethod,
           paymentStatus: PaymentStatus.PENDING,
-          orderId,
+          orderId: dto.orderId,
         },
       });
 
@@ -58,12 +64,12 @@ export class PaymentService {
     }
   }
 
-  async confirmPayment(paymentIntentId: string) {
+  async confirmPayment(dto: ConfirmPaymentDto): Promise<PaymentResponseDto> {
     try {
-      const paymentIntent = await this.stripe.paymentIntents.retrieve(paymentIntentId);
+      const paymentIntent = await this.stripe.paymentIntents.retrieve(dto.paymentIntentId);
 
       const payment = await this.prisma.payment.findUnique({
-        where: { stripePaymentIntentId: paymentIntentId },
+        where: { stripePaymentIntentId: dto.paymentIntentId },
         include: { order: true },
       });
 
@@ -92,7 +98,7 @@ export class PaymentService {
       }
 
       const updatedPayment = await this.prisma.payment.update({
-        where: { stripePaymentIntentId: paymentIntentId },
+        where: { stripePaymentIntentId: dto.paymentIntentId },
         data: {
           paymentStatus: status,
           stripeChargeId: paymentIntent.latest_charge as string || null,
@@ -103,7 +109,7 @@ export class PaymentService {
       if (status === PaymentStatus.SUCCEEDED) {
         await this.prisma.order.update({
           where: { id: payment.orderId },
-          data: { orderStatus: 'PAID' },
+          data: { orderStatus: OrderStatus.PAID },
         });
       }
 
@@ -114,20 +120,20 @@ export class PaymentService {
     }
   }
 
-  async refundPayment(paymentIntentId: string, amount?: number) {
+  async refundPayment(dto: RefundPaymentDto): Promise<any> {
     try {
       const payment = await this.prisma.payment.findUnique({
-        where: { stripePaymentIntentId: paymentIntentId },
+        where: { stripePaymentIntentId: dto.paymentIntentId },
       });
 
       if (!payment || payment.paymentStatus !== PaymentStatus.SUCCEEDED) {
         throw new BadRequestException('Payment not found or not eligible for refund');
       }
 
-      const refundAmount = amount || payment.amount;
+      const refundAmount = dto.amount || payment.amount;
 
       const refund = await this.stripe.refunds.create({
-        payment_intent: paymentIntentId,
+        payment_intent: dto.paymentIntentId,
         amount: Math.round(refundAmount * 100), // Convert to cents
       });
 
@@ -135,7 +141,7 @@ export class PaymentService {
       const newRefundedAmount = (payment.refundedAmount || 0) + refundAmount;
 
       await this.prisma.payment.update({
-        where: { stripePaymentIntentId: paymentIntentId },
+        where: { stripePaymentIntentId: dto.paymentIntentId },
         data: {
           paymentStatus: isPartialRefund ? PaymentStatus.PARTIALLY_REFUNDED : PaymentStatus.REFUNDED,
           refundedAmount: newRefundedAmount,
@@ -149,7 +155,7 @@ export class PaymentService {
     }
   }
 
-  async getPaymentHistory(orderId: number) {
+  async getPaymentHistory(orderId: number): Promise<PaymentResponseDto[]> {
     return this.prisma.payment.findMany({
       where: { orderId },
       orderBy: { createdAt: 'desc' },
@@ -169,7 +175,7 @@ export class PaymentService {
     }
   }
 
-  async handleWebhook(signature: string, payload: Buffer) {
+  async handleWebhook(signature: string, payload: Buffer): Promise<{ received: boolean }> {
     try {
       const event = this.stripe.webhooks.constructEvent(
         payload,
@@ -211,7 +217,7 @@ export class PaymentService {
     if (payment) {
       await this.prisma.order.update({
         where: { id: payment.orderId },
-        data: { orderStatus: 'PAID' },
+        data: { orderStatus: 'paid' },
       });
     }
   }
