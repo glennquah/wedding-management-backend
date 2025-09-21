@@ -107,7 +107,7 @@ export class EmailNotificationService {
 
     ---
     Knotly - Your Perfect Wedding, Perfectly Planned
-    Website: https://knotly.com`;
+    Website: https://knotly.app`;
   }
 
   async sendWelcomeEmailTemplate(
@@ -115,7 +115,20 @@ export class EmailNotificationService {
     templateData: WelcomeEmailData,
   ): Promise<void> {
     const html = this.renderTemplate(EmailTemplate.WELCOME, templateData);
-    const text = `Welcome ${templateData.userName}!
+    const text = this.generateWelcomeEmailTemplatePlainText(templateData);
+
+    await this.sendEmail(
+      to,
+      "Welcome to Knotly - Let's Plan Your Dream Wedding!",
+      text,
+      html,
+    );
+  }
+
+  private generateWelcomeEmailTemplatePlainText(
+    templateData: WelcomeEmailData,
+  ): string {
+    return `Welcome ${templateData.userName}!
 
     We're thrilled to have you join the Knotly family! Your wedding planning journey starts here, and we're here to help you every step of the way.
 
@@ -125,14 +138,7 @@ export class EmailNotificationService {
 
     ---
     Knotly - Your Perfect Wedding, Perfectly Planned
-    Website: https://knotly.com`;
-
-    await this.sendEmail(
-      to,
-      "Welcome to Knotly - Let's Plan Your Dream Wedding!",
-      text,
-      html,
-    );
+    Website: https://knotly.app`;
   }
 
   async sendEmail(
