@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vendor Status Update - Knotly</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
+          Cantarell, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background-color: #f8f9fa;
+      }
+
+      .email-container {
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: #ffffff;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .header {
+        background: linear-gradient(135deg, #ff5a5f 0%, #45292f 100%);
+        padding: 40px 20px;
+        text-align: center;
+      }
+
+      .logo {
+        font-size: 32px;
+        font-weight: bold;
+        color: #ffffff !important;
+        text-decoration: none;
+        letter-spacing: 1px;
+        display: block;
+        text-align: center;
+        margin: 0 auto;
+      }
+
+      .logo-img {
+        width: 150px;
+        height: 50px;
+        object-fit: contain;
+        display: block;
+        margin: 0 auto;
+      }
+
+      .tagline {
+        color: #ffffff;
+        font-size: 14px;
+        margin-top: 8px;
+        opacity: 0.9;
+      }
+
+      .content {
+        padding: 40px 30px;
+      }
+
+      .greeting {
+        font-size: 24px;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 20px;
+      }
+
+      .message {
+        font-size: 16px;
+        line-height: 1.7;
+        color: #555;
+        margin-bottom: 30px;
+      }
+
+      .status-card {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 25px;
+        margin: 30px 0;
+        text-align: center;
+        border: 2px solid #e9ecef;
+      }
+
+      .status-card.pending {
+        border-color: #ffc107;
+        background-color: #fff8e1;
+      }
+
+      .status-card.approved {
+        border-color: #28a745;
+        background-color: #f1f8e9;
+      }
+
+      .status-card.rejected {
+        border-color: #dc3545;
+        background-color: #fdeaea;
+      }
+
+      .status-icon {
+        font-size: 48px;
+        margin-bottom: 15px;
+      }
+
+      .status-icon.pending {
+        color: #ffc107;
+      }
+
+      .status-icon.approved {
+        color: #28a745;
+      }
+
+      .status-icon.rejected {
+        color: #dc3545;
+      }
+
+      .status-title {
+        font-size: 24px;
+        font-weight: 600;
+        margin-bottom: 10px;
+      }
+
+      .status-title.pending {
+        color: #856404;
+      }
+
+      .status-title.approved {
+        color: #155724;
+      }
+
+      .status-title.rejected {
+        color: #721c24;
+      }
+
+      .status-description {
+        font-size: 16px;
+        color: #6c757d;
+      }
+
+      .next-steps {
+        background-color: #e7f3ff;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 30px 0;
+        border-left: 4px solid #007bff;
+      }
+
+      .next-steps h3 {
+        color: #004085;
+        font-size: 18px;
+        margin-bottom: 15px;
+      }
+
+      .next-steps ul {
+        color: #495057;
+        padding-left: 20px;
+      }
+
+      .next-steps li {
+        margin-bottom: 8px;
+      }
+
+      .cta-container {
+        text-align: center;
+        margin: 40px 0;
+      }
+
+      .cta-button {
+        display: inline-block;
+        background: linear-gradient(135deg, #ff5a5f 0%, #da3c41 100%) !important;
+        color: #ffffff !important;
+        text-decoration: none !important;
+        padding: 16px 32px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 16px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        transition: transform 0.2s ease;
+        box-shadow: 0 4px 15px rgba(255, 90, 95, 0.3);
+        border: none !important;
+      }
+
+      .cta-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 90, 95, 0.4);
+      }
+
+      .divider {
+        height: 1px;
+        background: linear-gradient(
+          to right,
+          transparent,
+          #e0e0e0,
+          transparent
+        );
+        margin: 30px 0;
+      }
+
+      .footer {
+        background-color: #f8f9fa;
+        padding: 30px;
+        text-align: center;
+        border-top: 1px solid #e9ecef;
+      }
+
+      .footer-logo {
+        font-size: 18px;
+        font-weight: bold;
+        color: #ff5a5f;
+        margin-bottom: 10px;
+      }
+
+      .footer-text {
+        font-size: 14px;
+        color: #6c757d;
+        margin-bottom: 15px;
+      }
+
+      .social-links {
+        margin: 20px 0;
+      }
+
+      .social-link {
+        display: inline-block;
+        margin: 0 10px;
+        color: #ff5a5f;
+        text-decoration: none;
+        font-size: 14px;
+      }
+
+      .unsubscribe {
+        font-size: 12px;
+        color: #adb5bd;
+        margin-top: 20px;
+      }
+
+      .unsubscribe a {
+        color: #ff5a5f;
+        text-decoration: none;
+      }
+
+      @media (max-width: 600px) {
+        .email-container {
+          margin: 0;
+          border-radius: 0;
+        }
+
+        .content {
+          padding: 30px 20px;
+        }
+
+        .header {
+          padding: 30px 20px;
+        }
+
+        .greeting {
+          font-size: 20px;
+        }
+
+        .cta-button {
+          padding: 14px 28px;
+          font-size: 14px;
+        }
+
+        .status-icon {
+          font-size: 36px;
+        }
+
+        .status-title {
+          font-size: 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="email-container">
+      <!-- Header -->
+      <div class="header">
+        <div style="text-align: center;">
+          <img
+            src="https://res.cloudinary.com/doudbsnya/image/upload/v1758432610/logo_ptrwb6.png"
+            alt="Knotly Logo"
+            class="logo-img"
+          />
+        </div>
+        <div class="tagline">Your Perfect Wedding, Perfectly Planned</div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="content">
+        <div class="greeting">Hello {{vendorName}}!</div>
+
+        <div class="message">
+          We have an important update regarding your vendor onboarding status on Knotly.
+        </div>
+
+        <!-- Status Card - Dynamic based on vendorOnboardingStatus -->
+        <!-- Pending Status -->
+        {{#if isPending}}
+        <div class="status-card pending">
+          <div class="status-icon pending">⏳</div>
+          <div class="status-title pending">Application Under Review</div>
+          <div class="status-description">
+            Your vendor application is currently being reviewed by our team.
+          </div>
+        </div>
+
+        <div class="next-steps">
+          <h3>📋 What happens next?</h3>
+          <ul>
+            <li>Our team is reviewing your application and documentation</li>
+            <li>We'll verify your business information and credentials</li>
+            <li>You'll receive an update within 2-3 business days</li>
+            <li>Keep an eye on your email for further updates</li>
+          </ul>
+        </div>
+        {{/if}}
+
+        <!-- Approved/Onboarded Status -->
+        {{#if isOnboarded}}
+        <div class="status-card approved">
+          <div class="status-icon approved">✅</div>
+          <div class="status-title approved">Welcome to Knotly!</div>
+          <div class="status-description">
+            Congratulations! Your vendor profile has been approved and is now live.
+          </div>
+        </div>
+
+        <div class="next-steps">
+          <h3>🚀 Get started now:</h3>
+          <ul>
+            <li>Complete your vendor profile with photos and descriptions</li>
+            <li>Set your availability and pricing</li>
+            <li>Start receiving booking requests from couples</li>
+            <li>Explore our vendor dashboard features</li>
+          </ul>
+        </div>
+        {{/if}}
+
+        <!-- Rejected Status -->
+        {{#if isRejected}}
+        <div class="status-card rejected">
+          <div class="status-icon rejected">❌</div>
+          <div class="status-title rejected">Application Not Approved</div>
+          <div class="status-description">
+            Unfortunately, we cannot approve your vendor application at this time.
+          </div>
+        </div>
+
+        <div class="next-steps">
+          <h3>💡 What you can do:</h3>
+          <ul>
+            <li>Review our vendor requirements and guidelines</li>
+            <li>Update your business documentation if needed</li>
+            <li>Reapply after addressing any issues mentioned</li>
+            <li>Contact our support team if you have questions</li>
+          </ul>
+        </div>
+        {{/if}}
+
+        <div class="cta-container">
+          <a href="{{dashboardUrl}}" class="cta-button">Go to Dashboard</a>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="message">
+          If you have any questions about your vendor status or need assistance, please don't hesitate to contact our support team. We're here to help you succeed on Knotly!
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="footer">
+        <a href="https://knotly.app" class="logo">
+          <img
+            src="https://res.cloudinary.com/doudbsnya/image/upload/v1758432610/logo_ptrwb6.png"
+            alt="Knotly Logo"
+            class="logo-img"
+          />
+        </a>
+        <div class="footer-text">
+          Making your dream wedding a reality, one detail at a time.
+        </div>
+
+        <div class="social-links">
+          <a href="https://knotly.app" class="social-link">Website</a>
+          <a href="https://knotly.app/support" class="social-link">Support</a>
+          <a href="mailto:hello@knotly.app" class="social-link">Contact</a>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
