@@ -118,4 +118,53 @@ export class NotificationDetailsService {
 
     return wedding.notificationDetails.emailTemplates;
   }
+
+  async getEmailNotificationHistoryWithWeddingId(weddingId: number) {
+    const wedding = await this.prisma.wedding.findUnique({
+      where: { id: weddingId },
+      include: {
+        notificationDetails: {
+          include: {
+            emailNotificationHistory: true,
+          },
+        },
+      },
+    });
+
+    if (!wedding) {
+      throw new NotFoundException(`Wedding with ID ${weddingId} not found`);
+    }
+
+    return wedding.notificationDetails.emailNotificationHistory;
+  }
+
+  async getAllEmailNotificationHistory() {
+    return this.prisma.emailNotificationHistory.findMany({
+      include: {
+        NotificationDetails: {
+          include: {
+            wedding: true,
+          },
+        },
+      },
+      orderBy: { sentAt: 'desc' },
+    });
+  }
+
+  async deleteEmailNotificationHistory(historyId: number) {
+    const existingHistory =
+      await this.prisma.emailNotificationHistory.findUnique({
+        where: { id: historyId },
+      });
+
+    if (!existingHistory) {
+      throw new NotFoundException(
+        `Email notification history with ID ${historyId} not found`,
+      );
+    }
+
+    return this.prisma.emailNotificationHistory.delete({
+      where: { id: historyId },
+    });
+  }
 }

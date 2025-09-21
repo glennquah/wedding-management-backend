@@ -113,4 +113,47 @@ export class NotificationDetailsController {
   ) {
     return this.notificationDetailsService.deleteEmailTemplate(emailTemplateId);
   }
+
+  @Get('weddings/:weddingId/email-notification-history')
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
+  @ApiOperation({ summary: 'Get email notification history for a wedding' })
+  @ApiResponse({
+    status: 200,
+    description: 'Email notification history retrieved successfully.',
+  })
+  async getEmailNotificationHistoryWithWeddingId(
+    @Param('weddingId', ParseIntPipe) weddingId: number,
+  ) {
+    return this.notificationDetailsService.getEmailNotificationHistoryWithWeddingId(
+      weddingId,
+    );
+  }
+
+  @Get('email-notification-history')
+  @Roles(UserRole.SUPERADMIN)
+  @ApiOperation({
+    summary: 'Get all email notification history (SuperAdmin only)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'All email notification history retrieved successfully.',
+  })
+  async getAllEmailNotificationHistory() {
+    return this.notificationDetailsService.getAllEmailNotificationHistory();
+  }
+
+  @Delete('email-notification-history/:historyId')
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
+  @ApiOperation({ summary: 'Delete email notification history by ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Email notification history deleted successfully.',
+  })
+  async deleteEmailNotificationHistory(
+    @Param('historyId', ParseIntPipe) historyId: number,
+  ) {
+    return this.notificationDetailsService.deleteEmailNotificationHistory(
+      historyId,
+    );
+  }
 }
