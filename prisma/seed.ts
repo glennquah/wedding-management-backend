@@ -133,8 +133,8 @@ async function main() {
         preferredStyle: theme.preferredStyle,
         preferredServices: theme.preferredServices,
         notificationDetails: {
-          create: {}
-        }
+          create: {},
+        },
       },
     });
     weddings.push(wedding);

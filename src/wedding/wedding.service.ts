@@ -31,8 +31,8 @@ export class WeddingService {
         preferredStyle: dto.preferredStyle,
         preferredServices: dto.preferredServices,
         notificationDetails: {
-          create: {}
-        }
+          create: {},
+        },
       },
     });
   }

@@ -218,21 +218,21 @@ Website: https://knotly.app`;
   ): string {
     return `Hello ${templateData.name}!
 
-Great news! You've been invited to help plan and coordinate an upcoming wedding. Join the team and be part of making this special day perfect!
+    Great news! You've been invited to help plan and coordinate an upcoming wedding. Join the team and be part of making this special day perfect!
 
-Wedding Details:
-Wedding: ${templateData.weddingName}
-Invited by: ${templateData.inviterName}
+    Wedding Details:
+    Wedding: ${templateData.weddingName}
+    Invited by: ${templateData.inviterName}
 
-Click the link below to create your account and start collaborating on this amazing wedding journey!
+    Click the link below to create your account and start collaborating on this amazing wedding journey!
 
-Create Account: ${templateData.signupUrl}
+    Create Account: ${templateData.signupUrl}
 
-If you don't want to join this wedding planning team, you can safely ignore this email. The invitation link will expire in 7 days.
+    If you don't want to join this wedding planning team, you can safely ignore this email. The invitation link will expire in 7 days.
 
----
-Knotly - Your Perfect Wedding, Perfectly Planned
-Website: https://knotly.app`;
+    ---
+    Knotly - Your Perfect Wedding, Perfectly Planned
+    Website: https://knotly.app`;
   }
 
   async sendEmail(
