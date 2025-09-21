@@ -210,8 +210,8 @@ export class NotificationDetailsService {
       type: history.type,
       createdAt: history.createdAt,
       updatedAt: history.updatedAt,
-      weddingName: history.notificationDetails.wedding?.name,
-      vendorName: history.notificationDetails.vendor?.user?.name,
+      weddingName: history.notificationDetails?.wedding?.name || null,
+      vendorName: history.notificationDetails?.vendor?.user?.name || null,
     }));
   }
 

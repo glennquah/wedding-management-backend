@@ -20,6 +20,9 @@ async function main() {
   // Clear existing data first (if tables exist)
   console.log('✅ Clearing existing data...');
   try {
+    await prisma.emailNotificationHistory.deleteMany();
+    await prisma.emailTemplate.deleteMany();
+    await prisma.notificationDetails.deleteMany();
     await prisma.guest.deleteMany();
     await prisma.wedding.deleteMany();
     await prisma.vendor.deleteMany();
@@ -486,8 +489,15 @@ async function main() {
   // Create email templates and notification history for weddings and vendors
   console.log('✅ Creating email templates and notification history...');
 
-  // Get all notification details (both wedding and vendor)
-  const allNotificationDetails = await prisma.notificationDetails.findMany();
+  // Get only notification details that belong to weddings or vendors
+  const allNotificationDetails = await prisma.notificationDetails.findMany({
+    where: {
+      OR: [
+        { weddingId: { not: null } },
+        { vendorId: { not: null } },
+      ],
+    },
+  });
 
   // Email template data
   const emailTemplates = [
