@@ -70,7 +70,7 @@ export class EmailNotificationService {
     resetLink: string,
     name: string = 'there',
     weddingId?: number,
-  ) {
+  ): Promise<void> {
     const templateData: PasswordResetData = {
       name,
       buttonUrl: resetLink,
@@ -84,7 +84,7 @@ export class EmailNotificationService {
     userName: string,
     dashboardUrl: string,
     weddingId?: number,
-  ) {
+  ): Promise<void> {
     const templateData: WelcomeEmailData = {
       userName,
       dashboardUrl,
@@ -98,7 +98,7 @@ export class EmailNotificationService {
     verifyUrl: string,
     name: string = 'there',
     weddingId?: number,
-  ) {
+  ): Promise<void> {
     const templateData: VerifyEmailData = {
       name,
       verifyUrl,
@@ -114,7 +114,7 @@ export class EmailNotificationService {
     weddingName: string,
     inviterName: string,
     weddingId?: number,
-  ) {
+  ): Promise<void> {
     const templateData: CreateAccountData = {
       name,
       weddingName,
@@ -165,7 +165,7 @@ export class EmailNotificationService {
   async sendWelcomeEmailTemplate(
     to: string,
     templateData: WelcomeEmailData,
-    weddingId?: number,
+    weddingId: number,
   ): Promise<void> {
     const html = this.renderTemplate(EmailTemplate.WELCOME, templateData);
     const text = this.generateWelcomeEmailTemplatePlainText(templateData);
@@ -199,7 +199,7 @@ export class EmailNotificationService {
   async sendVerifyEmailTemplate(
     to: string,
     templateData: VerifyEmailData,
-    weddingId?: number,
+    weddingId: number,
   ): Promise<void> {
     const html = this.renderTemplate(EmailTemplate.VERIFY_EMAIL, templateData);
     const text = this.generateVerifyEmailPlainText(templateData);
@@ -217,21 +217,21 @@ export class EmailNotificationService {
   private generateVerifyEmailPlainText(templateData: VerifyEmailData): string {
     return `Hello ${templateData.name}!
 
-Welcome to Knotly! To complete your account setup, please verify your email address by clicking the link below.
+    Welcome to Knotly! To complete your account setup, please verify your email address by clicking the link below.
 
-Verify Email: ${templateData.verifyUrl}
+    Verify Email: ${templateData.verifyUrl}
 
-If you didn't create an account with Knotly, please ignore this email. The verification link will expire in 24 hours for security.
+    If you didn't create an account with Knotly, please ignore this email. The verification link will expire in 24 hours for security.
 
----
-Knotly - Your Perfect Wedding, Perfectly Planned
-Website: https://knotly.app`;
+    ---
+    Knotly - Your Perfect Wedding, Perfectly Planned
+    Website: https://knotly.app`;
   }
 
   async sendCreateAccountTemplate(
     to: string,
     templateData: CreateAccountData,
-    weddingId?: number,
+    weddingId: number,
   ): Promise<void> {
     const html = this.renderTemplate(
       EmailTemplate.CREATE_ACCOUNT,
@@ -276,8 +276,8 @@ Website: https://knotly.app`;
     subject: string,
     text: string,
     html: string,
-    weddingId?: number,
-    type?: EmailTemplateType,
+    weddingId: number,
+    type: EmailTemplateType,
   ): Promise<void> {
     const msg = {
       to,
@@ -293,16 +293,13 @@ Website: https://knotly.app`;
     try {
       await sgMail.send(msg);
 
-      // Log email notification if weddingId and type are provided
-      if (weddingId && type) {
-        await this.notificationDetailsService.createEmailNotification({
-          to: [to],
-          subject,
-          body: html,
-          type,
-          weddingId,
-        });
-      }
+      await this.notificationDetailsService.createEmailNotification({
+        to: [to],
+        subject,
+        body: html,
+        type,
+        weddingId,
+      });
     } catch (error) {
       console.error(error);
       throw error;
@@ -311,8 +308,8 @@ Website: https://knotly.app`;
 
   async sendBulkEmail(
     bulkEmailData: SendBulkEmailDto,
-    weddingId?: number,
-    type?: EmailTemplateType,
+    weddingId: number,
+    type: EmailTemplateType,
   ): Promise<void> {
     const messages = bulkEmailData.emails.map((email) => ({
       to: email,
@@ -325,16 +322,13 @@ Website: https://knotly.app`;
     try {
       await sgMail.send(messages);
 
-      // Log email notification if weddingId and type are provided
-      if (weddingId && type) {
-        await this.notificationDetailsService.createEmailNotification({
-          to: bulkEmailData.emails,
-          subject: bulkEmailData.subject,
-          body: bulkEmailData.html,
-          type,
-          weddingId,
-        });
-      }
+      await this.notificationDetailsService.createEmailNotification({
+        to: bulkEmailData.emails,
+        subject: bulkEmailData.subject,
+        body: bulkEmailData.html,
+        type,
+        weddingId,
+      });
     } catch (error) {
       console.error(error);
       throw error;

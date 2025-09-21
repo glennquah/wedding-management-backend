@@ -14,8 +14,14 @@ import { Roles } from 'src/auth/decorators/roles.decorator';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { UserRole } from 'src/common/user-role.enum';
-import { CreateEmailTemplateDto } from './dtos/create-email-template.dto';
-import { UpdateEmailTemplateDto } from './dtos/update-email-template.dto';
+import {
+  CreateEmailTemplateDto,
+  EmailNotificationHistoryResponseDto,
+  EmailNotificationHistoryWithWeddingDto,
+  EmailTemplateResponseDto,
+  EmailTemplateWithWeddingDto,
+  UpdateEmailTemplateDto,
+} from './dtos';
 import { NotificationDetailsService } from './notification-details.service';
 
 @ApiTags('notification-details')
@@ -36,7 +42,7 @@ export class NotificationDetailsController {
   async createEmailTemplateInWedding(
     @Param('weddingId', ParseIntPipe) weddingId: number,
     @Body() dto: CreateEmailTemplateDto,
-  ) {
+  ): Promise<EmailTemplateResponseDto> {
     return this.notificationDetailsService.createEmailTemplateInWedding(
       weddingId,
       dto,
@@ -52,7 +58,7 @@ export class NotificationDetailsController {
   })
   async getEmailTemplatesForWedding(
     @Param('weddingId', ParseIntPipe) weddingId: number,
-  ) {
+  ): Promise<EmailTemplateResponseDto[]> {
     return this.notificationDetailsService.getEmailTemplatesForWedding(
       weddingId,
     );
@@ -67,7 +73,7 @@ export class NotificationDetailsController {
   })
   async getEmailTemplateWithId(
     @Param('emailTemplateId', ParseIntPipe) emailTemplateId: number,
-  ) {
+  ): Promise<EmailTemplateWithWeddingDto> {
     return this.notificationDetailsService.getEmailTemplateWithId(
       emailTemplateId,
     );
@@ -80,7 +86,7 @@ export class NotificationDetailsController {
     status: 200,
     description: 'Email templates retrieved successfully.',
   })
-  async getAllEmailTemplates() {
+  async getAllEmailTemplates(): Promise<EmailTemplateWithWeddingDto[]> {
     return this.notificationDetailsService.getAllEmailTemplates();
   }
 
@@ -94,7 +100,7 @@ export class NotificationDetailsController {
   async updateEmailTemplateInWedding(
     @Param('emailTemplateId', ParseIntPipe) emailTemplateId: number,
     @Body() dto: UpdateEmailTemplateDto,
-  ) {
+  ): Promise<EmailTemplateResponseDto> {
     return this.notificationDetailsService.updateEmailTemplateInWedding(
       emailTemplateId,
       dto,
@@ -110,7 +116,7 @@ export class NotificationDetailsController {
   })
   async deleteEmailTemplate(
     @Param('emailTemplateId', ParseIntPipe) emailTemplateId: number,
-  ) {
+  ): Promise<EmailTemplateResponseDto> {
     return this.notificationDetailsService.deleteEmailTemplate(emailTemplateId);
   }
 
@@ -123,7 +129,7 @@ export class NotificationDetailsController {
   })
   async getEmailNotificationHistoryWithWeddingId(
     @Param('weddingId', ParseIntPipe) weddingId: number,
-  ) {
+  ): Promise<EmailNotificationHistoryResponseDto[]> {
     return this.notificationDetailsService.getEmailNotificationHistoryWithWeddingId(
       weddingId,
     );
@@ -138,7 +144,9 @@ export class NotificationDetailsController {
     status: 200,
     description: 'All email notification history retrieved successfully.',
   })
-  async getAllEmailNotificationHistory() {
+  async getAllEmailNotificationHistory(): Promise<
+    EmailNotificationHistoryWithWeddingDto[]
+  > {
     return this.notificationDetailsService.getAllEmailNotificationHistory();
   }
 
@@ -151,7 +159,7 @@ export class NotificationDetailsController {
   })
   async deleteEmailNotificationHistory(
     @Param('historyId', ParseIntPipe) historyId: number,
-  ) {
+  ): Promise<EmailNotificationHistoryResponseDto> {
     return this.notificationDetailsService.deleteEmailNotificationHistory(
       historyId,
     );

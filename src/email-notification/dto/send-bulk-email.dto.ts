@@ -23,8 +23,7 @@ export class SendBulkEmailDto {
   @IsString()
   html: string;
 
-  @ApiProperty({ example: 123, required: false })
+  @ApiProperty({ example: 123 })
   @IsNumber()
-  @IsOptional()
-  weddingId?: number;
+  weddingId: number;
 }

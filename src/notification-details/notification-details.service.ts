@@ -1,8 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { EmailTemplateType } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateEmailTemplateDto } from './dtos/create-email-template.dto';
-import { UpdateEmailTemplateDto } from './dtos/update-email-template.dto';
+import {
+  CreateEmailTemplateDto,
+  EmailNotificationHistoryResponseDto,
+  EmailNotificationHistoryWithWeddingDto,
+  EmailTemplateResponseDto,
+  EmailTemplateWithWeddingDto,
+  UpdateEmailTemplateDto,
+} from './dtos';
 
 @Injectable()
 export class NotificationDetailsService {
@@ -11,7 +17,7 @@ export class NotificationDetailsService {
   async createEmailTemplateInWedding(
     weddingId: number,
     dto: CreateEmailTemplateDto,
-  ) {
+  ): Promise<EmailTemplateResponseDto> {
     const wedding = await this.prisma.wedding.findUnique({
       where: { id: weddingId },
       include: { notificationDetails: true },
@@ -35,7 +41,7 @@ export class NotificationDetailsService {
   async updateEmailTemplateInWedding(
     emailTemplateId: number,
     dto: UpdateEmailTemplateDto,
-  ) {
+  ): Promise<EmailTemplateResponseDto> {
     const existingTemplate = await this.prisma.emailTemplate.findUnique({
       where: { id: emailTemplateId },
     });
@@ -52,7 +58,9 @@ export class NotificationDetailsService {
     });
   }
 
-  async getEmailTemplateWithId(emailTemplateId: number) {
+  async getEmailTemplateWithId(
+    emailTemplateId: number,
+  ): Promise<EmailTemplateWithWeddingDto> {
     const template = await this.prisma.emailTemplate.findUnique({
       where: { id: emailTemplateId },
       include: {
@@ -73,7 +81,7 @@ export class NotificationDetailsService {
     return template;
   }
 
-  async getAllEmailTemplates() {
+  async getAllEmailTemplates(): Promise<EmailTemplateWithWeddingDto[]> {
     return this.prisma.emailTemplate.findMany({
       include: {
         NotificationDetails: {
@@ -85,7 +93,9 @@ export class NotificationDetailsService {
     });
   }
 
-  async deleteEmailTemplate(emailTemplateId: number) {
+  async deleteEmailTemplate(
+    emailTemplateId: number,
+  ): Promise<EmailTemplateResponseDto> {
     const existingTemplate = await this.prisma.emailTemplate.findUnique({
       where: { id: emailTemplateId },
     });
@@ -101,7 +111,9 @@ export class NotificationDetailsService {
     });
   }
 
-  async getEmailTemplatesForWedding(weddingId: number) {
+  async getEmailTemplatesForWedding(
+    weddingId: number,
+  ): Promise<EmailTemplateResponseDto[]> {
     const wedding = await this.prisma.wedding.findUnique({
       where: { id: weddingId },
       include: {
@@ -120,7 +132,9 @@ export class NotificationDetailsService {
     return wedding.notificationDetails.emailTemplates;
   }
 
-  async getEmailNotificationHistoryWithWeddingId(weddingId: number) {
+  async getEmailNotificationHistoryWithWeddingId(
+    weddingId: number,
+  ): Promise<EmailNotificationHistoryResponseDto[]> {
     const wedding = await this.prisma.wedding.findUnique({
       where: { id: weddingId },
       include: {
@@ -139,7 +153,9 @@ export class NotificationDetailsService {
     return wedding.notificationDetails.emailNotificationHistory;
   }
 
-  async getAllEmailNotificationHistory() {
+  async getAllEmailNotificationHistory(): Promise<
+    EmailNotificationHistoryWithWeddingDto[]
+  > {
     return this.prisma.emailNotificationHistory.findMany({
       include: {
         NotificationDetails: {
@@ -152,7 +168,9 @@ export class NotificationDetailsService {
     });
   }
 
-  async deleteEmailNotificationHistory(historyId: number) {
+  async deleteEmailNotificationHistory(
+    historyId: number,
+  ): Promise<EmailNotificationHistoryResponseDto> {
     const existingHistory =
       await this.prisma.emailNotificationHistory.findUnique({
         where: { id: historyId },
@@ -175,7 +193,7 @@ export class NotificationDetailsService {
     body: string;
     type: EmailTemplateType;
     weddingId: number;
-  }) {
+  }): Promise<EmailNotificationHistoryResponseDto> {
     const wedding = await this.prisma.wedding.findUnique({
       where: { id: data.weddingId },
       include: { notificationDetails: true },
