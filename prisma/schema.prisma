@@ -113,18 +113,19 @@ model Vendor {
   userId Int  @unique
   user   User @relation(fields: [userId], references: [id])
 
-  vendorWebsite    String?
-  uenNumber        String?
-  onboardedDate    DateTime               @default(now())
-  bio              String?
-  rating           Float?                 @default(0)
-  isSuspended      Boolean                @default(false)
-  serviceOffered   WeddingService
-  styleOffered     WeddingStyle
-  weddingTypes     WeddingType[]
-  capacity         Int?
-  listings         Listing[]
-  onboardingStatus VendorOnboardingStatus @default(pending)
+  vendorWebsite       String?
+  uenNumber           String?
+  onboardedDate       DateTime               @default(now())
+  bio                 String?
+  rating              Float?                 @default(0)
+  isSuspended         Boolean                @default(false)
+  serviceOffered      WeddingService
+  styleOffered        WeddingStyle
+  weddingTypes        WeddingType[]
+  capacity            Int?
+  listings            Listing[]
+  onboardingStatus    VendorOnboardingStatus @default(pending)
+  notificationDetails NotificationDetails?
 }
 
 model EmailTemplate {
@@ -160,6 +161,8 @@ model NotificationDetails {
   createdAt                DateTime                   @default(now())
   updatedAt                DateTime                   @updatedAt
   weddingId                Int?                       @unique
+  vendor                   Vendor?                    @relation(fields: [vendorId], references: [userId])
+  vendorId                 Int?                       @unique
 }
 
 model Wedding {
