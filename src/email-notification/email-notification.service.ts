@@ -4,23 +4,12 @@ import * as fs from 'fs';
 import * as Handlebars from 'handlebars';
 import * as path from 'path';
 import { SendBulkEmailDto } from './dto/send-bulk-email.dto';
-
-export interface PasswordResetData {
-  name: string;
-  buttonUrl: string;
-}
-
-export interface WelcomeEmailData {
-  userName: string;
-  dashboardUrl: string;
-}
-
-export type EmailTemplateData = PasswordResetData | WelcomeEmailData;
-
-export enum EmailTemplate {
-  PASSWORD_RESET = 'password-reset',
-  WELCOME = 'welcome',
-}
+import { EmailTemplate } from './enums/email-template.enum';
+import {
+  EmailTemplateData,
+  PasswordResetData,
+  WelcomeEmailData,
+} from './interfaces/email-template-data.interface';
 
 @Injectable()
 export class EmailNotificationService {
@@ -128,15 +117,15 @@ export class EmailNotificationService {
     const html = this.renderTemplate(EmailTemplate.WELCOME, templateData);
     const text = `Welcome ${templateData.userName}!
 
-We're thrilled to have you join the Knotly family! Your wedding planning journey starts here, and we're here to help you every step of the way.
+    We're thrilled to have you join the Knotly family! Your wedding planning journey starts here, and we're here to help you every step of the way.
 
-Start Planning: ${templateData.dashboardUrl}
+    Start Planning: ${templateData.dashboardUrl}
 
-Need help getting started? Our support team is always ready to assist you. Happy planning!
+    Need help getting started? Our support team is always ready to assist you. Happy planning!
 
----
-Knotly - Your Perfect Wedding, Perfectly Planned
-Website: https://knotly.com`;
+    ---
+    Knotly - Your Perfect Wedding, Perfectly Planned
+    Website: https://knotly.com`;
 
     await this.sendEmail(
       to,
