@@ -140,6 +140,22 @@ export class NotificationDetailsController {
     );
   }
 
+  @Get('vendors/:vendorId/email-notification-history')
+  @Roles(UserRole.VENDOR, UserRole.SUPERADMIN)
+  @ApiOperation({ summary: 'Get email notification history for a vendor' })
+  @ApiResponse({
+    status: 200,
+    description: 'Email notification history retrieved successfully.',
+    type: [EmailNotificationHistoryResponseDto],
+  })
+  async getEmailNotificationHistoryWithVendorId(
+    @Param('vendorId', ParseIntPipe) vendorId: number,
+  ): Promise<EmailNotificationHistoryResponseDto[]> {
+    return this.notificationDetailsService.getEmailNotificationHistoryWithVendorId(
+      vendorId,
+    );
+  }
+
   @Get('email-notification-history')
   @Roles(UserRole.SUPERADMIN)
   @ApiOperation({

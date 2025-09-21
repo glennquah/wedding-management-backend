@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { EmailTemplateType } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import {
@@ -153,6 +157,31 @@ export class NotificationDetailsService {
     return wedding.notificationDetails.emailNotificationHistory;
   }
 
+  async getEmailNotificationHistoryWithVendorId(
+    vendorId: number,
+  ): Promise<EmailNotificationHistoryResponseDto[]> {
+    const vendor = await this.prisma.vendor.findUnique({
+      where: { userId: vendorId },
+      include: {
+        notificationDetails: {
+          include: {
+            emailNotificationHistory: true,
+          },
+        },
+      },
+    });
+
+    if (!vendor) {
+      throw new NotFoundException(`Vendor with ID ${vendorId} not found`);
+    }
+
+    if (!vendor.notificationDetails) {
+      return [];
+    }
+
+    return vendor.notificationDetails.emailNotificationHistory;
+  }
+
   async getAllEmailNotificationHistory(): Promise<
     EmailNotificationHistoryWithWeddingDto[]
   > {
@@ -192,17 +221,61 @@ export class NotificationDetailsService {
     subject: string;
     body: string;
     type: EmailTemplateType;
-    weddingId: number;
+    weddingId?: number;
+    vendorId?: number;
   }): Promise<EmailNotificationHistoryResponseDto> {
-    const wedding = await this.prisma.wedding.findUnique({
-      where: { id: data.weddingId },
-      include: { notificationDetails: true },
-    });
-
-    if (!wedding) {
-      throw new NotFoundException(
-        `Wedding with ID ${data.weddingId} not found`,
+    if (!data.weddingId && !data.vendorId) {
+      throw new BadRequestException(
+        'Either weddingId or vendorId must be provided',
       );
+    }
+
+    if (data.weddingId && data.vendorId) {
+      throw new BadRequestException(
+        'Cannot provide both weddingId and vendorId',
+      );
+    }
+
+    let notificationDetailsId: number;
+
+    if (data.weddingId) {
+      const wedding = await this.prisma.wedding.findUnique({
+        where: { id: data.weddingId },
+        include: { notificationDetails: true },
+      });
+
+      if (!wedding) {
+        throw new NotFoundException(
+          `Wedding with ID ${data.weddingId} not found`,
+        );
+      }
+
+      if (!wedding.notificationDetails) {
+        throw new NotFoundException(
+          `Notification details not found for wedding with ID ${data.weddingId}`,
+        );
+      }
+
+      notificationDetailsId = wedding.notificationDetails.id;
+    } else {
+      const vendor = await this.prisma.vendor.findUnique({
+        where: { userId: data.vendorId },
+        include: { notificationDetails: true },
+      });
+
+      if (!vendor) {
+        throw new NotFoundException(
+          `Vendor with ID ${data.vendorId} not found`,
+        );
+      }
+
+      if (!vendor.notificationDetails) {
+        throw new NotFoundException(
+          `Notification details not found for vendor with ID ${data.vendorId}`,
+        );
+      }
+
+      notificationDetailsId = vendor.notificationDetails.id;
     }
 
     return this.prisma.emailNotificationHistory.create({
@@ -211,7 +284,7 @@ export class NotificationDetailsService {
         subject: data.subject,
         body: data.body,
         type: data.type,
-        notificationDetailsId: wedding.notificationDetails.id,
+        notificationDetailsId,
       },
     });
   }

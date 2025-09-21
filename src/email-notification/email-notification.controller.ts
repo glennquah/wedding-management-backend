@@ -30,8 +30,9 @@ export class EmailNotificationController {
       emailData.subject,
       emailData.text,
       emailData.html,
-      emailData.weddingId,
       EmailTemplateType.CUSTOM,
+      emailData.weddingId,
+      emailData.vendorId,
     );
   }
 

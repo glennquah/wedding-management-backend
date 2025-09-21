@@ -127,7 +127,6 @@ export class EmailNotificationService {
   async sendPasswordResetEmail(
     to: string,
     templateData: PasswordResetData,
-    weddingId?: number,
   ): Promise<void> {
     const html = this.renderTemplate(
       EmailTemplate.PASSWORD_RESET,
@@ -140,7 +139,6 @@ export class EmailNotificationService {
       'Reset Your Knotly Password',
       text,
       html,
-      weddingId || null,
       EmailTemplateType.PASSWORD_RESET,
     );
   }
@@ -174,8 +172,8 @@ export class EmailNotificationService {
       "Welcome to Knotly - Let's Plan Your Dream Wedding!",
       text,
       html,
-      weddingId,
       EmailTemplateType.WELCOME,
+      weddingId,
     );
   }
 
@@ -208,8 +206,8 @@ export class EmailNotificationService {
       'Verify Your Knotly Email',
       text,
       html,
-      weddingId,
       EmailTemplateType.VERIFY_EMAIL,
+      weddingId,
     );
   }
 
@@ -243,8 +241,8 @@ export class EmailNotificationService {
       "You've Been Invited to Plan a Wedding!",
       text,
       html,
-      weddingId,
       EmailTemplateType.CREATE_ACCOUNT,
+      weddingId,
     );
   }
 
@@ -275,8 +273,9 @@ export class EmailNotificationService {
     subject: string,
     text: string,
     html: string,
-    weddingId: number | null,
     type: EmailTemplateType,
+    weddingId?: number,
+    vendorId?: number,
   ): Promise<void> {
     const msg = {
       to,
@@ -292,7 +291,7 @@ export class EmailNotificationService {
     try {
       await sgMail.send(msg);
 
-      // Only log to notification history if weddingId is provided
+      // Log to notification history if weddingId or vendorId is provided
       if (weddingId) {
         await this.notificationDetailsService.createEmailNotification({
           to: [to],
@@ -300,6 +299,14 @@ export class EmailNotificationService {
           body: html,
           type,
           weddingId,
+        });
+      } else if (vendorId) {
+        await this.notificationDetailsService.createEmailNotification({
+          to: [to],
+          subject,
+          body: html,
+          type,
+          vendorId,
         });
       } else {
         console.log(`Email sent (no wedding context): ${type} to ${to}`);

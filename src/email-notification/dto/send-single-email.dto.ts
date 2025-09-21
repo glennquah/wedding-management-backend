@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsString, IsNumber, IsOptional } from 'class-validator';
+import { IsEmail, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class SendSingleEmailDto {
   @ApiProperty({ example: 'recipient@example.com' })
@@ -20,5 +20,11 @@ export class SendSingleEmailDto {
 
   @ApiProperty({ example: 123 })
   @IsNumber()
-  weddingId: number;
+  @IsOptional()
+  weddingId?: number;
+
+  @ApiProperty({ example: 456 })
+  @IsNumber()
+  @IsOptional()
+  vendorId?: number;
 }
