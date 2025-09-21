@@ -17,11 +17,11 @@ import { UserRole } from 'src/common/user-role.enum';
 import {
   CreateEmailTemplateDto,
   EmailNotificationHistoryResponseDto,
-  EmailNotificationHistoryWithWeddingDto,
   EmailTemplateResponseDto,
   EmailTemplateWithWeddingDto,
   UpdateEmailTemplateDto,
 } from './dtos';
+import { AllEmailNotificationHistoryResponseDto } from './dtos/all-email-notification-history-response.dto';
 import { NotificationDetailsService } from './notification-details.service';
 
 @ApiTags('notification-details')
@@ -164,10 +164,10 @@ export class NotificationDetailsController {
   @ApiResponse({
     status: 200,
     description: 'All email notification history retrieved successfully.',
-    type: [EmailNotificationHistoryResponseDto],
+    type: [AllEmailNotificationHistoryResponseDto],
   })
   async getAllEmailNotificationHistory(): Promise<
-    EmailNotificationHistoryWithWeddingDto[]
+    AllEmailNotificationHistoryResponseDto[]
   > {
     return this.notificationDetailsService.getAllEmailNotificationHistory();
   }

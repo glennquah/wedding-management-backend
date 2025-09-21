@@ -8,11 +8,11 @@ import { PrismaService } from '../prisma/prisma.service';
 import {
   CreateEmailTemplateDto,
   EmailNotificationHistoryResponseDto,
-  EmailNotificationHistoryWithWeddingDto,
   EmailTemplateResponseDto,
   EmailTemplateWithWeddingDto,
   UpdateEmailTemplateDto,
 } from './dtos';
+import { AllEmailNotificationHistoryResponseDto } from './dtos/all-email-notification-history-response.dto';
 
 @Injectable()
 export class NotificationDetailsService {
@@ -183,18 +183,36 @@ export class NotificationDetailsService {
   }
 
   async getAllEmailNotificationHistory(): Promise<
-    EmailNotificationHistoryWithWeddingDto[]
+    AllEmailNotificationHistoryResponseDto[]
   > {
-    return this.prisma.emailNotificationHistory.findMany({
+    const histories = await this.prisma.emailNotificationHistory.findMany({
       include: {
         notificationDetails: {
           include: {
             wedding: true,
+            vendor: {
+              include: {
+                user: true,
+              },
+            },
           },
         },
       },
       orderBy: { sentAt: 'desc' },
     });
+
+    return histories.map((history) => ({
+      id: history.id,
+      to: history.to,
+      subject: history.subject,
+      body: history.body,
+      sentAt: history.sentAt,
+      type: history.type,
+      createdAt: history.createdAt,
+      updatedAt: history.updatedAt,
+      weddingName: history.notificationDetails.wedding?.name,
+      vendorName: history.notificationDetails.vendor?.user?.name,
+    }));
   }
 
   async deleteEmailNotificationHistory(
