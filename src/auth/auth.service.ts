@@ -1,6 +1,9 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { compare } from 'bcrypt';
+import { UserRole } from '@prisma/client';
+import { compare, hash } from 'bcrypt';
+import { EmailNotificationService } from 'src/email-notification/email-notification.service';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { UserResponseDto } from 'src/user/dto/user-response.dto';
 import { UserService } from 'src/user/user.service';
 import { AuthResponseDto, TokensDto } from './dto/auth-response.dto';
@@ -14,6 +17,8 @@ export class AuthService {
   constructor(
     private jwtService: JwtService,
     private userService: UserService,
+    private emailNotificationService: EmailNotificationService,
+    private prisma: PrismaService,
   ) {}
 
   async login(dto: LoginDto): Promise<AuthResponseDto> {
@@ -70,5 +75,62 @@ export class AuthService {
     }
 
     throw new UnauthorizedException('Username or password is incorrect');
+  }
+
+  async sendResetPasswordEmail(email: string): Promise<void> {
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!user || user.role === UserRole.superAdmin) return;
+
+    const token = await this.jwtService.signAsync(
+      {
+        sub: user.id,
+        email: user.email,
+      },
+      {
+        expiresIn: '24h',
+        secret: process.env.JWT_SECRET_KEY,
+      },
+    );
+
+    const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
+
+    await this.emailNotificationService.sendForgetPasswordEmail(
+      email,
+      resetLink,
+      user.name,
+    );
+  }
+
+  async resetPassword(token: string, newPassword: string): Promise<void> {
+    try {
+      const decodedToken = await this.jwtService.verifyAsync(token, {
+        secret: process.env.JWT_SECRET_KEY,
+      });
+
+      if (!decodedToken || !decodedToken.sub) {
+        throw new UnauthorizedException('Invalid or expired token');
+      }
+
+      const userId = decodedToken.sub;
+      const user = await this.prisma.user.findUnique({
+        where: { id: userId },
+      });
+
+      if (!user) {
+        throw new UnauthorizedException('Invalid or expired token');
+      }
+
+      const hashedPassword = await hash(newPassword, 10);
+
+      await this.prisma.user.update({
+        where: { id: userId },
+        data: { password: hashedPassword },
+      });
+    } catch (error) {
+      throw new UnauthorizedException('Invalid or expired token');
+    }
   }
 }
