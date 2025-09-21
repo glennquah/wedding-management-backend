@@ -1,8 +1,10 @@
 import { Injectable } from '@nestjs/common';
+import { EmailTemplateType } from '@prisma/client';
 import * as sgMail from '@sendgrid/mail';
 import * as fs from 'fs';
 import * as Handlebars from 'handlebars';
 import * as path from 'path';
+import { NotificationDetailsService } from '../notification-details/notification-details.service';
 import { SendBulkEmailDto } from './dto/send-bulk-email.dto';
 import { EmailTemplate } from './enums/email-template.enum';
 import {
@@ -23,7 +25,7 @@ export class EmailNotificationService {
   );
   private templates: Map<string, HandlebarsTemplateDelegate<any>> = new Map();
 
-  constructor() {
+  constructor(private notificationDetailsService: NotificationDetailsService) {
     const key = process.env.SENDGRID_API_KEY;
     if (!key) {
       throw new Error('SENDGRID_API_KEY is not set in environment variables');
@@ -67,31 +69,42 @@ export class EmailNotificationService {
     to: string,
     resetLink: string,
     name: string = 'there',
+    weddingId?: number,
   ) {
     const templateData: PasswordResetData = {
       name,
       buttonUrl: resetLink,
     };
 
-    await this.sendPasswordResetEmail(to, templateData);
+    await this.sendPasswordResetEmail(to, templateData, weddingId);
   }
 
-  async sendWelcomeEmail(to: string, userName: string, dashboardUrl: string) {
+  async sendWelcomeEmail(
+    to: string,
+    userName: string,
+    dashboardUrl: string,
+    weddingId?: number,
+  ) {
     const templateData: WelcomeEmailData = {
       userName,
       dashboardUrl,
     };
 
-    await this.sendWelcomeEmailTemplate(to, templateData);
+    await this.sendWelcomeEmailTemplate(to, templateData, weddingId);
   }
 
-  async sendVerifyEmail(to: string, verifyUrl: string, name: string = 'there') {
+  async sendVerifyEmail(
+    to: string,
+    verifyUrl: string,
+    name: string = 'there',
+    weddingId?: number,
+  ) {
     const templateData: VerifyEmailData = {
       name,
       verifyUrl,
     };
 
-    await this.sendVerifyEmailTemplate(to, templateData);
+    await this.sendVerifyEmailTemplate(to, templateData, weddingId);
   }
 
   async sendCreateAccountEmail(
@@ -100,6 +113,7 @@ export class EmailNotificationService {
     name: string,
     weddingName: string,
     inviterName: string,
+    weddingId?: number,
   ) {
     const templateData: CreateAccountData = {
       name,
@@ -108,12 +122,13 @@ export class EmailNotificationService {
       signupUrl,
     };
 
-    await this.sendCreateAccountTemplate(to, templateData);
+    await this.sendCreateAccountTemplate(to, templateData, weddingId);
   }
 
   async sendPasswordResetEmail(
     to: string,
     templateData: PasswordResetData,
+    weddingId?: number,
   ): Promise<void> {
     const html = this.renderTemplate(
       EmailTemplate.PASSWORD_RESET,
@@ -121,7 +136,14 @@ export class EmailNotificationService {
     );
     const text = this.generatePasswordResetPlainText(templateData);
 
-    await this.sendEmail(to, 'Reset Your Knotly Password', text, html);
+    await this.sendEmail(
+      to,
+      'Reset Your Knotly Password',
+      text,
+      html,
+      weddingId,
+      EmailTemplateType.PASSWORD_RESET,
+    );
   }
 
   private generatePasswordResetPlainText(
@@ -143,6 +165,7 @@ export class EmailNotificationService {
   async sendWelcomeEmailTemplate(
     to: string,
     templateData: WelcomeEmailData,
+    weddingId?: number,
   ): Promise<void> {
     const html = this.renderTemplate(EmailTemplate.WELCOME, templateData);
     const text = this.generateWelcomeEmailTemplatePlainText(templateData);
@@ -152,6 +175,8 @@ export class EmailNotificationService {
       "Welcome to Knotly - Let's Plan Your Dream Wedding!",
       text,
       html,
+      weddingId,
+      EmailTemplateType.WELCOME,
     );
   }
 
@@ -174,11 +199,19 @@ export class EmailNotificationService {
   async sendVerifyEmailTemplate(
     to: string,
     templateData: VerifyEmailData,
+    weddingId?: number,
   ): Promise<void> {
     const html = this.renderTemplate(EmailTemplate.VERIFY_EMAIL, templateData);
     const text = this.generateVerifyEmailPlainText(templateData);
 
-    await this.sendEmail(to, 'Verify Your Knotly Email', text, html);
+    await this.sendEmail(
+      to,
+      'Verify Your Knotly Email',
+      text,
+      html,
+      weddingId,
+      EmailTemplateType.VERIFY_EMAIL,
+    );
   }
 
   private generateVerifyEmailPlainText(templateData: VerifyEmailData): string {
@@ -198,6 +231,7 @@ Website: https://knotly.app`;
   async sendCreateAccountTemplate(
     to: string,
     templateData: CreateAccountData,
+    weddingId?: number,
   ): Promise<void> {
     const html = this.renderTemplate(
       EmailTemplate.CREATE_ACCOUNT,
@@ -210,6 +244,8 @@ Website: https://knotly.app`;
       "You've Been Invited to Plan a Wedding!",
       text,
       html,
+      weddingId,
+      EmailTemplateType.CREATE_ACCOUNT,
     );
   }
 
@@ -240,6 +276,8 @@ Website: https://knotly.app`;
     subject: string,
     text: string,
     html: string,
+    weddingId?: number,
+    type?: EmailTemplateType,
   ): Promise<void> {
     const msg = {
       to,
@@ -254,13 +292,28 @@ Website: https://knotly.app`;
 
     try {
       await sgMail.send(msg);
+
+      // Log email notification if weddingId and type are provided
+      if (weddingId && type) {
+        await this.notificationDetailsService.createEmailNotification({
+          to: [to],
+          subject,
+          body: html,
+          type,
+          weddingId,
+        });
+      }
     } catch (error) {
       console.error(error);
       throw error;
     }
   }
 
-  async sendBulkEmail(bulkEmailData: SendBulkEmailDto): Promise<void> {
+  async sendBulkEmail(
+    bulkEmailData: SendBulkEmailDto,
+    weddingId?: number,
+    type?: EmailTemplateType,
+  ): Promise<void> {
     const messages = bulkEmailData.emails.map((email) => ({
       to: email,
       from: 'hello.knotly@gmail.com',
@@ -271,6 +324,17 @@ Website: https://knotly.app`;
 
     try {
       await sgMail.send(messages);
+
+      // Log email notification if weddingId and type are provided
+      if (weddingId && type) {
+        await this.notificationDetailsService.createEmailNotification({
+          to: bulkEmailData.emails,
+          subject: bulkEmailData.subject,
+          body: bulkEmailData.html,
+          type,
+          weddingId,
+        });
+      }
     } catch (error) {
       console.error(error);
       throw error;

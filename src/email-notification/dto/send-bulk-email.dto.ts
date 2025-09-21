@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsEmail, IsString } from 'class-validator';
+import { IsArray, IsEmail, IsString, IsNumber, IsOptional } from 'class-validator';
 
 export class SendBulkEmailDto {
   @ApiProperty({
@@ -22,4 +22,9 @@ export class SendBulkEmailDto {
   @ApiProperty({ example: '<p>HTML message</p>' })
   @IsString()
   html: string;
+
+  @ApiProperty({ example: 123, required: false })
+  @IsNumber()
+  @IsOptional()
+  weddingId?: number;
 }

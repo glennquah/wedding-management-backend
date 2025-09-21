@@ -1,11 +1,11 @@
 import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { EmailTemplateType } from '@prisma/client';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { UserRole } from 'src/common/user-role.enum';
 import { SendBulkEmailDto } from './dto/send-bulk-email.dto';
-import { SendPasswordResetDto } from './dto/send-password-reset.dto';
 import { SendSingleEmailDto } from './dto/send-single-email.dto';
 import { EmailNotificationService } from './email-notification.service';
 
@@ -30,6 +30,8 @@ export class EmailNotificationController {
       emailData.subject,
       emailData.text,
       emailData.html,
+      emailData.weddingId,
+      EmailTemplateType.CUSTOM,
     );
   }
 
@@ -41,24 +43,10 @@ export class EmailNotificationController {
     description: 'The emails have been successfully sent.',
   })
   async sendBulkEmail(@Body() bulkEmailData: SendBulkEmailDto): Promise<void> {
-    await this.emailNotificationService.sendBulkEmail(bulkEmailData);
-  }
-
-  // ENDPOINT ONLY FOR TESTING PURPOSES
-  @Post('send-password-reset')
-  @Roles(UserRole.SUPERADMIN)
-  @ApiOperation({ summary: 'Send password reset email' })
-  @ApiResponse({
-    status: 201,
-    description: 'The password reset email has been successfully sent.',
-  })
-  async sendPasswordResetEmail(
-    @Body() passwordResetData: SendPasswordResetDto,
-  ): Promise<void> {
-    await this.emailNotificationService.sendForgetPasswordEmail(
-      passwordResetData.to,
-      passwordResetData.resetLink,
-      passwordResetData.name,
+    await this.emailNotificationService.sendBulkEmail(
+      bulkEmailData,
+      bulkEmailData.weddingId,
+      EmailTemplateType.CUSTOM,
     );
   }
 }

@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { EmailTemplateType } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateEmailTemplateDto } from './dtos/create-email-template.dto';
 import { UpdateEmailTemplateDto } from './dtos/update-email-template.dto';
@@ -165,6 +166,35 @@ export class NotificationDetailsService {
 
     return this.prisma.emailNotificationHistory.delete({
       where: { id: historyId },
+    });
+  }
+
+  async createEmailNotification(data: {
+    to: string[];
+    subject: string;
+    body: string;
+    type: EmailTemplateType;
+    weddingId: number;
+  }) {
+    const wedding = await this.prisma.wedding.findUnique({
+      where: { id: data.weddingId },
+      include: { notificationDetails: true },
+    });
+
+    if (!wedding) {
+      throw new NotFoundException(
+        `Wedding with ID ${data.weddingId} not found`,
+      );
+    }
+
+    return this.prisma.emailNotificationHistory.create({
+      data: {
+        to: data.to,
+        subject: data.subject,
+        body: data.body,
+        type: data.type,
+        notificationDetailsId: wedding.notificationDetails.id,
+      },
     });
   }
 }

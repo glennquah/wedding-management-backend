@@ -20,4 +20,8 @@ export interface CreateAccountData {
   signupUrl: string;
 }
 
-export type EmailTemplateData = PasswordResetData | WelcomeEmailData | VerifyEmailData | CreateAccountData;
+export type EmailTemplateData =
+  | PasswordResetData
+  | WelcomeEmailData
+  | VerifyEmailData
+  | CreateAccountData;
