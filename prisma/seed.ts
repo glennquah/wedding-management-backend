@@ -132,6 +132,9 @@ async function main() {
         guestCountBucket: theme.guestCountBucket,
         preferredStyle: theme.preferredStyle,
         preferredServices: theme.preferredServices,
+        notificationDetails: {
+          create: {}
+        }
       },
     });
     weddings.push(wedding);
