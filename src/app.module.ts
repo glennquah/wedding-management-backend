@@ -8,6 +8,7 @@ import { EmailNotificationModule } from './email-notification/email-notification
 import { GuestModule } from './guest/guest.module';
 import { ListingModule } from './listing/listing.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { SeatingArrangementModule } from './seating-arrangement/seating-arrangement.module';
 import { SuperAdminModule } from './super-admin/super-admin.module';
 import { UserModule } from './user/user.module';
 import { VendorModule } from './vendor/vendor.module';
@@ -25,6 +26,7 @@ import { NotificationDetailsModule } from './notification-details/notification-d
     AuthModule,
     GuestModule,
     WeddingModule,
+    SeatingArrangementModule,
     ListingModule,
     EmailNotificationModule,
     NotificationDetailsModule,

@@ -250,8 +250,64 @@ describe('Vendor (e2e)', () => {
     });
   });
 
+  describe('DELETE /vendors/delete-self', () => {
+    it('should allow vendor to delete their own profile with correct password', async () => {
+      // First create a vendor to delete
+      const vendorToDelete = {
+        name: 'Vendor To Self Delete',
+        email: 'vendorselfdelete@test.com',
+        password: 'password123',
+        role: UserRole.VENDOR,
+        serviceOffered: WeddingService.TRANSPORTATION,
+        styleOffered: WeddingStyle.MODERN,
+        weddingTypes: [WeddingType.WESTERN],
+      };
+
+      await request(app.getHttpServer())
+        .post('/vendors')
+        .set('Authorization', `Bearer ${superAdminToken}`)
+        .send(vendorToDelete)
+        .expect(201);
+
+      // Login to get the new vendor's token
+      const loginResponse = await request(app.getHttpServer())
+        .post('/auth/login')
+        .send({
+          username: vendorToDelete.email,
+          password: vendorToDelete.password,
+        })
+        .expect(201);
+
+      const newVendorToken = loginResponse.body.backendTokens.accessToken;
+
+      // Delete own profile with correct password
+      await request(app.getHttpServer())
+        .delete('/vendors/delete-self')
+        .set('Authorization', `Bearer ${newVendorToken}`)
+        .send({ password: vendorToDelete.password })
+        .expect(200);
+
+      // Verify the vendor is deleted by trying to login again
+      await request(app.getHttpServer())
+        .post('/auth/login')
+        .send({
+          username: vendorToDelete.email,
+          password: vendorToDelete.password,
+        })
+        .expect(401);
+    });
+
+    it('should reject delete-self with incorrect password', async () => {
+      await request(app.getHttpServer())
+        .delete('/vendors/delete-self')
+        .set('Authorization', `Bearer ${vendorToken}`)
+        .send({ password: 'wrongpassword' })
+        .expect(401);
+    });
+  });
+
   describe('DELETE /vendors/:id', () => {
-    it('should delete a vendor successfully', async () => {
+    it('should delete a vendor successfully (super admin only)', async () => {
       // First create a vendor to delete
       const vendorToDelete = {
         name: 'Vendor To Delete',

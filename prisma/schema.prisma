@@ -156,29 +156,30 @@ model NotificationDetails {
   id                       Int                        @id @default(autoincrement())
   emailTemplates           EmailTemplate[]
   emailNotificationHistory EmailNotificationHistory[]
-  wedding                  Wedding?
+  wedding                  Wedding?                   @relation(fields: [weddingId], references: [id])
   createdAt                DateTime                   @default(now())
   updatedAt                DateTime                   @updatedAt
+  weddingId                Int?
 }
 
 model Wedding {
-  id                    Int                 @id @default(autoincrement())
-  mainCouple            Admin[]             @relation("MainCouple")
-  name                  String
-  date                  DateTime?
-  location              String?
-  guests                Guest[]
-  admins                Admin[]             @relation("AdminWeddings")
-  createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
-  weddingType           WeddingType
-  budgetBucket          BudgetBucket
-  guestCountBucket      GuestCountBucket
-  preferredStyle        WeddingStyle
-  preferredServices     WeddingService[]
-  orders                Order[]
-  notificationDetails   NotificationDetails @relation(fields: [notificationDetailsId], references: [id])
-  notificationDetailsId Int                 @unique
+  id                  Int                   @id @default(autoincrement())
+  mainCouple          Admin[]               @relation("MainCouple")
+  name                String
+  date                DateTime?
+  location            String?
+  guests              Guest[]
+  admins              Admin[]               @relation("AdminWeddings")
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  weddingType         WeddingType
+  budgetBucket        BudgetBucket
+  guestCountBucket    GuestCountBucket
+  preferredStyle      WeddingStyle
+  preferredServices   WeddingService[]
+  orders              Order[]
+  NotificationDetails NotificationDetails[]
+  SeatingArrangement  SeatingArrangement?
 }
 
 model Guest {
@@ -241,4 +242,14 @@ model OrderListing {
   listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
 
   @@id([orderId, listingId])
+}
+
+model SeatingArrangement {
+  id              Int      @id @default(autoincrement())
+  weddingId       Int      @unique
+  wedding         Wedding  @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+  groupPriorities Json?
+  tables          Json
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }

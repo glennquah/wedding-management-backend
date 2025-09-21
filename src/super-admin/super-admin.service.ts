@@ -122,6 +122,13 @@ export class SuperAdminService {
       );
     }
 
+    // Prepare user update data
+    const userUpdateData: any = {};
+    if (dto.name) userUpdateData.name = dto.name;
+    if (dto.email) userUpdateData.email = dto.email;
+    if (dto.password) userUpdateData.password = await hash(dto.password, 10);
+
+    // Check if email is being updated and if it conflicts
     if (dto.email) {
       const existingUser = await this.prisma.user.findUnique({
         where: { email: dto.email },
@@ -131,16 +138,16 @@ export class SuperAdminService {
       }
     }
 
-    const updatedUser = await this.prisma.user.update({
-      where: { id: userId },
-      data: {
-        email: dto.email,
-        name: dto.name,
-        password: dto.password,
-      },
-    });
+    // Update user data if there are changes
+    if (Object.keys(userUpdateData).length > 0) {
+      const updatedUser = await this.prisma.user.update({
+        where: { id: userId },
+        data: userUpdateData,
+      });
+      return this.userService.toUserResponseDto(updatedUser);
+    }
 
-    return this.userService.toUserResponseDto(updatedUser);
+    return this.userService.toUserResponseDto(superAdmin.user);
   }
 
   async delete(userId: number): Promise<void> {
