@@ -12,6 +12,7 @@ import { SuperAdminModule } from './super-admin/super-admin.module';
 import { UserModule } from './user/user.module';
 import { VendorModule } from './vendor/vendor.module';
 import { WeddingModule } from './wedding/wedding.module';
+import { NotificationDetailsModule } from './notification-details/notification-details.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { WeddingModule } from './wedding/wedding.module';
     WeddingModule,
     ListingModule,
     EmailNotificationModule,
+    NotificationDetailsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

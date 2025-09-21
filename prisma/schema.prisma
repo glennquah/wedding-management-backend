@@ -132,6 +132,7 @@ model EmailTemplate {
   name                  String              @unique
   subject               String
   htmlContent           String
+  textContent           String?
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
   NotificationDetails   NotificationDetails @relation(fields: [notificationDetailsId], references: [id])
