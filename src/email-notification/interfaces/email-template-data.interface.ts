@@ -8,4 +8,16 @@ export interface WelcomeEmailData {
   dashboardUrl: string;
 }
 
-export type EmailTemplateData = PasswordResetData | WelcomeEmailData;
+export interface VerifyEmailData {
+  name: string;
+  verifyUrl: string;
+}
+
+export interface CreateAccountData {
+  name: string;
+  weddingName: string;
+  inviterName: string;
+  signupUrl: string;
+}
+
+export type EmailTemplateData = PasswordResetData | WelcomeEmailData | VerifyEmailData | CreateAccountData;

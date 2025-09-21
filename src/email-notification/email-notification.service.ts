@@ -6,8 +6,10 @@ import * as path from 'path';
 import { SendBulkEmailDto } from './dto/send-bulk-email.dto';
 import { EmailTemplate } from './enums/email-template.enum';
 import {
+  CreateAccountData,
   EmailTemplateData,
   PasswordResetData,
+  VerifyEmailData,
   WelcomeEmailData,
 } from './interfaces/email-template-data.interface';
 
@@ -35,6 +37,8 @@ export class EmailNotificationService {
       const templateFiles = [
         { name: EmailTemplate.PASSWORD_RESET, file: 'password-reset.html' },
         { name: EmailTemplate.WELCOME, file: 'welcome.html' },
+        { name: EmailTemplate.VERIFY_EMAIL, file: 'verify-email.html' },
+        { name: EmailTemplate.CREATE_ACCOUNT, file: 'create-account.html' },
       ];
 
       templateFiles.forEach(({ name, file }) => {
@@ -79,6 +83,32 @@ export class EmailNotificationService {
     };
 
     await this.sendWelcomeEmailTemplate(to, templateData);
+  }
+
+  async sendVerifyEmail(to: string, verifyUrl: string, name: string = 'there') {
+    const templateData: VerifyEmailData = {
+      name,
+      verifyUrl,
+    };
+
+    await this.sendVerifyEmailTemplate(to, templateData);
+  }
+
+  async sendCreateAccountEmail(
+    to: string,
+    signupUrl: string,
+    name: string,
+    weddingName: string,
+    inviterName: string,
+  ) {
+    const templateData: CreateAccountData = {
+      name,
+      weddingName,
+      inviterName,
+      signupUrl,
+    };
+
+    await this.sendCreateAccountTemplate(to, templateData);
   }
 
   async sendPasswordResetEmail(
@@ -139,6 +169,54 @@ export class EmailNotificationService {
     ---
     Knotly - Your Perfect Wedding, Perfectly Planned
     Website: https://knotly.app`;
+  }
+
+  async sendVerifyEmailTemplate(to: string, templateData: VerifyEmailData): Promise<void> {
+    const html = this.renderTemplate(EmailTemplate.VERIFY_EMAIL, templateData);
+    const text = this.generateVerifyEmailPlainText(templateData);
+
+    await this.sendEmail(to, 'Verify Your Knotly Email', text, html);
+  }
+
+  private generateVerifyEmailPlainText(templateData: VerifyEmailData): string {
+    return `Hello ${templateData.name}!
+
+Welcome to Knotly! To complete your account setup, please verify your email address by clicking the link below.
+
+Verify Email: ${templateData.verifyUrl}
+
+If you didn't create an account with Knotly, please ignore this email. The verification link will expire in 24 hours for security.
+
+---
+Knotly - Your Perfect Wedding, Perfectly Planned
+Website: https://knotly.app`;
+  }
+
+  async sendCreateAccountTemplate(to: string, templateData: CreateAccountData): Promise<void> {
+    const html = this.renderTemplate(EmailTemplate.CREATE_ACCOUNT, templateData);
+    const text = this.generateCreateAccountPlainText(templateData);
+
+    await this.sendEmail(to, "You've Been Invited to Plan a Wedding!", text, html);
+  }
+
+  private generateCreateAccountPlainText(templateData: CreateAccountData): string {
+    return `Hello ${templateData.name}!
+
+Great news! You've been invited to help plan and coordinate an upcoming wedding. Join the team and be part of making this special day perfect!
+
+Wedding Details:
+Wedding: ${templateData.weddingName}
+Invited by: ${templateData.inviterName}
+
+Click the link below to create your account and start collaborating on this amazing wedding journey!
+
+Create Account: ${templateData.signupUrl}
+
+If you don't want to join this wedding planning team, you can safely ignore this email. The invitation link will expire in 7 days.
+
+---
+Knotly - Your Perfect Wedding, Perfectly Planned
+Website: https://knotly.app`;
   }
 
   async sendEmail(

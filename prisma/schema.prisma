@@ -72,6 +72,14 @@ enum VendorOnboardingStatus {
   onboarded
 }
 
+enum EmailTemplateType {
+  PASSWORD_RESET
+  WELCOME
+  VERIFY_EMAIL
+  CREATE_ACCOUNT
+  BULK_EMAIL
+}
+
 model User {
   id        Int      @id @default(autoincrement())
   name      String
@@ -119,6 +127,39 @@ model Vendor {
   onboardingStatus VendorOnboardingStatus @default(pending)
 }
 
+model EmailTemplate {
+  id                     Int                  @id @default(autoincrement())
+  name                   String               @unique
+  subject                String
+  htmlContent            String
+  createdAt              DateTime             @default(now())
+  updatedAt              DateTime             @updatedAt
+  NotificationSettings   NotificationSettings @relation(fields: [notificationSettingsId], references: [id])
+  notificationSettingsId Int
+}
+
+model EmailNotificationHistory {
+  id                     Int                  @id @default(autoincrement())
+  to                     String[]
+  subject                String
+  body                   String
+  sentAt                 DateTime             @default(now())
+  type                   EmailTemplateType
+  createdAt              DateTime             @default(now())
+  updatedAt              DateTime             @updatedAt
+  NotificationSettings   NotificationSettings @relation(fields: [notificationSettingsId], references: [id])
+  notificationSettingsId Int
+}
+
+model Notification {
+  id                       Int                        @id @default(autoincrement())
+  emailTemplates           EmailTemplate[]
+  emailNotificationHistory EmailNotificationHistory[]
+  wedding                  Wedding?
+  createdAt                DateTime                   @default(now())
+  updatedAt                DateTime                   @updatedAt
+}
+
 model Wedding {
   id                Int              @id @default(autoincrement())
   mainCouple        Admin[]          @relation("MainCouple")
@@ -135,11 +176,13 @@ model Wedding {
   preferredStyle    WeddingStyle
   preferredServices WeddingService[]
   orders            Order[]
+  notification      Notification     @relation(fields: [notificationId], references: [id])
+  notificationId    Int
 }
 
 model Guest {
   id                 Int                @id @default(autoincrement())
-  email              String             
+  email              String
   name               String
   allergies          String?
   group              String?
