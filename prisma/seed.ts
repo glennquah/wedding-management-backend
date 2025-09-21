@@ -1,6 +1,7 @@
 import {
   BudgetBucket,
   ConfirmationStatus,
+  EmailTemplateType,
   GuestCountBucket,
   PrismaClient,
   UserRole,
@@ -471,6 +472,9 @@ async function main() {
             capacity: vendor.capacity,
             onboardingStatus: vendor.onboardingStatus,
             isSuspended: vendor.isSuspended,
+            notificationDetails: {
+              create: {},
+            },
           },
         },
       },
@@ -478,6 +482,228 @@ async function main() {
   }
 
   console.log('✅ Created 20 vendors');
+
+  // Create email templates and notification history for weddings and vendors
+  console.log('✅ Creating email templates and notification history...');
+
+  // Get all notification details (both wedding and vendor)
+  const allNotificationDetails = await prisma.notificationDetails.findMany();
+
+  // Email template data
+  const emailTemplates = [
+    {
+      name: 'Welcome Template',
+      subject: 'Welcome to our Wedding Management Platform!',
+      htmlContent: `
+        <html>
+          <body>
+            <h1>Welcome!</h1>
+            <p>We're excited to have you join our wedding management platform.</p>
+            <p>Start planning your perfect day with us!</p>
+            <br>
+            <p>Best regards,<br>Wedding Management Team</p>
+          </body>
+        </html>
+      `,
+      textContent:
+        "Welcome! We're excited to have you join our wedding management platform. Start planning your perfect day with us! Best regards, Wedding Management Team",
+    },
+    {
+      name: 'Password Reset Template',
+      subject: 'Reset Your Password',
+      htmlContent: `
+        <html>
+          <body>
+            <h1>Password Reset Request</h1>
+            <p>You have requested to reset your password.</p>
+            <p>Click the link below to reset your password:</p>
+            <a href="#reset-link">Reset Password</a>
+            <p>If you didn't request this, please ignore this email.</p>
+            <br>
+            <p>Best regards,<br>Wedding Management Team</p>
+          </body>
+        </html>
+      `,
+      textContent:
+        "You have requested to reset your password. Click the link to reset your password. If you didn't request this, please ignore this email. Best regards, Wedding Management Team",
+    },
+    {
+      name: 'Successful Booking Template',
+      subject: 'Booking Confirmation - {{vendorName}}',
+      htmlContent: `
+        <html>
+          <body>
+            <h1>Booking Confirmed!</h1>
+            <p>Great news! Your booking has been successfully confirmed.</p>
+            <h3>Booking Details:</h3>
+            <ul>
+              <li><strong>Vendor:</strong> {{vendorName}}</li>
+              <li><strong>Service:</strong> {{serviceType}}</li>
+              <li><strong>Date:</strong> {{bookingDate}}</li>
+              <li><strong>Booking ID:</strong> {{bookingId}}</li>
+            </ul>
+            <p>The vendor will contact you shortly to finalize the details.</p>
+            <br>
+            <p>Best regards,<br>Wedding Management Team</p>
+          </body>
+        </html>
+      `,
+      textContent:
+        'Booking Confirmed! Your booking with {{vendorName}} for {{serviceType}} on {{bookingDate}} has been successfully confirmed. Booking ID: {{bookingId}}. Amount: ${{amount}}. The vendor will contact you shortly. Best regards, Wedding Management Team',
+    },
+    {
+      name: 'Vendor Status Update Template',
+      subject: 'Vendor Account Status Update',
+      htmlContent: `
+        <html>
+          <body>
+            <h1>Vendor Account Status Update</h1>
+            <p>Your vendor account status has been updated.</p>
+            <h3>Status Details:</h3>
+            <p><strong>New Status:</strong> {{vendorStatus}}</p>
+            {{#if isPending}}
+            <p>Your application is currently under review. We will notify you once the review is complete.</p>
+            {{/if}}
+            {{#if isOnboarded}}
+            <p>Congratulations! Your vendor account has been approved. You can now start receiving bookings and managing your services.</p>
+            {{/if}}
+            {{#if isRejected}}
+            <p>Unfortunately, your vendor application has been rejected. Please contact our support team for more information.</p>
+            {{/if}}
+            <br>
+            <p>Best regards,<br>Wedding Management Team</p>
+          </body>
+        </html>
+      `,
+      textContent:
+        'Vendor Account Status Update: Your vendor account status has been updated to {{vendorStatus}}. {{#if isPending}}Your application is under review.{{/if}}{{#if isOnboarded}}Congratulations! Your account has been approved.{{/if}}{{#if isRejected}}Your application has been rejected. Contact support for details.{{/if}} Best regards, Wedding Management Team',
+    },
+    {
+      name: 'Admin Status Update Template',
+      subject: 'Account Status Notification',
+      htmlContent: `
+        <html>
+          <body>
+            <h1>Account Status Update</h1>
+            <p>Your account status has been updated by our administrative team.</p>
+            <h3>Status Details:</h3>
+            {{#if isSuspended}}
+            <p><strong>Status:</strong> Account Suspended</p>
+            <p>Your account has been temporarily suspended. This means you will have limited access to platform features.</p>
+            <p>If you believe this is an error, please contact our support team immediately.</p>
+            {{else}}
+            <p><strong>Status:</strong> Account Active</p>
+            <p>Good news! Your account suspension has been lifted and your account is now active.</p>
+            <p>You now have full access to all platform features.</p>
+            {{/if}}
+            <p>For any questions or concerns, please don't hesitate to reach out to our support team.</p>
+            <br>
+            <p>Best regards,<br>Wedding Management Team</p>
+          </body>
+        </html>
+      `,
+      textContent:
+        'Account Status Update: {{#if isSuspended}}Your account has been suspended. Contact support if you believe this is an error.{{else}}Your account suspension has been lifted and is now active.{{/if}} For questions, contact our support team. Best regards, Wedding Management Team',
+    },
+  ];
+
+  // Create email templates for each notification detail
+  for (const notificationDetail of allNotificationDetails) {
+    for (const template of emailTemplates) {
+      await prisma.emailTemplate.create({
+        data: {
+          name: `${template.name} - NotificationDetail ${notificationDetail.id}`,
+          subject: template.subject,
+          htmlContent: template.htmlContent,
+          textContent: template.textContent,
+          notificationDetailsId: notificationDetail.id,
+        },
+      });
+    }
+  }
+
+  // Create notification history (10 entries total, distributed across notification details)
+  const notificationHistoryData = [
+    {
+      to: ['couple@wedding.com'],
+      subject: 'Welcome to Wedding Planning!',
+      body: "Welcome to our platform! We're here to help you plan your perfect wedding.",
+      type: EmailTemplateType.WELCOME,
+    },
+    {
+      to: ['vendor@wedding.com'],
+      subject: 'Vendor Onboarding Complete',
+      body: 'Congratulations! Your vendor profile has been approved and is now live.',
+      type: EmailTemplateType.WELCOME,
+    },
+    {
+      to: ['quah.glenn@gmail.com'],
+      subject: 'Password Reset Request',
+      body: 'You requested a password reset. Click the link to reset your password.',
+      type: EmailTemplateType.PASSWORD_RESET,
+    },
+    {
+      to: ['garden@venue.com'],
+      subject: 'New Booking Inquiry',
+      body: 'You have received a new booking inquiry for your venue services.',
+      type: EmailTemplateType.CUSTOM,
+    },
+    {
+      to: ['heritage@venue.com'],
+      subject: 'Profile Update Confirmation',
+      body: 'Your vendor profile has been successfully updated.',
+      type: EmailTemplateType.CUSTOM,
+    },
+    {
+      to: ['david.lee@email.com', 'emma.johnson@email.com'],
+      subject: 'Wedding Planning Reminder',
+      body: "Don't forget to confirm your venue booking by next week!",
+      type: EmailTemplateType.CUSTOM,
+    },
+    {
+      to: ['gourmet@catering.com'],
+      subject: 'New Review Posted',
+      body: 'A couple has left a 5-star review for your catering services!',
+      type: EmailTemplateType.CUSTOM,
+    },
+    {
+      to: ['raj.kumar@email.com'],
+      subject: 'Guest RSVP Update',
+      body: 'Several guests have updated their RSVP status for your wedding.',
+      type: EmailTemplateType.CUSTOM,
+    },
+    {
+      to: ['eternal@photo.com'],
+      subject: 'Portfolio Spotlight',
+      body: 'Your photography work has been featured in our vendor spotlight!',
+      type: EmailTemplateType.CUSTOM,
+    },
+    {
+      to: ['ranae.lim@email.com'],
+      subject: 'Wedding Countdown - 30 Days!',
+      body: "Your special day is just 30 days away! Here's your checklist.",
+      type: EmailTemplateType.CUSTOM,
+    },
+  ];
+
+  // Distribute notification history across all notification details
+  for (let i = 0; i < notificationHistoryData.length; i++) {
+    const notificationDetail =
+      allNotificationDetails[i % allNotificationDetails.length];
+    const historyData = notificationHistoryData[i];
+
+    await prisma.emailNotificationHistory.create({
+      data: {
+        to: historyData.to,
+        subject: historyData.subject,
+        body: historyData.body,
+        type: historyData.type,
+        notificationDetailsId: notificationDetail.id,
+      },
+    });
+  }
+
+  console.log('✅ Created email templates and notification history');
 
   const guestNames = [
     'Michael Chen',
@@ -589,6 +815,9 @@ async function main() {
   console.log(`- 10 Admin users (5 couples)`);
   console.log(`- 20 Vendor users`);
   console.log(`- 5 Weddings`);
+  console.log(`- 25 Notification Details (5 for weddings, 20 for vendors)`);
+  console.log(`- 125 Email Templates (5 per notification detail)`);
+  console.log(`- 10 Email Notification History entries`);
   console.log(
     `- ~80 primary guests per wedding (some with accompanying guests)`,
   );

@@ -130,7 +130,7 @@ model Vendor {
 
 model EmailTemplate {
   id                    Int                 @id @default(autoincrement())
-  name                  String              @unique
+  name                  String
   subject               String
   htmlContent           String
   textContent           String?
