@@ -152,8 +152,8 @@ async function main() {
       weddingIndex: 0,
     },
     {
-      name1: 'Marcus Tan',
-      email1: 'marcus.tan@email.com',
+      name1: 'Glenn Quah',
+      email1: 'quah.glenn@gmail.com',
       name2: 'Sarah Wong',
       email2: 'sarah.wong@email.com',
       weddingIndex: 1,

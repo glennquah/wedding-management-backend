@@ -8,5 +8,6 @@ import { EmailNotificationService } from './email-notification.service';
   imports: [JwtModule, NotificationDetailsModule],
   controllers: [EmailNotificationController],
   providers: [EmailNotificationService],
+  exports: [EmailNotificationService],
 })
 export class EmailNotificationModule {}

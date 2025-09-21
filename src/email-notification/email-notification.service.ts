@@ -69,14 +69,13 @@ export class EmailNotificationService {
     to: string,
     resetLink: string,
     name: string = 'there',
-    weddingId?: number,
   ): Promise<void> {
     const templateData: PasswordResetData = {
       name,
       buttonUrl: resetLink,
     };
 
-    await this.sendPasswordResetEmail(to, templateData, weddingId);
+    await this.sendPasswordResetEmail(to, templateData);
   }
 
   async sendWelcomeEmail(
@@ -141,7 +140,7 @@ export class EmailNotificationService {
       'Reset Your Knotly Password',
       text,
       html,
-      weddingId,
+      weddingId || null,
       EmailTemplateType.PASSWORD_RESET,
     );
   }
@@ -276,13 +275,13 @@ export class EmailNotificationService {
     subject: string,
     text: string,
     html: string,
-    weddingId: number,
+    weddingId: number | null,
     type: EmailTemplateType,
   ): Promise<void> {
     const msg = {
       to,
       from: {
-        email: 'hello@knotly.app',
+        email: 'hello.knotly@gmail.com',
         name: 'Knotly Team',
       },
       subject,
@@ -293,13 +292,18 @@ export class EmailNotificationService {
     try {
       await sgMail.send(msg);
 
-      await this.notificationDetailsService.createEmailNotification({
-        to: [to],
-        subject,
-        body: html,
-        type,
-        weddingId,
-      });
+      // Only log to notification history if weddingId is provided
+      if (weddingId) {
+        await this.notificationDetailsService.createEmailNotification({
+          to: [to],
+          subject,
+          body: html,
+          type,
+          weddingId,
+        });
+      } else {
+        console.log(`Email sent (no wedding context): ${type} to ${to}`);
+      }
     } catch (error) {
       console.error(error);
       throw error;
