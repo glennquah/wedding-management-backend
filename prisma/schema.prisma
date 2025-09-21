@@ -77,7 +77,7 @@ enum EmailTemplateType {
   WELCOME
   VERIFY_EMAIL
   CREATE_ACCOUNT
-  BULK_EMAIL
+  CUSTOM
 }
 
 model User {
