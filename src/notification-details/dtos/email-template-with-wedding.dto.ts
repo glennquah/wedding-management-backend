@@ -49,5 +49,5 @@ export class EmailTemplateWithWeddingDto {
   notificationDetailsId: number;
 
   @ApiProperty({ type: NotificationDetailsDto })
-  NotificationDetails: NotificationDetailsDto;
+  notificationDetails: NotificationDetailsDto;
 }

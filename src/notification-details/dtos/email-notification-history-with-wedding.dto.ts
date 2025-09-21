@@ -52,5 +52,5 @@ export class EmailNotificationHistoryWithWeddingDto {
   notificationDetailsId: number;
 
   @ApiProperty({ type: NotificationDetailsDto })
-  NotificationDetails: NotificationDetailsDto;
+  notificationDetails: NotificationDetailsDto;
 }

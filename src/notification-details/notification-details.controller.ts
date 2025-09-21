@@ -55,6 +55,7 @@ export class NotificationDetailsController {
   @ApiResponse({
     status: 200,
     description: 'Email templates retrieved successfully.',
+    type: [EmailTemplateResponseDto],
   })
   async getEmailTemplatesForWedding(
     @Param('weddingId', ParseIntPipe) weddingId: number,
@@ -70,6 +71,7 @@ export class NotificationDetailsController {
   @ApiResponse({
     status: 200,
     description: 'Email template retrieved successfully.',
+    type: EmailTemplateWithWeddingDto,
   })
   async getEmailTemplateWithId(
     @Param('emailTemplateId', ParseIntPipe) emailTemplateId: number,
@@ -85,6 +87,7 @@ export class NotificationDetailsController {
   @ApiResponse({
     status: 200,
     description: 'Email templates retrieved successfully.',
+    type: [EmailTemplateWithWeddingDto],
   })
   async getAllEmailTemplates(): Promise<EmailTemplateWithWeddingDto[]> {
     return this.notificationDetailsService.getAllEmailTemplates();
@@ -96,6 +99,7 @@ export class NotificationDetailsController {
   @ApiResponse({
     status: 200,
     description: 'Email template updated successfully.',
+    type: EmailTemplateResponseDto,
   })
   async updateEmailTemplateInWedding(
     @Param('emailTemplateId', ParseIntPipe) emailTemplateId: number,
@@ -126,6 +130,7 @@ export class NotificationDetailsController {
   @ApiResponse({
     status: 200,
     description: 'Email notification history retrieved successfully.',
+    type: [EmailNotificationHistoryResponseDto],
   })
   async getEmailNotificationHistoryWithWeddingId(
     @Param('weddingId', ParseIntPipe) weddingId: number,
@@ -143,6 +148,7 @@ export class NotificationDetailsController {
   @ApiResponse({
     status: 200,
     description: 'All email notification history retrieved successfully.',
+    type: [EmailNotificationHistoryResponseDto],
   })
   async getAllEmailNotificationHistory(): Promise<
     EmailNotificationHistoryWithWeddingDto[]
@@ -156,6 +162,7 @@ export class NotificationDetailsController {
   @ApiResponse({
     status: 200,
     description: 'Email notification history deleted successfully.',
+    type: EmailNotificationHistoryResponseDto,
   })
   async deleteEmailNotificationHistory(
     @Param('historyId', ParseIntPipe) historyId: number,

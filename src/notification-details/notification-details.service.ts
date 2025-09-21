@@ -64,7 +64,7 @@ export class NotificationDetailsService {
     const template = await this.prisma.emailTemplate.findUnique({
       where: { id: emailTemplateId },
       include: {
-        NotificationDetails: {
+        notificationDetails: {
           include: {
             wedding: true,
           },
@@ -84,7 +84,7 @@ export class NotificationDetailsService {
   async getAllEmailTemplates(): Promise<EmailTemplateWithWeddingDto[]> {
     return this.prisma.emailTemplate.findMany({
       include: {
-        NotificationDetails: {
+        notificationDetails: {
           include: {
             wedding: true,
           },
@@ -158,7 +158,7 @@ export class NotificationDetailsService {
   > {
     return this.prisma.emailNotificationHistory.findMany({
       include: {
-        NotificationDetails: {
+        notificationDetails: {
           include: {
             wedding: true,
           },

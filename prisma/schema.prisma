@@ -135,7 +135,7 @@ model EmailTemplate {
   textContent           String?
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
-  NotificationDetails   NotificationDetails @relation(fields: [notificationDetailsId], references: [id])
+  notificationDetails   NotificationDetails @relation(fields: [notificationDetailsId], references: [id])
   notificationDetailsId Int
 }
 
@@ -148,7 +148,7 @@ model EmailNotificationHistory {
   type                  EmailTemplateType
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
-  NotificationDetails   NotificationDetails @relation(fields: [notificationDetailsId], references: [id])
+  notificationDetails   NotificationDetails @relation(fields: [notificationDetailsId], references: [id])
   notificationDetailsId Int
 }
 
@@ -159,26 +159,26 @@ model NotificationDetails {
   wedding                  Wedding?                   @relation(fields: [weddingId], references: [id])
   createdAt                DateTime                   @default(now())
   updatedAt                DateTime                   @updatedAt
-  weddingId                Int?
+  weddingId                Int?                       @unique
 }
 
 model Wedding {
-  id                  Int                   @id @default(autoincrement())
-  mainCouple          Admin[]               @relation("MainCouple")
+  id                  Int                  @id @default(autoincrement())
+  mainCouple          Admin[]              @relation("MainCouple")
   name                String
   date                DateTime?
   location            String?
   guests              Guest[]
-  admins              Admin[]               @relation("AdminWeddings")
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
+  admins              Admin[]              @relation("AdminWeddings")
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
   weddingType         WeddingType
   budgetBucket        BudgetBucket
   guestCountBucket    GuestCountBucket
   preferredStyle      WeddingStyle
   preferredServices   WeddingService[]
   orders              Order[]
-  NotificationDetails NotificationDetails[]
+  notificationDetails NotificationDetails?
   SeatingArrangement  SeatingArrangement?
 }
 
