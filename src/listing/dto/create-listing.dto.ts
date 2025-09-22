@@ -14,14 +14,14 @@ import { Type } from 'class-transformer';
 export class AvailabilitySlotDto {
   @ApiProperty({
     description: 'Start time of the availability slot',
-    example: '2025-01-15T08:00:00Z'
+    example: '2025-01-15T08:00:00Z',
   })
   @IsISO8601()
   startTime: string;
 
   @ApiProperty({
     description: 'End time of the availability slot',
-    example: '2025-01-15T17:00:00Z'
+    example: '2025-01-15T17:00:00Z',
   })
   @IsISO8601()
   endTime: string;
@@ -29,7 +29,7 @@ export class AvailabilitySlotDto {
   @ApiProperty({
     description: 'Date for easier querying (optional)',
     example: '2025-01-15',
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsDateString()
@@ -52,8 +52,8 @@ export class CreateListingDto {
       {
         startTime: '2025-01-15T08:00:00Z',
         endTime: '2025-01-15T17:00:00Z',
-        date: '2025-01-15'
-      }
+        date: '2025-01-15',
+      },
     ],
   })
   @IsArray()

@@ -18,8 +18,8 @@ export class ListingResponseDto {
       {
         startTime: '2025-01-15T08:00:00Z',
         endTime: '2025-01-15T17:00:00Z',
-        date: '2025-01-15'
-      }
+        date: '2025-01-15',
+      },
     ],
   })
   availabilities: AvailabilitySlotDto[];
