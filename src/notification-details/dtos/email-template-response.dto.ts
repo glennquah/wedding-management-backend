@@ -13,7 +13,10 @@ export class EmailTemplateResponseDto {
   @ApiProperty({ example: '<h1>Welcome!</h1><p>Thank you for joining us.</p>' })
   htmlContent: string;
 
-  @ApiProperty({ example: 'Welcome! Thank you for joining us.', required: false })
+  @ApiProperty({
+    example: 'Welcome! Thank you for joining us.',
+    required: false,
+  })
   textContent?: string;
 
   @ApiProperty({ example: '2023-12-01T10:00:00Z' })
