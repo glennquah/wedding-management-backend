@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { User, Vendor } from '@prisma/client';
-import { compare, hash } from 'bcrypt';
+import { compare, hash } from 'bcryptjs';
 import { VendorOnboardingStatus } from 'src/common/vendor-onboarding-status.enum';
 import { WeddingService } from '../common/wedding-service.enum';
 import { WeddingStyle } from '../common/wedding-style.enum';

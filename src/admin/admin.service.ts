@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Admin, Prisma, User, Wedding } from '@prisma/client';
-import { compare, hash } from 'bcrypt';
+import { compare, hash } from 'bcryptjs';
 import { UserRole } from 'src/common/user-role.enum';
 import { WeddingDetailsDto } from 'src/wedding/dto/wedding-details.dto';
 import { PrismaService } from '../prisma/prisma.service';
