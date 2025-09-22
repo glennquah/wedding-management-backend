@@ -5,7 +5,12 @@ import {
   IsArray,
   IsDateString,
   IsOptional,
+  IsUrl,
+  ValidateNested,
+  IsISO8601,
 } from 'class-validator';
+import { Type } from 'class-transformer';
+import { AvailabilitySlotDto } from './create-listing.dto';
 
 export class UpdateListingDto {
   @ApiProperty({ description: 'The name of the listing', required: false })
@@ -19,15 +24,22 @@ export class UpdateListingDto {
   price?: number;
 
   @ApiProperty({
-    description: 'Available dates for the listing',
-    type: [String],
+    description: 'Available time slots for the listing',
+    type: [AvailabilitySlotDto],
     required: false,
-    example: ['2025-09-10', '2025-09-12'],
+    example: [
+      {
+        startTime: '2025-01-15T08:00:00Z',
+        endTime: '2025-01-15T17:00:00Z',
+        date: '2025-01-15'
+      }
+    ],
   })
   @IsOptional()
   @IsArray()
-  @IsDateString({}, { each: true })
-  availabilities?: string[];
+  @ValidateNested({ each: true })
+  @Type(() => AvailabilitySlotDto)
+  availabilities?: AvailabilitySlotDto[];
 
   @ApiProperty({
     description: 'Additional remarks about the listing',
@@ -36,4 +48,18 @@ export class UpdateListingDto {
   @IsOptional()
   @IsString()
   remarks?: string;
+
+  @ApiProperty({
+    description: 'Array of image URLs for the listing',
+    type: [String],
+    required: false,
+    example: [
+      'https://example.com/image1.jpg',
+      'https://example.com/image2.jpg',
+    ],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsUrl({}, { each: true })
+  imageUrls?: string[];
 }

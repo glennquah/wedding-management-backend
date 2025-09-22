@@ -158,8 +158,9 @@ model Listing {
   id             Int        @id @default(autoincrement())
   listingName    String
   price          Float
-  availabilities DateTime[]
+  availabilities Json
   remarks        String
+  imageUrls      String[]
 
   // Relations
   vendorId Int

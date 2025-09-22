@@ -26,7 +26,8 @@ export class ListingService {
     return this.prisma.listing.create({
       data: {
         ...dto,
-        availabilities: dto.availabilities.map((date) => new Date(date)),
+        availabilities: dto.availabilities as any,
+        imageUrls: dto.imageUrls || [],
       },
     });
   }
@@ -41,11 +42,14 @@ export class ListingService {
       throw new NotFoundException('Listing not found or not owned by vendor');
     }
 
-    const { availabilities, ...restDto } = dto;
+    const { availabilities, imageUrls, ...restDto } = dto;
     const updateData = {
       ...restDto,
       ...(availabilities && {
-        availabilities: availabilities.map((date) => new Date(date)),
+        availabilities: availabilities as any,
+      }),
+      ...(imageUrls !== undefined && {
+        imageUrls: imageUrls,
       }),
     };
 
@@ -62,6 +66,18 @@ export class ListingService {
     }
 
     await this.prisma.listing.delete({ where: { id } });
+  }
+
+  async findById(id: number): Promise<Listing> {
+    const listing = await this.prisma.listing.findUnique({
+      where: { id },
+    });
+
+    if (!listing) {
+      throw new NotFoundException(`Listing with ID ${id} not found`);
+    }
+
+    return listing;
   }
 
   async searchByName(
@@ -89,11 +105,10 @@ export class ListingService {
       id: listing.id,
       listingName: listing.listingName,
       price: listing.price,
-      availabilities: listing.availabilities.map((availability) =>
-        availability.toISOString(),
-      ),
+      availabilities: listing.availabilities as any,
       remarks: listing.remarks,
       vendorId: listing.vendorId,
+      imageUrls: listing.imageUrls,
       createdAt: listing.createdAt.toISOString(),
       updatedAt: listing.updatedAt.toISOString(),
     };
