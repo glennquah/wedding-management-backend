@@ -24,4 +24,14 @@ jobs:
         run: npx nest build --webpack
 
       - name: Deploy CDK
-        run: cd infra && npx cdk deploy --require-approval never
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          VPC_ID: ${{ secrets.VPC_ID }}
+          VPC_AZS: ${{ secrets.VPC_AZS }}
+          PUBLIC_SUBNET_IDS: ${{ secrets.PUBLIC_SUBNET_IDS }}
+          RDS_SG_ID: ${{ secrets.RDS_SG_ID }}
+        run: |
+          cd infra
+          npx cdk deploy --require-approval never
