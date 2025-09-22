@@ -492,10 +492,7 @@ async function main() {
   // Get only notification details that belong to weddings or vendors
   const allNotificationDetails = await prisma.notificationDetails.findMany({
     where: {
-      OR: [
-        { weddingId: { not: null } },
-        { vendorId: { not: null } },
-      ],
+      OR: [{ weddingId: { not: null } }, { vendorId: { not: null } }],
     },
   });
 

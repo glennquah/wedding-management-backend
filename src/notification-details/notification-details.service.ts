@@ -42,6 +42,48 @@ export class NotificationDetailsService {
     });
   }
 
+  async createSuperAdminTemplate(
+    dto: CreateEmailTemplateDto,
+  ): Promise<EmailTemplateResponseDto> {
+    let superAdminNotificationDetails =
+      await this.prisma.notificationDetails.findFirst({
+        where: { isSuperAdminNotification: true },
+      });
+
+    if (!superAdminNotificationDetails) {
+      superAdminNotificationDetails =
+        await this.prisma.notificationDetails.create({
+          data: {
+            isSuperAdminNotification: true,
+          },
+        });
+    }
+
+    return this.prisma.emailTemplate.create({
+      data: {
+        name: dto.name,
+        subject: dto.subject,
+        htmlContent: dto.htmlContent,
+        textContent: dto.textContent,
+        notificationDetailsId: superAdminNotificationDetails.id,
+      },
+    });
+  }
+
+  async getEmailTemplatesForSuperAdmin(): Promise<EmailTemplateResponseDto[]> {
+    const superAdminNotificationDetails =
+      await this.prisma.notificationDetails.findFirst({
+        where: { isSuperAdminNotification: true },
+        include: { emailTemplates: true },
+      });
+
+    if (!superAdminNotificationDetails) {
+      return [];
+    }
+
+    return superAdminNotificationDetails.emailTemplates;
+  }
+
   async updateEmailTemplateInWedding(
     emailTemplateId: number,
     dto: UpdateEmailTemplateDto,

@@ -49,6 +49,31 @@ export class NotificationDetailsController {
     );
   }
 
+  @Post('superadmin/email-templates')
+  @Roles(UserRole.SUPERADMIN)
+  @ApiOperation({ summary: 'Create email template for superadmin' })
+  @ApiResponse({
+    status: 201,
+    description: 'The email template has been successfully created.',
+  })
+  async createSuperAdminTemplate(
+    @Body() dto: CreateEmailTemplateDto,
+  ): Promise<EmailTemplateResponseDto> {
+    return this.notificationDetailsService.createSuperAdminTemplate(dto);
+  }
+
+  @Get('superadmin/email-templates')
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
+  @ApiOperation({ summary: 'Get all email templates for superadmin' })
+  @ApiResponse({
+    status: 200,
+    description: 'Email templates retrieved successfully.',
+    type: [EmailTemplateResponseDto],
+  })
+  async getEmailTemplatesForSuperAdmin(): Promise<EmailTemplateResponseDto[]> {
+    return this.notificationDetailsService.getEmailTemplatesForSuperAdmin();
+  }
+
   @Get('weddings/:weddingId/email-templates')
   @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Get all email templates for a wedding' })

@@ -163,6 +163,7 @@ model NotificationDetails {
   weddingId                Int?                       @unique
   vendor                   Vendor?                    @relation(fields: [vendorId], references: [userId])
   vendorId                 Int?                       @unique
+  isSuperAdminNotification Boolean?                   @default(false)
 }
 
 model Wedding {
