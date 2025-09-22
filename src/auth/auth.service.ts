@@ -129,7 +129,7 @@ export class AuthService {
         where: { id: userId },
         data: { password: hashedPassword },
       });
-    } catch (error) {
+    } catch {
       throw new UnauthorizedException('Invalid or expired token');
     }
   }

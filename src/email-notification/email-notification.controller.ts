@@ -1,10 +1,8 @@
 import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { EmailTemplateType } from '@prisma/client';
-import { Roles } from 'src/auth/decorators/roles.decorator';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
-import { UserRole } from 'src/common/user-role.enum';
 import { SendBulkEmailDto } from './dto/send-bulk-email.dto';
 import { SendSingleEmailDto } from './dto/send-single-email.dto';
 import { EmailNotificationService } from './email-notification.service';
@@ -18,7 +16,6 @@ export class EmailNotificationController {
   ) {}
 
   @Post('send')
-  @Roles(UserRole.VENDOR, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Send an email notification' })
   @ApiResponse({
     status: 201,
@@ -37,13 +34,13 @@ export class EmailNotificationController {
   }
 
   @Post('send-bulk')
-  @Roles(UserRole.VENDOR, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Send bulk email notifications' })
   @ApiResponse({
     status: 201,
     description: 'The emails have been successfully sent.',
   })
   async sendBulkEmail(@Body() bulkEmailData: SendBulkEmailDto): Promise<void> {
+    console.log('Sending bulk email with data:', bulkEmailData);
     await this.emailNotificationService.sendBulkEmail(
       bulkEmailData,
       bulkEmailData.weddingId,

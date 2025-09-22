@@ -81,6 +81,7 @@ export class GuestService {
       });
     }
 
+    console.log('Updating guest with data:', dto);
     return this.prisma.guest.update({
       where: { id },
       data: dto,
