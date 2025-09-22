@@ -1,0 +1,27 @@
+name: Deploy CDK Stack
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Clean previous build
+        run: rm -rf dist node_modules
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Nest with webpack
+        run: npx nest build --webpack
+
+      - name: Deploy CDK
+        run: cd infra && npx cdk deploy --require-approval never
