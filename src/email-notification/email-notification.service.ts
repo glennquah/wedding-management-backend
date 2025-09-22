@@ -319,29 +319,38 @@ export class EmailNotificationService {
 
   async sendBulkEmail(
     bulkEmailData: SendBulkEmailDto,
-    weddingId: number,
     type: EmailTemplateType,
+    weddingId?: number,
   ): Promise<void> {
+    console.log('Sending bulk email to:', bulkEmailData);
     const messages = bulkEmailData.emails.map((email) => ({
       to: email,
       from: 'hello.knotly@gmail.com',
       subject: bulkEmailData.subject,
-      text: bulkEmailData.text,
+      text: bulkEmailData.text || 'Please view this email in HTML format.',
       html: bulkEmailData.html,
     }));
 
     try {
       await sgMail.send(messages);
 
-      await this.notificationDetailsService.createEmailNotification({
-        to: bulkEmailData.emails,
-        subject: bulkEmailData.subject,
-        body: bulkEmailData.html,
-        type,
-        weddingId,
-      });
+      if (weddingId) {
+        await this.notificationDetailsService.createEmailNotification({
+          to: bulkEmailData.emails,
+          subject: bulkEmailData.subject,
+          body: bulkEmailData.html,
+          type,
+          weddingId,
+        });
+      }
     } catch (error) {
-      console.error(error);
+      console.error('SendGrid Bulk Email Error:', error);
+      if (error.response?.body?.errors) {
+        console.error(
+          'SendGrid Bulk Email Error Details:',
+          JSON.stringify(error.response.body.errors, null, 2),
+        );
+      }
       throw error;
     }
   }

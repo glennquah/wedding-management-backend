@@ -40,11 +40,10 @@ export class EmailNotificationController {
     description: 'The emails have been successfully sent.',
   })
   async sendBulkEmail(@Body() bulkEmailData: SendBulkEmailDto): Promise<void> {
-    console.log('Sending bulk email with data:', bulkEmailData);
     await this.emailNotificationService.sendBulkEmail(
       bulkEmailData,
-      bulkEmailData.weddingId,
       EmailTemplateType.CUSTOM,
+      bulkEmailData.weddingId,
     );
   }
 }
