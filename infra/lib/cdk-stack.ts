@@ -1,0 +1,56 @@
+import * as cdk from 'aws-cdk-lib';
+import { Construct } from 'constructs';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
+import * as apigateway from 'aws-cdk-lib/aws-apigateway';
+import * as ec2 from 'aws-cdk-lib/aws-ec2';
+import * as path from 'path';
+
+export class CdkStack extends cdk.Stack {
+  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+    super(scope, id, props);
+
+    const vpc = ec2.Vpc.fromVpcAttributes(this, 'MyVPC', {
+      vpcId: process.env.VPC_ID!,
+      availabilityZones: process.env.VPC_AZS!.split(','),
+      publicSubnetIds: process.env.PUBLIC_SUBNET_IDS!.split(','),
+    });   
+
+    const lambdaSG = new ec2.SecurityGroup(this, 'LambdaSG', {
+      vpc,
+      allowAllOutbound: true,
+      description: 'Security group for NestJS Lambda',
+    });
+
+    const rdsSG = ec2.SecurityGroup.fromSecurityGroupId(
+      this,
+      'RDSSG',
+      process.env.RDS_SG_ID!, 
+    );
+
+    rdsSG.addIngressRule(lambdaSG, ec2.Port.tcp(5432), 'Allow Lambda to connect to Postgres');
+
+    const nestJsLambda = new lambda.Function(this, 'NestJsApiLambda', {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: 'main.handler',
+      code: lambda.Code.fromAsset(path.join(__dirname, '../../dist')),
+      vpc,
+      vpcSubnets: { subnets: vpc.publicSubnets },
+      allowPublicSubnet: true,
+      securityGroups: [lambdaSG],
+      environment: {
+        NODE_ENV: 'production',
+        DATABASE_URL: process.env.DATABASE_URL ?? '',
+      },
+      memorySize: 512,
+      timeout: cdk.Duration.seconds(30),
+    });
+
+    new apigateway.LambdaRestApi(this, 'NestJsApiGateway', {
+      handler: nestJsLambda,
+      proxy: true,
+      deployOptions: {
+        stageName: 'prod',
+      },
+    });
+  }
+}
