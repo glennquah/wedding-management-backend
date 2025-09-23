@@ -40,7 +40,9 @@ export class CdkStack extends cdk.Stack {
       securityGroups: [lambdaSG],
       environment: {
         NODE_ENV: 'production',
-        DATABASE_URL: process.env.DATABASE_URL ?? '',
+        DATABASE_URL: process.env.DATABASE_URL,
+        JWT_SECRET_KEY: process.env.JWT_SECRET_KEY,
+        JWT_REFRESH_KEY: process.env.JWT_REFRESH_KEY
       },
       memorySize: 512,
       timeout: cdk.Duration.seconds(30),

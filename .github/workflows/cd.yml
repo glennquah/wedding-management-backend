@@ -44,6 +44,8 @@ jobs:
           VPC_AZS: ${{ secrets.VPC_AZS }}
           PUBLIC_SUBNET_IDS: ${{ secrets.PUBLIC_SUBNET_IDS }}
           RDS_SG_ID: ${{ secrets.RDS_SG_ID }}
+          JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+          JWT_REFRESH_KEY: ${{ secrets.JWT_REFRESH_KEY }}
         run: |
           cd infra
           npx cdk deploy --require-approval never
