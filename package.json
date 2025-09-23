@@ -28,7 +28,7 @@
     "prisma:schema:update:prod": "npx dotenv -e .env.prod -- npx prisma migrate deploy",
     "prisma:gui:prod": "npx dotenv -e .env.prod -- npx prisma studio",
     "prisma:seed:prod": "npx dotenv -e .env.prod -- npx prisma db seed",
-    "build:lambda": "webpack --config webpack.config.js"
+    "build:lambda": "npx nest build --webpack"
   },
   "dependencies": {
     "@nestjs/common": "^10.4.20",
