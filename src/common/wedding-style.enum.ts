@@ -1,6 +1,6 @@
 export enum WeddingStyle {
-  LUXURY = 'luxury',
-  MODERN = 'modern',
-  TRADITIONAL = 'traditional',
-  RUSTIC = 'rustic',
+  LUXURY = 'LUXURY',
+  MODERN = 'MODERN',
+  TRADITIONAL = 'TRADITIONAL',
+  RUSTIC = 'RUSTIC',
 }

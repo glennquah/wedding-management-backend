@@ -80,8 +80,6 @@ export class GuestService {
         data: { confirmationStatus: ConfirmationStatus.CONFIRMED },
       });
     }
-
-    console.log('Updating guest with data:', dto);
     return this.prisma.guest.update({
       where: { id },
       data: dto,

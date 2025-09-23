@@ -92,6 +92,9 @@ export class VendorService {
         styleOffered: dto.styleOffered,
         weddingTypes: dto.weddingTypes,
         capacity: dto.capacity,
+        notificationDetails: {
+          create: {},
+        },
       },
       include: { user: true }, // include the user relation for mapping
     });

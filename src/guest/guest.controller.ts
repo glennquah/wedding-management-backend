@@ -120,7 +120,6 @@ export class GuestController {
     @Param('id', ParseIntPipe) id: number,
     @Body() body: UpdateGuestDto,
   ): Promise<GuestResponseDto> {
-    console.log('body:', body);
     const guest = await this.guestService.update(id, body);
     return this.guestService.toGuestResponseDto(guest);
   }
