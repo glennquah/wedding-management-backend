@@ -46,7 +46,7 @@ export class ListingService {
     const updateData = {
       ...restDto,
       ...(availabilities && {
-        availabilities: availabilities as any,
+        availabilities: JSON.parse(JSON.stringify(availabilities)),
       }),
       ...(imageUrls !== undefined && {
         imageUrls: imageUrls,
