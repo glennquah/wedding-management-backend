@@ -1,7 +1,7 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { ExpressAdapter } from '@nestjs/platform-express';
-import serverlessExpress from '@vendia/serverless-express';
+import { configure } from '@vendia/serverless-express';
 import { Context, Handler } from 'aws-lambda';
 import * as express from 'express';
 
@@ -33,7 +33,7 @@ async function bootstrap() {
     
     await nestApp.init();
 
-    cachedServer = serverlessExpress({ app: expressApp });
+    cachedServer = configure({ app: expressApp });
   }
   return cachedServer;
 }
