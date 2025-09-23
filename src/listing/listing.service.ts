@@ -105,7 +105,7 @@ export class ListingService {
       id: listing.id,
       listingName: listing.listingName,
       price: listing.price,
-      availabilities: listing.availabilities as any,
+      availabilities: JSON.parse(JSON.stringify(listing.availabilities)),
       remarks: listing.remarks,
       vendorId: listing.vendorId,
       imageUrls: listing.imageUrls,
