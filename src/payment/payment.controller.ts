@@ -14,11 +14,9 @@ import {
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import { JwtGuard } from '../auth/guards/jwt.guard';
-import { ConfirmPaymentDto } from './dto/confirm-payment.dto';
-import { CreatePaymentIntentDto } from './dto/create-payment-intent.dto';
-import { PaymentIntentResponseDto } from './dto/payment-intent-response.dto';
+import { CreateCheckoutSessionDto } from './dto/create-checkout-session.dto';
+import { CheckoutSessionResponseDto } from './dto/checkout-session-response.dto';
 import { PaymentResponseDto } from './dto/payment-response.dto';
-import { RefundPaymentDto } from './dto/refund-payment.dto';
 import { PaymentService } from './payment.service';
 
 @ApiTags('payments')
@@ -27,45 +25,20 @@ export class PaymentController {
   constructor(private readonly paymentService: PaymentService) {}
 
   @UseGuards(JwtGuard)
-  @Post('create-intent')
-  @ApiOperation({ summary: 'Create a payment intent for an order' })
+  @Post('create-checkout-session')
+  @ApiOperation({ summary: 'Create a Stripe Checkout session for an order' })
   @ApiResponse({
     status: 201,
-    description: 'Payment intent created successfully.',
-    type: PaymentIntentResponseDto,
+    description: 'Checkout session created successfully.',
+    type: CheckoutSessionResponseDto,
   })
   @ApiResponse({ status: 400, description: 'Bad request.' })
   @ApiResponse({ status: 404, description: 'Order not found.' })
-  async createPaymentIntent(@Body() createPaymentIntentDto: CreatePaymentIntentDto): Promise<PaymentIntentResponseDto> {
-    return this.paymentService.createPaymentIntent(createPaymentIntentDto);
+  async createCheckoutSession(@Body() createCheckoutSessionDto: CreateCheckoutSessionDto): Promise<CheckoutSessionResponseDto> {
+    return this.paymentService.createCheckoutSession(createCheckoutSessionDto);
   }
 
-  @UseGuards(JwtGuard)
-  @Post('confirm')
-  @ApiOperation({ summary: 'Confirm a payment intent' })
-  @ApiResponse({
-    status: 200,
-    description: 'Payment confirmed successfully.',
-    type: PaymentResponseDto,
-  })
-  @ApiResponse({ status: 400, description: 'Bad request.' })
-  @ApiResponse({ status: 404, description: 'Payment not found.' })
-  async confirmPayment(@Body() confirmPaymentDto: ConfirmPaymentDto): Promise<PaymentResponseDto> {
-    return this.paymentService.confirmPayment(confirmPaymentDto);
-  }
 
-  @UseGuards(JwtGuard)
-  @Post('refund')
-  @ApiOperation({ summary: 'Refund a payment' })
-  @ApiResponse({
-    status: 200,
-    description: 'Payment refunded successfully.',
-  })
-  @ApiResponse({ status: 400, description: 'Payment not eligible for refund.' })
-  @ApiResponse({ status: 404, description: 'Payment not found.' })
-  async refundPayment(@Body() refundPaymentDto: RefundPaymentDto): Promise<any> {
-    return this.paymentService.refundPayment(refundPaymentDto);
-  }
 
   @UseGuards(JwtGuard)
   @Get('history/:orderId')
@@ -94,4 +67,5 @@ export class PaymentController {
   ) {
     return this.paymentService.handleWebhook(signature, req.rawBody!);
   }
+
 }

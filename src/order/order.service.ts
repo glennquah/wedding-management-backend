@@ -278,58 +278,6 @@ export class OrderService {
     });
   }
 
-  async cleanupExpiredOrders(): Promise<{ cleanedCount: number }> {
-    const now = new Date();
-
-    // Find expired orders that are still pending
-    const expiredOrders = await this.prisma.order.findMany({
-      where: {
-        orderStatus: OrderStatus.PENDING,
-        expiresAt: {
-          lt: now,
-        },
-      },
-      include: {
-        listings: {
-          include: {
-            listing: true,
-          },
-        },
-      },
-    });
-
-    let cleanedCount = 0;
-
-    for (const order of expiredOrders) {
-      // Restore booked dates back to listing availabilities
-      for (const orderListing of order.listings) {
-        const listing = orderListing.listing;
-        const bookedDates = orderListing.bookedDates;
-
-        // Add back the booked dates to the listing's availabilities
-        const updatedAvailabilities = [...listing.availabilities, ...bookedDates];
-
-        // Sort the dates and remove duplicates
-        const sortedUniqueAvailabilities = Array.from(
-          new Set(updatedAvailabilities.map(date => date.getTime()))
-        ).map(time => new Date(time)).sort();
-
-        await this.prisma.listing.update({
-          where: { id: listing.id },
-          data: { availabilities: sortedUniqueAvailabilities },
-        });
-      }
-
-      // Delete the expired order
-      await this.prisma.order.delete({
-        where: { id: order.id },
-      });
-
-      cleanedCount++;
-    }
-
-    return { cleanedCount };
-  }
 
   isOrderExpired(order: { expiresAt?: Date | null; orderStatus: string }): boolean {
     if (!order.expiresAt) return false;

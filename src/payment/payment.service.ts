@@ -1,13 +1,10 @@
 import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import Stripe from 'stripe';
 import { OrderStatus } from '../common/order-status.enum';
-import { PaymentMethod } from '../common/payment-method.enum';
 import { PaymentStatus } from '../common/payment-status.enum';
 import { PrismaService } from '../prisma/prisma.service';
-import { ConfirmPaymentDto } from './dto/confirm-payment.dto';
-import { CreatePaymentIntentDto } from './dto/create-payment-intent.dto';
-import { RefundPaymentDto } from './dto/refund-payment.dto';
-import { PaymentIntentResponseDto } from './dto/payment-intent-response.dto';
+import { CreateCheckoutSessionDto } from './dto/create-checkout-session.dto';
+import { CheckoutSessionResponseDto } from './dto/checkout-session-response.dto';
 import { PaymentResponseDto } from './dto/payment-response.dto';
 
 @Injectable()
@@ -20,23 +17,40 @@ export class PaymentService {
     });
   }
 
-  async createPaymentIntent(dto: CreatePaymentIntentDto): Promise<PaymentIntentResponseDto> {
+  async createCheckoutSession(dto: CreateCheckoutSessionDto): Promise<CheckoutSessionResponseDto> {
     try {
       const order = await this.prisma.order.findUnique({
         where: { id: dto.orderId },
-        include: { listings: true },
+        include: { listings: { include: { listing: true } } },
       });
 
       if (!order) {
         throw new BadRequestException('Order not found');
       }
 
-      const paymentMethods = this.getStripePaymentMethods(dto.paymentMethod);
+      // Create line items for Stripe Checkout
+      const lineItems = order.listings.map(orderListing => ({
+        price_data: {
+          currency: order.currency.toLowerCase(),
+          product_data: {
+            name: orderListing.listing.listingName,
+            description: orderListing.listing.remarks || 'Wedding service',
+          },
+          unit_amount: Math.round(orderListing.listing.price * 100), // Convert to cents
+        },
+        quantity: 1,
+      }));
 
-      const paymentIntent = await this.stripe.paymentIntents.create({
-        amount: Math.round(order.totalAmount * 100), // Convert to cents
-        currency: order.currency.toLowerCase(),
-        payment_method_types: paymentMethods,
+      const baseUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+      const successUrl = dto.successUrl || `${baseUrl}/payment/success?session_id={CHECKOUT_SESSION_ID}`;
+      const cancelUrl = dto.cancelUrl || `${baseUrl}/payment/cancel`;
+
+      const session = await this.stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        line_items: lineItems,
+        mode: 'payment',
+        success_url: successUrl,
+        cancel_url: cancelUrl,
         metadata: {
           orderId: dto.orderId.toString(),
         },
@@ -44,116 +58,26 @@ export class PaymentService {
 
       const payment = await this.prisma.payment.create({
         data: {
-          stripePaymentIntentId: paymentIntent.id,
+          stripeCheckoutSessionId: session.id,
           amount: order.totalAmount,
           currency: order.currency,
-          paymentMethod: dto.paymentMethod,
           paymentStatus: PaymentStatus.PENDING,
           orderId: dto.orderId,
         },
       });
 
       return {
-        clientSecret: paymentIntent.client_secret,
-        paymentIntentId: paymentIntent.id,
+        url: session.url!,
+        sessionId: session.id,
         payment,
       };
     } catch (error) {
-      console.error('Error creating payment intent:', error);
-      throw new InternalServerErrorException('Failed to create payment intent');
+      console.error('Error creating checkout session:', error);
+      throw new InternalServerErrorException('Failed to create checkout session');
     }
   }
 
-  async confirmPayment(dto: ConfirmPaymentDto): Promise<PaymentResponseDto> {
-    try {
-      const paymentIntent = await this.stripe.paymentIntents.retrieve(dto.paymentIntentId);
 
-      const payment = await this.prisma.payment.findUnique({
-        where: { stripePaymentIntentId: dto.paymentIntentId },
-        include: { order: true },
-      });
-
-      if (!payment) {
-        throw new BadRequestException('Payment not found');
-      }
-
-      let status: PaymentStatus;
-      switch (paymentIntent.status) {
-        case 'succeeded':
-          status = PaymentStatus.SUCCEEDED;
-          break;
-        case 'processing':
-          status = PaymentStatus.PROCESSING;
-          break;
-        case 'requires_payment_method':
-        case 'requires_confirmation':
-        case 'requires_action':
-          status = PaymentStatus.PENDING;
-          break;
-        case 'canceled':
-          status = PaymentStatus.CANCELLED;
-          break;
-        default:
-          status = PaymentStatus.FAILED;
-      }
-
-      const updatedPayment = await this.prisma.payment.update({
-        where: { stripePaymentIntentId: dto.paymentIntentId },
-        data: {
-          paymentStatus: status,
-          stripeChargeId: paymentIntent.latest_charge as string || null,
-        },
-      });
-
-      // Update order status if payment succeeded
-      if (status === PaymentStatus.SUCCEEDED) {
-        await this.prisma.order.update({
-          where: { id: payment.orderId },
-          data: { orderStatus: OrderStatus.PAID },
-        });
-      }
-
-      return updatedPayment;
-    } catch (error) {
-      console.error('Error confirming payment:', error);
-      throw new InternalServerErrorException('Failed to confirm payment');
-    }
-  }
-
-  async refundPayment(dto: RefundPaymentDto): Promise<any> {
-    try {
-      const payment = await this.prisma.payment.findUnique({
-        where: { stripePaymentIntentId: dto.paymentIntentId },
-      });
-
-      if (!payment || payment.paymentStatus !== PaymentStatus.SUCCEEDED) {
-        throw new BadRequestException('Payment not found or not eligible for refund');
-      }
-
-      const refundAmount = dto.amount || payment.amount;
-
-      const refund = await this.stripe.refunds.create({
-        payment_intent: dto.paymentIntentId,
-        amount: Math.round(refundAmount * 100), // Convert to cents
-      });
-
-      const isPartialRefund = refundAmount < payment.amount;
-      const newRefundedAmount = (payment.refundedAmount || 0) + refundAmount;
-
-      await this.prisma.payment.update({
-        where: { stripePaymentIntentId: dto.paymentIntentId },
-        data: {
-          paymentStatus: isPartialRefund ? PaymentStatus.PARTIALLY_REFUNDED : PaymentStatus.REFUNDED,
-          refundedAmount: newRefundedAmount,
-        },
-      });
-
-      return refund;
-    } catch (error) {
-      console.error('Error processing refund:', error);
-      throw new InternalServerErrorException('Failed to process refund');
-    }
-  }
 
   async getPaymentHistory(orderId: number): Promise<PaymentResponseDto[]> {
     return this.prisma.payment.findMany({
@@ -162,18 +86,6 @@ export class PaymentService {
     });
   }
 
-  private getStripePaymentMethods(paymentMethod: PaymentMethod): string[] {
-    switch (paymentMethod) {
-      case PaymentMethod.CARD:
-        return ['card'];
-      case PaymentMethod.GOOGLE_PAY:
-        return ['card']; // Google Pay uses card payment method type
-      case PaymentMethod.APPLE_PAY:
-        return ['card']; // Apple Pay uses card payment method type
-      default:
-        return ['card'];
-    }
-  }
 
   async handleWebhook(signature: string, payload: Buffer): Promise<{ received: boolean }> {
     try {
@@ -184,11 +96,11 @@ export class PaymentService {
       );
 
       switch (event.type) {
-        case 'payment_intent.succeeded':
-          await this.handlePaymentSucceeded(event.data.object as Stripe.PaymentIntent);
+        case 'checkout.session.completed':
+          await this.handleCheckoutCompleted(event.data.object as Stripe.Checkout.Session);
           break;
-        case 'payment_intent.payment_failed':
-          await this.handlePaymentFailed(event.data.object as Stripe.PaymentIntent);
+        case 'checkout.session.expired':
+          await this.handleCheckoutExpired(event.data.object as Stripe.Checkout.Session);
           break;
         default:
           console.log(`Unhandled event type: ${event.type}`);
@@ -201,34 +113,71 @@ export class PaymentService {
     }
   }
 
-  private async handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {
-    await this.prisma.payment.update({
-      where: { stripePaymentIntentId: paymentIntent.id },
-      data: {
-        paymentStatus: PaymentStatus.SUCCEEDED,
-        stripeChargeId: paymentIntent.latest_charge as string,
-      },
-    });
 
+  private async handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     const payment = await this.prisma.payment.findUnique({
-      where: { stripePaymentIntentId: paymentIntent.id },
+      where: { stripeCheckoutSessionId: session.id },
     });
 
     if (payment) {
+      await this.prisma.payment.update({
+        where: { stripeCheckoutSessionId: session.id },
+        data: {
+          paymentStatus: PaymentStatus.SUCCEEDED,
+          stripePaymentIntentId: session.payment_intent as string,
+        },
+      });
+
       await this.prisma.order.update({
         where: { id: payment.orderId },
-        data: { orderStatus: 'paid' },
+        data: { orderStatus: OrderStatus.PAID },
       });
     }
   }
 
-  private async handlePaymentFailed(paymentIntent: Stripe.PaymentIntent) {
-    await this.prisma.payment.update({
-      where: { stripePaymentIntentId: paymentIntent.id },
-      data: {
-        paymentStatus: PaymentStatus.FAILED,
-        failureReason: paymentIntent.last_payment_error?.message || 'Payment failed',
+  private async handleCheckoutExpired(session: Stripe.Checkout.Session) {
+    const payment = await this.prisma.payment.findUnique({
+      where: { stripeCheckoutSessionId: session.id },
+      include: {
+        order: {
+          include: {
+            listings: {
+              include: {
+                listing: true,
+              },
+            },
+          },
+        },
       },
     });
+
+    if (payment) {
+      // Restore booked dates back to listing availabilities
+      for (const orderListing of payment.order.listings) {
+        const listing = orderListing.listing;
+        const bookedDates = orderListing.bookedDates;
+
+        // Add back the booked dates to the listing's availabilities
+        const updatedAvailabilities = [...listing.availabilities, ...bookedDates];
+
+        // Sort the dates and remove duplicates
+        const sortedUniqueAvailabilities = Array.from(
+          new Set(updatedAvailabilities.map(date => date.getTime()))
+        ).map(time => new Date(time)).sort();
+
+        await this.prisma.listing.update({
+          where: { id: listing.id },
+          data: { availabilities: sortedUniqueAvailabilities },
+        });
+      }
+
+      // Delete the expired order (payment will be cascade deleted)
+      await this.prisma.order.delete({
+        where: { id: payment.orderId },
+      });
+
+      console.log(`Cleaned up expired order ${payment.orderId} and restored availability for ${payment.order.listings.length} listings`);
+    }
   }
+
 }

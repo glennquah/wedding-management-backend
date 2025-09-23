@@ -10,14 +10,13 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
-import { Roles } from '../auth/decorators/roles.decorator';
 import { UserRole } from '../common/user-role.enum';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { OrderResponseDto } from './dto/order-response.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
-import { OrderCleanupService } from './order-cleanup.service';
 import { OrderService } from './order.service';
 
 @ApiTags('orders')
@@ -26,7 +25,6 @@ import { OrderService } from './order.service';
 export class OrderController {
   constructor(
     private readonly orderService: OrderService,
-    private readonly orderCleanupService: OrderCleanupService,
   ) {}
 
   @Post()
@@ -128,16 +126,5 @@ export class OrderController {
   @ApiResponse({ status: 404, description: 'Order not found.' })
   async delete(@Param('id', ParseIntPipe) id: number): Promise<void> {
     await this.orderService.delete(id);
-  }
-
-  @Post('cleanup')
-  @Roles(UserRole.SUPERADMIN)
-  @ApiOperation({ summary: 'Manually trigger cleanup of expired orders' })
-  @ApiResponse({
-    status: 200,
-    description: 'Cleanup completed successfully.',
-  })
-  async manualCleanup(): Promise<{ cleanedCount: number }> {
-    return this.orderCleanupService.manualCleanup();
   }
 }

@@ -76,13 +76,6 @@ enum PaymentStatus {
   partiallyRefunded
 }
 
-enum PaymentMethod {
-  card
-  googlePay
-  applePay
-  bankTransfer
-}
-
 enum VendorOnboardingStatus {
   pending
   rejected
@@ -224,16 +217,12 @@ model OrderListing {
 }
 
 model Payment {
-  id                    Int           @id @default(autoincrement())
-  stripePaymentIntentId String        @unique
-  amount                Float
-  currency              String        @default("SGD")
-  paymentMethod         PaymentMethod
-  paymentStatus         PaymentStatus @default(pending)
-  stripeChargeId        String?
-  receiptUrl            String?
-  failureReason         String?
-  refundedAmount        Float?        @default(0)
+  id                      Int           @id @default(autoincrement())
+  stripeCheckoutSessionId String        @unique
+  stripePaymentIntentId   String?       // This is populated by webhook after payment
+  amount                  Float
+  currency                String        @default("SGD")
+  paymentStatus           PaymentStatus @default(pending)
 
   // Relations
   orderId Int
@@ -242,6 +231,7 @@ model Payment {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([stripeCheckoutSessionId])
   @@index([stripePaymentIntentId])
   @@index([paymentStatus])
 }
