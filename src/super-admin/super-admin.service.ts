@@ -49,7 +49,7 @@ export class SuperAdminService {
       name: dto.name,
       email: dto.email,
       password: await hash(dto.password, 10),
-      role: 'superAdmin' as UserRole,
+      role: UserRole.SUPERADMIN,
     });
 
     // Create the super admin profile
