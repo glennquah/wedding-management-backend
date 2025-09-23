@@ -33,7 +33,17 @@ export class CdkStack extends cdk.Stack {
     const nestJsLambda = new lambda.Function(this, 'NestJsApiLambda', {
       runtime: lambda.Runtime.NODEJS_20_X,
       handler: 'main.handler',
-      code: lambda.Code.fromAsset(path.join(__dirname, '../../dist')),
+      code: lambda.Code.fromAsset(path.join(__dirname, '../../dist'), {
+        exclude: [
+          'infra/**',
+          'prisma/**',
+          'src/**',
+          'test/**',
+          '*.ts',
+          '*.map',
+          'main.js.LICENSE.txt',
+        ],
+      }),
       vpc,
       vpcSubnets: { subnets: vpc.publicSubnets },
       allowPublicSubnet: true,
