@@ -1,5 +1,6 @@
 const path = require('path');
 const webpack = require('webpack');
+const CopyPlugin = require('copy-webpack-plugin');
 
 module.exports = {
   entry: './src/lambda.ts',
@@ -36,5 +37,13 @@ module.exports = {
         return lazyImports.includes(resource);
       },
     }),
+    new CopyPlugin({
+      patterns: [
+        {
+          from: path.resolve(__dirname, 'node_modules/.prisma/client'),
+          to: path.resolve(__dirname, 'dist/node_modules/.prisma/client'),
+        },
+      ],
+    }),  
   ],
 };
