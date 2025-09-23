@@ -82,7 +82,7 @@ export class AuthService {
       where: { email },
     });
 
-    if (!user || user.role === UserRole.superAdmin) return;
+    if (!user || user.role === UserRole.SUPERADMIN) return;
 
     const token = await this.jwtService.signAsync(
       {

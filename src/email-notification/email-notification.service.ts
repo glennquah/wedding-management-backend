@@ -1,12 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { EmailTemplateType } from '@prisma/client';
 import * as sgMail from '@sendgrid/mail';
 import * as fs from 'fs';
 import * as Handlebars from 'handlebars';
 import * as path from 'path';
 import { NotificationDetailsService } from '../notification-details/notification-details.service';
 import { SendBulkEmailDto } from './dto/send-bulk-email.dto';
-import { EmailTemplate } from './enums/email-template.enum';
+import { EmailTemplateType } from './enums/email-template.enum';
 import {
   CreateAccountData,
   EmailTemplateData,
@@ -37,10 +36,10 @@ export class EmailNotificationService {
   private loadTemplates(): void {
     try {
       const templateFiles = [
-        { name: EmailTemplate.PASSWORD_RESET, file: 'password-reset.html' },
-        { name: EmailTemplate.WELCOME, file: 'welcome.html' },
-        { name: EmailTemplate.VERIFY_EMAIL, file: 'verify-email.html' },
-        { name: EmailTemplate.CREATE_ACCOUNT, file: 'create-account.html' },
+        { name: EmailTemplateType.PASSWORD_RESET, file: 'password-reset.html' },
+        { name: EmailTemplateType.WELCOME, file: 'welcome.html' },
+        { name: EmailTemplateType.VERIFY_EMAIL, file: 'verify-email.html' },
+        { name: EmailTemplateType.CREATE_ACCOUNT, file: 'create-account.html' },
       ];
 
       templateFiles.forEach(({ name, file }) => {
@@ -89,7 +88,7 @@ export class EmailNotificationService {
       dashboardUrl,
     };
 
-    await this.sendWelcomeEmailTemplate(to, templateData, weddingId);
+    await this.sendWelcomeEmailTemplateType(to, templateData, weddingId);
   }
 
   async sendVerifyEmail(
@@ -103,7 +102,7 @@ export class EmailNotificationService {
       verifyUrl,
     };
 
-    await this.sendVerifyEmailTemplate(to, templateData, weddingId);
+    await this.sendVerifyEmailTemplateType(to, templateData, weddingId);
   }
 
   async sendCreateAccountEmail(
@@ -129,7 +128,7 @@ export class EmailNotificationService {
     templateData: PasswordResetData,
   ): Promise<void> {
     const html = this.renderTemplate(
-      EmailTemplate.PASSWORD_RESET,
+      EmailTemplateType.PASSWORD_RESET,
       templateData,
     );
     const text = this.generatePasswordResetPlainText(templateData);
@@ -159,13 +158,13 @@ export class EmailNotificationService {
     Website: https://knotly.app`;
   }
 
-  async sendWelcomeEmailTemplate(
+  async sendWelcomeEmailTemplateType(
     to: string,
     templateData: WelcomeEmailData,
     weddingId: number,
   ): Promise<void> {
-    const html = this.renderTemplate(EmailTemplate.WELCOME, templateData);
-    const text = this.generateWelcomeEmailTemplatePlainText(templateData);
+    const html = this.renderTemplate(EmailTemplateType.WELCOME, templateData);
+    const text = this.generateWelcomeEmailTemplateTypePlainText(templateData);
 
     await this.sendEmail(
       to,
@@ -177,7 +176,7 @@ export class EmailNotificationService {
     );
   }
 
-  private generateWelcomeEmailTemplatePlainText(
+  private generateWelcomeEmailTemplateTypePlainText(
     templateData: WelcomeEmailData,
   ): string {
     return `Welcome ${templateData.userName}!
@@ -193,12 +192,15 @@ export class EmailNotificationService {
     Website: https://knotly.app`;
   }
 
-  async sendVerifyEmailTemplate(
+  async sendVerifyEmailTemplateType(
     to: string,
     templateData: VerifyEmailData,
     weddingId: number,
   ): Promise<void> {
-    const html = this.renderTemplate(EmailTemplate.VERIFY_EMAIL, templateData);
+    const html = this.renderTemplate(
+      EmailTemplateType.VERIFY_EMAIL,
+      templateData,
+    );
     const text = this.generateVerifyEmailPlainText(templateData);
 
     await this.sendEmail(
@@ -231,7 +233,7 @@ export class EmailNotificationService {
     weddingId: number,
   ): Promise<void> {
     const html = this.renderTemplate(
-      EmailTemplate.CREATE_ACCOUNT,
+      EmailTemplateType.CREATE_ACCOUNT,
       templateData,
     );
     const text = this.generateCreateAccountPlainText(templateData);
