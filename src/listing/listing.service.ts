@@ -26,7 +26,7 @@ export class ListingService {
     return this.prisma.listing.create({
       data: {
         ...dto,
-        availabilities: dto.availabilities as any,
+        availabilities: JSON.parse(JSON.stringify(dto.availabilities)),
         imageUrls: dto.imageUrls || [],
       },
     });
