@@ -1,7 +1,8 @@
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
-import * as apigateway from 'aws-cdk-lib/aws-apigateway';
+import * as apigatewayv2 from 'aws-cdk-lib/aws-apigatewayv2';
+import * as integrations from 'aws-cdk-lib/aws-apigatewayv2-integrations';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as path from 'path';
 
@@ -45,12 +46,18 @@ export class CdkStack extends cdk.Stack {
       timeout: cdk.Duration.seconds(30),
     });
 
-    new apigateway.LambdaRestApi(this, 'NestJsApiGateway', {
-      handler: nestJsLambda,
-      proxy: true,
-      deployOptions: {
-        stageName: 'prod',
-      },
+    const httpApi = new apigatewayv2.HttpApi(this, 'NestJsHttpApi', {
+      apiName: 'NestJsApi',
+      createDefaultStage: true,
+    });
+    
+    httpApi.addRoutes({
+      path: '/{proxy+}',
+      methods: [apigatewayv2.HttpMethod.ANY],
+      integration: new integrations.HttpLambdaIntegration(
+        'LambdaIntegration',
+        nestJsLambda,
+      ),
     });
   }
 }
