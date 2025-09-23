@@ -18,7 +18,7 @@ async function bootstrap() {
     );
 
     // TODO: Verify this origin
-    nestApp.enableCors({ origin: ['https://knotly.app'], credentials: true, });
+    nestApp.enableCors({ origin: ['https://knotly.app'], credentials: true });
 
     nestApp.useGlobalPipes(
       new ValidationPipe({
@@ -30,7 +30,7 @@ async function bootstrap() {
         validationError: { target: false },
       }),
     );
-    
+
     await nestApp.init();
 
     cachedServer = configure({ app: expressApp });

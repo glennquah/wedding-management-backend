@@ -8,8 +8,8 @@ dotenv.config({ path: path.resolve(__dirname, '../../.env.prod') });
 
 const app = new cdk.App();
 new CdkStack(app, 'NestJsApiStack', {
-  env: { 
-    account: process.env.AWS_ACCOUNT_ID, 
-    region: process.env.AWS_REGION 
+  env: {
+    account: process.env.AWS_ACCOUNT_ID,
+    region: process.env.AWS_REGION,
   },
 });

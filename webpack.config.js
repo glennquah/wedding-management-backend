@@ -44,6 +44,6 @@ module.exports = {
           to: path.resolve(__dirname, 'dist/node_modules/.prisma/client'),
         },
       ],
-    }),  
+    }),
   ],
 };
