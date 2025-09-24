@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { User, Vendor } from '@prisma/client';
 import { compare, hash } from 'bcrypt';
+import { UserRole } from 'src/common/user-role.enum';
 import { VendorOnboardingStatus } from 'src/common/vendor-onboarding-status.enum';
 import { WeddingService } from '../common/wedding-service.enum';
 import { WeddingStyle } from '../common/wedding-style.enum';
@@ -73,7 +74,7 @@ export class VendorService {
         name: dto.name,
         email: dto.email,
         password: await hash(dto.password, 10),
-        role: 'vendor',
+        role: UserRole.VENDOR,
       },
     });
 
@@ -92,6 +93,9 @@ export class VendorService {
         styleOffered: dto.styleOffered,
         weddingTypes: dto.weddingTypes,
         capacity: dto.capacity,
+        notificationDetails: {
+          create: {},
+        },
       },
       include: { user: true }, // include the user relation for mapping
     });
