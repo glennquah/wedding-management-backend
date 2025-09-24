@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Account Status - Knotly</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
+          Cantarell, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background-color: #f8f9fa;
+      }
+
+      .email-container {
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: #ffffff;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .header {
+        background: linear-gradient(135deg, #ff5a5f 0%, #45292f 100%);
+        padding: 40px 20px;
+        text-align: center;
+      }
+
+      .logo {
+        font-size: 32px;
+        font-weight: bold;
+        color: #ffffff !important;
+        text-decoration: none;
+        letter-spacing: 1px;
+        display: block;
+        text-align: center;
+        margin: 0 auto;
+      }
+
+      .logo-img {
+        width: 150px;
+        height: 50px;
+        object-fit: contain;
+        display: block;
+        margin: 0 auto;
+      }
+
+      .tagline {
+        color: #ffffff;
+        font-size: 14px;
+        margin-top: 8px;
+        opacity: 0.9;
+      }
+
+      .content {
+        padding: 40px 30px;
+      }
+
+      .greeting {
+        font-size: 24px;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 20px;
+      }
+
+      .message {
+        font-size: 16px;
+        line-height: 1.7;
+        color: #555;
+        margin-bottom: 30px;
+      }
+
+      .status-card {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 25px;
+        margin: 30px 0;
+        text-align: center;
+        border: 2px solid #e9ecef;
+      }
+
+      .status-card.suspended {
+        border-color: #dc3545;
+        background-color: #fdeaea;
+      }
+
+      .status-card.active {
+        border-color: #28a745;
+        background-color: #f1f8e9;
+      }
+
+      .status-icon {
+        font-size: 48px;
+        margin-bottom: 15px;
+      }
+
+      .status-icon.suspended {
+        color: #dc3545;
+      }
+
+      .status-icon.active {
+        color: #28a745;
+      }
+
+      .status-title {
+        font-size: 24px;
+        font-weight: 600;
+        margin-bottom: 10px;
+      }
+
+      .status-title.suspended {
+        color: #721c24;
+      }
+
+      .status-title.active {
+        color: #155724;
+      }
+
+      .status-description {
+        font-size: 16px;
+        color: #6c757d;
+      }
+
+      .important-notice {
+        background-color: #fff3cd;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 30px 0;
+        border-left: 4px solid #ffc107;
+      }
+
+      .important-notice.suspended {
+        background-color: #f8d7da;
+        border-left-color: #dc3545;
+      }
+
+      .important-notice h3 {
+        color: #856404;
+        font-size: 18px;
+        margin-bottom: 15px;
+      }
+
+      .important-notice.suspended h3 {
+        color: #721c24;
+      }
+
+      .important-notice ul {
+        color: #495057;
+        padding-left: 20px;
+      }
+
+      .important-notice li {
+        margin-bottom: 8px;
+      }
+
+      .contact-info {
+        background-color: #e7f3ff;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 30px 0;
+        border-left: 4px solid #007bff;
+      }
+
+      .contact-info h3 {
+        color: #004085;
+        font-size: 18px;
+        margin-bottom: 15px;
+      }
+
+      .contact-info p {
+        color: #495057;
+        margin-bottom: 10px;
+      }
+
+      .contact-info a {
+        color: #007bff;
+        text-decoration: none;
+      }
+
+      .cta-container {
+        text-align: center;
+        margin: 40px 0;
+      }
+
+      .cta-button {
+        display: inline-block;
+        background: linear-gradient(135deg, #ff5a5f 0%, #da3c41 100%) !important;
+        color: #ffffff !important;
+        text-decoration: none !important;
+        padding: 16px 32px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 16px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        transition: transform 0.2s ease;
+        box-shadow: 0 4px 15px rgba(255, 90, 95, 0.3);
+        border: none !important;
+      }
+
+      .cta-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 90, 95, 0.4);
+      }
+
+      .cta-button.disabled {
+        background: #6c757d !important;
+        cursor: not-allowed;
+        transform: none !important;
+        box-shadow: none !important;
+      }
+
+      .divider {
+        height: 1px;
+        background: linear-gradient(
+          to right,
+          transparent,
+          #e0e0e0,
+          transparent
+        );
+        margin: 30px 0;
+      }
+
+      .footer {
+        background-color: #f8f9fa;
+        padding: 30px;
+        text-align: center;
+        border-top: 1px solid #e9ecef;
+      }
+
+      .footer-logo {
+        font-size: 18px;
+        font-weight: bold;
+        color: #ff5a5f;
+        margin-bottom: 10px;
+      }
+
+      .footer-text {
+        font-size: 14px;
+        color: #6c757d;
+        margin-bottom: 15px;
+      }
+
+      .social-links {
+        margin: 20px 0;
+      }
+
+      .social-link {
+        display: inline-block;
+        margin: 0 10px;
+        color: #ff5a5f;
+        text-decoration: none;
+        font-size: 14px;
+      }
+
+      .unsubscribe {
+        font-size: 12px;
+        color: #adb5bd;
+        margin-top: 20px;
+      }
+
+      .unsubscribe a {
+        color: #ff5a5f;
+        text-decoration: none;
+      }
+
+      @media (max-width: 600px) {
+        .email-container {
+          margin: 0;
+          border-radius: 0;
+        }
+
+        .content {
+          padding: 30px 20px;
+        }
+
+        .header {
+          padding: 30px 20px;
+        }
+
+        .greeting {
+          font-size: 20px;
+        }
+
+        .cta-button {
+          padding: 14px 28px;
+          font-size: 14px;
+        }
+
+        .status-icon {
+          font-size: 36px;
+        }
+
+        .status-title {
+          font-size: 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="email-container">
+      <!-- Header -->
+      <div class="header">
+        <div style="text-align: center;">
+          <img
+            src="https://res.cloudinary.com/doudbsnya/image/upload/v1758432610/logo_ptrwb6.png"
+            alt="Knotly Logo"
+            class="logo-img"
+          />
+        </div>
+        <div class="tagline">Your Perfect Wedding, Perfectly Planned</div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="content">
+        <div class="greeting">Dear {{adminName}},</div>
+
+        <div class="message">
+          This is an important notification regarding your administrator account status on the Knotly platform.
+        </div>
+
+        <!-- Suspended Status -->
+        {{#if isSuspended}}
+        <div class="status-card suspended">
+          <div class="status-icon suspended">🚫</div>
+          <div class="status-title suspended">Account Suspended</div>
+          <div class="status-description">
+            Your administrator access has been temporarily suspended.
+          </div>
+        </div>
+
+        <div class="important-notice suspended">
+          <h3>⚠️ Important Information</h3>
+          <ul>
+            <li>Your admin privileges have been temporarily revoked</li>
+            <li>You cannot access the admin dashboard or perform admin functions</li>
+            <li>This action was taken for security or policy compliance reasons</li>
+            <li>All your account data remains secure and intact</li>
+            {{#if suspensionReason}}
+            <li><strong>Reason:</strong> {{suspensionReason}}</li>
+            {{/if}}
+            {{#if suspensionDuration}}
+            <li><strong>Duration:</strong> {{suspensionDuration}}</li>
+            {{/if}}
+          </ul>
+        </div>
+
+        <div class="contact-info">
+          <h3>📞 Need Assistance?</h3>
+          <p>If you believe this suspension was made in error or if you have questions about this action, please contact our support team immediately.</p>
+          <p>Email: <a href="mailto:admin-support@knotly.app">admin-support@knotly.app</a></p>
+          <p>Phone: +1 (555) 123-4567</p>
+        </div>
+        {{/if}}
+
+        <!-- Active/Unsuspended Status -->
+        {{#if isActive}}
+        <div class="status-card active">
+          <div class="status-icon active">✅</div>
+          <div class="status-title active">Account Reactivated</div>
+          <div class="status-description">
+            Your administrator access has been restored and is now active.
+          </div>
+        </div>
+
+        <div class="important-notice">
+          <h3>🎉 Welcome Back!</h3>
+          <ul>
+            <li>Your admin privileges have been fully restored</li>
+            <li>You now have complete access to the admin dashboard</li>
+            <li>All admin functions and tools are available to you</li>
+            <li>Your account security settings remain unchanged</li>
+            {{#if reactivationNote}}
+            <li><strong>Note:</strong> {{reactivationNote}}</li>
+            {{/if}}
+          </ul>
+        </div>
+
+        <div class="cta-container">
+          <a href="{{adminDashboardUrl}}" class="cta-button">Access Admin Dashboard</a>
+        </div>
+        {{/if}}
+
+        {{#if isSuspended}}
+        <div class="cta-container">
+          <span class="cta-button disabled">Admin Access Suspended</span>
+        </div>
+        {{/if}}
+
+        <div class="divider"></div>
+
+        <div class="message">
+          As an administrator, you play a crucial role in maintaining the quality and security of the Knotly platform. If you have any questions about your account status or administrative responsibilities, please don't hesitate to reach out to our team.
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="footer">
+        <a href="https://knotly.app" class="logo">
+          <img
+            src="https://res.cloudinary.com/doudbsnya/image/upload/v1758432610/logo_ptrwb6.png"
+            alt="Knotly Logo"
+            class="logo-img"
+          />
+        </a>
+        <div class="footer-text">
+          Making your dream wedding a reality, one detail at a time.
+        </div>
+
+        <div class="social-links">
+          <a href="https://knotly.app" class="social-link">Website</a>
+          <a href="https://knotly.app/support" class="social-link">Support</a>
+          <a href="mailto:hello@knotly.app" class="social-link">Contact</a>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
