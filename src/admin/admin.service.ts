@@ -270,4 +270,17 @@ export class AdminService {
 
     return { mainWeddingId: admin.mainWeddingId };
   }
+
+  async getMyWeddings(userId: number): Promise<Wedding[]> {
+    const admin = await this.prisma.admin.findUnique({
+      where: { userId },
+      include: { weddings: true },
+    });
+
+    if (!admin) {
+      throw new NotFoundException(`Admin with userId ${userId} not found`);
+    }
+
+    return admin.weddings;
+  }
 }
