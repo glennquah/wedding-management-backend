@@ -825,13 +825,40 @@ async function main() {
         {
           listingName: 'Grand Ballroom - Premium Package',
           price: 15000,
-          availabilities: ['2024-12-15', '2024-11-08', '2025-01-25'],
+          availabilities: [
+            {
+              startTime: '2024-12-15T08:00:00Z',
+              endTime: '2024-12-15T17:00:00Z',
+              date: '2024-12-15',
+            },
+            {
+              startTime: '2024-11-08T08:00:00Z',
+              endTime: '2024-11-08T17:00:00Z',
+              date: '2024-11-08',
+            },
+            {
+              startTime: '2025-01-25T08:00:00Z',
+              endTime: '2025-01-25T17:00:00Z',
+              date: '2025-01-25',
+            },
+          ],
           remarks: 'Includes lighting, sound system, and basic decoration',
         },
         {
           listingName: 'Grand Ballroom - Standard Package',
           price: 12000,
-          availabilities: ['2024-10-20', '2024-09-30'],
+          availabilities: [
+            {
+              startTime: '2024-10-20T08:00:00Z',
+              endTime: '2024-10-20T17:00:00Z',
+              date: '2024-10-20',
+            },
+            {
+              startTime: '2024-09-30T08:00:00Z',
+              endTime: '2024-09-30T17:00:00Z',
+              date: '2024-09-30',
+            },
+          ],
           remarks: 'Basic venue rental with standard amenities',
         },
       ],
@@ -842,13 +869,35 @@ async function main() {
         {
           listingName: 'Garden Paradise - Outdoor Ceremony',
           price: 8000,
-          availabilities: ['2024-09-30', '2024-10-20'],
+          availabilities: [
+            {
+              startTime: '2024-09-30T08:00:00Z',
+              endTime: '2024-09-30T17:00:00Z',
+              date: '2024-09-30',
+            },
+            {
+              startTime: '2024-10-20T08:00:00Z',
+              endTime: '2024-10-20T17:00:00Z',
+              date: '2024-10-20',
+            },
+          ],
           remarks: 'Beautiful outdoor setting with garden views',
         },
         {
           listingName: 'Garden Paradise - Reception Hall',
           price: 10000,
-          availabilities: ['2024-12-15', '2025-01-25'],
+          availabilities: [
+            {
+              startTime: '2024-12-15T08:00:00Z',
+              endTime: '2024-12-15T17:00:00Z',
+              date: '2024-12-15',
+            },
+            {
+              startTime: '2025-01-25T08:00:00Z',
+              endTime: '2025-01-25T17:00:00Z',
+              date: '2025-01-25',
+            },
+          ],
           remarks: 'Indoor reception space with garden access',
         },
       ],
@@ -859,7 +908,18 @@ async function main() {
         {
           listingName: 'Heritage Temple - Traditional Ceremony',
           price: 6000,
-          availabilities: ['2024-11-08', '2025-01-25'],
+          availabilities: [
+            {
+              startTime: '2024-11-08T08:00:00Z',
+              endTime: '2024-11-08T17:00:00Z',
+              date: '2024-11-08',
+            },
+            {
+              startTime: '2025-01-25T08:00:00Z',
+              endTime: '2025-01-25T17:00:00Z',
+              date: '2025-01-25',
+            },
+          ],
           remarks: 'Authentic traditional setting for cultural ceremonies',
         },
       ],
@@ -871,13 +931,40 @@ async function main() {
         {
           listingName: 'Gourmet 5-Course Dinner',
           price: 120,
-          availabilities: ['2024-12-15', '2024-11-08', '2025-01-25'],
+          availabilities: [
+            {
+              startTime: '2024-12-15T08:00:00Z',
+              endTime: '2024-12-15T17:00:00Z',
+              date: '2024-12-15',
+            },
+            {
+              startTime: '2024-11-08T08:00:00Z',
+              endTime: '2024-11-08T17:00:00Z',
+              date: '2024-11-08',
+            },
+            {
+              startTime: '2025-01-25T08:00:00Z',
+              endTime: '2025-01-25T17:00:00Z',
+              date: '2025-01-25',
+            },
+          ],
           remarks: 'Per person pricing for premium dining experience',
         },
         {
           listingName: 'Gourmet Cocktail Reception',
           price: 80,
-          availabilities: ['2024-09-30', '2024-10-20'],
+          availabilities: [
+            {
+              startTime: '2024-09-30T08:00:00Z',
+              endTime: '2024-09-30T17:00:00Z',
+              date: '2024-09-30',
+            },
+            {
+              startTime: '2024-10-20T08:00:00Z',
+              endTime: '2024-10-20T17:00:00Z',
+              date: '2024-10-20',
+            },
+          ],
           remarks: 'Per person pricing for cocktail hour with canapés',
         },
       ],
@@ -888,7 +975,18 @@ async function main() {
         {
           listingName: 'Traditional Chinese Banquet',
           price: 100,
-          availabilities: ['2024-11-08', '2025-01-25'],
+          availabilities: [
+            {
+              startTime: '2024-11-08T08:00:00Z',
+              endTime: '2024-11-08T17:00:00Z',
+              date: '2024-11-08',
+            },
+            {
+              startTime: '2025-01-25T08:00:00Z',
+              endTime: '2025-01-25T17:00:00Z',
+              date: '2025-01-25',
+            },
+          ],
           remarks: 'Per person pricing for authentic Chinese cuisine',
         },
       ],
@@ -900,13 +998,40 @@ async function main() {
         {
           listingName: 'Premium Wedding Photography Package',
           price: 3500,
-          availabilities: ['2024-12-15', '2024-11-08', '2025-01-25'],
+          availabilities: [
+            {
+              startTime: '2024-12-15T08:00:00Z',
+              endTime: '2024-12-15T17:00:00Z',
+              date: '2024-12-15',
+            },
+            {
+              startTime: '2024-11-08T08:00:00Z',
+              endTime: '2024-11-08T17:00:00Z',
+              date: '2024-11-08',
+            },
+            {
+              startTime: '2025-01-25T08:00:00Z',
+              endTime: '2025-01-25T17:00:00Z',
+              date: '2025-01-25',
+            },
+          ],
           remarks: 'Full day coverage with edited photos and album',
         },
         {
           listingName: 'Engagement Session',
           price: 800,
-          availabilities: ['2024-09-30', '2024-10-20'],
+          availabilities: [
+            {
+              startTime: '2024-09-30T08:00:00Z',
+              endTime: '2024-09-30T17:00:00Z',
+              date: '2024-09-30',
+            },
+            {
+              startTime: '2024-10-20T08:00:00Z',
+              endTime: '2024-10-20T17:00:00Z',
+              date: '2024-10-20',
+            },
+          ],
           remarks: '2-hour engagement photography session',
         },
       ],
@@ -917,7 +1042,18 @@ async function main() {
         {
           listingName: 'Candid Wedding Documentation',
           price: 2800,
-          availabilities: ['2024-09-30', '2024-10-20'],
+          availabilities: [
+            {
+              startTime: '2024-09-30T08:00:00Z',
+              endTime: '2024-09-30T17:00:00Z',
+              date: '2024-09-30',
+            },
+            {
+              startTime: '2024-10-20T08:00:00Z',
+              endTime: '2024-10-20T17:00:00Z',
+              date: '2024-10-20',
+            },
+          ],
           remarks: 'Natural storytelling photography style',
         },
       ],
@@ -929,13 +1065,35 @@ async function main() {
         {
           listingName: 'Luxury Floral Arrangements',
           price: 4500,
-          availabilities: ['2024-12-15', '2025-01-25'],
+          availabilities: [
+            {
+              startTime: '2024-12-15T08:00:00Z',
+              endTime: '2024-12-15T17:00:00Z',
+              date: '2024-12-15',
+            },
+            {
+              startTime: '2025-01-25T08:00:00Z',
+              endTime: '2025-01-25T17:00:00Z',
+              date: '2025-01-25',
+            },
+          ],
           remarks: 'Premium floral decorations for ceremony and reception',
         },
         {
           listingName: 'Bridal Bouquet & Centerpieces',
           price: 1500,
-          availabilities: ['2024-11-08', '2024-09-30'],
+          availabilities: [
+            {
+              startTime: '2024-11-08T08:00:00Z',
+              endTime: '2024-11-08T17:00:00Z',
+              date: '2024-11-08',
+            },
+            {
+              startTime: '2024-09-30T08:00:00Z',
+              endTime: '2024-09-30T17:00:00Z',
+              date: '2024-09-30',
+            },
+          ],
           remarks: 'Bridal bouquet with matching table centerpieces',
         },
       ],

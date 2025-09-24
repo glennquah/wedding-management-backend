@@ -7,10 +7,9 @@ import Stripe from 'stripe';
 import { OrderStatus } from '../common/order-status.enum';
 import { PaymentStatus } from '../common/payment-status.enum';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateCheckoutSessionDto } from './dto/create-checkout-session.dto';
 import { CheckoutSessionResponseDto } from './dto/checkout-session-response.dto';
+import { CreateCheckoutSessionDto } from './dto/create-checkout-session.dto';
 import { PaymentResponseDto } from './dto/payment-response.dto';
-import { addDatesToAvailabilities } from '../common/availability.helper';
 
 @Injectable()
 export class PaymentService {
@@ -166,19 +165,16 @@ export class PaymentService {
     });
 
     if (payment) {
-      // Restore booked dates back to listing availabilities
+      // Restore booked slots back to listing availabilities
       for (const orderListing of payment.order.listings) {
         const listing = orderListing.listing;
-        const bookedDates = orderListing.bookedDates;
-
-        const updatedAvailabilities = addDatesToAvailabilities(
-          listing.availabilities,
-          bookedDates,
-        );
+        const bookedSlots = orderListing.bookedSlots as any;
+        const existingSlots = (listing.availabilities as any) || [];
+        const updatedAvailabilities = [...existingSlots, ...bookedSlots];
 
         await this.prisma.listing.update({
           where: { id: listing.id },
-          data: { availabilities: updatedAvailabilities },
+          data: { availabilities: updatedAvailabilities as any },
         });
       }
 

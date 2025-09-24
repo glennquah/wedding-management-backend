@@ -238,7 +238,6 @@ model Order {
   totalAmount   Float
   currency      String      @default("SGD")
   purchaseDate  DateTime    @default(now())
-  expiresAt     DateTime?
   remark        String?
 
   // Relations
@@ -256,9 +255,9 @@ model Order {
 }
 
 model OrderListing {
-  orderId   Int
-  listingId Int
-  bookedDates DateTime[]
+  orderId     Int
+  listingId   Int
+  bookedSlots Json
 
   order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)

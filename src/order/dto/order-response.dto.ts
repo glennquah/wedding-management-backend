@@ -22,12 +22,6 @@ export class OrderResponseDto {
   purchaseDate: Date;
 
   @ApiProperty({
-    description: 'Expiration time for pending orders',
-    required: false,
-  })
-  expiresAt?: Date;
-
-  @ApiProperty({
     description: 'Additional remarks about the order',
     required: false,
   })

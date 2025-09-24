@@ -9,11 +9,6 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { OrderResponseDto } from './dto/order-response.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
-import {
-  isDateAvailable,
-  removeBookedDates,
-  addDatesToAvailabilities,
-} from '../common/availability.helper';
 
 @Injectable()
 export class OrderService {
@@ -39,19 +34,29 @@ export class OrderService {
       throw new BadRequestException('One or more listings not found');
     }
 
-    // Validate that all requested dates are available
+    // Validate that all requested slots are available
     for (const orderListing of dto.listings) {
       const listing = listings.find((l) => l.id === orderListing.listingId);
       if (!listing) continue;
 
-      const requestedDates = orderListing.bookedDates.map(
-        (date) => new Date(date),
-      );
+      const availableSlots = (listing.availabilities as any) || [];
 
-      for (const requestedDate of requestedDates) {
-        if (!isDateAvailable(requestedDate, listing.availabilities)) {
+      for (const requestedSlot of orderListing.bookedSlots) {
+        // Check if the exact slot exists in the listing's availabilities
+        const slotExists = availableSlots.some((availableSlot) => {
+          return (
+            availableSlot.startTime === requestedSlot.startTime &&
+            availableSlot.endTime === requestedSlot.endTime &&
+            (availableSlot.date ||
+              new Date(availableSlot.startTime).toISOString().split('T')[0]) ===
+              (requestedSlot.date ||
+                new Date(requestedSlot.startTime).toISOString().split('T')[0])
+          );
+        });
+
+        if (!slotExists) {
           throw new BadRequestException(
-            `Date ${requestedDate.toISOString().split('T')[0]} is not available for listing ${listing.listingName}`,
+            `Time slot ${requestedSlot.startTime} - ${requestedSlot.endTime} is not available for listing ${listing.listingName}`,
           );
         }
       }
@@ -62,22 +67,19 @@ export class OrderService {
       0,
     );
 
-    // Set expiration time (15 minutes from now)
-    const expiresAt = new Date();
-    expiresAt.setMinutes(expiresAt.getMinutes() + 15);
-
     // Create order with listings and booked dates
     const order = await this.prisma.order.create({
       data: {
         weddingId: dto.weddingId,
         totalAmount,
-        expiresAt,
         remark: dto.remark,
         listings: {
-          create: dto.listings.map((orderListing) => ({
-            listingId: orderListing.listingId,
-            bookedDates: orderListing.bookedDates.map((date) => new Date(date)),
-          })),
+          createMany: {
+            data: dto.listings.map((orderListing) => ({
+              listingId: orderListing.listingId,
+              bookedSlots: orderListing.bookedSlots as any,
+            })),
+          },
         },
       },
       include: {
@@ -89,22 +91,30 @@ export class OrderService {
       },
     });
 
-    // Remove booked dates from listing availabilities
+    // Remove booked slots from listing availabilities
     for (const orderListing of dto.listings) {
       const listing = listings.find((l) => l.id === orderListing.listingId);
       if (!listing) continue;
 
-      const bookedDates = orderListing.bookedDates.map(
-        (date) => new Date(date),
-      );
-      const updatedAvailabilities = removeBookedDates(
-        listing.availabilities,
-        bookedDates,
-      );
+      const availableSlots = (listing.availabilities as any) || [];
+
+      // Remove the exact booked slots from available slots
+      const updatedSlots = availableSlots.filter((availableSlot) => {
+        return !orderListing.bookedSlots.some((bookedSlot) => {
+          return (
+            availableSlot.startTime === bookedSlot.startTime &&
+            availableSlot.endTime === bookedSlot.endTime &&
+            (availableSlot.date ||
+              new Date(availableSlot.startTime).toISOString().split('T')[0]) ===
+              (bookedSlot.date ||
+                new Date(bookedSlot.startTime).toISOString().split('T')[0])
+          );
+        });
+      });
 
       await this.prisma.listing.update({
         where: { id: orderListing.listingId },
-        data: { availabilities: updatedAvailabilities },
+        data: { availabilities: updatedSlots as any },
       });
     }
 
@@ -220,19 +230,18 @@ export class OrderService {
       throw new BadRequestException('Order is already cancelled');
     }
 
-    // Restore booked dates back to listing availabilities when cancelling
+    // Restore booked slots back to listing availabilities when cancelling
     for (const orderListing of order.listings) {
       const listing = orderListing.listing;
-      const bookedDates = orderListing.bookedDates;
+      const bookedSlots = orderListing.bookedSlots as any[];
 
-      const updatedAvailabilities = addDatesToAvailabilities(
-        listing.availabilities,
-        bookedDates,
-      );
+      const availableSlots = (listing.availabilities as any) || [];
+      // Add the cancelled slots back to available slots
+      const updatedSlots = [...availableSlots, ...bookedSlots];
 
       await this.prisma.listing.update({
         where: { id: listing.id },
-        data: { availabilities: updatedAvailabilities },
+        data: { availabilities: updatedSlots as any },
       });
     }
 
@@ -266,34 +275,24 @@ export class OrderService {
       throw new NotFoundException(`Order with ID ${id} not found`);
     }
 
-    // Restore booked dates back to listing availabilities
+    // Restore booked slots back to listing availabilities
     for (const orderListing of order.listings) {
       const listing = orderListing.listing;
-      const bookedDates = orderListing.bookedDates;
+      const bookedSlots = orderListing.bookedSlots as any[];
 
-      const updatedAvailabilities = addDatesToAvailabilities(
-        listing.availabilities,
-        bookedDates,
-      );
+      const availableSlots = (listing.availabilities as any) || [];
+      // Add the deleted order's slots back to available slots
+      const updatedSlots = [...availableSlots, ...bookedSlots];
 
       await this.prisma.listing.update({
         where: { id: listing.id },
-        data: { availabilities: updatedAvailabilities },
+        data: { availabilities: updatedSlots as any },
       });
     }
 
     await this.prisma.order.delete({
       where: { id },
     });
-  }
-
-  isOrderExpired(order: {
-    expiresAt?: Date | null;
-    orderStatus: string;
-  }): boolean {
-    if (!order.expiresAt) return false;
-    if (order.orderStatus !== OrderStatus.PENDING) return false;
-    return new Date() > order.expiresAt;
   }
 
   toOrderResponseDto(order: any): OrderResponseDto {
@@ -303,14 +302,13 @@ export class OrderService {
       totalAmount: order.totalAmount,
       currency: order.currency,
       purchaseDate: order.purchaseDate,
-      expiresAt: order.expiresAt,
       remark: order.remark,
       weddingId: order.weddingId,
       createdAt: order.createdAt,
       updatedAt: order.updatedAt,
       listings: order.listings?.map((ol: any) => ({
         ...ol.listing,
-        bookedDates: ol.bookedDates,
+        bookedSlots: ol.bookedSlots,
       })),
       payments: order.payments,
     };
