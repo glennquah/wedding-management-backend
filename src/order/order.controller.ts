@@ -43,7 +43,7 @@ export class OrderController {
   }
 
   @Get()
-  @Roles(UserRole.ADMIN, UserRole.VENDOR, UserRole.SUPERADMIN)
+  @Roles(UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Get all orders' })
   @ApiResponse({
     status: 200,
