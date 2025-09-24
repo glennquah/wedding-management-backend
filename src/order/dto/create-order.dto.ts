@@ -1,6 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsArray, IsDateString, IsInt, IsOptional, IsString, ValidateNested } from 'class-validator';
+import {
+  IsArray,
+  IsDateString,
+  IsInt,
+  IsOptional,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
 
 export class OrderListingDto {
   @ApiProperty({ description: 'Listing ID to include in the order' })
@@ -27,7 +34,7 @@ export class CreateOrderDto {
     type: [OrderListingDto],
     example: [
       { listingId: 1, bookedDates: ['2024-12-15'] },
-      { listingId: 2, bookedDates: ['2024-12-15', '2024-12-16'] }
+      { listingId: 2, bookedDates: ['2024-12-15', '2024-12-16'] },
     ],
   })
   @IsArray()

@@ -191,7 +191,11 @@
 
       .cta-button {
         display: inline-block;
-        background: linear-gradient(135deg, #ff5a5f 0%, #da3c41 100%) !important;
+        background: linear-gradient(
+          135deg,
+          #ff5a5f 0%,
+          #da3c41 100%
+        ) !important;
         color: #ffffff !important;
         text-decoration: none !important;
         padding: 16px 32px;
@@ -308,7 +312,7 @@
     <div class="email-container">
       <!-- Header -->
       <div class="header">
-        <div style="text-align: center;">
+        <div style="text-align: center">
           <img
             src="https://res.cloudinary.com/doudbsnya/image/upload/v1758432610/logo_ptrwb6.png"
             alt="Knotly Logo"
@@ -323,7 +327,8 @@
         <div class="greeting">Dear {{adminName}},</div>
 
         <div class="message">
-          This is an important notification regarding your administrator account status on the Knotly platform.
+          This is an important notification regarding your administrator account
+          status on the Knotly platform.
         </div>
 
         <!-- Suspended Status -->
@@ -340,13 +345,16 @@
           <h3>⚠️ Important Information</h3>
           <ul>
             <li>Your admin privileges have been temporarily revoked</li>
-            <li>You cannot access the admin dashboard or perform admin functions</li>
-            <li>This action was taken for security or policy compliance reasons</li>
+            <li>
+              You cannot access the admin dashboard or perform admin functions
+            </li>
+            <li>
+              This action was taken for security or policy compliance reasons
+            </li>
             <li>All your account data remains secure and intact</li>
             {{#if suspensionReason}}
             <li><strong>Reason:</strong> {{suspensionReason}}</li>
-            {{/if}}
-            {{#if suspensionDuration}}
+            {{/if}} {{#if suspensionDuration}}
             <li><strong>Duration:</strong> {{suspensionDuration}}</li>
             {{/if}}
           </ul>
@@ -354,8 +362,17 @@
 
         <div class="contact-info">
           <h3>📞 Need Assistance?</h3>
-          <p>If you believe this suspension was made in error or if you have questions about this action, please contact our support team immediately.</p>
-          <p>Email: <a href="mailto:admin-support@knotly.app">admin-support@knotly.app</a></p>
+          <p>
+            If you believe this suspension was made in error or if you have
+            questions about this action, please contact our support team
+            immediately.
+          </p>
+          <p>
+            Email:
+            <a href="mailto:admin-support@knotly.app"
+              >admin-support@knotly.app</a
+            >
+          </p>
           <p>Phone: +1 (555) 123-4567</p>
         </div>
         {{/if}}
@@ -384,11 +401,11 @@
         </div>
 
         <div class="cta-container">
-          <a href="{{adminDashboardUrl}}" class="cta-button">Access Admin Dashboard</a>
+          <a href="{{adminDashboardUrl}}" class="cta-button"
+            >Access Admin Dashboard</a
+          >
         </div>
-        {{/if}}
-
-        {{#if isSuspended}}
+        {{/if}} {{#if isSuspended}}
         <div class="cta-container">
           <span class="cta-button disabled">Admin Access Suspended</span>
         </div>
@@ -397,7 +414,10 @@
         <div class="divider"></div>
 
         <div class="message">
-          As an administrator, you play a crucial role in maintaining the quality and security of the Knotly platform. If you have any questions about your account status or administrative responsibilities, please don't hesitate to reach out to our team.
+          As an administrator, you play a crucial role in maintaining the
+          quality and security of the Knotly platform. If you have any questions
+          about your account status or administrative responsibilities, please
+          don't hesitate to reach out to our team.
         </div>
       </div>
 

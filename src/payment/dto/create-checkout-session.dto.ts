@@ -6,12 +6,18 @@ export class CreateCheckoutSessionDto {
   @IsNumber()
   orderId: number;
 
-  @ApiProperty({ description: 'Success URL to redirect to after payment', required: false })
+  @ApiProperty({
+    description: 'Success URL to redirect to after payment',
+    required: false,
+  })
   @IsOptional()
   @IsString()
   successUrl?: string;
 
-  @ApiProperty({ description: 'Cancel URL to redirect to if payment is cancelled', required: false })
+  @ApiProperty({
+    description: 'Cancel URL to redirect to if payment is cancelled',
+    required: false,
+  })
   @IsOptional()
   @IsString()
   cancelUrl?: string;

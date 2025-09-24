@@ -8,7 +8,7 @@ import {
   VendorOnboardingStatus,
   WeddingService,
   WeddingStyle,
-  WeddingType
+  WeddingType,
 } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 
@@ -944,7 +944,9 @@ async function main() {
 
   const createdListings = [];
   for (const vendorListings of listingsData) {
-    const vendor = vendors.find(v => v.user.email === vendorListings.vendorEmail);
+    const vendor = vendors.find(
+      (v) => v.user.email === vendorListings.vendorEmail,
+    );
     if (vendor) {
       for (const listing of vendorListings.listings) {
         const createdListing = await prisma.listing.create({

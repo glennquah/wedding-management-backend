@@ -23,9 +23,7 @@ import { OrderService } from './order.service';
 @Controller('orders')
 @UseGuards(JwtGuard, RolesGuard)
 export class OrderController {
-  constructor(
-    private readonly orderService: OrderService,
-  ) {}
+  constructor(private readonly orderService: OrderService) {}
 
   @Post()
   @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
@@ -37,7 +35,9 @@ export class OrderController {
   })
   @ApiResponse({ status: 400, description: 'Bad request.' })
   @ApiResponse({ status: 404, description: 'Wedding or listings not found.' })
-  async create(@Body() createOrderDto: CreateOrderDto): Promise<OrderResponseDto> {
+  async create(
+    @Body() createOrderDto: CreateOrderDto,
+  ): Promise<OrderResponseDto> {
     const order = await this.orderService.create(createOrderDto);
     return this.orderService.toOrderResponseDto(order);
   }
@@ -64,7 +64,9 @@ export class OrderController {
     type: OrderResponseDto,
   })
   @ApiResponse({ status: 404, description: 'Order not found.' })
-  async findOne(@Param('id', ParseIntPipe) id: number): Promise<OrderResponseDto> {
+  async findOne(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<OrderResponseDto> {
     const order = await this.orderService.findOne(id);
     return this.orderService.toOrderResponseDto(order);
   }
@@ -78,7 +80,9 @@ export class OrderController {
     type: [OrderResponseDto],
   })
   @ApiResponse({ status: 404, description: 'Wedding not found.' })
-  async findByWedding(@Param('weddingId', ParseIntPipe) weddingId: number): Promise<OrderResponseDto[]> {
+  async findByWedding(
+    @Param('weddingId', ParseIntPipe) weddingId: number,
+  ): Promise<OrderResponseDto[]> {
     const orders = await this.orderService.findByWedding(weddingId);
     return orders.map((order) => this.orderService.toOrderResponseDto(order));
   }
@@ -111,7 +115,9 @@ export class OrderController {
   })
   @ApiResponse({ status: 404, description: 'Order not found.' })
   @ApiResponse({ status: 400, description: 'Order cannot be cancelled.' })
-  async cancel(@Param('id', ParseIntPipe) id: number): Promise<OrderResponseDto> {
+  async cancel(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<OrderResponseDto> {
     const order = await this.orderService.cancel(id);
     return this.orderService.toOrderResponseDto(order);
   }

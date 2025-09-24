@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import Stripe from 'stripe';
 import { OrderStatus } from '../common/order-status.enum';
 import { PaymentStatus } from '../common/payment-status.enum';
@@ -18,7 +22,9 @@ export class PaymentService {
     });
   }
 
-  async createCheckoutSession(dto: CreateCheckoutSessionDto): Promise<CheckoutSessionResponseDto> {
+  async createCheckoutSession(
+    dto: CreateCheckoutSessionDto,
+  ): Promise<CheckoutSessionResponseDto> {
     try {
       const order = await this.prisma.order.findUnique({
         where: { id: dto.orderId },
@@ -30,7 +36,7 @@ export class PaymentService {
       }
 
       // Create line items for Stripe Checkout
-      const lineItems = order.listings.map(orderListing => ({
+      const lineItems = order.listings.map((orderListing) => ({
         price_data: {
           currency: order.currency.toLowerCase(),
           product_data: {
@@ -43,7 +49,9 @@ export class PaymentService {
       }));
 
       const baseUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-      const successUrl = dto.successUrl || `${baseUrl}/payment/success?session_id={CHECKOUT_SESSION_ID}`;
+      const successUrl =
+        dto.successUrl ||
+        `${baseUrl}/payment/success?session_id={CHECKOUT_SESSION_ID}`;
       const cancelUrl = dto.cancelUrl || `${baseUrl}/payment/cancel`;
 
       const session = await this.stripe.checkout.sessions.create({
@@ -74,11 +82,11 @@ export class PaymentService {
       };
     } catch (error) {
       console.error('Error creating checkout session:', error);
-      throw new InternalServerErrorException('Failed to create checkout session');
+      throw new InternalServerErrorException(
+        'Failed to create checkout session',
+      );
     }
   }
-
-
 
   async getPaymentHistory(orderId: number): Promise<PaymentResponseDto[]> {
     return this.prisma.payment.findMany({
@@ -87,21 +95,27 @@ export class PaymentService {
     });
   }
 
-
-  async handleWebhook(signature: string, payload: Buffer): Promise<{ received: boolean }> {
+  async handleWebhook(
+    signature: string,
+    payload: Buffer,
+  ): Promise<{ received: boolean }> {
     try {
       const event = this.stripe.webhooks.constructEvent(
         payload,
         signature,
-        process.env.STRIPE_WEBHOOK_SECRET!
+        process.env.STRIPE_WEBHOOK_SECRET!,
       );
 
       switch (event.type) {
         case 'checkout.session.completed':
-          await this.handleCheckoutCompleted(event.data.object as Stripe.Checkout.Session);
+          await this.handleCheckoutCompleted(
+            event.data.object as Stripe.Checkout.Session,
+          );
           break;
         case 'checkout.session.expired':
-          await this.handleCheckoutExpired(event.data.object as Stripe.Checkout.Session);
+          await this.handleCheckoutExpired(
+            event.data.object as Stripe.Checkout.Session,
+          );
           break;
         default:
           console.log(`Unhandled event type: ${event.type}`);
@@ -113,7 +127,6 @@ export class PaymentService {
       throw new BadRequestException('Webhook signature verification failed');
     }
   }
-
 
   private async handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     const payment = await this.prisma.payment.findUnique({
@@ -158,7 +171,10 @@ export class PaymentService {
         const listing = orderListing.listing;
         const bookedDates = orderListing.bookedDates;
 
-        const updatedAvailabilities = addDatesToAvailabilities(listing.availabilities, bookedDates);
+        const updatedAvailabilities = addDatesToAvailabilities(
+          listing.availabilities,
+          bookedDates,
+        );
 
         await this.prisma.listing.update({
           where: { id: listing.id },
@@ -171,8 +187,9 @@ export class PaymentService {
         where: { id: payment.orderId },
       });
 
-      console.log(`Cleaned up expired order ${payment.orderId} and restored availability for ${payment.order.listings.length} listings`);
+      console.log(
+        `Cleaned up expired order ${payment.orderId} and restored availability for ${payment.order.listings.length} listings`,
+      );
     }
   }
-
 }

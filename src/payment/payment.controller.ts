@@ -9,7 +9,7 @@ import {
   Post,
   RawBodyRequest,
   Req,
-  UseGuards
+  UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
@@ -34,11 +34,11 @@ export class PaymentController {
   })
   @ApiResponse({ status: 400, description: 'Bad request.' })
   @ApiResponse({ status: 404, description: 'Order not found.' })
-  async createCheckoutSession(@Body() createCheckoutSessionDto: CreateCheckoutSessionDto): Promise<CheckoutSessionResponseDto> {
+  async createCheckoutSession(
+    @Body() createCheckoutSessionDto: CreateCheckoutSessionDto,
+  ): Promise<CheckoutSessionResponseDto> {
     return this.paymentService.createCheckoutSession(createCheckoutSessionDto);
   }
-
-
 
   @UseGuards(JwtGuard)
   @Get('history/:orderId')
@@ -49,7 +49,9 @@ export class PaymentController {
     type: [PaymentResponseDto],
   })
   @ApiResponse({ status: 404, description: 'Order not found.' })
-  async getPaymentHistory(@Param('orderId') orderId: string): Promise<PaymentResponseDto[]> {
+  async getPaymentHistory(
+    @Param('orderId') orderId: string,
+  ): Promise<PaymentResponseDto[]> {
     return this.paymentService.getPaymentHistory(parseInt(orderId));
   }
 
@@ -63,9 +65,8 @@ export class PaymentController {
   @ApiResponse({ status: 400, description: 'Invalid webhook signature.' })
   async handleWebhook(
     @Headers('stripe-signature') signature: string,
-    @Req() req: RawBodyRequest<Request>
+    @Req() req: RawBodyRequest<Request>,
   ) {
     return this.paymentService.handleWebhook(signature, req.rawBody!);
   }
-
 }

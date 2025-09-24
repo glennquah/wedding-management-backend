@@ -10,7 +10,7 @@ export class PaymentResponseDto {
 
   @ApiProperty({
     description: 'Stripe payment intent ID (populated after payment)',
-    required: false
+    required: false,
   })
   stripePaymentIntentId?: string;
 
@@ -23,7 +23,7 @@ export class PaymentResponseDto {
   @ApiProperty({
     description: 'Current payment status',
     enum: PaymentStatus,
-    enumName: 'PaymentStatus'
+    enumName: 'PaymentStatus',
   })
   paymentStatus: PaymentStatus;
 

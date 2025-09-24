@@ -1,11 +1,19 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Order } from '@prisma/client';
 import { OrderStatus } from '../common/order-status.enum';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { OrderResponseDto } from './dto/order-response.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
-import { isDateAvailable, removeBookedDates, addDatesToAvailabilities } from '../common/availability.helper';
+import {
+  isDateAvailable,
+  removeBookedDates,
+  addDatesToAvailabilities,
+} from '../common/availability.helper';
 
 @Injectable()
 export class OrderService {
@@ -22,7 +30,7 @@ export class OrderService {
     }
 
     // Verify all listings exist and validate availability
-    const listingIds = dto.listings.map(l => l.listingId);
+    const listingIds = dto.listings.map((l) => l.listingId);
     const listings = await this.prisma.listing.findMany({
       where: { id: { in: listingIds } },
     });
@@ -33,21 +41,26 @@ export class OrderService {
 
     // Validate that all requested dates are available
     for (const orderListing of dto.listings) {
-      const listing = listings.find(l => l.id === orderListing.listingId);
+      const listing = listings.find((l) => l.id === orderListing.listingId);
       if (!listing) continue;
 
-      const requestedDates = orderListing.bookedDates.map(date => new Date(date));
+      const requestedDates = orderListing.bookedDates.map(
+        (date) => new Date(date),
+      );
 
       for (const requestedDate of requestedDates) {
         if (!isDateAvailable(requestedDate, listing.availabilities)) {
           throw new BadRequestException(
-            `Date ${requestedDate.toISOString().split('T')[0]} is not available for listing ${listing.listingName}`
+            `Date ${requestedDate.toISOString().split('T')[0]} is not available for listing ${listing.listingName}`,
           );
         }
       }
     }
 
-    const totalAmount = listings.reduce((sum, listing) => sum + listing.price, 0);
+    const totalAmount = listings.reduce(
+      (sum, listing) => sum + listing.price,
+      0,
+    );
 
     // Set expiration time (15 minutes from now)
     const expiresAt = new Date();
@@ -63,7 +76,7 @@ export class OrderService {
         listings: {
           create: dto.listings.map((orderListing) => ({
             listingId: orderListing.listingId,
-            bookedDates: orderListing.bookedDates.map(date => new Date(date)),
+            bookedDates: orderListing.bookedDates.map((date) => new Date(date)),
           })),
         },
       },
@@ -78,11 +91,16 @@ export class OrderService {
 
     // Remove booked dates from listing availabilities
     for (const orderListing of dto.listings) {
-      const listing = listings.find(l => l.id === orderListing.listingId);
+      const listing = listings.find((l) => l.id === orderListing.listingId);
       if (!listing) continue;
 
-      const bookedDates = orderListing.bookedDates.map(date => new Date(date));
-      const updatedAvailabilities = removeBookedDates(listing.availabilities, bookedDates);
+      const bookedDates = orderListing.bookedDates.map(
+        (date) => new Date(date),
+      );
+      const updatedAvailabilities = removeBookedDates(
+        listing.availabilities,
+        bookedDates,
+      );
 
       await this.prisma.listing.update({
         where: { id: orderListing.listingId },
@@ -193,7 +211,9 @@ export class OrderService {
     }
 
     if (order.orderStatus === OrderStatus.PAID) {
-      throw new BadRequestException('Cannot cancel a paid order. Please refund instead.');
+      throw new BadRequestException(
+        'Cannot cancel a paid order. Please refund instead.',
+      );
     }
 
     if (order.orderStatus === OrderStatus.CANCELLED) {
@@ -205,7 +225,10 @@ export class OrderService {
       const listing = orderListing.listing;
       const bookedDates = orderListing.bookedDates;
 
-      const updatedAvailabilities = addDatesToAvailabilities(listing.availabilities, bookedDates);
+      const updatedAvailabilities = addDatesToAvailabilities(
+        listing.availabilities,
+        bookedDates,
+      );
 
       await this.prisma.listing.update({
         where: { id: listing.id },
@@ -248,7 +271,10 @@ export class OrderService {
       const listing = orderListing.listing;
       const bookedDates = orderListing.bookedDates;
 
-      const updatedAvailabilities = addDatesToAvailabilities(listing.availabilities, bookedDates);
+      const updatedAvailabilities = addDatesToAvailabilities(
+        listing.availabilities,
+        bookedDates,
+      );
 
       await this.prisma.listing.update({
         where: { id: listing.id },
@@ -261,8 +287,10 @@ export class OrderService {
     });
   }
 
-
-  isOrderExpired(order: { expiresAt?: Date | null; orderStatus: string }): boolean {
+  isOrderExpired(order: {
+    expiresAt?: Date | null;
+    orderStatus: string;
+  }): boolean {
     if (!order.expiresAt) return false;
     if (order.orderStatus !== OrderStatus.PENDING) return false;
     return new Date() > order.expiresAt;
