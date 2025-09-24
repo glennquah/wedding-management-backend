@@ -69,7 +69,7 @@ export class AdminService {
       name: dto.name,
       email: dto.email,
       password: await hash(dto.password, 10),
-      role: 'admin' as UserRole,
+      role: UserRole.ADMIN,
     });
 
     // Create the admin profile first
