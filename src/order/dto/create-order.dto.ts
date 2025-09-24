@@ -7,21 +7,7 @@ import {
   IsString,
   ValidateNested,
 } from 'class-validator';
-
-export class BookedSlotDto {
-  @ApiProperty({ description: 'Start time of the booked slot' })
-  @IsString()
-  startTime: string;
-
-  @ApiProperty({ description: 'End time of the booked slot' })
-  @IsString()
-  endTime: string;
-
-  @ApiProperty({ description: 'Date for easier querying (optional)' })
-  @IsOptional()
-  @IsString()
-  date?: string;
-}
+import { AvailabilitySlotDto } from '../../listing/dto/create-listing.dto';
 
 export class OrderListingDto {
   @ApiProperty({ description: 'Listing ID to include in the order' })
@@ -30,7 +16,7 @@ export class OrderListingDto {
 
   @ApiProperty({
     description: 'Array of booked availability slots for this listing',
-    type: [BookedSlotDto],
+    type: [AvailabilitySlotDto],
     example: [
       {
         startTime: '2024-12-15T08:00:00Z',
@@ -46,8 +32,8 @@ export class OrderListingDto {
   })
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => BookedSlotDto)
-  bookedSlots: BookedSlotDto[];
+  @Type(() => AvailabilitySlotDto)
+  bookedSlots: AvailabilitySlotDto[];
 }
 
 export class CreateOrderDto {
