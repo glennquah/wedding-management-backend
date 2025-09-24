@@ -60,20 +60,20 @@ enum GuestCountBucket {
 }
 
 enum OrderStatus {
-  pending
-  paid
-  cancelled
-  completed
+  PENDING
+  PAID
+  CANCELLED
+  COMPLETED
 }
 
 enum PaymentStatus {
-  pending
-  processing
-  succeeded
-  failed
-  cancelled
-  refunded
-  partiallyRefunded
+  PENDING
+  PROCESSING
+  SUCCEEDED
+  FAILED
+  CANCELLED
+  REFUNDED
+  PARTIALLY_REFUNDED
 }
 
 enum VendorOnboardingStatus {
@@ -232,7 +232,7 @@ model Listing {
 
 model Order {
   id            Int         @id @default(autoincrement())
-  orderStatus   OrderStatus @default(pending)
+  orderStatus   OrderStatus @default(PENDING)
   totalAmount   Float
   currency      String      @default("SGD")
   purchaseDate  DateTime    @default(now())
@@ -270,7 +270,7 @@ model Payment {
   stripePaymentIntentId   String?       // This is populated by webhook after payment
   amount                  Float
   currency                String        @default("SGD")
-  paymentStatus           PaymentStatus @default(pending)
+  paymentStatus           PaymentStatus @default(PENDING)
 
   // Relations
   orderId Int
