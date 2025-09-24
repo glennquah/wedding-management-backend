@@ -1,12 +1,12 @@
 import {
+  ConflictException,
   Injectable,
   NotFoundException,
-  ConflictException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateSeatingArrangementDto } from './dto/create-seating-arrangement.dto';
-import { UpdateSeatingArrangementDto } from './dto/update-seating-arrangement.dto';
 import { SeatingArrangementResponseDto } from './dto/seating-arrangement-response.dto';
+import { UpdateSeatingArrangementDto } from './dto/update-seating-arrangement.dto';
 
 @Injectable()
 export class SeatingArrangementService {

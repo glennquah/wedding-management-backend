@@ -9,6 +9,8 @@ import { AuthService } from './auth.service';
 import { AuthResponseDto, TokensDto } from './dto/auth-response.dto';
 import { LoginDto } from './dto/auth.dto';
 import { JwtPayload } from './dto/jwt-payload.interface';
+import { RequestResetPasswordDto } from './dto/request-reset-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { RefreshJwtGuard } from './guards/refresh.guard';
 
 import { AdminResponseDto } from 'src/admin/dto/admin-response.dto';
@@ -101,5 +103,38 @@ export class AuthController {
     @Request() req: Request & { user: JwtPayload },
   ): Promise<TokensDto> {
     return await this.authService.refreshToken(req.user);
+  }
+
+  @Post('/request-password-reset')
+  @ApiOperation({
+    summary: 'Request password reset',
+    description: 'Sends a password reset email to the user.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Password reset email sent successfully.',
+  })
+  async requestPasswordReset(
+    @Body() requestResetPasswordDto: RequestResetPasswordDto,
+  ): Promise<void> {
+    await this.authService.sendResetPasswordEmail(
+      requestResetPasswordDto.email,
+    );
+  }
+
+  @Post('/reset-password')
+  @ApiOperation({
+    summary: 'Reset password',
+    description: 'Allows a user to reset their password using a valid token.',
+  })
+  @ApiResponse({ status: 200, description: 'Password reset successfully.' })
+  @ApiResponse({ status: 401, description: 'Invalid or expired token.' })
+  async resetPassword(
+    @Body() resetPasswordDto: ResetPasswordDto,
+  ): Promise<void> {
+    await this.authService.resetPassword(
+      resetPasswordDto.token,
+      resetPasswordDto.newPassword,
+    );
   }
 }
