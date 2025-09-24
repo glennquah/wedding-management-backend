@@ -32,10 +32,14 @@ export class FastApiSeatingService {
 
     try {
       const response = await firstValueFrom(
-        this.httpService.get(`${this.fastApiUrl}/seating/layout/${guestCountBucket}`),
+        this.httpService.get(
+          `${this.fastApiUrl}/seating/layout/${guestCountBucket}`,
+        ),
       );
 
-      this.logger.log(`Successfully retrieved hall layout for bucket: ${guestCountBucket}`);
+      this.logger.log(
+        `Successfully retrieved hall layout for bucket: ${guestCountBucket}`,
+      );
       return response.data;
     } catch (error) {
       this.logger.error(

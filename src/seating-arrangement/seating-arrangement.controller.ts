@@ -118,22 +118,25 @@ export class SeatingArrangementController {
   @ApiParam({
     name: 'weddingId',
     type: 'number',
-    description: 'Wedding ID'
+    description: 'Wedding ID',
   })
   @ApiParam({
     name: 'guestCountBucket',
     type: 'string',
-    description: 'Guest count bucket (e.g., SMALL, MEDIUM, LARGE)'
+    description: 'Guest count bucket (e.g., SMALL, MEDIUM, LARGE)',
   })
   @ApiResponse({
     status: 200,
     description: 'Hall layout retrieved successfully.',
     type: HallLayoutDto,
   })
-  @ApiResponse({ status: 404, description: 'Hall layout not found for the specified bucket.' })
+  @ApiResponse({
+    status: 404,
+    description: 'Hall layout not found for the specified bucket.',
+  })
   getHallLayout(
     @Param('weddingId', ParseIntPipe) weddingId: number,
-    @Param('guestCountBucket') guestCountBucket: string
+    @Param('guestCountBucket') guestCountBucket: string,
   ): Promise<HallLayoutDto> {
     return this.fastApiSeatingService.getHallLayout(guestCountBucket);
   }

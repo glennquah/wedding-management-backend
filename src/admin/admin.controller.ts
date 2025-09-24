@@ -105,7 +105,9 @@ export class AdminController {
 
   @Get('my-weddings')
   @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
-  @ApiOperation({ summary: 'Get all weddings associated with the logged-in admin' })
+  @ApiOperation({
+    summary: 'Get all weddings associated with the logged-in admin',
+  })
   @ApiResponse({
     status: 200,
     description: 'List of weddings associated with the admin',
