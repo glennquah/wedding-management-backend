@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { AvailabilitySlotDto } from './create-listing.dto';
 
 export class ListingResponseDto {
   @ApiProperty({ description: 'Listing ID' })
@@ -11,17 +12,33 @@ export class ListingResponseDto {
   price: number;
 
   @ApiProperty({
-    description: 'Available dates for the listing',
-    type: [String],
-    example: ['2025-09-10', '2025-09-12'],
+    description: 'Available time slots for the listing',
+    type: [AvailabilitySlotDto],
+    example: [
+      {
+        startTime: '2025-01-15T08:00:00Z',
+        endTime: '2025-01-15T17:00:00Z',
+        date: '2025-01-15',
+      },
+    ],
   })
-  availabilities: string[];
+  availabilities: AvailabilitySlotDto[];
 
   @ApiProperty({ description: 'Additional remarks about the listing' })
   remarks: string;
 
   @ApiProperty({ description: 'Vendor ID linked to this listing' })
   vendorId: number;
+
+  @ApiProperty({
+    description: 'Array of image URLs for the listing',
+    type: [String],
+    example: [
+      'https://example.com/image1.jpg',
+      'https://example.com/image2.jpg',
+    ],
+  })
+  imageUrls: string[];
 
   // If you later want to expose vendor details:
   // @ApiProperty({ description: 'Vendor details', type: () => VendorResponseDto })
