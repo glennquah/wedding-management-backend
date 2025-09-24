@@ -951,7 +951,7 @@ async function main() {
           data: {
             listingName: listing.listingName,
             price: listing.price,
-            availabilities: listing.availabilities.map(date => new Date(date)),
+            availabilities: listing.availabilities, // Store as JSON array of date strings
             remarks: listing.remarks,
             vendorId: vendor.userId,
           },

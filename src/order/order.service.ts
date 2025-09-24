@@ -5,6 +5,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { OrderResponseDto } from './dto/order-response.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
+import { isDateAvailable, removeBookedDates, addDatesToAvailabilities } from '../common/availability.helper';
 
 @Injectable()
 export class OrderService {
@@ -36,13 +37,9 @@ export class OrderService {
       if (!listing) continue;
 
       const requestedDates = orderListing.bookedDates.map(date => new Date(date));
-      const availableDates = listing.availabilities;
 
       for (const requestedDate of requestedDates) {
-        const isAvailable = availableDates.some(availableDate =>
-          availableDate.getTime() === requestedDate.getTime()
-        );
-        if (!isAvailable) {
+        if (!isDateAvailable(requestedDate, listing.availabilities)) {
           throw new BadRequestException(
             `Date ${requestedDate.toISOString().split('T')[0]} is not available for listing ${listing.listingName}`
           );
@@ -85,9 +82,7 @@ export class OrderService {
       if (!listing) continue;
 
       const bookedDates = orderListing.bookedDates.map(date => new Date(date));
-      const updatedAvailabilities = listing.availabilities.filter(availableDate =>
-        !bookedDates.some(bookedDate => bookedDate.getTime() === availableDate.getTime())
-      );
+      const updatedAvailabilities = removeBookedDates(listing.availabilities, bookedDates);
 
       await this.prisma.listing.update({
         where: { id: orderListing.listingId },
@@ -210,17 +205,11 @@ export class OrderService {
       const listing = orderListing.listing;
       const bookedDates = orderListing.bookedDates;
 
-      // Add back the booked dates to the listing's availabilities
-      const updatedAvailabilities = [...listing.availabilities, ...bookedDates];
-
-      // Sort the dates and remove duplicates
-      const sortedUniqueAvailabilities = Array.from(
-        new Set(updatedAvailabilities.map(date => date.getTime()))
-      ).map(time => new Date(time)).sort();
+      const updatedAvailabilities = addDatesToAvailabilities(listing.availabilities, bookedDates);
 
       await this.prisma.listing.update({
         where: { id: listing.id },
-        data: { availabilities: sortedUniqueAvailabilities },
+        data: { availabilities: updatedAvailabilities },
       });
     }
 
@@ -259,17 +248,11 @@ export class OrderService {
       const listing = orderListing.listing;
       const bookedDates = orderListing.bookedDates;
 
-      // Add back the booked dates to the listing's availabilities
-      const updatedAvailabilities = [...listing.availabilities, ...bookedDates];
-
-      // Sort the dates and remove duplicates
-      const sortedUniqueAvailabilities = Array.from(
-        new Set(updatedAvailabilities.map(date => date.getTime()))
-      ).map(time => new Date(time)).sort();
+      const updatedAvailabilities = addDatesToAvailabilities(listing.availabilities, bookedDates);
 
       await this.prisma.listing.update({
         where: { id: listing.id },
-        data: { availabilities: sortedUniqueAvailabilities },
+        data: { availabilities: updatedAvailabilities },
       });
     }
 
