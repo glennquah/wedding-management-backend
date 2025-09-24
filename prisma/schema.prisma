@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
 datasource db {
@@ -216,8 +217,9 @@ model Listing {
   id             Int        @id @default(autoincrement())
   listingName    String
   price          Float
-  availabilities DateTime[]
+  availabilities Json
   remarks        String
+  imageUrls      String[]
 
   // Relations
   vendorId Int

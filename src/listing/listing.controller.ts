@@ -74,6 +74,20 @@ export class ListingController {
     return this.listingService.delete(vendorId, id);
   }
 
+  @Get(':id')
+  @Roles(UserRole.ADMIN, UserRole.VENDOR, UserRole.SUPERADMIN)
+  @ApiOperation({ summary: 'Get a listing by ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'The listing details.',
+    type: ListingResponseDto,
+  })
+  @ApiResponse({ status: 404, description: 'Listing not found.' })
+  async findById(@Param('id', ParseIntPipe) id: number) {
+    const listing = await this.listingService.findById(id);
+    return this.listingService.toListingResponseDto(listing);
+  }
+
   @Get(':vendorId/search')
   @Roles(UserRole.ADMIN, UserRole.VENDOR, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Search listings by vendor name' })

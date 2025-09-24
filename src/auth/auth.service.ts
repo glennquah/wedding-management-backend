@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserRole } from '@prisma/client';
-import { compare, hash } from 'bcrypt';
+import { compare, hash } from 'bcryptjs';
 import { EmailNotificationService } from 'src/email-notification/email-notification.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UserResponseDto } from 'src/user/dto/user-response.dto';

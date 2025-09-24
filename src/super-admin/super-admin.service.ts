@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { hash } from 'bcrypt';
+import { hash } from 'bcryptjs';
 import { UserRole } from 'src/common/user-role.enum';
 import { PrismaService } from '../prisma/prisma.service';
 import { UserService } from '../user/user.service';

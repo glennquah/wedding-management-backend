@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Admin, Prisma, User, Wedding } from '@prisma/client';
-import { compare, hash } from 'bcrypt';
+import { compare, hash } from 'bcryptjs';
 import { UserRole } from 'src/common/user-role.enum';
 import { WeddingDetailsDto } from 'src/wedding/dto/wedding-details.dto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -269,5 +269,18 @@ export class AdminService {
     }
 
     return { mainWeddingId: admin.mainWeddingId };
+  }
+
+  async getMyWeddings(userId: number): Promise<Wedding[]> {
+    const admin = await this.prisma.admin.findUnique({
+      where: { userId },
+      include: { weddings: true },
+    });
+
+    if (!admin) {
+      throw new NotFoundException(`Admin with userId ${userId} not found`);
+    }
+
+    return admin.weddings;
   }
 }
