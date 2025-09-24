@@ -46,6 +46,10 @@ jobs:
           RDS_SG_ID: ${{ secrets.RDS_SG_ID }}
           JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
           JWT_REFRESH_KEY: ${{ secrets.JWT_REFRESH_KEY }}
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+          STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+          FASTAPI_URL: ${{ secrets.FASTAPI_URL }}
         run: |
           cd infra
           npx cdk deploy --require-approval never
