@@ -17,8 +17,19 @@ async function bootstrap() {
       new ExpressAdapter(expressApp),
     );
 
-    // TODO: Verify this origin
-    nestApp.enableCors({ origin: ['https://knotly.app'], credentials: true });
+    nestApp.enableCors({
+      origin: [
+        'http://localhost:3000',
+        'http://localhost:3001',
+        'https://knotly.app',
+        'https://www.knotly.app',
+        'https://core.knotly.app',
+        'https://www.core.knotly.app',
+      ],
+      methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+      credentials: true,
+      allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+    });
 
     nestApp.useGlobalPipes(
       new ValidationPipe({
