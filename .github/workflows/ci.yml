@@ -36,6 +36,9 @@ jobs:
       PORT: ${{ secrets.PORT }}
       JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
       JWT_REFRESH_KEY: ${{ secrets.JWT_REFRESH_KEY }}
+      FASTAPI_URL: http://localhost:8001
+      STRIPE_SECRET_KEY: API_KEY_NOT_ACTUALLY_HERE
+      STRIPE_WEBHOOK_SECRET: API_KEY_NOT_ACTUALLY_HERE
 
     steps:
       - name: Checkout code
