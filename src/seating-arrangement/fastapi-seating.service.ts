@@ -23,7 +23,10 @@ export class FastApiSeatingService {
     }
   }
 
-  async getHallLayout(guestCountBucket: string): Promise<HallLayoutDto> {
+  async getHallLayout(
+    guestCountBucket: string,
+    tablesPerRow?: number,
+  ): Promise<HallLayoutDto> {
     if (!this.fastApiUrl) {
       throw new BadRequestException(
         'FastAPI service not configured. Please contact administrator.',
@@ -31,11 +34,13 @@ export class FastApiSeatingService {
     }
 
     try {
-      const response = await firstValueFrom(
-        this.httpService.get(
-          `${this.fastApiUrl}/seating/layout/${guestCountBucket}`,
-        ),
-      );
+      // Build URL with optional tables_per_row parameter
+      let url = `${this.fastApiUrl}/seating/layout/${guestCountBucket}`;
+      if (tablesPerRow !== undefined) {
+        url += `?tables_per_row=${tablesPerRow}`;
+      }
+
+      const response = await firstValueFrom(this.httpService.get(url));
 
       this.logger.log(
         `Successfully retrieved hall layout for bucket: ${guestCountBucket}`,

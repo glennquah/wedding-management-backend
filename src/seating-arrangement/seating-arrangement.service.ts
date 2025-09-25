@@ -42,6 +42,7 @@ export class SeatingArrangementService {
         weddingId,
         groupPriorities: createSeatingArrangementDto.groupPriorities || null,
         tables: createSeatingArrangementDto.tables || [],
+        tablesPerRow: createSeatingArrangementDto.tablesPerRow || null,
       },
     });
 
@@ -80,6 +81,7 @@ export class SeatingArrangementService {
     const updateData: {
       groupPriorities?: Record<string, number>;
       tables?: string[][];
+      tablesPerRow?: number;
     } = {};
 
     if (updateSeatingArrangementDto.groupPriorities !== undefined) {
@@ -88,6 +90,10 @@ export class SeatingArrangementService {
 
     if (updateSeatingArrangementDto.tables !== undefined) {
       updateData.tables = updateSeatingArrangementDto.tables;
+    }
+
+    if (updateSeatingArrangementDto.tablesPerRow !== undefined) {
+      updateData.tablesPerRow = updateSeatingArrangementDto.tablesPerRow;
     }
 
     const updatedSeatingArrangement =
@@ -123,6 +129,7 @@ export class SeatingArrangementService {
       weddingId: seatingArrangement.weddingId,
       groupPriorities: seatingArrangement.groupPriorities,
       tables: seatingArrangement.tables as string[][],
+      tablesPerRow: seatingArrangement.tablesPerRow,
       createdAt: seatingArrangement.createdAt,
       updatedAt: seatingArrangement.updatedAt,
     };

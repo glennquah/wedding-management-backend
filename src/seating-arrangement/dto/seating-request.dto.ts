@@ -4,6 +4,7 @@ import {
   IsArray,
   IsEnum,
   IsNotEmpty,
+  IsNumber,
   IsObject,
   IsOptional,
   IsString,
@@ -60,4 +61,13 @@ export class SeatingRequestDto {
   @IsNotEmpty()
   @IsObject()
   group_priorities: Record<string, number>;
+
+  @ApiProperty({
+    description: 'Number of tables per row for layout selection',
+    required: false,
+    example: 4,
+  })
+  @IsOptional()
+  @IsNumber()
+  tables_per_row?: number;
 }
