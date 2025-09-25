@@ -16,7 +16,13 @@ import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { UserRole } from 'src/common/user-role.enum';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { Roles } from 'src/auth/decorators/roles.decorator';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { SeatingArrangementService } from './seating-arrangement.service';
 import { FastApiSeatingService } from './fastapi-seating.service';
 import { CreateSeatingArrangementDto } from './dto/create-seating-arrangement.dto';
@@ -146,7 +152,10 @@ export class SeatingArrangementController {
     @Param('guestCountBucket') guestCountBucket: string,
     @Query('tables_per_row') tablesPerRow?: number,
   ): Promise<HallLayoutDto> {
-    return this.fastApiSeatingService.getHallLayout(guestCountBucket, tablesPerRow);
+    return this.fastApiSeatingService.getHallLayout(
+      guestCountBucket,
+      tablesPerRow,
+    );
   }
 
   @Post('optimize')
