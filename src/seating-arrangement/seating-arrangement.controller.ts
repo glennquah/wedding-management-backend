@@ -10,12 +10,13 @@ import {
   HttpCode,
   HttpStatus,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { UserRole } from 'src/common/user-role.enum';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { Roles } from 'src/auth/decorators/roles.decorator';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { SeatingArrangementService } from './seating-arrangement.service';
 import { FastApiSeatingService } from './fastapi-seating.service';
 import { CreateSeatingArrangementDto } from './dto/create-seating-arrangement.dto';
@@ -125,6 +126,12 @@ export class SeatingArrangementController {
     type: 'string',
     description: 'Guest count bucket (e.g., SMALL, MEDIUM, LARGE)',
   })
+  @ApiQuery({
+    name: 'tables_per_row',
+    type: 'number',
+    description: 'Number of tables per row for layout selection (optional)',
+    required: false,
+  })
   @ApiResponse({
     status: 200,
     description: 'Hall layout retrieved successfully.',
@@ -137,8 +144,9 @@ export class SeatingArrangementController {
   getHallLayout(
     @Param('weddingId', ParseIntPipe) weddingId: number,
     @Param('guestCountBucket') guestCountBucket: string,
+    @Query('tables_per_row') tablesPerRow?: number,
   ): Promise<HallLayoutDto> {
-    return this.fastApiSeatingService.getHallLayout(guestCountBucket);
+    return this.fastApiSeatingService.getHallLayout(guestCountBucket, tablesPerRow);
   }
 
   @Post('optimize')

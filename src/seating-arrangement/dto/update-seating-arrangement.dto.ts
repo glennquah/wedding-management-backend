@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsObject, IsOptional } from 'class-validator';
+import { IsArray, IsInt, IsObject, IsOptional, Min } from 'class-validator';
 
 export class UpdateSeatingArrangementDto {
   @ApiProperty({
@@ -24,4 +24,14 @@ export class UpdateSeatingArrangementDto {
   @IsOptional()
   @IsArray()
   tables?: string[][];
+
+  @ApiProperty({
+    description: 'Number of tables per row in the layout',
+    required: false,
+    example: 4,
+  })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  tablesPerRow?: number;
 }

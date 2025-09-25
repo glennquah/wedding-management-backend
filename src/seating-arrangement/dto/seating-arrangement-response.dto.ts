@@ -25,6 +25,13 @@ export class SeatingArrangementResponseDto {
   })
   tables: string[][];
 
+  @ApiProperty({
+    description: 'Number of tables per row in the layout',
+    required: false,
+    example: 4,
+  })
+  tablesPerRow?: number;
+
   @ApiProperty({ description: 'Creation date' })
   createdAt: Date;
 
