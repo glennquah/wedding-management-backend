@@ -5,6 +5,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateListingDto } from './dto/create-listing.dto';
 import { ListingResponseDto } from './dto/listing-response.dto';
 import { UpdateListingDto } from './dto/update-listing.dto';
+import { WeddingService } from 'src/common/wedding-service.enum';
 
 @Injectable()
 export class ListingService {
@@ -95,6 +96,28 @@ export class ListingService {
         listingName: {
           contains: listingName,
           mode: 'insensitive', // case-insensitive search
+        },
+      },
+    });
+  }
+
+  async getAllByService(service: WeddingService): Promise<Listing[]> {
+    return this.prisma.listing.findMany({
+      where: {
+        vendor: {
+          serviceOffered: service,
+        },
+      },
+      include: {
+        vendor: {
+          include: {
+            user: {
+              select: {
+                name: true,
+                email: true,
+              },
+            },
+          },
         },
       },
     });
