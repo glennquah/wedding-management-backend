@@ -120,7 +120,9 @@ export class ListingController {
     type: [ListingResponseDto],
   })
   async getAllVenues() {
-    const listings = await this.listingService.getAllByService(WeddingService.VENUE);
+    const listings = await this.listingService.getAllByService(
+      WeddingService.VENUE,
+    );
     return listings.map((listing) =>
       this.listingService.toListingResponseDto(listing),
     );
@@ -135,7 +137,9 @@ export class ListingController {
     type: [ListingResponseDto],
   })
   async getAllCatering() {
-    const listings = await this.listingService.getAllByService(WeddingService.CATERING);
+    const listings = await this.listingService.getAllByService(
+      WeddingService.CATERING,
+    );
     return listings.map((listing) =>
       this.listingService.toListingResponseDto(listing),
     );
@@ -150,7 +154,9 @@ export class ListingController {
     type: [ListingResponseDto],
   })
   async getAllPhotography() {
-    const listings = await this.listingService.getAllByService(WeddingService.PHOTOGRAPHY);
+    const listings = await this.listingService.getAllByService(
+      WeddingService.PHOTOGRAPHY,
+    );
     return listings.map((listing) =>
       this.listingService.toListingResponseDto(listing),
     );
@@ -165,7 +171,9 @@ export class ListingController {
     type: [ListingResponseDto],
   })
   async getAllDecoration() {
-    const listings = await this.listingService.getAllByService(WeddingService.DECORATION);
+    const listings = await this.listingService.getAllByService(
+      WeddingService.DECORATION,
+    );
     return listings.map((listing) =>
       this.listingService.toListingResponseDto(listing),
     );
@@ -180,7 +188,9 @@ export class ListingController {
     type: [ListingResponseDto],
   })
   async getAllMusic() {
-    const listings = await this.listingService.getAllByService(WeddingService.MUSIC);
+    const listings = await this.listingService.getAllByService(
+      WeddingService.MUSIC,
+    );
     return listings.map((listing) =>
       this.listingService.toListingResponseDto(listing),
     );
@@ -195,7 +205,9 @@ export class ListingController {
     type: [ListingResponseDto],
   })
   async getAllAttire() {
-    const listings = await this.listingService.getAllByService(WeddingService.ATTIRE);
+    const listings = await this.listingService.getAllByService(
+      WeddingService.ATTIRE,
+    );
     return listings.map((listing) =>
       this.listingService.toListingResponseDto(listing),
     );
@@ -210,7 +222,9 @@ export class ListingController {
     type: [ListingResponseDto],
   })
   async getAllMakeup() {
-    const listings = await this.listingService.getAllByService(WeddingService.MAKEUP);
+    const listings = await this.listingService.getAllByService(
+      WeddingService.MAKEUP,
+    );
     return listings.map((listing) =>
       this.listingService.toListingResponseDto(listing),
     );
@@ -225,7 +239,9 @@ export class ListingController {
     type: [ListingResponseDto],
   })
   async getAllTransportation() {
-    const listings = await this.listingService.getAllByService(WeddingService.TRANSPORTATION);
+    const listings = await this.listingService.getAllByService(
+      WeddingService.TRANSPORTATION,
+    );
     return listings.map((listing) =>
       this.listingService.toListingResponseDto(listing),
     );
