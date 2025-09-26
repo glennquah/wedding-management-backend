@@ -2,9 +2,10 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { Admin, Prisma, User, Wedding } from '@prisma/client';
-import { hash } from 'bcrypt';
+import { compare, hash } from 'bcryptjs';
 import { UserRole } from 'src/common/user-role.enum';
 import { WeddingDetailsDto } from 'src/wedding/dto/wedding-details.dto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -68,7 +69,7 @@ export class AdminService {
       name: dto.name,
       email: dto.email,
       password: await hash(dto.password, 10),
-      role: 'admin' as UserRole,
+      role: UserRole.ADMIN,
     });
 
     // Create the admin profile first
@@ -167,6 +168,13 @@ export class AdminService {
   async update(userId: number, dto: UpdateAdminDto): Promise<AdminResponseDto> {
     await this.findById(userId);
 
+    // Prepare user update data
+    const userUpdateData: any = {};
+    if (dto.name) userUpdateData.name = dto.name;
+    if (dto.email) userUpdateData.email = dto.email;
+    if (dto.password) userUpdateData.password = await hash(dto.password, 10);
+
+    // Check if email is being updated and if it conflicts
     if (dto.email) {
       const existingUser = await this.prisma.user.findUnique({
         where: { email: dto.email },
@@ -174,21 +182,13 @@ export class AdminService {
       if (existingUser && existingUser.id !== userId) {
         throw new ConflictException('User with this email already exists');
       }
+    }
+
+    // Update user data if there are changes
+    if (Object.keys(userUpdateData).length > 0) {
       await this.prisma.user.update({
         where: { id: userId },
-        data: {
-          email: dto.email,
-          name: dto.name,
-          password: dto.password,
-        },
-      });
-    } else if (dto.name || dto.password) {
-      await this.prisma.user.update({
-        where: { id: userId },
-        data: {
-          name: dto.name,
-          password: dto.password,
-        },
+        data: userUpdateData,
       });
     }
 
@@ -218,7 +218,29 @@ export class AdminService {
     return this.toAdminResponseDto(updatedAdmin);
   }
 
-  async deleteAdmin(userId: number): Promise<void> {
+  async deleteSelf(userId: number, password: string): Promise<void> {
+    // Get the raw user data with password for validation
+    const rawUser = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!rawUser) {
+      throw new NotFoundException(`User with id ${userId} not found`);
+    }
+
+    // Validate password
+    const isValidPassword = await compare(password, rawUser.password);
+    if (!isValidPassword) {
+      throw new UnauthorizedException('Invalid password');
+    }
+
+    await this.prisma.$transaction([
+      this.prisma.admin.delete({ where: { userId } }),
+      this.prisma.user.delete({ where: { id: userId } }),
+    ]);
+  }
+
+  async delete(userId: number): Promise<void> {
     await this.findById(userId);
 
     await this.prisma.$transaction([
@@ -247,5 +269,18 @@ export class AdminService {
     }
 
     return { mainWeddingId: admin.mainWeddingId };
+  }
+
+  async getMyWeddings(userId: number): Promise<Wedding[]> {
+    const admin = await this.prisma.admin.findUnique({
+      where: { userId },
+      include: { weddings: true },
+    });
+
+    if (!admin) {
+      throw new NotFoundException(`Admin with userId ${userId} not found`);
+    }
+
+    return admin.weddings;
   }
 }

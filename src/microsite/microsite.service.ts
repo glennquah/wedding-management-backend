@@ -1,7 +1,6 @@
 import {
   Injectable,
   NotFoundException,
-  UnauthorizedException,
   ConflictException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
@@ -159,7 +158,7 @@ export class MicrositeService {
 
     const updatedGuest = await this.prisma.guest.update({
       where: { id: guestId },
-      data: { confirmationStatus: ConfirmationStatus.CONFIRMED },
+      data: { confirmationStatus: 'confirmed' },
     });
     // Fetch wedding name for the updated guest
     const wedding = await this.prisma.wedding.findUnique({

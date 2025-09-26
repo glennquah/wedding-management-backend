@@ -31,9 +31,14 @@ jobs:
       POSTGRES_PASSWORD: password123
       POSTGRES_DB: wedding_management
       DATABASE_URL: postgresql://admin:password123@localhost:5432/wedding_management
+      FRONTEND_URL: http://localhost:3000
+      SENDGRID_API_KEY: API_KEY_NOT_ACTUALLY_HERE
       PORT: ${{ secrets.PORT }}
       JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
       JWT_REFRESH_KEY: ${{ secrets.JWT_REFRESH_KEY }}
+      FASTAPI_URL: http://localhost:8001
+      STRIPE_SECRET_KEY: API_KEY_NOT_ACTUALLY_HERE
+      STRIPE_WEBHOOK_SECRET: API_KEY_NOT_ACTUALLY_HERE
 
     steps:
       - name: Checkout code

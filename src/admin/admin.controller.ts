@@ -10,15 +10,21 @@ import {
   Request,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { UserRole } from 'src/common/user-role.enum';
+import { BudgetBucket } from 'src/common/budget-bucket.enum';
+import { GuestCountBucket } from 'src/common/guest-count-bucket.enum';
+import { WeddingService } from 'src/common/wedding-service.enum';
+import { WeddingStyle } from 'src/common/wedding-style.enum';
+import { WeddingType } from 'src/common/wedding-type.enum';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 
 import { AdminResponseDto } from './dto/admin-response.dto';
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { UpdateAdminDto } from './dto/update-admin.dto';
+import { WeddingResponseDto } from '../wedding/dto/wedding-response.dto';
 
 import { AdminService } from './admin.service';
 
@@ -97,6 +103,36 @@ export class AdminController {
     return this.adminService.getMainWeddingId(req.user.sub);
   }
 
+  @Get('my-weddings')
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
+  @ApiOperation({
+    summary: 'Get all weddings associated with the logged-in admin',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of weddings associated with the admin',
+    type: [WeddingResponseDto],
+  })
+  @ApiResponse({ status: 404, description: 'Admin not found.' })
+  async getMyWeddings(
+    @Request() req: Request & { user: JwtPayload },
+  ): Promise<WeddingResponseDto[]> {
+    const weddings = await this.adminService.getMyWeddings(req.user.sub);
+    return weddings.map((wedding) => ({
+      id: wedding.id,
+      name: wedding.name,
+      date: wedding.date?.toISOString(),
+      location: wedding.location,
+      weddingType: wedding.weddingType as WeddingType,
+      budgetBucket: wedding.budgetBucket as BudgetBucket,
+      guestCountBucket: wedding.guestCountBucket as GuestCountBucket,
+      preferredStyle: wedding.preferredStyle as WeddingStyle,
+      preferredServices: wedding.preferredServices as WeddingService[],
+      createdAt: wedding.createdAt.toISOString(),
+      updatedAt: wedding.updatedAt.toISOString(),
+    }));
+  }
+
   @Get(':id')
   @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Get an admin by ID' })
@@ -148,16 +184,45 @@ export class AdminController {
     return this.adminService.update(id, body);
   }
 
+  @Delete('delete-self')
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({
+    summary: 'Delete own admin profile (requires password confirmation)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'The admin profile has been successfully deleted.',
+  })
+  @ApiResponse({ status: 401, description: 'Invalid password.' })
+  @ApiResponse({ status: 404, description: 'Admin not found.' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        password: { type: 'string', example: 'mypassword123' },
+      },
+      required: ['password'],
+    },
+  })
+  async deleteSelf(
+    @Request() req: Request & { user: JwtPayload },
+    @Body() body: { password: string },
+  ): Promise<void> {
+    await this.adminService.deleteSelf(req.user.sub, body.password);
+  }
+
   @Delete(':id')
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
-  @ApiOperation({ summary: 'Delete an admin' })
+  @Roles(UserRole.SUPERADMIN)
+  @ApiOperation({
+    summary: 'Delete an admin (super admin only, no password required)',
+  })
   @ApiResponse({
     status: 200,
     description: 'The admin has been successfully deleted.',
   })
   @ApiResponse({ status: 404, description: 'Admin not found.' })
   async delete(@Param('id', ParseIntPipe) id: number): Promise<void> {
-    await this.adminService.deleteAdmin(id);
+    await this.adminService.delete(id);
   }
 
   @Put(':id/suspend')

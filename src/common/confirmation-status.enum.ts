@@ -1,5 +1,5 @@
 export enum ConfirmationStatus {
-  PENDING = 'pending',
-  CONFIRMED = 'confirmed',
-  REJECTED = 'rejected',
+  PENDING = 'PENDING',
+  CONFIRMED = 'CONFIRMED',
+  REJECTED = 'REJECTED',
 }

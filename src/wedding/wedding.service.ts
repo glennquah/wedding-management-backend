@@ -30,6 +30,9 @@ export class WeddingService {
         guestCountBucket: dto.guestCountBucket,
         preferredStyle: dto.preferredStyle,
         preferredServices: dto.preferredServices,
+        notificationDetails: {
+          create: {},
+        },
       },
     });
   }

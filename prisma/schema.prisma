@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
 datasource db {
@@ -8,55 +9,55 @@ datasource db {
 }
 
 enum ConfirmationStatus {
-  pending
-  confirmed
-  rejected
+  PENDING
+  CONFIRMED
+  REJECTED
 }
 
 enum UserRole {
-  admin
-  superAdmin
-  vendor
+  ADMIN
+  SUPERADMIN
+  VENDOR
 }
 
 enum WeddingType {
-  chinese
-  malay
-  indian
-  western
-  others
+  CHINESE
+  MALAY
+  INDIAN
+  WESTERN
+  OTHERS
 }
 
 enum WeddingService {
-  venue
-  catering
-  photography
-  decoration
-  music
-  attire
-  makeup
-  transportation
+  VENUE
+  CATERING
+  PHOTOGRAPHY
+  DECORATION
+  MUSIC
+  ATTIRE
+  MAKEUP
+  TRANSPORTATION
 }
 
 enum WeddingStyle {
-  luxury
-  modern
-  traditional
-  rustic
+  LUXURY
+  MODERN
+  TRADITIONAL
+  RUSTIC
 }
 
 // tentative numbers, need to market research to finalize
 enum BudgetBucket {
-  low // up to $10,000
-  medium // $10,000 to $30,000
-  high // $30,000 to $50,000
-  luxury // above $50,000
+  LOW // up to $10,000
+  MEDIUM // $10,000 to $30,000
+  HIGH // $30,000 to $50,000
+  LUXURY // above $50,000
 }
 
 enum GuestCountBucket {
-  small // up to 50
-  medium // 50 to 150
-  large // above 150
+  SMALL // up to 50
+  MEDIUM // 50 to 150
+  LARGE // above 150
 }
 
 enum OrderStatus {
@@ -66,10 +67,28 @@ enum OrderStatus {
   COMPLETED
 }
 
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  SUCCEEDED
+  FAILED
+  CANCELLED
+  REFUNDED
+  PARTIALLY_REFUNDED
+}
+
 enum VendorOnboardingStatus {
-  pending
-  rejected
-  onboarded
+  PENDING
+  REJECTED
+  ONBOARDED
+}
+
+enum EmailTemplateType {
+  PASSWORD_RESET
+  WELCOME
+  VERIFY_EMAIL
+  CREATE_ACCOUNT
+  CUSTOM
 }
 
 model User {
@@ -105,36 +124,77 @@ model Vendor {
   userId Int  @unique
   user   User @relation(fields: [userId], references: [id])
 
-  vendorWebsite    String?
-  uenNumber        String?
-  onboardedDate    DateTime               @default(now())
-  bio              String?
-  rating           Float?                 @default(0)
-  isSuspended      Boolean                @default(false)
-  serviceOffered   WeddingService
-  styleOffered     WeddingStyle
-  weddingTypes     WeddingType[]
-  capacity         Int?
-  listings         Listing[]
-  onboardingStatus VendorOnboardingStatus @default(pending)
+  vendorWebsite       String?
+  uenNumber           String?
+  onboardedDate       DateTime               @default(now())
+  bio                 String?
+  rating              Float?                 @default(0)
+  isSuspended         Boolean                @default(false)
+  serviceOffered      WeddingService
+  styleOffered        WeddingStyle
+  weddingTypes        WeddingType[]
+  capacity            Int?
+  listings            Listing[]
+  onboardingStatus    VendorOnboardingStatus @default(PENDING)
+  notificationDetails NotificationDetails?
+}
+
+model EmailTemplate {
+  id                    Int                 @id @default(autoincrement())
+  name                  String
+  subject               String
+  htmlContent           String
+  textContent           String?
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  notificationDetails   NotificationDetails @relation(fields: [notificationDetailsId], references: [id])
+  notificationDetailsId Int
+}
+
+model EmailNotificationHistory {
+  id                    Int                 @id @default(autoincrement())
+  to                    String[]
+  subject               String
+  body                  String
+  sentAt                DateTime            @default(now())
+  type                  EmailTemplateType
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  notificationDetails   NotificationDetails @relation(fields: [notificationDetailsId], references: [id])
+  notificationDetailsId Int
+}
+
+model NotificationDetails {
+  id                       Int                        @id @default(autoincrement())
+  emailTemplates           EmailTemplate[]
+  emailNotificationHistory EmailNotificationHistory[]
+  wedding                  Wedding?                   @relation(fields: [weddingId], references: [id])
+  createdAt                DateTime                   @default(now())
+  updatedAt                DateTime                   @updatedAt
+  weddingId                Int?                       @unique
+  vendor                   Vendor?                    @relation(fields: [vendorId], references: [userId])
+  vendorId                 Int?                       @unique
+  isSuperAdminNotification Boolean?                   @default(false)
 }
 
 model Wedding {
-  id                Int              @id @default(autoincrement())
-  mainCouple        Admin[]          @relation("MainCouple")
-  name              String
-  date              DateTime?
-  location          String?
-  guests            Guest[]
-  admins            Admin[]          @relation("AdminWeddings")
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
-  weddingType       WeddingType
-  budgetBucket      BudgetBucket
-  guestCountBucket  GuestCountBucket
-  preferredStyle    WeddingStyle
-  preferredServices WeddingService[]
-  orders            Order[]
+  id                  Int                  @id @default(autoincrement())
+  mainCouple          Admin[]              @relation("MainCouple")
+  name                String
+  date                DateTime?
+  location            String?
+  guests              Guest[]
+  admins              Admin[]              @relation("AdminWeddings")
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  weddingType         WeddingType
+  budgetBucket        BudgetBucket
+  guestCountBucket    GuestCountBucket
+  preferredStyle      WeddingStyle
+  preferredServices   WeddingService[]
+  orders              Order[]
+  notificationDetails NotificationDetails?
+  SeatingArrangement  SeatingArrangement?
   microsite         Microsite?
 }
 
@@ -157,11 +217,11 @@ model Microsite {
 
 model Guest {
   id                 Int                @id @default(autoincrement())
-  email              String             
+  email              String
   name               String
   allergies          String?
   group              String?
-  confirmationStatus ConfirmationStatus @default(pending)
+  confirmationStatus ConfirmationStatus @default(PENDING)
   weddingId          Int
   wedding            Wedding            @relation(fields: [weddingId], references: [id], onDelete: Cascade)
   primaryGuestId     Int?
@@ -175,8 +235,9 @@ model Listing {
   id             Int        @id @default(autoincrement())
   listingName    String
   price          Float
-  availabilities DateTime[]
+  availabilities Json
   remarks        String
+  imageUrls      String[]
 
   // Relations
   vendorId Int
@@ -192,7 +253,8 @@ model Listing {
 model Order {
   id            Int         @id @default(autoincrement())
   orderStatus   OrderStatus @default(PENDING)
-  paymentMethod String
+  totalAmount   Float
+  currency      String      @default("SGD")
   purchaseDate  DateTime    @default(now())
   remark        String?
 
@@ -203,16 +265,51 @@ model Order {
   // Many-to-many with Listings
   listings OrderListing[]
 
+  // Payment relation
+  payments Payment[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model OrderListing {
-  orderId   Int
-  listingId Int
+  orderId     Int
+  listingId   Int
+  bookedSlots Json
 
   order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
 
   @@id([orderId, listingId])
+}
+
+model Payment {
+  id                      Int           @id @default(autoincrement())
+  stripeCheckoutSessionId String        @unique
+  stripePaymentIntentId   String?       // This is populated by webhook after payment
+  amount                  Float
+  currency                String        @default("SGD")
+  paymentStatus           PaymentStatus @default(PENDING)
+
+  // Relations
+  orderId Int
+  order   Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([stripeCheckoutSessionId])
+  @@index([stripePaymentIntentId])
+  @@index([paymentStatus])
+}
+
+model SeatingArrangement {
+  id              Int      @id @default(autoincrement())
+  weddingId       Int      @unique
+  wedding         Wedding  @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+  groupPriorities Json?
+  tables          Json
+  tablesPerRow    Int?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }
