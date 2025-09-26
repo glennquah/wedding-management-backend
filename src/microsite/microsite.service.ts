@@ -158,7 +158,7 @@ export class MicrositeService {
 
     const updatedGuest = await this.prisma.guest.update({
       where: { id: guestId },
-      data: { confirmationStatus: 'confirmed' },
+      data: { confirmationStatus: ConfirmationStatus.CONFIRMED },
     });
     // Fetch wedding name for the updated guest
     const wedding = await this.prisma.wedding.findUnique({
@@ -302,8 +302,9 @@ export class MicrositeService {
         coupleName: updateMicrositeDto.coupleName,
         heroImages: updateMicrositeDto.heroImages,
         imageGallery: updateMicrositeDto.imageGallery,
-        schedule: updateMicrositeDto.schedule,
-        faqs: updateMicrositeDto.faqs,
+        schedule:
+          updateMicrositeDto.schedule as unknown as Prisma.InputJsonValue,
+        faqs: updateMicrositeDto.faqs as unknown as Prisma.InputJsonValue,
         password: updateMicrositeDto.password,
       },
       include: {

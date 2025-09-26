@@ -52,7 +52,7 @@ export class MicrositeController {
 
   @Get('wedding/:weddingId')
   @UseGuards(JwtGuard, RolesGuard)
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Get microsite details by wedding ID' })
   @ApiResponse({
     status: 200,
@@ -135,7 +135,7 @@ export class MicrositeController {
 
   @Post()
   @UseGuards(JwtGuard, RolesGuard)
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Create a microsite for a wedding' })
   @ApiResponse({
     status: 201,

@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsOptional, IsNumber, IsArray } from 'class-validator';
+import { ScheduleItemDto, FaqItemDto } from './create-microsite.dto';
 
 export class UpdateMicrositeDto {
   @ApiProperty({
@@ -53,7 +54,7 @@ export class UpdateMicrositeDto {
     isArray: true,
   })
   @IsOptional()
-  schedule?: any[];
+  schedule?: ScheduleItemDto[];
 
   @ApiProperty({
     description: 'Frequently asked questions (stored as JSON)',
@@ -62,7 +63,7 @@ export class UpdateMicrositeDto {
     isArray: true,
   })
   @IsOptional()
-  faqs?: any[];
+  faqs?: FaqItemDto[];
 
   @ApiProperty({
     description: 'Password to access microsite',

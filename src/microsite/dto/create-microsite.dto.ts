@@ -8,7 +8,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
-class ScheduleItemDto {
+export class ScheduleItemDto {
   @ApiProperty({ description: 'Scheduled time', example: '2:00 PM' })
   @IsString()
   time: string;
@@ -28,7 +28,7 @@ class ScheduleItemDto {
   description: string;
 }
 
-class FaqItemDto {
+export class FaqItemDto {
   @ApiProperty({
     description: 'FAQ question',
     example: 'What is the dress code?',
