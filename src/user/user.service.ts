@@ -34,7 +34,12 @@ export class UserService {
     throw error;
   }
 
-  toUserResponseDto(user: User & { admin?: { isSuspended: boolean } | null; vendor?: { isSuspended: boolean } | null }): UserResponseDto {
+  toUserResponseDto(
+    user: User & {
+      admin?: { isSuspended: boolean } | null;
+      vendor?: { isSuspended: boolean } | null;
+    },
+  ): UserResponseDto {
     // Extract isSuspended based on user role
     let isSuspended = false;
     if (user.role === 'ADMIN' && user.admin) {
@@ -95,18 +100,24 @@ export class UserService {
     return this.toUserResponseDto(user);
   }
 
-  async findRawByEmail(email: string): Promise<User & { admin?: { isSuspended: boolean } | null; vendor?: { isSuspended: boolean } | null } | null> {
+  async findRawByEmail(email: string): Promise<
+    | (User & {
+        admin?: { isSuspended: boolean } | null;
+        vendor?: { isSuspended: boolean } | null;
+      })
+    | null
+  > {
     // need this for auth service - include admin and vendor to check suspension status
     return this.prisma.user.findUnique({
       where: { email },
       include: {
         admin: {
-          select: { isSuspended: true }
+          select: { isSuspended: true },
         },
         vendor: {
-          select: { isSuspended: true }
-        }
-      }
+          select: { isSuspended: true },
+        },
+      },
     });
   }
 
