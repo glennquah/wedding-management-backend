@@ -9,6 +9,7 @@ import {
   ParseIntPipe,
   UseGuards,
   Put,
+  ParseFloatPipe,
 } from '@nestjs/common';
 import { ListingService } from './listing.service';
 import { CreateListingDto } from './dto/create-listing.dto';
@@ -20,6 +21,7 @@ import { ListingResponseDto } from './dto/listing-response.dto';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { UserRole } from 'src/common/user-role.enum';
 import { WeddingService } from 'src/common/wedding-service.enum';
+import { WeddingStyle, WeddingType } from '@prisma/client';
 
 @ApiTags('listings')
 @Controller('listings')
@@ -126,6 +128,69 @@ export class ListingController {
     return listings.map((listing) =>
       this.listingService.toListingResponseDto(listing),
     );
+  }
+
+  @Get('venue/browse')
+  @Roles(UserRole.ADMIN, UserRole.VENDOR, UserRole.SUPERADMIN)
+  @ApiOperation({ summary: 'Browse venue listings with filtering' })
+  @ApiResponse({
+    status: 200,
+    description: 'Filtered venue listings with pagination.',
+    schema: {
+      type: 'object',
+      properties: {
+        listings: {
+          type: 'array',
+          items: { $ref: '#/components/schemas/ListingResponseDto' },
+        },
+        total: { type: 'number' },
+        page: { type: 'number' },
+        totalPages: { type: 'number' },
+      },
+    },
+  })
+  async browseVenues(
+    @Query('minPrice', new ParseFloatPipe({ optional: true }))
+    minPrice?: number,
+    @Query('maxPrice', new ParseFloatPipe({ optional: true }))
+    maxPrice?: number,
+    @Query('availableDate') availableDate?: string,
+    @Query('style') style?: WeddingStyle,
+    @Query('weddingType') weddingType?: WeddingType,
+    @Query('minRating', new ParseFloatPipe({ optional: true }))
+    minRating?: number,
+    @Query('minCapacity', new ParseIntPipe({ optional: true }))
+    minCapacity?: number,
+    @Query('search') search?: string,
+    @Query('sortBy') sortBy?: 'price' | 'rating' | 'createdAt' | 'listingName',
+    @Query('sortOrder') sortOrder?: 'asc' | 'desc',
+    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
+    @Query('offset', new ParseIntPipe({ optional: true })) offset?: number,
+  ) {
+    const result = await this.listingService.browseListings({
+      service: WeddingService.VENUE,
+      minPrice,
+      maxPrice,
+      availableDate,
+      style,
+      weddingType,
+      minRating,
+      minCapacity,
+      search,
+      sortBy: sortBy || 'createdAt',
+      sortOrder: sortOrder || 'desc',
+      limit: limit || 20,
+      offset: offset || 0,
+    });
+
+    return {
+      listings: result.listings.map((listing) =>
+        this.listingService.toListingResponseDto(listing),
+      ),
+      total: result.total,
+      page: Math.floor((offset || 0) / (limit || 20)) + 1,
+      totalPages: Math.ceil(result.total / (limit || 20)),
+    };
   }
 
   @Get('catering/all')
@@ -245,5 +310,135 @@ export class ListingController {
     return listings.map((listing) =>
       this.listingService.toListingResponseDto(listing),
     );
+  }
+
+  @Get('browse')
+  @Roles(UserRole.ADMIN, UserRole.VENDOR, UserRole.SUPERADMIN)
+  @ApiOperation({ summary: 'Browse listings with comprehensive filtering' })
+  @ApiResponse({
+    status: 200,
+    description: 'Filtered listings with pagination.',
+    schema: {
+      type: 'object',
+      properties: {
+        listings: {
+          type: 'array',
+          items: { $ref: '#/components/schemas/ListingResponseDto' },
+        },
+        total: { type: 'number' },
+        page: { type: 'number' },
+        totalPages: { type: 'number' },
+      },
+    },
+  })
+  async browseListings(
+    @Query('service') service?: WeddingService,
+    @Query('minPrice', new ParseFloatPipe({ optional: true }))
+    minPrice?: number,
+    @Query('maxPrice', new ParseFloatPipe({ optional: true }))
+    maxPrice?: number,
+    @Query('availableDate') availableDate?: string,
+    @Query('style') style?: WeddingStyle,
+    @Query('weddingType') weddingType?: WeddingType,
+    @Query('minRating', new ParseFloatPipe({ optional: true }))
+    minRating?: number,
+    @Query('minCapacity', new ParseIntPipe({ optional: true }))
+    minCapacity?: number,
+    @Query('search') search?: string,
+    @Query('sortBy') sortBy?: 'price' | 'rating' | 'createdAt' | 'listingName',
+    @Query('sortOrder') sortOrder?: 'asc' | 'desc',
+    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
+    @Query('offset', new ParseIntPipe({ optional: true })) offset?: number,
+  ) {
+    const result = await this.listingService.browseListings({
+      service,
+      minPrice,
+      maxPrice,
+      availableDate,
+      style,
+      weddingType,
+      minRating,
+      minCapacity,
+      search,
+      sortBy: sortBy || 'createdAt',
+      sortOrder: sortOrder || 'desc',
+      limit: limit || 20,
+      offset: offset || 0,
+    });
+
+    return {
+      listings: result.listings.map((listing) =>
+        this.listingService.toListingResponseDto(listing),
+      ),
+      total: result.total,
+      page: Math.floor((offset || 0) / (limit || 20)) + 1,
+      totalPages: Math.ceil(result.total / (limit || 20)),
+    };
+  }
+
+  @Get('search/advanced')
+  @Roles(UserRole.ADMIN, UserRole.VENDOR, UserRole.SUPERADMIN)
+  @ApiOperation({
+    summary: 'Advanced search listings with enhanced text search',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Advanced search results with pagination.',
+    schema: {
+      type: 'object',
+      properties: {
+        listings: {
+          type: 'array',
+          items: { $ref: '#/components/schemas/ListingResponseDto' },
+        },
+        total: { type: 'number' },
+        page: { type: 'number' },
+        totalPages: { type: 'number' },
+      },
+    },
+  })
+  async searchListingsAdvanced(
+    @Query('search') search: string,
+    @Query('service') service?: WeddingService,
+    @Query('minPrice', new ParseFloatPipe({ optional: true }))
+    minPrice?: number,
+    @Query('maxPrice', new ParseFloatPipe({ optional: true }))
+    maxPrice?: number,
+    @Query('availableDate') availableDate?: string,
+    @Query('style') style?: WeddingStyle,
+    @Query('weddingType') weddingType?: WeddingType,
+    @Query('minRating', new ParseFloatPipe({ optional: true }))
+    minRating?: number,
+    @Query('minCapacity', new ParseIntPipe({ optional: true }))
+    minCapacity?: number,
+    @Query('sortBy') sortBy?: 'price' | 'rating' | 'createdAt' | 'listingName',
+    @Query('sortOrder') sortOrder?: 'asc' | 'desc',
+    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
+    @Query('offset', new ParseIntPipe({ optional: true })) offset?: number,
+  ) {
+    const result = await this.listingService.searchListingsAdvanced({
+      search,
+      service,
+      minPrice,
+      maxPrice,
+      availableDate,
+      style,
+      weddingType,
+      minRating,
+      minCapacity,
+      sortBy: sortBy || 'createdAt',
+      sortOrder: sortOrder || 'desc',
+      limit: limit || 20,
+      offset: offset || 0,
+    });
+
+    return {
+      listings: result.listings.map((listing) =>
+        this.listingService.toListingResponseDto(listing),
+      ),
+      total: result.total,
+      page: Math.floor((offset || 0) / (limit || 20)) + 1,
+      totalPages: Math.ceil(result.total / (limit || 20)),
+    };
   }
 }

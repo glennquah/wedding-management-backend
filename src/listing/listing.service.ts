@@ -1,11 +1,43 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Listing } from '@prisma/client';
+import { Listing, WeddingStyle, WeddingType } from '@prisma/client';
 import { VendorService } from 'src/vendor/vendor.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateListingDto } from './dto/create-listing.dto';
 import { ListingResponseDto } from './dto/listing-response.dto';
 import { UpdateListingDto } from './dto/update-listing.dto';
 import { WeddingService } from 'src/common/wedding-service.enum';
+
+interface BrowseFilters {
+  service?: WeddingService;
+  minPrice?: number;
+  maxPrice?: number;
+  availableDate?: string;
+  style?: WeddingStyle;
+  weddingType?: WeddingType;
+  minRating?: number;
+  minCapacity?: number;
+  search?: string;
+  sortBy: 'price' | 'rating' | 'createdAt' | 'listingName';
+  sortOrder: 'asc' | 'desc';
+  limit: number;
+  offset: number;
+}
+
+interface BrowseResult {
+  listings: (Listing & {
+    vendor: {
+      rating: number;
+      capacity: number;
+      styleOffered: WeddingStyle;
+      weddingTypes: WeddingType[];
+      user: {
+        name: string;
+        email: string;
+      };
+    };
+  })[];
+  total: number;
+}
 
 @Injectable()
 export class ListingService {
@@ -121,6 +153,166 @@ export class ListingService {
         },
       },
     });
+  }
+
+  async browseListings(filters: BrowseFilters): Promise<BrowseResult> {
+    const where: any = {};
+
+    // Service filter
+    if (filters.service) {
+      where.vendor = {
+        ...where.vendor,
+        serviceOffered: filters.service,
+      };
+    }
+
+    // Price range filter
+    if (filters.minPrice !== undefined || filters.maxPrice !== undefined) {
+      where.price = {};
+      if (filters.minPrice !== undefined) {
+        where.price.gte = filters.minPrice;
+      }
+      if (filters.maxPrice !== undefined) {
+        where.price.lte = filters.maxPrice;
+      }
+    }
+
+    // Style filter
+    if (filters.style) {
+      where.vendor = {
+        ...where.vendor,
+        styleOffered: filters.style,
+      };
+    }
+
+    // Wedding type filter
+    if (filters.weddingType) {
+      where.vendor = {
+        ...where.vendor,
+        weddingTypes: {
+          has: filters.weddingType,
+        },
+      };
+    }
+
+    // Rating filter
+    if (filters.minRating !== undefined) {
+      where.vendor = {
+        ...where.vendor,
+        rating: {
+          gte: filters.minRating,
+        },
+      };
+    }
+
+    // Capacity filter
+    if (filters.minCapacity !== undefined) {
+      where.vendor = {
+        ...where.vendor,
+        capacity: {
+          gte: filters.minCapacity,
+        },
+      };
+    }
+
+    // Text search filter
+    if (filters.search) {
+      where.OR = [
+        {
+          listingName: {
+            contains: filters.search,
+            mode: 'insensitive',
+          },
+        },
+        {
+          remarks: {
+            contains: filters.search,
+            mode: 'insensitive',
+          },
+        },
+        {
+          vendor: {
+            user: {
+              name: {
+                contains: filters.search,
+                mode: 'insensitive',
+              },
+            },
+          },
+        },
+      ];
+    }
+
+    // Date availability filter (check if date falls within any availability slot)
+    if (filters.availableDate) {
+      const targetDate = new Date(filters.availableDate);
+      where.availabilities = {
+        path: '$[*]',
+        array_contains: {
+          date: filters.availableDate,
+        },
+      };
+    }
+
+    // Build orderBy
+    const orderBy: any = {};
+    if (filters.sortBy === 'rating') {
+      orderBy.vendor = { rating: filters.sortOrder };
+    } else if (filters.sortBy === 'price') {
+      orderBy.price = filters.sortOrder;
+    } else if (filters.sortBy === 'listingName') {
+      orderBy.listingName = filters.sortOrder;
+    } else {
+      orderBy.createdAt = filters.sortOrder;
+    }
+
+    // Get total count
+    const total = await this.prisma.listing.count({ where });
+
+    // Get listings with pagination
+    const listings = await this.prisma.listing.findMany({
+      where,
+      include: {
+        vendor: {
+          select: {
+            rating: true,
+            capacity: true,
+            styleOffered: true,
+            weddingTypes: true,
+            user: {
+              select: {
+                name: true,
+                email: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy,
+      skip: filters.offset,
+      take: filters.limit,
+    });
+
+    return { listings, total };
+  }
+
+  async searchListingsAdvanced(filters: BrowseFilters): Promise<BrowseResult> {
+    // For advanced search, we enhance the text search to be more comprehensive
+    const enhancedFilters = { ...filters };
+
+    if (filters.search) {
+      // Split search terms and create more sophisticated search
+      const searchTerms = filters.search
+        .toLowerCase()
+        .split(' ')
+        .filter((term) => term.length > 0);
+
+      // For now, we'll use the same logic as browse but this could be enhanced
+      // with more sophisticated text matching, fuzzy search, etc.
+      return this.browseListings(enhancedFilters);
+    }
+
+    return this.browseListings(enhancedFilters);
   }
 
   toListingResponseDto(listing: Listing): ListingResponseDto {
