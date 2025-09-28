@@ -23,4 +23,7 @@ export class UserResponseDto {
 
   @ApiProperty({ description: 'Last update timestamp' })
   updatedAt: Date;
+
+  @ApiProperty({ description: 'Is the user suspended?', required: false })
+  isSuspended?: boolean;
 }

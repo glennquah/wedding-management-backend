@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
@@ -113,6 +113,8 @@ model Admin {
   weddings      Wedding[] @relation("AdminWeddings")
   mainWedding   Wedding?  @relation("MainCouple", fields: [mainWeddingId], references: [id])
   mainWeddingId Int?
+
+  cart Cart?
 }
 
 model SuperAdmin {
@@ -214,71 +216,89 @@ model Guest {
 }
 
 model Listing {
-  id             Int        @id @default(autoincrement())
+  id             Int            @id @default(autoincrement())
   listingName    String
   price          Float
   availabilities Json
   remarks        String
   imageUrls      String[]
-
+  
   // Relations
-  vendorId Int
-  vendor   Vendor @relation(fields: [vendorId], references: [userId], onDelete: Cascade)
-
+  vendorId       Int
+  vendor         Vendor         @relation(fields: [vendorId], references: [userId], onDelete: Cascade)
+  
   // Many-to-many with Orders
-  orders OrderListing[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  orders         OrderListing[]
+  cartItems      CartItem[]
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
 }
 
 model Order {
-  id            Int         @id @default(autoincrement())
-  orderStatus   OrderStatus @default(PENDING)
-  totalAmount   Float
-  currency      String      @default("SGD")
-  purchaseDate  DateTime    @default(now())
-  remark        String?
-
+  id           Int            @id @default(autoincrement())
+  orderStatus  OrderStatus    @default(PENDING)
+  totalAmount  Float
+  currency     String         @default("SGD")
+  purchaseDate DateTime       @default(now())
+  remark       String?
+  
   // Relations
-  weddingId Int
-  wedding   Wedding @relation(fields: [weddingId], references: [id], onDelete: Cascade)
-
+  weddingId    Int
+  wedding      Wedding        @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+  
   // Many-to-many with Listings
-  listings OrderListing[]
-
+  listings     OrderListing[]
+  
   // Payment relation
-  payments Payment[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  payments     Payment[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
 }
 
 model OrderListing {
   orderId     Int
   listingId   Int
   bookedSlots Json
-
-  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  order       Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  listing     Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
 
   @@id([orderId, listingId])
+}
+
+model Cart {
+  id        Int        @id @default(autoincrement())
+  total     Float      @default(0)
+  adminId   Int        @unique
+  admin     Admin      @relation(fields: [adminId], references: [userId], onDelete: Cascade)
+  items     CartItem[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model CartItem {
+  id        Int     @id @default(autoincrement())
+  cartId    Int
+  cart      Cart    @relation(fields: [cartId], references: [id])
+  listingId Int
+  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@unique([cartId, listingId])
 }
 
 model Payment {
   id                      Int           @id @default(autoincrement())
   stripeCheckoutSessionId String        @unique
-  stripePaymentIntentId   String?       // This is populated by webhook after payment
+  stripePaymentIntentId   String? // This is populated by webhook after payment
   amount                  Float
   currency                String        @default("SGD")
   paymentStatus           PaymentStatus @default(PENDING)
-
+  
+  
   // Relations
-  orderId Int
-  order   Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  orderId                 Int
+  order                   Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  createdAt               DateTime      @default(now())
+  updatedAt               DateTime      @updatedAt
 
   @@index([stripeCheckoutSessionId])
   @@index([stripePaymentIntentId])

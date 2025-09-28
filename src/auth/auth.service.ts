@@ -71,6 +71,18 @@ export class AuthService {
     const user = await this.userService.findRawByEmail(dto.username);
 
     if (user && (await compare(dto.password, user.password))) {
+      // Check if user is suspended based on role
+      let isSuspended = false;
+      if (user.role === 'ADMIN' && user.admin) {
+        isSuspended = user.admin.isSuspended;
+      } else if (user.role === 'VENDOR' && user.vendor) {
+        isSuspended = user.vendor.isSuspended;
+      }
+
+      if (isSuspended) {
+        throw new UnauthorizedException('ACCOUNT_SUSPENDED');
+      }
+
       return this.userService.toUserResponseDto(user);
     }
 
