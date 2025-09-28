@@ -245,7 +245,6 @@ export class ListingService {
 
     // Date availability filter (check if date falls within any availability slot)
     if (filters.availableDate) {
-      const targetDate = new Date(filters.availableDate);
       where.availabilities = {
         path: '$[*]',
         array_contains: {
@@ -301,12 +300,6 @@ export class ListingService {
     const enhancedFilters = { ...filters };
 
     if (filters.search) {
-      // Split search terms and create more sophisticated search
-      const searchTerms = filters.search
-        .toLowerCase()
-        .split(' ')
-        .filter((term) => term.length > 0);
-
       // For now, we'll use the same logic as browse but this could be enhanced
       // with more sophisticated text matching, fuzzy search, etc.
       return this.browseListings(enhancedFilters);
