@@ -17,6 +17,7 @@ import { UserModule } from './user/user.module';
 import { VendorModule } from './vendor/vendor.module';
 import { WeddingModule } from './wedding/wedding.module';
 import { MicrositeModule } from './microsite/microsite.module';
+import { CartModule } from './cart/cart.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { MicrositeModule } from './microsite/microsite.module';
     NotificationDetailsModule,
     OrderModule,
     PaymentModule,
+    CartModule,
   ],
   controllers: [AppController],
   providers: [AppService],
