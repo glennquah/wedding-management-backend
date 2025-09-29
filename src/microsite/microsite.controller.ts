@@ -124,12 +124,17 @@ export class MicrositeController {
     status: 404,
     description: 'Guest not found for the specified wedding.',
   })
+  @ApiResponse({
+    status: 409,
+    description: 'Guest has already confirmed attendance.',
+  })
   async confirmGuest(
     @Body() confirmDto: ConfirmGuestDto,
   ): Promise<GuestResponseDto> {
     return this.micrositeService.confirmGuest(
       confirmDto.guestId,
       confirmDto.weddingId,
+      confirmDto.allergies,
     );
   }
 

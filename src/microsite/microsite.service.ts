@@ -141,6 +141,7 @@ export class MicrositeService {
   async confirmGuest(
     guestId: number,
     weddingId: number,
+    allergies?: string,
   ): Promise<GuestResponseDto> {
     // Find the guest that belongs to both the guestId and weddingId
     const guest = await this.prisma.guest.findFirst({
@@ -156,9 +157,21 @@ export class MicrositeService {
       );
     }
 
+    // Prevent re-confirmation
+    if (guest.confirmationStatus === ConfirmationStatus.CONFIRMED) {
+      throw new ConflictException(
+        `Guest with ID ${guestId} has already confirmed attendance`,
+      );
+    }
+
     const updatedGuest = await this.prisma.guest.update({
       where: { id: guestId },
-      data: { confirmationStatus: ConfirmationStatus.CONFIRMED },
+      data: {
+        confirmationStatus: ConfirmationStatus.CONFIRMED,
+        ...(typeof allergies === 'string' && allergies.length > 0
+          ? { allergies }
+          : {}),
+      },
     });
     // Fetch wedding name for the updated guest
     const wedding = await this.prisma.wedding.findUnique({
