@@ -16,12 +16,10 @@ import {
 
 @Injectable()
 export class EmailNotificationService {
-  private readonly templateDir = path.join(
-    process.cwd(),
-    'src',
-    'email-notification',
-    'email-templates',
-  );
+  private readonly templateDir = process.env.NODE_ENV === 'production'
+  ? path.join(process.cwd(), 'email-templates') // Lambda: copied by webpack
+  : path.join(process.cwd(), 'src', 'email-notification', 'email-templates'); // Local dev
+
   private templates: Map<string, HandlebarsTemplateDelegate<any>> = new Map();
 
   constructor(private notificationDetailsService: NotificationDetailsService) {
