@@ -197,6 +197,24 @@ model Wedding {
   orders              Order[]
   notificationDetails NotificationDetails?
   SeatingArrangement  SeatingArrangement?
+  microsite         Microsite?
+}
+
+model Microsite {
+  id            Int      @id @default(autoincrement())
+  templateNumber Int
+  slug              String           @unique
+  coupleName    String
+  heroImages    String[]
+  imageGallery  String[]  
+  schedule      Json?    
+  faqs          Json?    
+  password      String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  weddingId     Int      @unique
+  wedding       Wedding  @relation(fields: [weddingId], references: [id], onDelete: Cascade)
 }
 
 model Guest {
