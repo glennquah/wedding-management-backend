@@ -7,6 +7,7 @@ import {
 import { Admin, Prisma, User, Wedding } from '@prisma/client';
 import { compare, hash } from 'bcryptjs';
 import { UserRole } from 'src/common/user-role.enum';
+import { EmailNotificationService } from 'src/email-notification/email-notification.service';
 import { WeddingDetailsDto } from 'src/wedding/dto/wedding-details.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { UserService } from '../user/user.service';
@@ -19,6 +20,7 @@ export class AdminService {
   constructor(
     private prisma: PrismaService,
     private userService: UserService,
+    private emailService: EmailNotificationService,
   ) {}
 
   private toAdminResponseDto(
@@ -118,6 +120,14 @@ export class AdminService {
       where: { userId: admin.userId },
       include: { user: true, weddings: true },
     });
+
+    // Send Welcome Email
+    await this.emailService.sendWelcomeEmail(
+      user.email,
+      user.name,
+      process.env.FRONTEND_URL,
+      dto.weddingId,
+    );
 
     return this.toAdminResponseDto(updatedAdmin!);
   }
