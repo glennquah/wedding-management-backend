@@ -122,4 +122,63 @@ export class WeddingController {
   async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
     await this.service.delete(id);
   }
+
+  @Post(':id/key-attendees/:adminId')
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
+  @ApiOperation({ summary: 'Add a key attendee for date optimization' })
+  @ApiResponse({
+    status: 201,
+    description: 'Key attendee added successfully',
+  })
+  @ApiResponse({ status: 404, description: 'Wedding not found.' })
+  async addKeyAttendee(
+    @Param('id', ParseIntPipe) weddingId: number,
+    @Param('adminId', ParseIntPipe) adminId: number,
+  ): Promise<{ message: string }> {
+    await this.service.addKeyAttendee(weddingId, adminId);
+    return { message: 'Key attendee added successfully' };
+  }
+
+  @Delete(':id/key-attendees/:adminId')
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
+  @ApiOperation({ summary: 'Remove a key attendee' })
+  @ApiResponse({
+    status: 200,
+    description: 'Key attendee removed successfully',
+  })
+  @ApiResponse({ status: 404, description: 'Wedding not found.' })
+  async removeKeyAttendee(
+    @Param('id', ParseIntPipe) weddingId: number,
+    @Param('adminId', ParseIntPipe) adminId: number,
+  ): Promise<{ message: string }> {
+    await this.service.removeKeyAttendee(weddingId, adminId);
+    return { message: 'Key attendee removed successfully' };
+  }
+
+  @Get(':id/key-attendees')
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
+  @ApiOperation({ summary: 'Get all key attendees for a wedding' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of key attendee IDs',
+    schema: {
+      type: 'object',
+      properties: {
+        keyAttendeeIds: {
+          type: 'array',
+          items: { type: 'number' },
+        },
+      },
+    },
+  })
+  @ApiResponse({ status: 404, description: 'Wedding not found.' })
+  async getKeyAttendees(
+    @Param('id', ParseIntPipe) weddingId: number,
+  ): Promise<{ keyAttendeeIds: number[] }> {
+    const keyAttendeeIds = await this.service.getKeyAttendees(weddingId);
+    return { keyAttendeeIds };
+  }
 }

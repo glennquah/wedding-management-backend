@@ -7,6 +7,7 @@ import { NotificationDetailsService } from '../notification-details/notification
 import { SendBulkEmailDto } from './dto/send-bulk-email.dto';
 import { EmailTemplateType } from './enums/email-template.enum';
 import {
+  CalendarAccessRequestData,
   CollaboratorAddedData,
   CreateAccountData,
   EmailTemplateData,
@@ -42,6 +43,7 @@ export class EmailNotificationService {
         { name: EmailTemplateType.VERIFY_EMAIL, file: 'verify-email.html' },
         { name: EmailTemplateType.CREATE_ACCOUNT, file: 'create-account.html' },
         { name: EmailTemplateType.COLLABORATOR_ADDED, file: 'collaborator-added.html' },
+        { name: EmailTemplateType.CALENDAR_ACCESS_REQUEST, file: 'calendar-access-request.html' },
       ];
 
       templateFiles.forEach(({ name, file }) => {
@@ -331,6 +333,55 @@ export class EmailNotificationService {
     ---
     Knotly - Your Perfect Wedding, Perfectly Planned
     Website: https://knotly.app`;
+  }
+
+  async sendCalendarAccessRequest(
+    to: string,
+    name: string,
+    weddingName: string,
+    authUrl: string,
+    weddingId?: number,
+  ): Promise<void> {
+    const templateData: CalendarAccessRequestData = {
+      name,
+      weddingName,
+      buttonUrl: authUrl,
+    };
+
+    const htmlContent = this.renderTemplate(
+      EmailTemplateType.CALENDAR_ACCESS_REQUEST,
+      templateData,
+    );
+
+    const textContent = `Hi ${name}!
+
+You've been requested to connect your Google Calendar to help optimize the wedding date for ${weddingName}.
+
+How It Works:
+- We'll check your calendar availability
+- Our AI will suggest dates when everyone is free
+- You can disconnect anytime
+- We only read availability, not event details
+
+Click the link below to securely connect your Google Calendar:
+${authUrl}
+
+Your Privacy Matters: We only access your calendar to check if you're free or busy. We never read event titles, descriptions, or any other details.
+
+Questions about calendar access? Contact the wedding planner or reach out to our support team.
+
+---
+Knotly - Your Perfect Wedding, Perfectly Planned
+Website: https://knotly.app`;
+
+    await this.sendEmail(
+      to,
+      'Calendar Access Request for Wedding Planning',
+      textContent,
+      htmlContent,
+      EmailTemplateType.CALENDAR_ACCESS_REQUEST,
+      weddingId,
+    );
   }
 
   async sendEmail(

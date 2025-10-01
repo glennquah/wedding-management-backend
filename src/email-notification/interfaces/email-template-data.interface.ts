@@ -27,6 +27,12 @@ export interface CollaboratorAddedData {
   loginUrl: string;
 }
 
+export interface CalendarAccessRequestData {
+  name: string;
+  weddingName: string;
+  buttonUrl: string;
+}
+
 export interface SuccessfulBookingData {
   vendorName: string;
   serviceType: string;
@@ -63,6 +69,7 @@ export type EmailTemplateData =
   | VerifyEmailData
   | CreateAccountData
   | CollaboratorAddedData
+  | CalendarAccessRequestData
   | SuccessfulBookingData
   | VendorStatusData
   | AdminStatusData;

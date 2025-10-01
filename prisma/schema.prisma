@@ -89,6 +89,7 @@ enum EmailTemplateType {
   VERIFY_EMAIL
   CREATE_ACCOUNT
   COLLABORATOR_ADDED
+  CALENDAR_ACCESS_REQUEST
   CUSTOM
 }
 
@@ -115,7 +116,20 @@ model Admin {
   mainWedding   Wedding?  @relation("MainCouple", fields: [mainWeddingId], references: [id])
   mainWeddingId Int?
 
-  cart Cart?
+  cart                     Cart?
+  googleCalendarConnection GoogleCalendarConnection?
+}
+
+model GoogleCalendarConnection {
+  id           Int      @id @default(autoincrement())
+  adminId      Int      @unique
+  admin        Admin    @relation(fields: [adminId], references: [userId], onDelete: Cascade)
+  accessToken  String
+  refreshToken String
+  tokenExpiry  DateTime
+  email        String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
 model SuperAdmin {
@@ -188,6 +202,7 @@ model Wedding {
   location            String?
   guests              Guest[]
   admins              Admin[]              @relation("AdminWeddings")
+  keyAttendeeIds      Int[]                @default([])
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
   weddingType         WeddingType
@@ -198,7 +213,7 @@ model Wedding {
   orders              Order[]
   notificationDetails NotificationDetails?
   SeatingArrangement  SeatingArrangement?
-  microsite         Microsite?
+  microsite           Microsite?
 }
 
 model Microsite {

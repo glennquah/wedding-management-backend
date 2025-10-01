@@ -133,4 +133,62 @@ export class WeddingService {
       updatedAt: wedding.updatedAt.toISOString(),
     };
   }
+
+  async addKeyAttendee(weddingId: number, adminId: number): Promise<void> {
+    const wedding = await this.prisma.wedding.findUnique({
+      where: { id: weddingId },
+      select: { keyAttendeeIds: true },
+    });
+
+    if (!wedding) {
+      throw new NotFoundException(`Wedding with id ${weddingId} not found`);
+    }
+
+    // Check if already added
+    if (wedding.keyAttendeeIds.includes(adminId)) {
+      return; // Already a key attendee
+    }
+
+    // Add to array
+    await this.prisma.wedding.update({
+      where: { id: weddingId },
+      data: {
+        keyAttendeeIds: {
+          push: adminId,
+        },
+      },
+    });
+  }
+
+  async removeKeyAttendee(weddingId: number, adminId: number): Promise<void> {
+    const wedding = await this.prisma.wedding.findUnique({
+      where: { id: weddingId },
+      select: { keyAttendeeIds: true },
+    });
+
+    if (!wedding) {
+      throw new NotFoundException(`Wedding with id ${weddingId} not found`);
+    }
+
+    // Remove from array
+    await this.prisma.wedding.update({
+      where: { id: weddingId },
+      data: {
+        keyAttendeeIds: wedding.keyAttendeeIds.filter((id) => id !== adminId),
+      },
+    });
+  }
+
+  async getKeyAttendees(weddingId: number): Promise<number[]> {
+    const wedding = await this.prisma.wedding.findUnique({
+      where: { id: weddingId },
+      select: { keyAttendeeIds: true },
+    });
+
+    if (!wedding) {
+      throw new NotFoundException(`Wedding with id ${weddingId} not found`);
+    }
+
+    return wedding.keyAttendeeIds;
+  }
 }
