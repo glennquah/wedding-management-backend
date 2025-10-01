@@ -8,8 +8,8 @@ import { UserRole } from '../src/common/user-role.enum';
 import { WeddingService } from '../src/common/wedding-service.enum';
 import { WeddingStyle } from '../src/common/wedding-style.enum';
 import { WeddingType } from '../src/common/wedding-type.enum';
-import { PrismaService } from '../src/prisma/prisma.service';
 import { EmailNotificationService } from '../src/email-notification/email-notification.service';
+import { PrismaService } from '../src/prisma/prisma.service';
 import { MockEmailNotificationService } from './mocks/email-notification.service.mock';
 import { cleanDatabase, teardownTestApp } from './test-utils';
 
@@ -48,7 +48,9 @@ describe('Auth (e2e)', () => {
     await cleanDatabase(prismaService);
 
     // Get the mock email service and clear any previous emails
-    mockEmailService = app.get(EmailNotificationService) as MockEmailNotificationService;
+    mockEmailService = app.get(
+      EmailNotificationService,
+    ) as MockEmailNotificationService;
     mockEmailService.clearSentEmails();
 
     // Create a test wedding for admin registration
