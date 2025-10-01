@@ -7,6 +7,7 @@ import {
 import { Admin, Prisma, User, Wedding } from '@prisma/client';
 import { compare, hash } from 'bcryptjs';
 import { UserRole } from 'src/common/user-role.enum';
+import { EmailNotificationService } from 'src/email-notification/email-notification.service';
 import { WeddingDetailsDto } from 'src/wedding/dto/wedding-details.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { UserService } from '../user/user.service';
@@ -19,6 +20,7 @@ export class AdminService {
   constructor(
     private prisma: PrismaService,
     private userService: UserService,
+    private emailService: EmailNotificationService,
   ) {}
 
   private toAdminResponseDto(
@@ -119,6 +121,14 @@ export class AdminService {
       include: { user: true, weddings: true },
     });
 
+    // Send Welcome Email
+    await this.emailService.sendWelcomeEmail(
+      user.email,
+      user.name,
+      process.env.FRONTEND_URL,
+      dto.weddingId,
+    );
+
     return this.toAdminResponseDto(updatedAdmin!);
   }
 
@@ -166,7 +176,14 @@ export class AdminService {
   }
 
   async update(userId: number, dto: UpdateAdminDto): Promise<AdminResponseDto> {
-    await this.findById(userId);
+    const admin = await this.prisma.admin.findUnique({
+      where: { userId },
+      include: { user: true },
+    });
+
+    if (!admin) {
+      throw new NotFoundException(`Admin with userId ${userId} not found`);
+    }
 
     // Prepare user update data
     const userUpdateData: any = {};
@@ -207,6 +224,16 @@ export class AdminService {
           set: [],
         };
       }
+    }
+
+    if (dto.isSuspended !== undefined) {
+      const email = admin.user.email;
+      const name = admin.user.name;
+      await this.emailService.sendAdminSuspensionEmail(
+        email,
+        name,
+        dto.isSuspended,
+      );
     }
 
     const updatedAdmin = await this.prisma.admin.update({
