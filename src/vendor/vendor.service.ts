@@ -8,6 +8,7 @@ import { User, Vendor } from '@prisma/client';
 import { compare, hash } from 'bcryptjs';
 import { UserRole } from 'src/common/user-role.enum';
 import { VendorOnboardingStatus } from 'src/common/vendor-onboarding-status.enum';
+import { EmailNotificationService } from 'src/email-notification/email-notification.service';
 import { WeddingService } from '../common/wedding-service.enum';
 import { WeddingStyle } from '../common/wedding-style.enum';
 import { WeddingType } from '../common/wedding-type.enum';
@@ -22,6 +23,7 @@ export class VendorService {
   constructor(
     private prisma: PrismaService,
     private userService: UserService,
+    private emailService: EmailNotificationService,
   ) {}
 
   private toVendorResponseDto(
@@ -186,13 +188,24 @@ export class VendorService {
     delete updateData.password;
     delete updateData.role;
 
-    const updatedVendor = this.prisma.vendor.update({
+    const updatedVendor = await this.prisma.vendor.update({
       where: { userId },
       data: updateData,
       include: { user: true },
     });
 
-    return this.toVendorResponseDto(await updatedVendor);
+    // Send onboarding status change email
+    if (dto.onboardingStatus) {
+      const vendorName = updatedVendor.user.name;
+      const vendorEmail = updatedVendor.user.email;
+      await this.emailService.sendVendorStatusEmail(
+        vendorEmail,
+        vendorName,
+        dto.onboardingStatus,
+      );
+    }
+
+    return this.toVendorResponseDto(updatedVendor);
   }
 
   async deleteSelf(userId: number, password: string): Promise<void> {

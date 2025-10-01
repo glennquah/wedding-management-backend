@@ -3,6 +3,7 @@ import * as sgMail from '@sendgrid/mail';
 import * as fs from 'fs';
 import * as Handlebars from 'handlebars';
 import * as path from 'path';
+import { VendorOnboardingStatus } from 'src/common/vendor-onboarding-status.enum';
 import { NotificationDetailsService } from '../notification-details/notification-details.service';
 import { SendBulkEmailDto } from './dto/send-bulk-email.dto';
 import { EmailTemplateType } from './enums/email-template.enum';
@@ -10,6 +11,7 @@ import {
   CreateAccountData,
   EmailTemplateData,
   PasswordResetData,
+  VendorStatusData,
   VerifyEmailData,
   WelcomeEmailData,
 } from './interfaces/email-template-data.interface';
@@ -40,6 +42,7 @@ export class EmailNotificationService {
         { name: EmailTemplateType.WELCOME, file: 'welcome.html' },
         { name: EmailTemplateType.VERIFY_EMAIL, file: 'verify-email.html' },
         { name: EmailTemplateType.CREATE_ACCOUNT, file: 'create-account.html' },
+        { name: EmailTemplateType.VENDOR_STATUS, file: 'vendor-status.html' },
       ];
 
       templateFiles.forEach(({ name, file }) => {
@@ -264,6 +267,71 @@ export class EmailNotificationService {
     Create Account: ${templateData.signupUrl}
 
     If you don't want to join this wedding planning team, you can safely ignore this email. The invitation link will expire in 7 days.
+
+    ---
+    Knotly - Your Perfect Wedding, Perfectly Planned
+    Website: https://knotly.app`;
+  }
+
+  async sendVendorStatusEmail(
+    to: string,
+    vendorName: string,
+    onboardingStatus: VendorOnboardingStatus,
+    vendorId?: number,
+  ): Promise<void> {
+    const templateData: VendorStatusData = {
+      vendorName,
+      vendorOnboardingStatus: onboardingStatus,
+      dashboardUrl: process.env.FRONTEND_URL,
+      isPending: onboardingStatus === VendorOnboardingStatus.PENDING,
+      isRejected: onboardingStatus === VendorOnboardingStatus.REJECTED,
+      isOnboarded: onboardingStatus === VendorOnboardingStatus.ONBOARDED,
+    };
+
+    const html = this.renderTemplate(
+      EmailTemplateType.VENDOR_STATUS,
+      templateData,
+    );
+    const text = this.generateVendorStatusPlainText(templateData);
+
+    await this.sendEmail(
+      to,
+      'Vendor Account Status Update - Knotly',
+      text,
+      html,
+      EmailTemplateType.VENDOR_STATUS,
+      undefined,
+      vendorId,
+    );
+  }
+
+  private generateVendorStatusPlainText(
+    templateData: VendorStatusData,
+  ): string {
+    let statusMessage = '';
+
+    if (templateData.isPending) {
+      statusMessage =
+        'Your vendor application is currently under review. We will notify you once the review is complete.';
+    } else if (templateData.isOnboarded) {
+      statusMessage =
+        'Congratulations! Your vendor account has been approved. You can now start receiving bookings and managing your services.';
+    } else if (templateData.isRejected) {
+      statusMessage =
+        'Unfortunately, your vendor application has been rejected. Please contact our support team for more information.';
+    }
+
+    return `Hello ${templateData.vendorName}!
+
+    Your vendor account status has been updated.
+
+    New Status: ${templateData.vendorOnboardingStatus.toUpperCase()}
+
+    ${statusMessage}
+
+    Access your dashboard: ${templateData.dashboardUrl}
+
+    If you have any questions, please contact our support team.
 
     ---
     Knotly - Your Perfect Wedding, Perfectly Planned

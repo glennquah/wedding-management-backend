@@ -1,3 +1,5 @@
+import { VendorOnboardingStatus } from 'src/common/vendor-onboarding-status.enum';
+
 export interface PasswordResetData {
   name: string;
   buttonUrl: string;
@@ -32,7 +34,7 @@ export interface SuccessfulBookingData {
 
 export interface VendorStatusData {
   vendorName: string;
-  vendorOnboardingStatus: 'pending' | 'rejected' | 'onboarded';
+  vendorOnboardingStatus: VendorOnboardingStatus;
   dashboardUrl: string;
   isPending?: boolean;
   isRejected?: boolean;
