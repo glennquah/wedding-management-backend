@@ -32,6 +32,10 @@ export async function seedListings(prisma: PrismaClient) {
               date: '2025-01-25',
             },
           ],
+          imageUrls: [
+            'https://res.cloudinary.com/dnyxxyolp/image/upload/v1759302508/ballroom_1_vrgb7s.jpg',
+            'https://res.cloudinary.com/dnyxxyolp/image/upload/v1759302892/flowers_i5p5iq.jpg',
+          ],
           remarks: 'Includes lighting, sound system, and basic decoration',
         },
         {
@@ -48,6 +52,9 @@ export async function seedListings(prisma: PrismaClient) {
               endTime: '2024-09-30T17:00:00Z',
               date: '2024-09-30',
             },
+          ],
+          imageUrls: [
+            'https://res.cloudinary.com/dnyxxyolp/image/upload/v1759302416/ballroom_2_hx5bzf.jpg',
           ],
           remarks: 'Basic venue rental with standard amenities',
         },
@@ -71,6 +78,9 @@ export async function seedListings(prisma: PrismaClient) {
               date: '2024-10-20',
             },
           ],
+          imageUrls: [
+            'https://res.cloudinary.com/dnyxxyolp/image/upload/v1759302561/garden_qtylu6.jpg',
+          ],
           remarks: 'Beautiful outdoor setting with garden views',
         },
         {
@@ -87,6 +97,9 @@ export async function seedListings(prisma: PrismaClient) {
               endTime: '2025-01-25T17:00:00Z',
               date: '2025-01-25',
             },
+          ],
+          imageUrls: [
+            'https://res.cloudinary.com/dnyxxyolp/image/upload/v1759303198/wedding_resort_ki7c5g.jpg',
           ],
           remarks: 'Indoor reception space with garden access',
         },
@@ -109,6 +122,9 @@ export async function seedListings(prisma: PrismaClient) {
               endTime: '2025-01-25T17:00:00Z',
               date: '2025-01-25',
             },
+          ],
+          imageUrls: [
+            'https://res.cloudinary.com/dnyxxyolp/image/upload/v1759303164/temple_k1qe4z.jpg',
           ],
           remarks: 'Authentic traditional setting for cultural ceremonies',
         },
@@ -138,6 +154,9 @@ export async function seedListings(prisma: PrismaClient) {
               date: '2025-01-25',
             },
           ],
+          imageUrls: [
+            'https://res.cloudinary.com/dnyxxyolp/image/upload/v1759302702/gourmet_pqadyf.jpg',
+          ],
           remarks: 'Per person pricing for premium dining experience',
         },
         {
@@ -154,6 +173,9 @@ export async function seedListings(prisma: PrismaClient) {
               endTime: '2024-10-20T17:00:00Z',
               date: '2024-10-20',
             },
+          ],
+          imageUrls: [
+            'https://res.cloudinary.com/dnyxxyolp/image/upload/v1759302675/cocktail_ccnx9r.jpg',
           ],
           remarks: 'Per person pricing for cocktail hour with canapés',
         },
@@ -176,6 +198,9 @@ export async function seedListings(prisma: PrismaClient) {
               endTime: '2025-01-25T17:00:00Z',
               date: '2025-01-25',
             },
+          ],
+          imageUrls: [
+            'https://res.cloudinary.com/dnyxxyolp/image/upload/v1759302684/chinese_lxil0v.jpg',
           ],
           remarks: 'Per person pricing for authentic Chinese cuisine',
         },
@@ -205,6 +230,9 @@ export async function seedListings(prisma: PrismaClient) {
               date: '2025-01-25',
             },
           ],
+          imageUrls: [
+            'https://res.cloudinary.com/dnyxxyolp/image/upload/v1759302816/photog_i3tqtz.jpg',
+          ],
           remarks: 'Full day coverage with edited photos and album',
         },
         {
@@ -221,6 +249,9 @@ export async function seedListings(prisma: PrismaClient) {
               endTime: '2024-10-20T17:00:00Z',
               date: '2024-10-20',
             },
+          ],
+          imageUrls: [
+            'https://res.cloudinary.com/dnyxxyolp/image/upload/v1759302824/wedding_photog_cc3dff.jpg',
           ],
           remarks: '2-hour engagement photography session',
         },
@@ -243,6 +274,9 @@ export async function seedListings(prisma: PrismaClient) {
               endTime: '2024-10-20T17:00:00Z',
               date: '2024-10-20',
             },
+          ],
+          imageUrls: [
+            'https://res.cloudinary.com/dnyxxyolp/image/upload/v1759303156/candid_geijp4.jpg',
           ],
           remarks: 'Natural storytelling photography style',
         },
@@ -267,6 +301,9 @@ export async function seedListings(prisma: PrismaClient) {
               date: '2025-01-25',
             },
           ],
+          imageUrls: [
+            'https://res.cloudinary.com/dnyxxyolp/image/upload/v1759302892/flowers_i5p5iq.jpg',
+          ],
           remarks: 'Premium floral decorations for ceremony and reception',
         },
         {
@@ -283,6 +320,9 @@ export async function seedListings(prisma: PrismaClient) {
               endTime: '2024-09-30T17:00:00Z',
               date: '2024-09-30',
             },
+          ],
+          imageUrls: [
+            'https://res.cloudinary.com/dnyxxyolp/image/upload/v1759302888/premium_flowers_ys61y0.jpg',
           ],
           remarks: 'Bridal bouquet with matching table centerpieces',
         },
@@ -304,6 +344,7 @@ export async function seedListings(prisma: PrismaClient) {
             availabilities: listing.availabilities, // Store as JSON array of date strings
             remarks: listing.remarks,
             vendorId: vendor.userId,
+            imageUrls: listing.imageUrls,
           },
         });
         createdListings.push(createdListing);

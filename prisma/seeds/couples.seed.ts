@@ -7,6 +7,7 @@ export async function seedCouples(
 ) {
   console.log('✅ Seeding couples...');
 
+  // Now create the couple users and associate them with weddings
   const couples = [
     {
       name1: 'Ryan Chen',
@@ -14,13 +15,14 @@ export async function seedCouples(
       name2: 'Ranae Lim',
       email2: 'ranae.lim@email.com',
       weddingIndex: 0,
+      weddings: [1, 2, 3],
     },
     {
       name1: 'Glenn Quah',
       email1: 'quah.glenn@gmail.com',
       name2: 'Sarah Wong',
       email2: 'sarah.wong@email.com',
-      weddingIndex: 1,
+      weddings: [1, 2, 3],
     },
     {
       name1: 'Amir Rahman',
@@ -46,8 +48,13 @@ export async function seedCouples(
     },
   ];
 
+  const coupleUsers = [];
   for (const couple of couples) {
-    const wedding = weddings[couple.weddingIndex];
+    const mainWeddingId =
+      couple.weddingIndex !== undefined
+        ? weddings[couple.weddingIndex].id
+        : null;
+
     const [user1, user2] = await Promise.all([
       prisma.user.create({
         data: {
@@ -58,7 +65,7 @@ export async function seedCouples(
           admin: {
             create: {
               isSuspended: couple.isSuspended || false,
-              mainWeddingId: wedding.id,
+              mainWeddingId: mainWeddingId,
             },
           },
         },
@@ -72,26 +79,45 @@ export async function seedCouples(
           admin: {
             create: {
               isSuspended: couple.isSuspended || false,
-              mainWeddingId: wedding.id,
+              mainWeddingId: mainWeddingId,
             },
           },
         },
       }),
     ]);
 
-    // Connect both admins to the wedding as admins and as main couple
-    await prisma.wedding.update({
-      where: { id: wedding.id },
-      data: {
-        admins: {
-          connect: [{ userId: user1.id }, { userId: user2.id }],
+    if (couple.weddingIndex !== undefined) {
+      const wedding = weddings[couple.weddingIndex];
+      await prisma.wedding.update({
+        where: { id: wedding.id },
+        data: {
+          admins: {
+            connect: [{ userId: user1.id }, { userId: user2.id }],
+          },
+          mainCouple: {
+            connect: [{ userId: user1.id }, { userId: user2.id }],
+          },
         },
-        mainCouple: {
-          connect: [{ userId: user1.id }, { userId: user2.id }],
-        },
-      },
-    });
-  }
+      });
+    }
 
+    if (couple.weddings && couple.weddings.length > 0) {
+      for (const additionalWeddingIndex of couple.weddings) {
+        if (
+          additionalWeddingIndex !== couple.weddingIndex &&
+          weddings[additionalWeddingIndex]
+        ) {
+          await prisma.wedding.update({
+            where: { id: weddings[additionalWeddingIndex].id },
+            data: {
+              admins: {
+                connect: [{ userId: user1.id }, { userId: user2.id }],
+              },
+            },
+          });
+        }
+      }
+    }
+  }
   console.log('✅ Created couples and associated with weddings');
 }
