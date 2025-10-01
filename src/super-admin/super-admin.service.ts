@@ -60,6 +60,8 @@ export class SuperAdminService {
       include: { user: true },
     });
 
+    // TODO: Send over email with credentials (hashed)
+
     return this.userService.toUserResponseDto(superAdmin.user);
   }
 

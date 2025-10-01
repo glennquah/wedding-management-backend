@@ -88,6 +88,9 @@ enum EmailTemplateType {
   WELCOME
   VERIFY_EMAIL
   CREATE_ACCOUNT
+  VENDOR_STATUS
+  VENDOR_SUSPENSION
+  ADMIN_SUSPENSION
   CUSTOM
 }
 
@@ -300,6 +303,8 @@ model CartItem {
   listingId Int
   listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
 
+  selectedSlots Json
+
   @@unique([cartId, listingId])
 }
 
@@ -332,4 +337,14 @@ model SeatingArrangement {
   tablesPerRow    Int?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+}
+
+model TokenBlacklist {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([token])
+  @@index([expiresAt])
 }

@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { AvailabilitySlotDto } from 'src/listing/dto/create-listing.dto';
 
 export class CartItemResponseDto {
   @ApiProperty({ description: 'Cart Item ID' })
@@ -15,4 +16,10 @@ export class CartItemResponseDto {
 
   @ApiProperty({ description: 'Cart item display image URL' })
   imageUrls: string[];
+
+  @ApiProperty({
+    description: 'Selected availability slot for this cart item',
+    type: [AvailabilitySlotDto],
+  })
+  selectedSlots: AvailabilitySlotDto[];
 }

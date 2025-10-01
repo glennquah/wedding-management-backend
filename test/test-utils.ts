@@ -8,7 +8,9 @@ import { UserRole } from '../src/common/user-role.enum';
 import { WeddingService } from '../src/common/wedding-service.enum';
 import { WeddingStyle } from '../src/common/wedding-style.enum';
 import { WeddingType } from '../src/common/wedding-type.enum';
+import { EmailNotificationService } from '../src/email-notification/email-notification.service';
 import { PrismaService } from '../src/prisma/prisma.service';
+import { MockEmailNotificationService } from './mocks/email-notification.service.mock';
 
 export async function setupTestApp(): Promise<{
   app: INestApplication;
@@ -19,10 +21,14 @@ export async function setupTestApp(): Promise<{
   adminId: string;
   vendorId: string;
   testWeddingId: number;
+  mockEmailService: MockEmailNotificationService;
 }> {
   const moduleFixture: TestingModule = await Test.createTestingModule({
     imports: [AppModule],
-  }).compile();
+  })
+    .overrideProvider(EmailNotificationService)
+    .useClass(MockEmailNotificationService)
+    .compile();
 
   const app = moduleFixture.createNestApplication();
 
@@ -56,6 +62,11 @@ export async function setupTestApp(): Promise<{
     testWeddingId,
   } = await authenticateUsers(app);
 
+  // Get the mock email service instance
+  const mockEmailService = app.get(
+    EmailNotificationService,
+  ) as MockEmailNotificationService;
+
   return {
     app,
     jwtTokenSuperAdmin,
@@ -65,6 +76,7 @@ export async function setupTestApp(): Promise<{
     adminId,
     vendorId,
     testWeddingId,
+    mockEmailService,
   };
 }
 
@@ -369,4 +381,10 @@ export async function teardownTestApp(app: INestApplication) {
     await cleanDatabase(prismaService);
     await app.close();
   }
+}
+
+export function getMockEmailService(
+  app: INestApplication,
+): MockEmailNotificationService {
+  return app.get(EmailNotificationService) as MockEmailNotificationService;
 }
