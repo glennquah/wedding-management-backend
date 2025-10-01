@@ -4,9 +4,10 @@ import { AdminController } from './admin.controller';
 import { AdminService } from './admin.service';
 import { UserService } from '../user/user.service';
 import { UserModule } from '../user/user.module';
+import { EmailNotificationModule } from '../email-notification/email-notification.module';
 
 @Module({
-  imports: [UserModule, JwtModule],
+  imports: [UserModule, JwtModule, EmailNotificationModule],
   controllers: [AdminController],
   providers: [AdminService, UserService],
   exports: [AdminService],

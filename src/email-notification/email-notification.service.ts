@@ -7,6 +7,7 @@ import { NotificationDetailsService } from '../notification-details/notification
 import { SendBulkEmailDto } from './dto/send-bulk-email.dto';
 import { EmailTemplateType } from './enums/email-template.enum';
 import {
+  CollaboratorAddedData,
   CreateAccountData,
   EmailTemplateData,
   PasswordResetData,
@@ -40,6 +41,7 @@ export class EmailNotificationService {
         { name: EmailTemplateType.WELCOME, file: 'welcome.html' },
         { name: EmailTemplateType.VERIFY_EMAIL, file: 'verify-email.html' },
         { name: EmailTemplateType.CREATE_ACCOUNT, file: 'create-account.html' },
+        { name: EmailTemplateType.COLLABORATOR_ADDED, file: 'collaborator-added.html' },
       ];
 
       templateFiles.forEach(({ name, file }) => {
@@ -107,7 +109,7 @@ export class EmailNotificationService {
 
   async sendCreateAccountEmail(
     to: string,
-    signupUrl: string,
+    resetPasswordUrl: string,
     name: string,
     weddingName: string,
     inviterName: string,
@@ -117,7 +119,7 @@ export class EmailNotificationService {
       name,
       weddingName,
       inviterName,
-      signupUrl,
+      resetPasswordUrl,
     };
 
     await this.sendCreateAccountTemplate(to, templateData, weddingId);
@@ -253,17 +255,78 @@ export class EmailNotificationService {
   ): string {
     return `Hello ${templateData.name}!
 
-    Great news! You've been invited to help plan and coordinate an upcoming wedding. Join the team and be part of making this special day perfect!
+    Great news! You've been invited to help plan and coordinate an upcoming wedding. An account has been created for you on Knotly!
 
     Wedding Details:
     Wedding: ${templateData.weddingName}
     Invited by: ${templateData.inviterName}
 
-    Click the link below to create your account and start collaborating on this amazing wedding journey!
+    To get started, click the link below to set your password for your new account. Once you've set your password, you can log in and start collaborating!
 
-    Create Account: ${templateData.signupUrl}
+    Set Your Password: ${templateData.resetPasswordUrl}
 
-    If you don't want to join this wedding planning team, you can safely ignore this email. The invitation link will expire in 7 days.
+    If you don't want to join this wedding planning team, you can safely ignore this email. This link will expire in 7 days.
+
+    ---
+    Knotly - Your Perfect Wedding, Perfectly Planned
+    Website: https://knotly.app`;
+  }
+
+  async sendCollaboratorAddedEmail(
+    to: string,
+    name: string,
+    weddingName: string,
+    inviterName: string,
+    loginUrl: string,
+    weddingId?: number,
+  ): Promise<void> {
+    const templateData: CollaboratorAddedData = {
+      name,
+      weddingName,
+      inviterName,
+      loginUrl,
+    };
+
+    await this.sendCollaboratorAddedTemplate(to, templateData, weddingId);
+  }
+
+  async sendCollaboratorAddedTemplate(
+    to: string,
+    templateData: CollaboratorAddedData,
+    weddingId: number,
+  ): Promise<void> {
+    const html = this.renderTemplate(
+      EmailTemplateType.COLLABORATOR_ADDED,
+      templateData,
+    );
+    const text = this.generateCollaboratorAddedPlainText(templateData);
+
+    await this.sendEmail(
+      to,
+      "You've Been Added as a Collaborator!",
+      text,
+      html,
+      EmailTemplateType.COLLABORATOR_ADDED,
+      weddingId,
+    );
+  }
+
+  private generateCollaboratorAddedPlainText(
+    templateData: CollaboratorAddedData,
+  ): string {
+    return `Hello ${templateData.name}!
+
+    You've been added as a collaborator to help plan an upcoming wedding!
+
+    Wedding Details:
+    Wedding: ${templateData.weddingName}
+    Added by: ${templateData.inviterName}
+
+    Log in to your Knotly account to access the wedding dashboard and start collaborating with the team!
+
+    Log In: ${templateData.loginUrl}
+
+    If you have any questions, feel free to reach out to the person who invited you or contact our support team.
 
     ---
     Knotly - Your Perfect Wedding, Perfectly Planned
