@@ -6,7 +6,12 @@ import { AdminController } from './admin.controller';
 import { AdminService } from './admin.service';
 
 @Module({
-  imports: [UserModule, JwtModule, EmailNotificationModule],
+  imports: [
+    UserModule,
+    JwtModule,
+    EmailNotificationModule,
+    EmailNotificationModule,
+  ],
   controllers: [AdminController],
   providers: [AdminService],
   exports: [AdminService],

@@ -176,7 +176,14 @@ export class AdminService {
   }
 
   async update(userId: number, dto: UpdateAdminDto): Promise<AdminResponseDto> {
-    await this.findById(userId);
+    const admin = await this.prisma.admin.findUnique({
+      where: { userId },
+      include: { user: true },
+    });
+
+    if (!admin) {
+      throw new NotFoundException(`Admin with userId ${userId} not found`);
+    }
 
     // Prepare user update data
     const userUpdateData: any = {};
@@ -217,6 +224,17 @@ export class AdminService {
           set: [],
         };
       }
+    }
+
+    if (dto.isSuspended !== undefined) {
+      const email = admin.user.email;
+      const name = admin.user.name;
+      await this.emailService.sendAdminSuspensionEmail(
+        email,
+        name,
+        dto.isSuspended,
+        userId,
+      );
     }
 
     const updatedAdmin = await this.prisma.admin.update({
