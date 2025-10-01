@@ -8,10 +8,12 @@ import { NotificationDetailsService } from '../notification-details/notification
 import { SendBulkEmailDto } from './dto/send-bulk-email.dto';
 import { EmailTemplateType } from './enums/email-template.enum';
 import {
+  AdminSuspensionData,
   CreateAccountData,
   EmailTemplateData,
   PasswordResetData,
   VendorStatusData,
+  VendorSuspensionData,
   VerifyEmailData,
   WelcomeEmailData,
 } from './interfaces/email-template-data.interface';
@@ -43,6 +45,14 @@ export class EmailNotificationService {
         { name: EmailTemplateType.VERIFY_EMAIL, file: 'verify-email.html' },
         { name: EmailTemplateType.CREATE_ACCOUNT, file: 'create-account.html' },
         { name: EmailTemplateType.VENDOR_STATUS, file: 'vendor-status.html' },
+        {
+          name: EmailTemplateType.VENDOR_SUSPENSION,
+          file: 'vendor-suspension.html',
+        },
+        {
+          name: EmailTemplateType.ADMIN_SUSPENSION,
+          file: 'admin-suspension.html',
+        },
       ];
 
       templateFiles.forEach(({ name, file }) => {
@@ -336,6 +346,165 @@ export class EmailNotificationService {
     ---
     Knotly - Your Perfect Wedding, Perfectly Planned
     Website: https://knotly.app`;
+  }
+
+  async sendVendorSuspensionEmail(
+    to: string,
+    vendorName: string,
+    isSuspended: boolean,
+    vendorId?: number,
+  ): Promise<void> {
+    const templateData: VendorSuspensionData = {
+      vendorName,
+      isSuspended,
+      isActive: !isSuspended,
+      dashboardUrl: process.env.FRONTEND_URL || 'https://knotly.app',
+    };
+
+    const html = this.renderTemplate(
+      EmailTemplateType.VENDOR_SUSPENSION,
+      templateData,
+    );
+    const text = this.generateVendorSuspensionPlainText(templateData);
+
+    const subject = isSuspended
+      ? 'Vendor Account Suspended - Knotly'
+      : 'Vendor Account Reactivated - Knotly';
+
+    await this.sendEmail(
+      to,
+      subject,
+      text,
+      html,
+      EmailTemplateType.VENDOR_SUSPENSION,
+      undefined,
+      vendorId,
+    );
+  }
+
+  private generateVendorSuspensionPlainText(
+    templateData: VendorSuspensionData,
+  ): string {
+    if (templateData.isSuspended) {
+      return `Hello ${templateData.vendorName}!
+
+    Your vendor account has been temporarily suspended.
+
+    What does this mean?
+    While your account is suspended, you will have limited access to the platform. Your vendor profile is not visible to couples, and you cannot receive new booking requests.
+
+    What you can do:
+    • Review our vendor terms and conditions
+    • Contact our support team to understand the reason for suspension
+    • Provide any requested documentation or information
+    • Work with us to resolve any outstanding issues
+
+    Access your dashboard: ${templateData.dashboardUrl}
+
+    If you have any questions, please contact our support team at support@knotly.app.
+
+    ---
+    Knotly - Your Perfect Wedding, Perfectly Planned
+    Website: https://knotly.app`;
+    } else {
+      return `Hello ${templateData.vendorName}!
+
+    Great news! Your vendor account suspension has been lifted.
+
+    Welcome back!
+    Your account is now fully active. You can continue receiving booking requests and managing your services on the platform.
+
+    Next steps:
+    • Update your vendor profile and availability
+    • Review any pending booking requests
+    • Ensure your service listings are up to date
+    • Start connecting with couples planning their special day
+
+    Access your dashboard: ${templateData.dashboardUrl}
+
+    ---
+    Knotly - Your Perfect Wedding, Perfectly Planned
+    Website: https://knotly.app`;
+    }
+  }
+
+  async sendAdminSuspensionEmail(
+    to: string,
+    adminName: string,
+    isSuspended: boolean,
+    weddingId?: number,
+  ): Promise<void> {
+    const templateData: AdminSuspensionData = {
+      adminName,
+      isSuspended,
+      isActive: !isSuspended,
+      dashboardUrl: process.env.FRONTEND_URL || 'https://knotly.app',
+    };
+
+    const html = this.renderTemplate(
+      EmailTemplateType.ADMIN_SUSPENSION,
+      templateData,
+    );
+    const text = this.generateAdminSuspensionPlainText(templateData);
+
+    const subject = isSuspended
+      ? 'Account Suspended - Knotly'
+      : 'Account Reactivated - Knotly';
+
+    await this.sendEmail(
+      to,
+      subject,
+      text,
+      html,
+      EmailTemplateType.ADMIN_SUSPENSION,
+      weddingId,
+    );
+  }
+
+  private generateAdminSuspensionPlainText(
+    templateData: AdminSuspensionData,
+  ): string {
+    if (templateData.isSuspended) {
+      return `Hello ${templateData.adminName}!
+
+    Your account has been temporarily suspended.
+
+    What does this mean?
+    While your account is suspended, you will have limited access to the platform. You may not be able to access certain features or make changes to your wedding plans.
+
+    What you can do:
+    • Review our terms and conditions
+    • Contact our support team to understand the reason for suspension
+    • Provide any requested information or documentation
+    • Work with us to resolve any outstanding issues
+
+    Access your dashboard: ${templateData.dashboardUrl}
+
+    If you have any questions, please contact our support team at support@knotly.app.
+
+    ---
+    Knotly - Your Perfect Wedding, Perfectly Planned
+    Website: https://knotly.app`;
+    } else {
+      return `Hello ${templateData.adminName}!
+
+    Great news! Your account suspension has been lifted.
+
+    Welcome back!
+    Your account is now fully active. You can continue planning your dream wedding with full access to all platform features.
+
+    Continue your wedding journey:
+    • Review your wedding timeline and checklist
+    • Browse and book vendors for your special day
+    • Manage your guest list and RSVPs
+    • Collaborate with your wedding team
+
+    Access your dashboard: ${templateData.dashboardUrl}
+
+    ---
+    Knotly - Your Perfect Wedding, Perfectly Planned
+    Website: https://knotly.app`;
+    }
   }
 
   async sendEmail(

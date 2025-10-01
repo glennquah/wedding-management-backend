@@ -52,6 +52,20 @@ export interface AdminStatusData {
   reactivationNote?: string;
 }
 
+export interface VendorSuspensionData {
+  vendorName: string;
+  isSuspended: boolean;
+  isActive: boolean;
+  dashboardUrl: string;
+}
+
+export interface AdminSuspensionData {
+  adminName: string;
+  isSuspended: boolean;
+  isActive: boolean;
+  dashboardUrl: string;
+}
+
 export type EmailTemplateData =
   | PasswordResetData
   | WelcomeEmailData
@@ -59,4 +73,6 @@ export type EmailTemplateData =
   | CreateAccountData
   | SuccessfulBookingData
   | VendorStatusData
-  | AdminStatusData;
+  | AdminStatusData
+  | VendorSuspensionData
+  | AdminSuspensionData;

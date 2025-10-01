@@ -195,13 +195,24 @@ export class VendorService {
     });
 
     // Send onboarding status change email
+    const vendorName = updatedVendor.user.name;
+    const vendorEmail = updatedVendor.user.email;
     if (dto.onboardingStatus) {
-      const vendorName = updatedVendor.user.name;
-      const vendorEmail = updatedVendor.user.email;
       await this.emailService.sendVendorStatusEmail(
         vendorEmail,
         vendorName,
         dto.onboardingStatus,
+        userId,
+      );
+    }
+
+    // Send suspension status change email
+    if (dto.isSuspended !== undefined) {
+      await this.emailService.sendVendorSuspensionEmail(
+        vendorEmail,
+        vendorName,
+        dto.isSuspended,
+        userId,
       );
     }
 
