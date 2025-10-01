@@ -233,7 +233,6 @@ export class AdminService {
         email,
         name,
         dto.isSuspended,
-        userId,
       );
     }
 
