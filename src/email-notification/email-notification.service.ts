@@ -324,7 +324,6 @@ export class EmailNotificationService {
     type: EmailTemplateType,
     weddingId?: number,
   ): Promise<void> {
-    console.log('Sending bulk email to:', bulkEmailData);
     const messages = bulkEmailData.emails.map((email) => ({
       to: email,
       from: 'hello.knotly@gmail.com',
