@@ -1,5 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Cart, CartItem } from '@prisma/client';
+import { AvailabilitySlotDto } from 'src/listing/dto/create-listing.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { AddToCartDto } from './dto/add-to-cart.dto';
 import { CartItemResponseDto } from './dto/cart-item-response.dto';
@@ -23,6 +28,7 @@ export class CartService {
       listingName: item.listing.listingName,
       price: item.listing.price,
       imageUrls: item.listing.imageUrls,
+      selectedSlots: item.selectedSlots as unknown as AvailabilitySlotDto[],
     };
   }
 
@@ -69,14 +75,43 @@ export class CartService {
     const listing = await this.prisma.listing.findUnique({
       where: { id: dto.listingId },
     });
-    if (!listing) throw new NotFoundException('Listing not found');
+
+    if (!listing) {
+      throw new NotFoundException('Listing not found');
+    }
+
+    // Cast listing availabilities from JSON
+    const slots = listing.availabilities as unknown as AvailabilitySlotDto[];
+
+    // Validate all selected slots
+    const invalidSlots = dto.selectedSlots.filter(
+      (slot) =>
+        !slots.some(
+          (avail) =>
+            avail.startTime === slot.startTime &&
+            avail.endTime === slot.endTime &&
+            avail.date === slot.date,
+        ),
+    );
+
+    if (invalidSlots.length > 0) {
+      throw new BadRequestException(
+        `The following slots are not available: ${JSON.stringify(invalidSlots)}`,
+      );
+    }
 
     await this.prisma.cartItem.upsert({
       where: {
         cartId_listingId: { cartId: cart.id, listingId: dto.listingId },
       },
-      update: {},
-      create: { cartId: cart.id, listingId: dto.listingId },
+      update: {
+        selectedSlots: dto.selectedSlots as any,
+      },
+      create: {
+        cartId: cart.id,
+        listingId: dto.listingId,
+        selectedSlots: dto.selectedSlots as any,
+      },
     });
 
     return this.recalculateTotal(cart.id);
