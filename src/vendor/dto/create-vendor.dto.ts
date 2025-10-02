@@ -55,29 +55,32 @@ export class CreateVendorDto extends CreateUserDto {
     description: 'Service offered by the vendor',
     enum: WeddingService,
     enumName: 'WeddingService',
-    required: true,
+    required: false,
   })
+  @IsOptional()
   @IsEnum(WeddingService)
-  serviceOffered: WeddingService;
+  serviceOffered?: WeddingService;
 
   @ApiProperty({
     description: 'Wedding style specialization of the vendor',
     enum: WeddingStyle,
     enumName: 'WeddingStyle',
-    required: true,
+    required: false,
   })
+  @IsOptional()
   @IsEnum(WeddingStyle)
-  styleOffered: WeddingStyle;
+  styleOffered?: WeddingStyle;
 
   @ApiProperty({
     description: 'Wedding type specialization of the vendor',
     enum: WeddingType,
     enumName: 'WeddingType',
     isArray: true,
-    required: true,
+    required: false,
   })
+  @IsOptional()
   @IsEnum(WeddingType, { each: true })
-  weddingTypes: WeddingType[];
+  weddingTypes?: WeddingType[];
 
   @ApiProperty({
     description: 'Capacity the vendor can handle for venue',

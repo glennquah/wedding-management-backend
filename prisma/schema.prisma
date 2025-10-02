@@ -135,8 +135,8 @@ model Vendor {
   bio                 String?
   rating              Float?                 @default(0)
   isSuspended         Boolean                @default(false)
-  serviceOffered      WeddingService
-  styleOffered        WeddingStyle
+  serviceOffered      WeddingService?
+  styleOffered        WeddingStyle?
   weddingTypes        WeddingType[]
   capacity            Int?
   listings            Listing[]
