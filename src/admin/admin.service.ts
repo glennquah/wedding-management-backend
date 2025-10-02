@@ -126,7 +126,7 @@ export class AdminService {
       user.email,
       user.name,
       process.env.FRONTEND_URL,
-      dto.weddingId ?? null,
+      dto.weddingId ?? undefined,
     );
 
     return this.toAdminResponseDto(updatedAdmin!);
