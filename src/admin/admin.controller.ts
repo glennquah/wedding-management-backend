@@ -133,6 +133,24 @@ export class AdminController {
     }));
   }
 
+  @Post('set-main-wedding/:weddingId')
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({
+    summary: 'Set a wedding as the main wedding for the logged-in admin',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'The wedding has been set as the main wedding.',
+    type: AdminResponseDto,
+  })
+  @ApiResponse({ status: 404, description: 'Wedding or admin not found.' })
+  async setMainWedding(
+    @Request() req: Request & { user: JwtPayload },
+    @Param('weddingId', ParseIntPipe) weddingId: number,
+  ): Promise<AdminResponseDto> {
+    return this.adminService.setMainWedding(req.user.sub, weddingId);
+  }
+
   @Get(':id')
   @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Get an admin by ID' })

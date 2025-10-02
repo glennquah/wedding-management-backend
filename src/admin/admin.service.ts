@@ -121,12 +121,12 @@ export class AdminService {
       include: { user: true, weddings: true },
     });
 
-    // Send Welcome Email
+    // Send Welcome Email (only include weddingId if provided)
     await this.emailService.sendWelcomeEmail(
       user.email,
       user.name,
       process.env.FRONTEND_URL,
-      dto.weddingId,
+      dto.weddingId ?? undefined,
     );
 
     return this.toAdminResponseDto(updatedAdmin!);
@@ -309,5 +309,53 @@ export class AdminService {
     }
 
     return admin.weddings;
+  }
+
+  async setMainWedding(
+    userId: number,
+    weddingId: number,
+  ): Promise<AdminResponseDto> {
+    // Check if admin exists
+    const admin = await this.prisma.admin.findUnique({
+      where: { userId },
+      include: { user: true, weddings: true },
+    });
+
+    if (!admin) {
+      throw new NotFoundException(`Admin with userId ${userId} not found`);
+    }
+
+    // Check if wedding exists
+    const wedding = await this.prisma.wedding.findUnique({
+      where: { id: weddingId },
+    });
+
+    if (!wedding) {
+      throw new NotFoundException(`Wedding with id ${weddingId} not found`);
+    }
+
+    // Link admin to wedding if not already linked
+    await this.prisma.wedding.update({
+      where: { id: weddingId },
+      data: {
+        admins: {
+          connect: { userId: userId },
+        },
+        mainCouple: {
+          connect: { userId: userId },
+        },
+      },
+    });
+
+    // Set as main wedding
+    const updatedAdmin = await this.prisma.admin.update({
+      where: { userId },
+      data: {
+        mainWeddingId: weddingId,
+      },
+      include: { user: true, weddings: true },
+    });
+
+    return this.toAdminResponseDto(updatedAdmin);
   }
 }
