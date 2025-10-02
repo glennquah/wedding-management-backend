@@ -135,7 +135,9 @@ export class AdminController {
 
   @Post('set-main-wedding/:weddingId')
   @Roles(UserRole.ADMIN)
-  @ApiOperation({ summary: 'Set a wedding as the main wedding for the logged-in admin' })
+  @ApiOperation({
+    summary: 'Set a wedding as the main wedding for the logged-in admin',
+  })
   @ApiResponse({
     status: 200,
     description: 'The wedding has been set as the main wedding.',

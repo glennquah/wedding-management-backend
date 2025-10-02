@@ -311,7 +311,10 @@ export class AdminService {
     return admin.weddings;
   }
 
-  async setMainWedding(userId: number, weddingId: number): Promise<AdminResponseDto> {
+  async setMainWedding(
+    userId: number,
+    weddingId: number,
+  ): Promise<AdminResponseDto> {
     // Check if admin exists
     const admin = await this.prisma.admin.findUnique({
       where: { userId },

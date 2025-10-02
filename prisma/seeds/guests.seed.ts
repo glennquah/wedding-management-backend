@@ -118,9 +118,7 @@ export async function seedGuests(prisma: PrismaClient) {
 
   console.log(`✅ Total primary guests: ${totalPrimaryGuests}`);
   console.log(`✅ Total accompanying guests: ${totalAccompanyingGuests}`);
-  console.log(
-    `✅ ~30% of primary guests have 1-3 accompanying guests each`,
-  );
+  console.log(`✅ ~30% of primary guests have 1-3 accompanying guests each`);
   console.log(
     `✅ Accompanying guests have individual confirmation status and dietary requirements`,
   );
