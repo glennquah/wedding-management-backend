@@ -268,7 +268,9 @@ export class WeddingService {
       earliestDate: wedding.dateOptimizerEarliestDate,
       latestDate: wedding.dateOptimizerLatestDate,
       preferredDays: wedding.dateOptimizerPreferredDays,
-      lastResults: wedding.dateOptimizerLastResults as unknown as OptimizeDateResponseDto | undefined,
+      lastResults: wedding.dateOptimizerLastResults as unknown as
+        | OptimizeDateResponseDto
+        | undefined,
     };
   }
 }
