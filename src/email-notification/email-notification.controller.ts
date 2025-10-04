@@ -1,6 +1,6 @@
 import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { EmailTemplateType } from './enums/email-template.enum';
+import { EmailTemplateType } from '@prisma/client';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { SendBulkEmailDto } from './dto/send-bulk-email.dto';

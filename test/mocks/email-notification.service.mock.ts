@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { VendorOnboardingStatus } from '../../src/common/vendor-onboarding-status.enum';
 import { SendBulkEmailDto } from '../../src/email-notification/dto/send-bulk-email.dto';
-import { EmailTemplateType } from '../../src/email-notification/enums/email-template.enum';
+import { EmailTemplateType } from '@prisma/client';
 import {
   CreateAccountData,
   PasswordResetData,
@@ -57,6 +57,22 @@ export class MockEmailNotificationService {
       html: `<p>Welcome ${userName}!</p>`,
       type: EmailTemplateType.WELCOME,
       weddingId,
+      timestamp: new Date(),
+    });
+  }
+
+  async sendSuperAdminCreatedEmail(
+    to: string,
+    name: string,
+    resetLink: string,
+    dashboardUrl: string,
+  ): Promise<void> {
+    this.sentEmails.push({
+      to,
+      subject: 'Knotly Super Admin Access - Set Up Your Account',
+      text: `Super admin onboarding for ${name}. Reset link: ${resetLink}. Dashboard: ${dashboardUrl}`,
+      html: `<p>Super admin onboarding for ${name}. Reset link: ${resetLink}. Dashboard: ${dashboardUrl}</p>`,
+      type: EmailTemplateType.SUPER_ADMIN_ONBOARDING,
       timestamp: new Date(),
     });
   }
