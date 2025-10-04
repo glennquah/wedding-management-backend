@@ -81,7 +81,7 @@ export async function seedRecommendationListings(prisma: PrismaClient) {
           availabilities: generateAvailabilities(),
           remarks: faker.company.catchPhrase(),
           vendorId: vendor.userId,
-          imageUrls: [], // Empty as requested
+          imageUrls: [], 
         },
       });
 
@@ -98,7 +98,6 @@ export async function seedRecommendationListings(prisma: PrismaClient) {
   console.log(`✅ Created ${createdListings.length} listings`);
   console.log(`   - Average ${(createdListings.length / vendors.length).toFixed(1)} listings per vendor`);
   console.log(`   - Availabilities: 2024-2025 (after historical wedding dates)`);
-  console.log(`   - Image URLs: empty as requested`);
 
   return createdListings;
 }
