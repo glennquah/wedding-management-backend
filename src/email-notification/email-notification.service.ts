@@ -135,6 +135,7 @@ export class EmailNotificationService {
     weddingName: string,
     inviterName: string,
     weddingId?: number,
+    isPartner?: boolean,
   ): Promise<void> {
     const templateData: CreateAccountData = {
       name,
@@ -143,7 +144,7 @@ export class EmailNotificationService {
       resetPasswordUrl,
     };
 
-    await this.sendCreateAccountTemplate(to, templateData, weddingId);
+    await this.sendCreateAccountTemplate(to, templateData, weddingId, isPartner);
   }
 
   async sendPasswordResetEmail(
@@ -254,16 +255,21 @@ export class EmailNotificationService {
     to: string,
     templateData: CreateAccountData,
     weddingId: number,
+    isPartner?: boolean,
   ): Promise<void> {
     const html = this.renderTemplate(
       EmailTemplateType.CREATE_ACCOUNT,
       templateData,
     );
-    const text = this.generateCreateAccountPlainText(templateData);
+    const text = this.generateCreateAccountPlainText(templateData, isPartner);
+
+    const subject = isPartner
+      ? "You've Been Invited to Plan Your Wedding!"
+      : "You've Been Invited to Plan a Wedding!";
 
     await this.sendEmail(
       to,
-      "You've Been Invited to Plan a Wedding!",
+      subject,
       text,
       html,
       EmailTemplateType.CREATE_ACCOUNT,
@@ -273,16 +279,25 @@ export class EmailNotificationService {
 
   private generateCreateAccountPlainText(
     templateData: CreateAccountData,
+    isPartner?: boolean,
   ): string {
-    return `Hello ${templateData.name}!
+    const greeting = `Hello ${templateData.name}!`;
+    const message = isPartner
+      ? `Great news! You've been invited by your partner to plan your wedding together on Knotly! An account has been created for you.`
+      : `Great news! You've been invited to help plan and coordinate an upcoming wedding. An account has been created for you on Knotly!`;
+    const action = isPartner
+      ? `To get started, click the link below to set your password for your new account. Once you've set your password, you can log in and start planning your special day together!`
+      : `To get started, click the link below to set your password for your new account. Once you've set your password, you can log in and start collaborating!`;
 
-    Great news! You've been invited to help plan and coordinate an upcoming wedding. An account has been created for you on Knotly!
+    return `${greeting}
+
+    ${message}
 
     Wedding Details:
     Wedding: ${templateData.weddingName}
     Invited by: ${templateData.inviterName}
 
-    To get started, click the link below to set your password for your new account. Once you've set your password, you can log in and start collaborating!
+    ${action}
 
     Set Your Password: ${templateData.resetPasswordUrl}
 
@@ -300,6 +315,7 @@ export class EmailNotificationService {
     inviterName: string,
     loginUrl: string,
     weddingId?: number,
+    isPartner?: boolean,
   ): Promise<void> {
     const templateData: CollaboratorAddedData = {
       name,
@@ -308,23 +324,28 @@ export class EmailNotificationService {
       loginUrl,
     };
 
-    await this.sendCollaboratorAddedTemplate(to, templateData, weddingId);
+    await this.sendCollaboratorAddedTemplate(to, templateData, weddingId, isPartner);
   }
 
   async sendCollaboratorAddedTemplate(
     to: string,
     templateData: CollaboratorAddedData,
     weddingId: number,
+    isPartner?: boolean,
   ): Promise<void> {
     const html = this.renderTemplate(
       EmailTemplateType.COLLABORATOR_ADDED,
       templateData,
     );
-    const text = this.generateCollaboratorAddedPlainText(templateData);
+    const text = this.generateCollaboratorAddedPlainText(templateData, isPartner);
+
+    const subject = isPartner
+      ? "You've Been Invited to Plan Your Wedding!"
+      : "You've Been Added as a Collaborator!";
 
     await this.sendEmail(
       to,
-      "You've Been Added as a Collaborator!",
+      subject,
       text,
       html,
       EmailTemplateType.COLLABORATOR_ADDED,
@@ -334,14 +355,20 @@ export class EmailNotificationService {
 
   private generateCollaboratorAddedPlainText(
     templateData: CollaboratorAddedData,
+    isPartner?: boolean,
   ): string {
-    return `Hello ${templateData.name}!
+    const greeting = `Hello ${templateData.name}!`;
+    const message = isPartner
+      ? `You've been invited by your partner to plan your wedding together on Knotly!`
+      : `You've been added as a collaborator to help plan an upcoming wedding!`;
 
-    You've been added as a collaborator to help plan an upcoming wedding!
+    return `${greeting}
+
+    ${message}
 
     Wedding Details:
     Wedding: ${templateData.weddingName}
-    Added by: ${templateData.inviterName}
+    ${isPartner ? 'Invited by' : 'Added by'}: ${templateData.inviterName}
 
     Log in to your Knotly account to access the wedding dashboard and start collaborating with the team!
 

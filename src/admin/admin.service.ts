@@ -16,6 +16,7 @@ import { AdminResponseDto } from './dto/admin-response.dto';
 import { CollaboratorResponseDto } from './dto/collaborator-response.dto';
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { InviteCollaboratorDto } from './dto/invite-collaborator.dto';
+import { InvitePartnerDto } from './dto/invite-partner.dto';
 import { UpdateAdminDto } from './dto/update-admin.dto';
 
 @Injectable()
@@ -365,6 +366,7 @@ export class AdminService {
 
   async inviteCollaborator(
     dto: InviteCollaboratorDto,
+    inviterId: number,
   ): Promise<CollaboratorResponseDto> {
     // Check if wedding exists
     const wedding = await this.prisma.wedding.findUnique({
@@ -395,16 +397,8 @@ export class AdminService {
     const loginUrl = `${frontendUrl}/login`;
 
     // Get the inviter's name
-    const inviter = await this.prisma.user.findFirst({
-      where: {
-        admin: {
-          weddings: {
-            some: {
-              id: dto.weddingId,
-            },
-          },
-        },
-      },
+    const inviter = await this.prisma.user.findUnique({
+      where: { id: inviterId },
     });
 
     const inviterName = inviter?.name || 'Wedding Admin';
@@ -458,6 +452,7 @@ export class AdminService {
         inviterName,
         loginUrl,
         dto.weddingId,
+        false, // isPartner
       );
     } else {
       // Create new user and admin account
@@ -513,6 +508,7 @@ export class AdminService {
         wedding.name,
         inviterName,
         dto.weddingId,
+        false, // isPartner
       );
     }
 
@@ -585,6 +581,204 @@ export class AdminService {
     await this.prisma.wedding.update({
       where: { id: weddingId },
       data: {
+        admins: {
+          disconnect: { userId },
+        },
+      },
+    });
+  }
+
+  async invitePartner(
+    dto: InvitePartnerDto,
+    inviterId: number,
+  ): Promise<CollaboratorResponseDto> {
+    // Check if wedding exists
+    const wedding = await this.prisma.wedding.findUnique({
+      where: { id: dto.weddingId },
+      include: {
+        mainCouple: true,
+      },
+    });
+
+    if (!wedding) {
+      throw new NotFoundException(`Wedding with id ${dto.weddingId} not found`);
+    }
+
+    // Check if main couple already has 2 members
+    if (wedding.mainCouple.length >= 2) {
+      throw new ConflictException('Main couple already has 2 members');
+    }
+
+    // If guestId provided, check if guest exists
+    if (dto.guestId) {
+      const guest = await this.prisma.guest.findUnique({
+        where: { id: dto.guestId },
+      });
+
+      if (!guest) {
+        throw new NotFoundException(`Guest with id ${dto.guestId} not found`);
+      }
+    }
+
+    // Check if user with this email already exists
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+    });
+
+    let userId: number;
+    let existingAccount = false;
+    const frontendUrl = process.env.FRONTEND_URL || 'https://knotly.app';
+    const loginUrl = `${frontendUrl}/login`;
+
+    // Get the inviter's name
+    const inviter = await this.prisma.user.findUnique({
+      where: { id: inviterId },
+    });
+
+    const inviterName = inviter?.name || 'Wedding Admin';
+
+    if (existingUser) {
+      // User already has an account
+      existingAccount = true;
+      userId = existingUser.id;
+
+      // Check if they're already an admin
+      const existingAdmin = await this.prisma.admin.findUnique({
+        where: { userId: existingUser.id },
+      });
+
+      if (!existingAdmin) {
+        // Create admin profile for existing user
+        await this.prisma.admin.create({
+          data: {
+            userId: existingUser.id,
+            onboardedDate: new Date(),
+          },
+        });
+      }
+
+      // Add to main couple and set as their main wedding
+      await this.prisma.wedding.update({
+        where: { id: dto.weddingId },
+        data: {
+          mainCouple: {
+            connect: { userId: existingUser.id },
+          },
+          admins: {
+            connect: { userId: existingUser.id },
+          },
+        },
+      });
+
+      // Send email to existing account
+      await this.emailService.sendCollaboratorAddedEmail(
+        dto.email,
+        dto.name,
+        wedding.name,
+        inviterName,
+        loginUrl,
+        dto.weddingId,
+        true, // isPartner
+      );
+    } else {
+      // Create new user and admin account
+      // Generate a temporary password (will be changed via password reset)
+      const tempPassword = Math.random().toString(36).slice(-8);
+
+      const newUser = await this.userService.create({
+        name: dto.name,
+        email: dto.email,
+        password: await hash(tempPassword, 10),
+        role: UserRole.ADMIN,
+      });
+
+      userId = newUser.id;
+
+      // Create admin profile
+      await this.prisma.admin.create({
+        data: {
+          userId: newUser.id,
+          onboardedDate: new Date(),
+        },
+      });
+
+      // Add to main couple and weddings list
+      await this.prisma.wedding.update({
+        where: { id: dto.weddingId },
+        data: {
+          mainCouple: {
+            connect: { userId: newUser.id },
+          },
+          admins: {
+            connect: { userId: newUser.id },
+          },
+        },
+      });
+
+      // Generate password reset token (7 days for partner invites)
+      const token = await this.jwtService.signAsync(
+        {
+          sub: newUser.id,
+          email: newUser.email,
+        },
+        {
+          expiresIn: '7d',
+          secret: process.env.JWT_SECRET_KEY,
+        },
+      );
+
+      const resetLink = `${frontendUrl}/reset-password?token=${token}`;
+
+      // Send create account email with password reset link
+      await this.emailService.sendCreateAccountEmail(
+        dto.email,
+        resetLink,
+        dto.name,
+        wedding.name,
+        inviterName,
+        dto.weddingId,
+        true, // isPartner
+      );
+    }
+
+    // Fetch and return the created partner
+    const partner = await this.findById(userId);
+
+    return {
+      id: partner.id,
+      name: partner.name,
+      email: partner.email,
+      accountCreated: true,
+      existingAccount,
+    };
+  }
+
+  async removePartner(weddingId: number, userId: number): Promise<void> {
+    // Check if wedding exists
+    const wedding = await this.prisma.wedding.findUnique({
+      where: { id: weddingId },
+      include: {
+        mainCouple: true,
+      },
+    });
+
+    if (!wedding) {
+      throw new NotFoundException(`Wedding with id ${weddingId} not found`);
+    }
+
+    // Check if user is in main couple
+    const isInMainCouple = wedding.mainCouple.some((mc) => mc.userId === userId);
+    if (!isInMainCouple) {
+      throw new NotFoundException('User is not in main couple');
+    }
+
+    // Remove from main couple and admins
+    await this.prisma.wedding.update({
+      where: { id: weddingId },
+      data: {
+        mainCouple: {
+          disconnect: { userId },
+        },
         admins: {
           disconnect: { userId },
         },

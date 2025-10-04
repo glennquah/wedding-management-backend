@@ -273,4 +273,75 @@ export class WeddingService {
         | undefined,
     };
   }
+
+  async addPartnerToMainCouple(
+    weddingId: number,
+    partnerId: number,
+  ): Promise<void> {
+    const wedding = await this.prisma.wedding.findUnique({
+      where: { id: weddingId },
+      include: {
+        mainCouple: true,
+      },
+    });
+
+    if (!wedding) {
+      throw new NotFoundException(`Wedding with id ${weddingId} not found`);
+    }
+
+    // Check if partner is already in main couple
+    if (wedding.mainCouple.some((admin) => admin.userId === partnerId)) {
+      return; // Already in main couple
+    }
+
+    // Verify the partner admin exists
+    const partnerAdmin = await this.prisma.admin.findUnique({
+      where: { userId: partnerId },
+    });
+
+    if (!partnerAdmin) {
+      throw new NotFoundException(`Admin with id ${partnerId} not found`);
+    }
+
+    // Add partner to main couple and set their main wedding
+    await this.prisma.wedding.update({
+      where: { id: weddingId },
+      data: {
+        mainCouple: {
+          connect: { userId: partnerId },
+        },
+      },
+    });
+  }
+
+  async removePartnerFromMainCouple(
+    weddingId: number,
+    partnerId: number,
+  ): Promise<void> {
+    const wedding = await this.prisma.wedding.findUnique({
+      where: { id: weddingId },
+      include: {
+        mainCouple: true,
+      },
+    });
+
+    if (!wedding) {
+      throw new NotFoundException(`Wedding with id ${weddingId} not found`);
+    }
+
+    // Check if partner is in main couple
+    if (!wedding.mainCouple.some((admin) => admin.userId === partnerId)) {
+      return; // Not in main couple, nothing to do
+    }
+
+    // Remove partner from main couple and unset their main wedding
+    await this.prisma.wedding.update({
+      where: { id: weddingId },
+      data: {
+        mainCouple: {
+          disconnect: { userId: partnerId },
+        },
+      },
+    });
+  }
 }
