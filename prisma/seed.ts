@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { seedCalendarConnections } from './seeds/calendar-connections.seed';
 import { seedCouples } from './seeds/couples.seed';
 import { seedEmailHistory } from './seeds/email-history.seed';
 import { seedEmailTemplates } from './seeds/email-templates.seed';
@@ -21,6 +22,7 @@ async function main() {
     await prisma.payment.deleteMany();
     await prisma.order.deleteMany();
     await prisma.listing.deleteMany();
+    await prisma.googleCalendarConnection.deleteMany();
     await prisma.guest.deleteMany();
     await prisma.wedding.deleteMany();
     await prisma.vendor.deleteMany();
@@ -55,6 +57,9 @@ async function main() {
 
   // 9. Seed guests (depends on weddings)
   await seedGuests(prisma);
+
+  // 10. Seed Google Calendar connections (depends on weddings, couples, and guests)
+  await seedCalendarConnections(prisma);
 
   // Print final summary
   console.log('\n========================================');

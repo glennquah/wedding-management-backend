@@ -10,7 +10,6 @@ import { compare, hash } from 'bcryptjs';
 import { UserRole } from 'src/common/user-role.enum';
 import { EmailNotificationService } from 'src/email-notification/email-notification.service';
 import { WeddingDetailsDto } from 'src/wedding/dto/wedding-details.dto';
-import { EmailNotificationService } from '../email-notification/email-notification.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { UserService } from '../user/user.service';
 import { AdminResponseDto } from './dto/admin-response.dto';
