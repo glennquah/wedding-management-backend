@@ -3,7 +3,8 @@ import { IsDateString, IsInt, IsNotEmpty } from 'class-validator';
 
 export class AvailabilityCheckDto {
   @ApiProperty({
-    description: 'Array of attendee IDs (admins or guests) to check availability for',
+    description:
+      'Array of attendee IDs (admins or guests) to check availability for',
     example: [1, 2, 3],
     type: [Number],
   })

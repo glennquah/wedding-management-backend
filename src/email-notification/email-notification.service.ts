@@ -42,8 +42,14 @@ export class EmailNotificationService {
         { name: EmailTemplateType.WELCOME, file: 'welcome.html' },
         { name: EmailTemplateType.VERIFY_EMAIL, file: 'verify-email.html' },
         { name: EmailTemplateType.CREATE_ACCOUNT, file: 'create-account.html' },
-        { name: EmailTemplateType.COLLABORATOR_ADDED, file: 'collaborator-added.html' },
-        { name: EmailTemplateType.CALENDAR_ACCESS_REQUEST, file: 'calendar-access-request.html' },
+        {
+          name: EmailTemplateType.COLLABORATOR_ADDED,
+          file: 'collaborator-added.html',
+        },
+        {
+          name: EmailTemplateType.CALENDAR_ACCESS_REQUEST,
+          file: 'calendar-access-request.html',
+        },
       ];
 
       templateFiles.forEach(({ name, file }) => {

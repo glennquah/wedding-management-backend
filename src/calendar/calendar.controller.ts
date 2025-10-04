@@ -143,10 +143,7 @@ export class CalendarController {
     @Param('userId', ParseIntPipe) userId: number,
     @Query('isAdmin') isAdmin?: string,
   ): Promise<CalendarConnectionStatusDto> {
-    return this.calendarService.getConnectionStatus(
-      userId,
-      isAdmin === 'true',
-    );
+    return this.calendarService.getConnectionStatus(userId, isAdmin === 'true');
   }
 
   @Post('check-availability')

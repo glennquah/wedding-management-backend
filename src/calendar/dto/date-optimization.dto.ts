@@ -5,7 +5,6 @@ import {
   IsInt,
   IsBoolean,
   IsOptional,
-  IsNumber,
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
@@ -149,8 +148,7 @@ export class OptimizeDateResponseDto {
   total_candidates?: number;
 
   @ApiProperty({
-    description:
-      'Number of viable dates (after filtering couple conflicts)',
+    description: 'Number of viable dates (after filtering couple conflicts)',
     required: false,
   })
   viable_dates?: number;

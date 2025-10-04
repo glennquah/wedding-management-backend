@@ -128,7 +128,11 @@
 
       .cta-button {
         display: inline-block;
-        background: linear-gradient(135deg, #ff5a5f 0%, #da3c41 100%) !important;
+        background: linear-gradient(
+          135deg,
+          #ff5a5f 0%,
+          #da3c41 100%
+        ) !important;
         color: #ffffff !important;
         text-decoration: none !important;
         padding: 14px 32px;
@@ -153,7 +157,12 @@
 
       .divider {
         height: 1px;
-        background: linear-gradient(to right, transparent, #e0e0e0, transparent);
+        background: linear-gradient(
+          to right,
+          transparent,
+          #e0e0e0,
+          transparent
+        );
         margin: 25px 0;
       }
 
@@ -228,7 +237,9 @@
         <div class="greeting">Hi {{name}}! 📅</div>
 
         <div class="message">
-          You've been requested to connect your Google Calendar to help optimize the wedding date for <strong class="wedding-name">{{weddingName}}</strong>.
+          You've been requested to connect your Google Calendar to help plan the
+          wedding date for
+          <strong class="wedding-name">{{weddingName}}</strong>.
         </div>
 
         <!-- Feature Box -->
@@ -236,7 +247,9 @@
           <div class="feature-title">How It Works:</div>
           <ul class="feature-list">
             <li>We'll check your calendar availability</li>
-            <li>Our AI will suggest dates when everyone is free</li>
+            <li>
+              Our AI will suggest dates to the organizer when everyone is free
+            </li>
             <li>You can disconnect anytime</li>
             <li>We only read availability, not event details</li>
           </ul>
@@ -251,21 +264,24 @@
         </div>
 
         <div class="alternative-link">
-          <strong>Button not working?</strong><br/>
+          <strong>Button not working?</strong><br />
           Copy and paste this link: <a href="{{buttonUrl}}">{{buttonUrl}}</a>
         </div>
 
         <!-- Privacy Note -->
         <div class="privacy-note">
           <div class="privacy-note-text">
-            <strong>🔒 Your Privacy Matters:</strong> We only access your calendar to check if you're free or busy. We never read event titles, descriptions, or any other details.
+            <strong>🔒 Your Privacy Matters:</strong> We only access your
+            calendar to check if you're free or busy. We never read event
+            titles, descriptions, or any other details.
           </div>
         </div>
 
         <div class="divider"></div>
 
-        <div class="message" style="font-size: 14px; color: #777;">
-          Questions about calendar access? Contact the wedding planner or reach out to our support team.
+        <div class="message" style="font-size: 14px; color: #777">
+          Questions about calendar access? Contact the wedding planner or reach
+          out to our support team.
         </div>
       </div>
 

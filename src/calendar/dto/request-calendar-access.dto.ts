@@ -3,7 +3,8 @@ import { IsInt, IsNotEmpty, IsBoolean, IsOptional } from 'class-validator';
 
 export class RequestCalendarAccessDto {
   @ApiProperty({
-    description: 'The ID of the attendee (admin or guest) to request calendar access from',
+    description:
+      'The ID of the attendee (admin or guest) to request calendar access from',
     example: 1,
   })
   @IsInt()

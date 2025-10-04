@@ -69,7 +69,7 @@ export class CalendarService {
       const parsedState = JSON.parse(state);
       userId = parsedState.userId;
       isAdmin = parsedState.isAdmin;
-    } catch (error) {
+    } catch {
       throw new BadRequestException('Invalid state parameter');
     }
 
