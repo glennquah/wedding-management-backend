@@ -9,6 +9,11 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
+export interface ScoreBreakdown {
+  key_attendee_availability: number;
+  day_of_week: number;
+}
+
 export class AttendeeUnavailabilityDto {
   @ApiProperty({ description: 'Attendee ID' })
   @IsInt()
@@ -100,6 +105,15 @@ export class DateRecommendationDto {
   @ApiProperty({ description: 'Overall desirability score (0-100)' })
   total_score: number;
 
+  @ApiProperty({
+    description: 'Breakdown of scores by factor',
+    example: {
+      key_attendee_availability: 63.0,
+      day_of_week: 30.0,
+    },
+  })
+  score_breakdown: ScoreBreakdown;
+
   @ApiProperty({ description: 'Number of key attendees available' })
   available_attendees_count: number;
 
@@ -113,12 +127,6 @@ export class DateRecommendationDto {
     type: [String],
   })
   unavailable_attendees: string[];
-
-  @ApiProperty({
-    description: 'Breakdown of scores by factor',
-    type: 'object',
-  })
-  score_breakdown: Record<string, number>;
 
   @ApiProperty({ description: 'Advantages of this date', type: [String] })
   pros: string[];

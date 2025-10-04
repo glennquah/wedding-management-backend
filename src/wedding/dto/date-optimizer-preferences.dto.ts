@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsArray, IsOptional, IsString } from 'class-validator';
+import { OptimizeDateResponseDto } from '../../calendar/dto/date-optimization.dto';
 
 export class DateOptimizerPreferencesDto {
   @ApiProperty({
@@ -31,7 +32,8 @@ export class DateOptimizerPreferencesDto {
   @ApiProperty({
     description: 'Last analysis results from AI optimizer',
     required: false,
+    type: () => OptimizeDateResponseDto,
   })
   @IsOptional()
-  lastResults?: any;
+  lastResults?: OptimizeDateResponseDto;
 }

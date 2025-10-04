@@ -10,6 +10,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateWeddingDto } from './dto/create-wedding.dto';
 import { UpdateWeddingDto } from './dto/update-wedding.dto';
 import { WeddingResponseDto } from './dto/wedding-response.dto';
+import { OptimizeDateResponseDto } from '../calendar/dto/date-optimization.dto';
 
 type WeddingWithGuests = Wedding & {
   guests?: Guest[];
@@ -267,7 +268,7 @@ export class WeddingService {
       earliestDate: wedding.dateOptimizerEarliestDate,
       latestDate: wedding.dateOptimizerLatestDate,
       preferredDays: wedding.dateOptimizerPreferredDays,
-      lastResults: wedding.dateOptimizerLastResults,
+      lastResults: wedding.dateOptimizerLastResults as unknown as OptimizeDateResponseDto | undefined,
     };
   }
 }

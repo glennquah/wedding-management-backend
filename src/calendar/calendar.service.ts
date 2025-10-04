@@ -13,7 +13,10 @@ import {
   AvailabilityCheckDto,
   AvailabilityCheckResponseDto,
 } from './dto/availability-check.dto';
-import { CalendarConnectionStatusDto } from './dto/calendar-connection-status.dto';
+import {
+  CalendarConnectionStatusDto,
+  CalendarAccessStatus,
+} from './dto/calendar-connection-status.dto';
 import {
   OptimizeDateRequestDto,
   OptimizeDateResponseDto,
@@ -287,13 +290,13 @@ export class CalendarService {
     if (!connection) {
       return {
         isConnected: false,
-        accessStatus: 'NOT_REQUESTED' as any,
+        accessStatus: CalendarAccessStatus.NOT_REQUESTED,
       };
     }
 
     return {
       isConnected: connection.accessStatus === 'CONNECTED',
-      accessStatus: connection.accessStatus as any,
+      accessStatus: connection.accessStatus as CalendarAccessStatus,
       email: connection.email || undefined,
       connectedAt:
         connection.accessStatus === 'CONNECTED'
@@ -425,11 +428,15 @@ export class CalendarService {
 
           if (tokenExpiry < now) {
             // Need to refresh - fetch the connection to pass to refresh method
-            const connectionToRefresh =
-              adminConnection ||
-              (await this.prisma.googleCalendarConnection.findUnique({
-                where: { guestId: attendeeId },
-              }));
+            let connectionToRefresh;
+            if (adminConnection) {
+              connectionToRefresh = adminConnection;
+            } else {
+              connectionToRefresh =
+                await this.prisma.googleCalendarConnection.findUnique({
+                  where: { guestId: attendeeId },
+                });
+            }
             currentAccessToken =
               await this.refreshAccessToken(connectionToRefresh);
           }
