@@ -44,6 +44,12 @@ export class GuestResponseDto {
   confirmationStatus: ConfirmationStatus;
 
   @ApiProperty({
+    description: 'Attendance status of the guest',
+    default: false,
+  })
+  attendance: boolean;
+
+  @ApiProperty({
     description: 'List of accompanying guests',
     type: [GuestResponseDto],
     required: false,
