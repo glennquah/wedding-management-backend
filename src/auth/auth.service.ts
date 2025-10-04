@@ -118,6 +118,15 @@ export class AuthService {
 
   async resetPassword(token: string, newPassword: string): Promise<void> {
     try {
+      // Check if token is blacklisted
+      const blacklistedToken = await this.prisma.tokenBlacklist.findUnique({
+        where: { token },
+      });
+
+      if (blacklistedToken) {
+        throw new UnauthorizedException('Invalid or expired token');
+      }
+
       const decodedToken = await this.jwtService.verifyAsync(token, {
         secret: process.env.JWT_SECRET_KEY,
       });
@@ -137,10 +146,19 @@ export class AuthService {
 
       const hashedPassword = await hash(newPassword, 10);
 
-      await this.prisma.user.update({
-        where: { id: userId },
-        data: { password: hashedPassword },
-      });
+      // Update password and blacklist the token in a transaction
+      await this.prisma.$transaction([
+        this.prisma.user.update({
+          where: { id: userId },
+          data: { password: hashedPassword },
+        }),
+        this.prisma.tokenBlacklist.create({
+          data: {
+            token,
+            expiresAt: new Date(decodedToken.exp * 1000),
+          },
+        }),
+      ]);
     } catch {
       throw new UnauthorizedException('Invalid or expired token');
     }

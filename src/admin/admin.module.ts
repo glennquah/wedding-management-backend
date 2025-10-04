@@ -1,15 +1,19 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
+import { EmailNotificationModule } from 'src/email-notification/email-notification.module';
+import { UserModule } from '../user/user.module';
 import { AdminController } from './admin.controller';
 import { AdminService } from './admin.service';
-import { UserService } from '../user/user.service';
-import { UserModule } from '../user/user.module';
-import { EmailNotificationModule } from '../email-notification/email-notification.module';
 
 @Module({
-  imports: [UserModule, JwtModule, EmailNotificationModule],
+  imports: [
+    UserModule,
+    JwtModule,
+    EmailNotificationModule,
+    EmailNotificationModule,
+  ],
   controllers: [AdminController],
-  providers: [AdminService, UserService],
+  providers: [AdminService],
   exports: [AdminService],
 })
 export class AdminModule {}

@@ -8,6 +8,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Admin, Prisma, User, Wedding } from '@prisma/client';
 import { compare, hash } from 'bcryptjs';
 import { UserRole } from 'src/common/user-role.enum';
+import { EmailNotificationService } from 'src/email-notification/email-notification.service';
 import { WeddingDetailsDto } from 'src/wedding/dto/wedding-details.dto';
 import { EmailNotificationService } from '../email-notification/email-notification.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -125,6 +126,14 @@ export class AdminService {
       include: { user: true, weddings: true },
     });
 
+    // Send Welcome Email (only include weddingId if provided)
+    await this.emailService.sendWelcomeEmail(
+      user.email,
+      user.name,
+      process.env.FRONTEND_URL,
+      dto.weddingId ?? undefined,
+    );
+
     return this.toAdminResponseDto(updatedAdmin!);
   }
 
@@ -172,7 +181,14 @@ export class AdminService {
   }
 
   async update(userId: number, dto: UpdateAdminDto): Promise<AdminResponseDto> {
-    await this.findById(userId);
+    const admin = await this.prisma.admin.findUnique({
+      where: { userId },
+      include: { user: true },
+    });
+
+    if (!admin) {
+      throw new NotFoundException(`Admin with userId ${userId} not found`);
+    }
 
     // Prepare user update data
     const userUpdateData: any = {};
@@ -213,6 +229,16 @@ export class AdminService {
           set: [],
         };
       }
+    }
+
+    if (dto.isSuspended !== undefined) {
+      const email = admin.user.email;
+      const name = admin.user.name;
+      await this.emailService.sendAdminSuspensionEmail(
+        email,
+        name,
+        dto.isSuspended,
+      );
     }
 
     const updatedAdmin = await this.prisma.admin.update({
@@ -288,6 +314,54 @@ export class AdminService {
     }
 
     return admin.weddings;
+  }
+
+  async setMainWedding(
+    userId: number,
+    weddingId: number,
+  ): Promise<AdminResponseDto> {
+    // Check if admin exists
+    const admin = await this.prisma.admin.findUnique({
+      where: { userId },
+      include: { user: true, weddings: true },
+    });
+
+    if (!admin) {
+      throw new NotFoundException(`Admin with userId ${userId} not found`);
+    }
+
+    // Check if wedding exists
+    const wedding = await this.prisma.wedding.findUnique({
+      where: { id: weddingId },
+    });
+
+    if (!wedding) {
+      throw new NotFoundException(`Wedding with id ${weddingId} not found`);
+    }
+
+    // Link admin to wedding if not already linked
+    await this.prisma.wedding.update({
+      where: { id: weddingId },
+      data: {
+        admins: {
+          connect: { userId: userId },
+        },
+        mainCouple: {
+          connect: { userId: userId },
+        },
+      },
+    });
+
+    // Set as main wedding
+    const updatedAdmin = await this.prisma.admin.update({
+      where: { userId },
+      data: {
+        mainWeddingId: weddingId,
+      },
+      include: { user: true, weddings: true },
+    });
+
+    return this.toAdminResponseDto(updatedAdmin);
   }
 
   async inviteCollaborator(

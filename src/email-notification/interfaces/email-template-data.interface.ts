@@ -1,3 +1,5 @@
+import { VendorOnboardingStatus } from 'src/common/vendor-onboarding-status.enum';
+
 export interface PasswordResetData {
   name: string;
   buttonUrl: string;
@@ -45,7 +47,7 @@ export interface SuccessfulBookingData {
 
 export interface VendorStatusData {
   vendorName: string;
-  vendorOnboardingStatus: 'pending' | 'rejected' | 'onboarded';
+  vendorOnboardingStatus: VendorOnboardingStatus;
   dashboardUrl: string;
   isPending?: boolean;
   isRejected?: boolean;
@@ -63,6 +65,20 @@ export interface AdminStatusData {
   reactivationNote?: string;
 }
 
+export interface VendorSuspensionData {
+  vendorName: string;
+  isSuspended: boolean;
+  isActive: boolean;
+  dashboardUrl: string;
+}
+
+export interface AdminSuspensionData {
+  adminName: string;
+  isSuspended: boolean;
+  isActive: boolean;
+  dashboardUrl: string;
+}
+
 export type EmailTemplateData =
   | PasswordResetData
   | WelcomeEmailData
@@ -72,4 +88,6 @@ export type EmailTemplateData =
   | CalendarAccessRequestData
   | SuccessfulBookingData
   | VendorStatusData
-  | AdminStatusData;
+  | AdminStatusData
+  | VendorSuspensionData
+  | AdminSuspensionData;

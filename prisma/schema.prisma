@@ -88,6 +88,9 @@ enum EmailTemplateType {
   WELCOME
   VERIFY_EMAIL
   CREATE_ACCOUNT
+  VENDOR_STATUS
+  VENDOR_SUSPENSION
+  ADMIN_SUSPENSION
   COLLABORATOR_ADDED
   CALENDAR_ACCESS_REQUEST
   CUSTOM
@@ -157,8 +160,8 @@ model Vendor {
   bio                 String?
   rating              Float?                 @default(0)
   isSuspended         Boolean                @default(false)
-  serviceOffered      WeddingService
-  styleOffered        WeddingStyle
+  serviceOffered      WeddingService?
+  styleOffered        WeddingStyle?
   weddingTypes        WeddingType[]
   capacity            Int?
   listings            Listing[]
@@ -365,4 +368,14 @@ model SeatingArrangement {
   tablesPerRow    Int?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+}
+
+model TokenBlacklist {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([token])
+  @@index([expiresAt])
 }

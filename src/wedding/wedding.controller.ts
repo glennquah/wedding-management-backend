@@ -28,6 +28,8 @@ export class WeddingController {
   constructor(private service: WeddingService) {}
 
   @Post()
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Create a new wedding' })
   @ApiResponse({
     status: 201,
