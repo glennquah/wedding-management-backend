@@ -121,7 +121,6 @@ export class WeddingService {
         weddingId: guest.weddingId,
         weddingName: wedding.name,
         primaryGuestId: guest.primaryGuestId,
-        attendance: guest.attendance || false,
         createdAt: guest.createdAt,
         updatedAt: guest.updatedAt,
       })),
