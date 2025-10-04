@@ -17,6 +17,7 @@ import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { UserRole } from 'src/common/user-role.enum';
 import { CreateWeddingDto } from './dto/create-wedding.dto';
+import { DateOptimizerPreferencesDto } from './dto/date-optimizer-preferences.dto';
 import { UpdateWeddingDto } from './dto/update-wedding.dto';
 import { WeddingResponseDto } from './dto/wedding-response.dto';
 import { WeddingService } from './wedding.service';
@@ -180,5 +181,62 @@ export class WeddingController {
   ): Promise<{ keyAttendeeIds: number[] }> {
     const keyAttendeeIds = await this.service.getKeyAttendees(weddingId);
     return { keyAttendeeIds };
+  }
+
+  @Get(':id/main-couple')
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
+  @ApiOperation({ summary: 'Get main couple for a wedding' })
+  @ApiResponse({
+    status: 200,
+    description: 'Main couple members',
+    schema: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          id: { type: 'number' },
+          name: { type: 'string' },
+          email: { type: 'string' },
+        },
+      },
+    },
+  })
+  @ApiResponse({ status: 404, description: 'Wedding not found.' })
+  async getMainCouple(@Param('id', ParseIntPipe) weddingId: number) {
+    return this.service.getMainCouple(weddingId);
+  }
+
+  @Put(':id/date-optimizer-preferences')
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
+  @ApiOperation({ summary: 'Update date optimizer preferences for a wedding' })
+  @ApiResponse({
+    status: 200,
+    description: 'Date optimizer preferences updated successfully',
+  })
+  @ApiResponse({ status: 404, description: 'Wedding not found.' })
+  async updateDateOptimizerPreferences(
+    @Param('id', ParseIntPipe) weddingId: number,
+    @Body() preferences: DateOptimizerPreferencesDto,
+  ): Promise<{ message: string }> {
+    await this.service.updateDateOptimizerPreferences(weddingId, preferences);
+    return { message: 'Date optimizer preferences updated successfully' };
+  }
+
+  @Get(':id/date-optimizer-preferences')
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
+  @ApiOperation({ summary: 'Get date optimizer preferences for a wedding' })
+  @ApiResponse({
+    status: 200,
+    description: 'Date optimizer preferences',
+    type: DateOptimizerPreferencesDto,
+  })
+  @ApiResponse({ status: 404, description: 'Wedding not found.' })
+  async getDateOptimizerPreferences(
+    @Param('id', ParseIntPipe) weddingId: number,
+  ): Promise<DateOptimizerPreferencesDto> {
+    return this.service.getDateOptimizerPreferences(weddingId);
   }
 }

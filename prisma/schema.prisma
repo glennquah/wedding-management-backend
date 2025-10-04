@@ -93,6 +93,13 @@ enum EmailTemplateType {
   CUSTOM
 }
 
+enum CalendarAccessStatus {
+  NOT_REQUESTED
+  REQUESTED
+  REJECTED
+  CONNECTED
+}
+
 model User {
   id        Int      @id @default(autoincrement())
   name      String
@@ -108,28 +115,31 @@ model User {
 }
 
 model Admin {
-  userId        Int       @id
-  user          User      @relation(fields: [userId], references: [id])
-  isSuspended   Boolean   @default(false)
-  onboardedDate DateTime  @default(now())
-  weddings      Wedding[] @relation("AdminWeddings")
-  mainWedding   Wedding?  @relation("MainCouple", fields: [mainWeddingId], references: [id])
-  mainWeddingId Int?
-
+  userId                   Int                       @id
+  user                     User                      @relation(fields: [userId], references: [id])
+  isSuspended              Boolean                   @default(false)
+  onboardedDate            DateTime                  @default(now())
+  weddings                 Wedding[]                 @relation("AdminWeddings")
+  mainWedding              Wedding?                  @relation("MainCouple", fields: [mainWeddingId], references: [id])
+  mainWeddingId            Int?
   cart                     Cart?
   googleCalendarConnection GoogleCalendarConnection?
 }
 
 model GoogleCalendarConnection {
-  id           Int      @id @default(autoincrement())
-  adminId      Int      @unique
-  admin        Admin    @relation(fields: [adminId], references: [userId], onDelete: Cascade)
-  accessToken  String
-  refreshToken String
-  tokenExpiry  DateTime
-  email        String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id                Int                  @id @default(autoincrement())
+  guestId           Int?                 @unique
+  guest             Guest?               @relation(fields: [guestId], references: [id], onDelete: Cascade)
+  adminId           Int?                 @unique
+  admin             Admin?               @relation(fields: [adminId], references: [userId], onDelete: Cascade)
+  accessToken       String
+  refreshToken      String
+  tokenExpiry       DateTime
+  email             String
+  accessStatus      CalendarAccessStatus @default(NOT_REQUESTED)
+  accessRequestedAt DateTime?
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
 }
 
 model SuperAdmin {
@@ -195,25 +205,29 @@ model NotificationDetails {
 }
 
 model Wedding {
-  id                  Int                  @id @default(autoincrement())
-  mainCouple          Admin[]              @relation("MainCouple")
-  name                String
-  date                DateTime?
-  location            String?
-  guests              Guest[]
-  admins              Admin[]              @relation("AdminWeddings")
-  keyAttendeeIds      Int[]                @default([])
-  createdAt           DateTime             @default(now())
-  updatedAt           DateTime             @updatedAt
-  weddingType         WeddingType
-  budgetBucket        BudgetBucket
-  guestCountBucket    GuestCountBucket
-  preferredStyle      WeddingStyle
-  preferredServices   WeddingService[]
-  orders              Order[]
-  notificationDetails NotificationDetails?
-  SeatingArrangement  SeatingArrangement?
-  microsite           Microsite?
+  id                       Int                  @id @default(autoincrement())
+  mainCouple               Admin[]              @relation("MainCouple")
+  name                     String
+  date                     DateTime?
+  location                 String?
+  guests                   Guest[]
+  admins                   Admin[]              @relation("AdminWeddings")
+  keyAttendeeIds           Int[]                @default([])
+  createdAt                DateTime             @default(now())
+  updatedAt                DateTime             @updatedAt
+  weddingType              WeddingType
+  budgetBucket             BudgetBucket
+  guestCountBucket         GuestCountBucket
+  preferredStyle           WeddingStyle
+  preferredServices        WeddingService[]
+  orders                   Order[]
+  notificationDetails      NotificationDetails?
+  SeatingArrangement       SeatingArrangement?
+  microsite                Microsite?
+  dateOptimizerEarliestDate String?
+  dateOptimizerLatestDate  String?
+  dateOptimizerPreferredDays String[]           @default([])
+  dateOptimizerLastResults Json?
 }
 
 model Microsite {
@@ -234,19 +248,20 @@ model Microsite {
 }
 
 model Guest {
-  id                 Int                @id @default(autoincrement())
-  email              String
-  name               String
-  allergies          String?
-  group              String?
-  confirmationStatus ConfirmationStatus @default(PENDING)
-  weddingId          Int
-  wedding            Wedding            @relation(fields: [weddingId], references: [id], onDelete: Cascade)
-  primaryGuestId     Int?
-  primaryGuest       Guest?             @relation("AccompanyingGuests", fields: [primaryGuestId], references: [id])
-  accompanyingGuests Guest[]            @relation("AccompanyingGuests")
-  createdAt          DateTime           @default(now())
-  updatedAt          DateTime           @updatedAt
+  id                       Int                        @id @default(autoincrement())
+  email                    String
+  name                     String
+  allergies                String?
+  group                    String?
+  confirmationStatus       ConfirmationStatus         @default(PENDING)
+  weddingId                Int
+  wedding                  Wedding                    @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+  primaryGuestId           Int?
+  primaryGuest             Guest?                     @relation("AccompanyingGuests", fields: [primaryGuestId], references: [id])
+  accompanyingGuests       Guest[]                    @relation("AccompanyingGuests")
+  googleCalendarConnection GoogleCalendarConnection?
+  createdAt                DateTime                   @default(now())
+  updatedAt                DateTime                   @updatedAt
 }
 
 model Listing {

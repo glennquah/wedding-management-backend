@@ -191,4 +191,83 @@ export class WeddingService {
 
     return wedding.keyAttendeeIds;
   }
+
+  async getMainCouple(weddingId: number) {
+    const wedding = await this.prisma.wedding.findUnique({
+      where: { id: weddingId },
+      include: {
+        mainCouple: {
+          include: {
+            user: true,
+            googleCalendarConnection: true,
+          },
+        },
+      },
+    });
+
+    if (!wedding) {
+      throw new NotFoundException(`Wedding with id ${weddingId} not found`);
+    }
+
+    // Return admin accounts with their calendar connection status
+    return wedding.mainCouple.map((admin) => {
+      return {
+        id: admin.userId,
+        name: admin.user.name,
+        email: admin.user.email,
+        calendarConnected: !!admin.googleCalendarConnection,
+      };
+    });
+  }
+
+  async updateDateOptimizerPreferences(
+    weddingId: number,
+    preferences: {
+      earliestDate?: string;
+      latestDate?: string;
+      preferredDays?: string[];
+      lastResults?: any;
+    },
+  ): Promise<void> {
+    const wedding = await this.prisma.wedding.findUnique({
+      where: { id: weddingId },
+    });
+
+    if (!wedding) {
+      throw new NotFoundException(`Wedding with id ${weddingId} not found`);
+    }
+
+    await this.prisma.wedding.update({
+      where: { id: weddingId },
+      data: {
+        dateOptimizerEarliestDate: preferences.earliestDate,
+        dateOptimizerLatestDate: preferences.latestDate,
+        dateOptimizerPreferredDays: preferences.preferredDays,
+        dateOptimizerLastResults: preferences.lastResults,
+      },
+    });
+  }
+
+  async getDateOptimizerPreferences(weddingId: number) {
+    const wedding = await this.prisma.wedding.findUnique({
+      where: { id: weddingId },
+      select: {
+        dateOptimizerEarliestDate: true,
+        dateOptimizerLatestDate: true,
+        dateOptimizerPreferredDays: true,
+        dateOptimizerLastResults: true,
+      },
+    });
+
+    if (!wedding) {
+      throw new NotFoundException(`Wedding with id ${weddingId} not found`);
+    }
+
+    return {
+      earliestDate: wedding.dateOptimizerEarliestDate,
+      latestDate: wedding.dateOptimizerLatestDate,
+      preferredDays: wedding.dateOptimizerPreferredDays,
+      lastResults: wedding.dateOptimizerLastResults,
+    };
+  }
 }

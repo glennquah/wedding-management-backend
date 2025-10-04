@@ -23,6 +23,10 @@ import {
   AvailabilityCheckDto,
   AvailabilityCheckResponseDto,
 } from './dto/availability-check.dto';
+import {
+  OptimizeDateRequestDto,
+  OptimizeDateResponseDto,
+} from './dto/date-optimization.dto';
 import { JwtPayload } from 'src/auth/dto/jwt-payload.interface';
 
 @ApiTags('calendar')
@@ -34,7 +38,7 @@ export class CalendarController {
   @UseGuards(JwtGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @ApiOperation({
-    summary: 'Request calendar access from a collaborator',
+    summary: 'Request calendar access from an admin or guest',
   })
   @ApiResponse({
     status: 201,
@@ -42,21 +46,28 @@ export class CalendarController {
   })
   @ApiResponse({
     status: 404,
-    description: 'Wedding or collaborator not found',
+    description: 'Wedding or user not found',
   })
   async requestCalendarAccess(
     @Body() dto: RequestCalendarAccessDto,
   ): Promise<{ message: string }> {
     await this.calendarService.requestCalendarAccess(
-      dto.collaboratorId,
+      dto.attendeeId,
       dto.weddingId,
+      dto.isAdmin || false,
     );
     return { message: 'Calendar access request sent successfully' };
   }
 
-  @Get('oauth/authorize/:adminId')
+  @Get('oauth/authorize/:userId')
   @ApiOperation({
-    summary: 'Get Google OAuth authorization URL for a specific admin',
+    summary: 'Get Google OAuth authorization URL for a user (admin or guest)',
+  })
+  @ApiQuery({
+    name: 'isAdmin',
+    description: 'Whether the user is an admin (true) or guest (false)',
+    required: false,
+    type: Boolean,
   })
   @ApiResponse({
     status: 200,
@@ -69,9 +80,13 @@ export class CalendarController {
     },
   })
   getAuthUrl(
-    @Param('adminId', ParseIntPipe) adminId: number,
+    @Param('userId', ParseIntPipe) userId: number,
+    @Query('isAdmin') isAdmin?: string,
   ): { authUrl: string } {
-    const authUrl = this.calendarService.generateAuthUrl(adminId);
+    const authUrl = this.calendarService.generateAuthUrl(
+      userId,
+      isAdmin === 'true',
+    );
     return { authUrl };
   }
 
@@ -86,7 +101,7 @@ export class CalendarController {
   })
   @ApiQuery({
     name: 'state',
-    description: 'State parameter containing adminId',
+    description: 'State parameter containing userId and isAdmin flag',
     required: true,
   })
   @ApiResponse({
@@ -100,18 +115,24 @@ export class CalendarController {
   ) {
     await this.calendarService.handleOAuthCallback(code, state);
 
-    // Redirect to frontend success page
+    // Redirect to frontend landing page
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
     return {
-      url: `${frontendUrl}/admin/date-optimizer?calendar_connected=success`,
+      url: `${frontendUrl}/`,
     };
   }
 
-  @Get('connection-status/:adminId')
+  @Get('connection-status/:userId')
   @UseGuards(JwtGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @ApiOperation({
-    summary: 'Check calendar connection status for an admin',
+    summary: 'Check calendar connection status for an admin or guest',
+  })
+  @ApiQuery({
+    name: 'isAdmin',
+    description: 'Whether the user is an admin (true) or guest (false)',
+    required: false,
+    type: Boolean,
   })
   @ApiResponse({
     status: 200,
@@ -119,20 +140,24 @@ export class CalendarController {
     type: CalendarConnectionStatusDto,
   })
   async getConnectionStatus(
-    @Param('adminId', ParseIntPipe) adminId: number,
+    @Param('userId', ParseIntPipe) userId: number,
+    @Query('isAdmin') isAdmin?: string,
   ): Promise<CalendarConnectionStatusDto> {
-    return this.calendarService.getConnectionStatus(adminId);
+    return this.calendarService.getConnectionStatus(
+      userId,
+      isAdmin === 'true',
+    );
   }
 
   @Post('check-availability')
   @UseGuards(JwtGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @ApiOperation({
-    summary: 'Check availability for multiple collaborators',
+    summary: 'Check availability for multiple users (admins and guests)',
   })
   @ApiResponse({
     status: 200,
-    description: 'Availability data for collaborators',
+    description: 'Availability data for users',
     type: AvailabilityCheckResponseDto,
   })
   async checkAvailability(
@@ -156,5 +181,46 @@ export class CalendarController {
   ): Promise<{ message: string }> {
     await this.calendarService.disconnectCalendar(req.user.sub);
     return { message: 'Calendar disconnected successfully' };
+  }
+
+  @Delete('disconnect/:userId')
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({
+    summary: 'Disconnect calendar for a specific user (guest or admin)',
+  })
+  @ApiQuery({
+    name: 'isAdmin',
+    description: 'Whether the user is an admin (true) or guest (false)',
+    required: false,
+    type: Boolean,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Calendar disconnected successfully',
+  })
+  async disconnectUserCalendar(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Query('isAdmin') isAdmin?: string,
+  ): Promise<{ message: string }> {
+    await this.calendarService.disconnectCalendar(userId, isAdmin === 'true');
+    return { message: 'Calendar disconnected successfully' };
+  }
+
+  @Post('optimize-date')
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({
+    summary: 'Optimize wedding date using AI-powered scheduling algorithm',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Date optimization results',
+    type: OptimizeDateResponseDto,
+  })
+  async optimizeWeddingDate(
+    @Body() dto: OptimizeDateRequestDto,
+  ): Promise<OptimizeDateResponseDto> {
+    return this.calendarService.optimizeWeddingDate(dto);
   }
 }

@@ -206,6 +206,9 @@ async function main() {
             },
           },
         },
+        include: {
+          admin: true,
+        },
       }),
       prisma.user.create({
         data: {
@@ -219,6 +222,9 @@ async function main() {
               mainWeddingId: wedding.id,
             },
           },
+        },
+        include: {
+          admin: true,
         },
       }),
     ]);
@@ -1227,7 +1233,100 @@ async function main() {
     );
   }
 
+  // Add key attendees and mock calendar connections for ALL weddings (for testing date optimizer)
+  console.log('✅ Setting up date optimizer test data for all weddings...');
+
+  const oneYearFromNow = new Date();
+  oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
+
+  for (let i = 0; i < weddings.length; i++) {
+    const wedding = weddings[i];
+    const [partner1, partner2] = coupleUsers[i];
+
+    // Create guest records for main couple (they need guest records for calendar connections)
+    const mainCoupleGuest1 = await prisma.guest.create({
+      data: {
+        name: partner1.name,
+        email: partner1.email,
+        weddingId: wedding.id,
+        confirmationStatus: ConfirmationStatus.CONFIRMED,
+        group: 'Main Couple',
+      },
+    });
+
+    const mainCoupleGuest2 = await prisma.guest.create({
+      data: {
+        name: partner2.name,
+        email: partner2.email,
+        weddingId: wedding.id,
+        confirmationStatus: ConfirmationStatus.CONFIRMED,
+        group: 'Main Couple',
+      },
+    });
+
+    // Create mock Google Calendar connections for main couple (using their user IDs, which maps to Admin.userId)
+    await prisma.googleCalendarConnection.create({
+      data: {
+        adminId: partner1.id,
+        accessToken: `mock_access_token_admin_${partner1.id}`,
+        refreshToken: `mock_refresh_token_admin_${partner1.id}`,
+        tokenExpiry: oneYearFromNow,
+        email: partner1.email,
+        accessStatus: 'CONNECTED',
+      },
+    });
+
+    await prisma.googleCalendarConnection.create({
+      data: {
+        adminId: partner2.id,
+        accessToken: `mock_access_token_admin_${partner2.id}`,
+        refreshToken: `mock_refresh_token_admin_${partner2.id}`,
+        tokenExpiry: oneYearFromNow,
+        email: partner2.email,
+        accessStatus: 'CONNECTED',
+      },
+    });
+
+    // Add key attendees to wedding (pick 5 existing guests with emails, excluding main couple)
+    const weddingGuests = await prisma.guest.findMany({
+      where: {
+        weddingId: wedding.id,
+        email: { not: '' },
+        id: { notIn: [mainCoupleGuest1.id, mainCoupleGuest2.id] },
+      },
+      take: 5,
+    });
+
+    // Create mock calendar connections for key attendees
+    for (const guest of weddingGuests) {
+      await prisma.googleCalendarConnection.create({
+        data: {
+          guestId: guest.id,
+          accessToken: `mock_access_token_guest_${guest.id}`,
+          refreshToken: `mock_refresh_token_guest_${guest.id}`,
+          tokenExpiry: oneYearFromNow,
+          email: guest.email,
+          accessStatus: 'CONNECTED',
+        },
+      });
+    }
+
+    // Update wedding with key attendee IDs (using guest IDs)
+    await prisma.wedding.update({
+      where: { id: wedding.id },
+      data: {
+        keyAttendeeIds: weddingGuests.map((g) => g.id),
+      },
+    });
+
+    console.log(
+      `✅ Added main couple + ${weddingGuests.length} key attendees with mock calendar connections for ${wedding.name}`,
+    );
+  }
+
+  console.log('\n===========================================');
   console.log('Database seeded successfully!');
+  console.log('===========================================');
   console.log(`Created:`);
   console.log(`- 1 Super Admin`);
   console.log(`- 10 Admin users (5 couples)`);
@@ -1245,6 +1344,14 @@ async function main() {
   console.log(
     `- Accompanying guests have individual confirmation status and dietary requirements`,
   );
+  console.log(
+    `\n✨ DATE OPTIMIZER TEST DATA (All Weddings):`,
+  );
+  console.log(`- All main couples have mock calendar connections`);
+  console.log(`- 5 key attendees added per wedding`);
+  console.log(`\n📧 Test Login Credentials:`);
+  console.log(`  Email: couple@wedding.com`);
+  console.log(`  Password: password123`);
 }
 
 main()

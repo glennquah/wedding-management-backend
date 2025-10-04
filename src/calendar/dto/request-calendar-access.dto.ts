@@ -1,14 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsInt, IsNotEmpty } from 'class-validator';
+import { IsInt, IsNotEmpty, IsBoolean, IsOptional } from 'class-validator';
 
 export class RequestCalendarAccessDto {
   @ApiProperty({
-    description: 'The ID of the collaborator to request calendar access from',
+    description: 'The ID of the attendee (admin or guest) to request calendar access from',
     example: 1,
   })
   @IsInt()
   @IsNotEmpty()
-  collaboratorId: number;
+  attendeeId: number;
 
   @ApiProperty({
     description: 'The ID of the wedding',
@@ -17,4 +17,13 @@ export class RequestCalendarAccessDto {
   @IsInt()
   @IsNotEmpty()
   weddingId: number;
+
+  @ApiProperty({
+    description: 'Whether the attendee is an admin (true) or guest (false)',
+    example: false,
+    required: false,
+  })
+  @IsBoolean()
+  @IsOptional()
+  isAdmin?: boolean;
 }

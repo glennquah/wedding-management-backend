@@ -3,13 +3,13 @@ import { IsDateString, IsInt, IsNotEmpty } from 'class-validator';
 
 export class AvailabilityCheckDto {
   @ApiProperty({
-    description: 'Array of collaborator IDs to check availability for',
+    description: 'Array of attendee IDs (admins or guests) to check availability for',
     example: [1, 2, 3],
     type: [Number],
   })
   @IsInt({ each: true })
   @IsNotEmpty()
-  collaboratorIds: number[];
+  attendeeIds: number[];
 
   @ApiProperty({
     description: 'Start date for availability check (ISO 8601 format)',
@@ -30,13 +30,13 @@ export class AvailabilityCheckDto {
 
 export class AttendeeAvailability {
   @ApiProperty({
-    description: 'The collaborator ID',
+    description: 'The attendee ID (admin or guest)',
     example: 1,
   })
-  collaboratorId: number;
+  attendeeId: number;
 
   @ApiProperty({
-    description: 'The collaborator name',
+    description: 'The attendee name',
     example: 'John Doe',
   })
   name: string;
