@@ -87,8 +87,13 @@ export async function seedRecommendationWeddings(prisma: PrismaClient) {
       to: new Date('2023-12-31'),   // End of 2023
     });
 
+    // Use fixed IDs starting from 20000 to avoid conflicts
+    // This ensures wedding IDs remain consistent across database resets
+    const fixedWeddingId = 20000 + i;
+
     const wedding = await prisma.wedding.create({
       data: {
+        id: fixedWeddingId,
         name: `Wedding ${i + 1}`,
         date: weddingDate,
         location: locations[i % locations.length],

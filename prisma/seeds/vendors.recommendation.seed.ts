@@ -113,8 +113,13 @@ export async function seedRecommendationVendors(
     const onboardingStatus = VendorOnboardingStatus.ONBOARDED;
     const isSuspended = false;
 
+    // Use fixed IDs starting from 10000 to avoid conflicts with real users
+    // This ensures vendor IDs remain consistent across database resets
+    const fixedUserId = 10000 + i;
+
     const vendor = await prisma.user.create({
       data: {
+        id: fixedUserId,
         name: vendorName,
         email: `vendor${i}@recommendation.com`,
         password: hashedPassword,
