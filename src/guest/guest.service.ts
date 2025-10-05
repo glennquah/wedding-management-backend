@@ -111,6 +111,19 @@ export class GuestService {
     return createdGuests;
   }
 
+  async markAttendance(id: number): Promise<Guest> {
+    const guest = await this.findById(id);
+
+    return this.prisma.guest.update({
+      where: { id },
+      data: { attendance: !guest.attendance },
+      include: {
+        accompanyingGuests: true,
+        primaryGuest: true,
+      },
+    });
+  }
+
   toGuestResponseDto(guest: GuestWithAccompanying): GuestResponseDto {
     return {
       id: guest.id,
@@ -119,6 +132,7 @@ export class GuestService {
       allergies: guest.allergies,
       group: guest.group,
       confirmationStatus: guest.confirmationStatus as ConfirmationStatus,
+      attendance: guest.attendance,
       weddingId: guest.weddingId,
       weddingName: guest.wedding?.name,
       primaryGuestId: guest.primaryGuestId,
