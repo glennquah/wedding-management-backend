@@ -33,12 +33,20 @@ export class GenerateAiEmailTemplateDto {
   mainMessage?: string;
 
   @ApiPropertyOptional({
-    description: 'Color scheme preferences (e.g., "pink and gold", "blue and white", "elegant purple")',
-    example: 'pink and gold',
+    description: 'Primary color in hex format (e.g., "#ff5a5f", "#3498db")',
+    example: '#ff5a5f',
   })
   @IsString()
   @IsOptional()
-  colorScheme?: string;
+  primaryColor?: string;
+
+  @ApiPropertyOptional({
+    description: 'Secondary color in hex format (e.g., "#45292f", "#2c3e50")',
+    example: '#45292f',
+  })
+  @IsString()
+  @IsOptional()
+  secondaryColor?: string;
 
   @ApiPropertyOptional({
     description: 'Tone of the email',
