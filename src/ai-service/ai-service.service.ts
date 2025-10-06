@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { Wedding } from '@prisma/client';
 import OpenAI from 'openai';
 import { GenerateAiEmailTemplateDto } from '../email-notification/dto/generate-ai-email-template.dto';
 import { EmailTemplateResponse } from './interfaces/email-template-response.interface';
@@ -33,10 +32,21 @@ export class AiServiceService {
 
   async generateEmailTemplate(
     dto: GenerateAiEmailTemplateDto,
-    weddingDetails?: Wedding,
+    weddingDetails?: any,
   ): Promise<EmailTemplateResponse> {
     const brandName = weddingDetails?.name || 'Knotly';
     const tone = dto.tone || 'friendly';
+
+    // Build microsite URL if wedding has microsite
+    const micrositeUrl = weddingDetails?.microsite?.slug
+      ? `${process.env.FRONTEND_URL}/microsite/${weddingDetails.microsite.slug}`
+      : null;
+
+    // Build Google Maps URL if location is provided (from DTO or wedding details)
+    const location = dto.mapLocation || weddingDetails?.location;
+    const locationMapUrl = location
+      ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`
+      : null;
 
     // Extract wedding information if available
     const weddingContext = weddingDetails
@@ -50,6 +60,7 @@ export class AiServiceService {
           - Guest Count Range: ${weddingDetails.guestCountBucket || 'Not set'}
           - Preferred Style: ${weddingDetails.preferredStyle || 'Not specified'}
           - Preferred Services: ${weddingDetails.preferredServices?.join(', ') || 'Not specified'}
+          ${micrositeUrl ? `- Microsite URL: ${micrositeUrl}` : ''}
 
           Use these details to make the email more personal and relevant to the couple's wedding.
       `
@@ -89,9 +100,15 @@ export class AiServiceService {
 
     4. CONTENT:
       - Email purpose: ${dto.emailPurpose}
-      ${dto.recipientName ? `- Recipient name placeholder: {{name}} or {{userName}}` : ''}
+      ${dto.audience ? `- Greeting audience: ${dto.audience}` : '- Use a warm, inclusive greeting like "Dear Close Ones" or "Dear Family and Friends"'}
       ${dto.mainMessage ? `- Main message: ${dto.mainMessage}` : ''}
-      ${dto.buttonText && dto.buttonUrl ? `- CTA button text: "${dto.buttonText}" with URL placeholder: {{buttonUrl}}` : ''}
+
+      CALL-TO-ACTION BUTTONS (display in the same row):
+      ${micrositeUrl ? `- First button: "View More" linking to: ${micrositeUrl}` : ''}
+      ${locationMapUrl ? `- Second button: "View On Map" linking to: ${locationMapUrl}` : ''}
+      ${!micrositeUrl && !locationMapUrl ? '- No call-to-action buttons available' : ''}
+      ${micrositeUrl && locationMapUrl ? '- Display both buttons side by side in the same row with equal width and spacing' : ''}
+
       - Tone: ${tone}
       ${dto.additionalContext ? `- Additional requirements: ${dto.additionalContext}` : ''}
 

@@ -18,12 +18,13 @@ export class GenerateAiEmailTemplateDto {
   emailPurpose: string;
 
   @ApiPropertyOptional({
-    description: 'Recipient name for personalization',
-    example: 'John Doe',
+    description:
+      'Target audience for the email greeting (e.g., "Dear Close Ones", "Dear Family and Friends", "Dear Valued Guests")',
+    example: 'Dear Close Ones',
   })
   @IsString()
   @IsOptional()
-  recipientName?: string;
+  audience?: string;
 
   @ApiPropertyOptional({
     description: 'Main content or message for the email',
@@ -59,20 +60,13 @@ export class GenerateAiEmailTemplateDto {
   tone?: EmailTone;
 
   @ApiPropertyOptional({
-    description: 'Text for the call-to-action button',
-    example: 'RSVP Now',
+    description:
+      'Location address to display on Google Maps. If provided, a "View On Map" button will be included in the email.',
+    example: '123 Wedding Venue Street, City, State 12345',
   })
   @IsString()
   @IsOptional()
-  buttonText?: string;
-
-  @ApiPropertyOptional({
-    description: 'URL for the call-to-action button',
-    example: 'https://knotly.app/rsvp',
-  })
-  @IsString()
-  @IsOptional()
-  buttonUrl?: string;
+  mapLocation?: string;
 
   @ApiPropertyOptional({
     description: 'Additional context or special requirements for the email',
