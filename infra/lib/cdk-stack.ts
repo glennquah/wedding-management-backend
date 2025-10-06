@@ -60,7 +60,8 @@ export class CdkStack extends cdk.Stack {
         SENDGRID_API_KEY: process.env.SENDGRID_API_KEY,
         STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
         STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
-        FASTAPI_URL: process.env.FASTAPI_URL
+        FASTAPI_URL: process.env.FASTAPI_URL,
+        FRONTEND_URL: process.env.FRONTEND_URL,
       },
       memorySize: 512,
       timeout: cdk.Duration.seconds(30),

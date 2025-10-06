@@ -1,6 +1,3 @@
--- CreateSchema
-CREATE SCHEMA IF NOT EXISTS "public";
-
 -- CreateEnum
 CREATE TYPE "public"."ConfirmationStatus" AS ENUM ('PENDING', 'CONFIRMED', 'REJECTED');
 
@@ -26,10 +23,13 @@ CREATE TYPE "public"."GuestCountBucket" AS ENUM ('SMALL', 'MEDIUM', 'LARGE');
 CREATE TYPE "public"."OrderStatus" AS ENUM ('PENDING', 'PAID', 'CANCELLED', 'COMPLETED');
 
 -- CreateEnum
+CREATE TYPE "public"."PaymentStatus" AS ENUM ('PENDING', 'PROCESSING', 'SUCCEEDED', 'FAILED', 'CANCELLED', 'REFUNDED', 'PARTIALLY_REFUNDED');
+
+-- CreateEnum
 CREATE TYPE "public"."VendorOnboardingStatus" AS ENUM ('PENDING', 'REJECTED', 'ONBOARDED');
 
 -- CreateEnum
-CREATE TYPE "public"."EmailTemplateType" AS ENUM ('PASSWORD_RESET', 'WELCOME', 'VERIFY_EMAIL', 'CREATE_ACCOUNT', 'CUSTOM');
+CREATE TYPE "public"."EmailTemplateType" AS ENUM ('PASSWORD_RESET', 'WELCOME', 'VERIFY_EMAIL', 'CREATE_ACCOUNT', 'VENDOR_STATUS', 'VENDOR_SUSPENSION', 'ADMIN_SUSPENSION', 'CUSTOM');
 
 -- CreateTable
 CREATE TABLE "public"."User" (
@@ -68,8 +68,8 @@ CREATE TABLE "public"."Vendor" (
     "bio" TEXT,
     "rating" DOUBLE PRECISION DEFAULT 0,
     "isSuspended" BOOLEAN NOT NULL DEFAULT false,
-    "serviceOffered" "public"."WeddingService" NOT NULL,
-    "styleOffered" "public"."WeddingStyle" NOT NULL,
+    "serviceOffered" "public"."WeddingService",
+    "styleOffered" "public"."WeddingStyle",
     "weddingTypes" "public"."WeddingType"[],
     "capacity" INTEGER,
     "onboardingStatus" "public"."VendorOnboardingStatus" NOT NULL DEFAULT 'PENDING'
@@ -134,6 +134,24 @@ CREATE TABLE "public"."Wedding" (
 );
 
 -- CreateTable
+CREATE TABLE "public"."Microsite" (
+    "id" SERIAL NOT NULL,
+    "templateNumber" INTEGER NOT NULL,
+    "slug" TEXT NOT NULL,
+    "coupleName" TEXT NOT NULL,
+    "heroImages" TEXT[],
+    "imageGallery" TEXT[],
+    "schedule" JSONB,
+    "faqs" JSONB,
+    "password" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "weddingId" INTEGER NOT NULL,
+
+    CONSTRAINT "Microsite_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "public"."Guest" (
     "id" SERIAL NOT NULL,
     "email" TEXT NOT NULL,
@@ -141,6 +159,7 @@ CREATE TABLE "public"."Guest" (
     "allergies" TEXT,
     "group" TEXT,
     "confirmationStatus" "public"."ConfirmationStatus" NOT NULL DEFAULT 'PENDING',
+    "attendance" BOOLEAN NOT NULL DEFAULT false,
     "weddingId" INTEGER NOT NULL,
     "primaryGuestId" INTEGER,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -168,7 +187,8 @@ CREATE TABLE "public"."Listing" (
 CREATE TABLE "public"."Order" (
     "id" SERIAL NOT NULL,
     "orderStatus" "public"."OrderStatus" NOT NULL DEFAULT 'PENDING',
-    "paymentMethod" TEXT NOT NULL,
+    "totalAmount" DOUBLE PRECISION NOT NULL,
+    "currency" TEXT NOT NULL DEFAULT 'SGD',
     "purchaseDate" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "remark" TEXT,
     "weddingId" INTEGER NOT NULL,
@@ -182,8 +202,45 @@ CREATE TABLE "public"."Order" (
 CREATE TABLE "public"."OrderListing" (
     "orderId" INTEGER NOT NULL,
     "listingId" INTEGER NOT NULL,
+    "bookedSlots" JSONB NOT NULL,
 
     CONSTRAINT "OrderListing_pkey" PRIMARY KEY ("orderId","listingId")
+);
+
+-- CreateTable
+CREATE TABLE "public"."Cart" (
+    "id" SERIAL NOT NULL,
+    "total" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "adminId" INTEGER NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Cart_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "public"."CartItem" (
+    "id" SERIAL NOT NULL,
+    "cartId" INTEGER NOT NULL,
+    "listingId" INTEGER NOT NULL,
+    "selectedSlots" JSONB NOT NULL,
+
+    CONSTRAINT "CartItem_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "public"."Payment" (
+    "id" SERIAL NOT NULL,
+    "stripeCheckoutSessionId" TEXT NOT NULL,
+    "stripePaymentIntentId" TEXT,
+    "amount" DOUBLE PRECISION NOT NULL,
+    "currency" TEXT NOT NULL DEFAULT 'SGD',
+    "paymentStatus" "public"."PaymentStatus" NOT NULL DEFAULT 'PENDING',
+    "orderId" INTEGER NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Payment_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -192,10 +249,21 @@ CREATE TABLE "public"."SeatingArrangement" (
     "weddingId" INTEGER NOT NULL,
     "groupPriorities" JSONB,
     "tables" JSONB NOT NULL,
+    "tablesPerRow" INTEGER,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "SeatingArrangement_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "public"."TokenBlacklist" (
+    "id" SERIAL NOT NULL,
+    "token" TEXT NOT NULL,
+    "expiresAt" TIMESTAMP(3) NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "TokenBlacklist_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -222,7 +290,40 @@ CREATE UNIQUE INDEX "NotificationDetails_weddingId_key" ON "public"."Notificatio
 CREATE UNIQUE INDEX "NotificationDetails_vendorId_key" ON "public"."NotificationDetails"("vendorId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Microsite_slug_key" ON "public"."Microsite"("slug");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Microsite_weddingId_key" ON "public"."Microsite"("weddingId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Cart_adminId_key" ON "public"."Cart"("adminId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "CartItem_cartId_listingId_key" ON "public"."CartItem"("cartId", "listingId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Payment_stripeCheckoutSessionId_key" ON "public"."Payment"("stripeCheckoutSessionId");
+
+-- CreateIndex
+CREATE INDEX "Payment_stripeCheckoutSessionId_idx" ON "public"."Payment"("stripeCheckoutSessionId");
+
+-- CreateIndex
+CREATE INDEX "Payment_stripePaymentIntentId_idx" ON "public"."Payment"("stripePaymentIntentId");
+
+-- CreateIndex
+CREATE INDEX "Payment_paymentStatus_idx" ON "public"."Payment"("paymentStatus");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "SeatingArrangement_weddingId_key" ON "public"."SeatingArrangement"("weddingId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "TokenBlacklist_token_key" ON "public"."TokenBlacklist"("token");
+
+-- CreateIndex
+CREATE INDEX "TokenBlacklist_token_idx" ON "public"."TokenBlacklist"("token");
+
+-- CreateIndex
+CREATE INDEX "TokenBlacklist_expiresAt_idx" ON "public"."TokenBlacklist"("expiresAt");
 
 -- CreateIndex
 CREATE INDEX "_AdminWeddings_B_index" ON "public"."_AdminWeddings"("B");
@@ -252,6 +353,9 @@ ALTER TABLE "public"."NotificationDetails" ADD CONSTRAINT "NotificationDetails_w
 ALTER TABLE "public"."NotificationDetails" ADD CONSTRAINT "NotificationDetails_vendorId_fkey" FOREIGN KEY ("vendorId") REFERENCES "public"."Vendor"("userId") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "public"."Microsite" ADD CONSTRAINT "Microsite_weddingId_fkey" FOREIGN KEY ("weddingId") REFERENCES "public"."Wedding"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "public"."Guest" ADD CONSTRAINT "Guest_weddingId_fkey" FOREIGN KEY ("weddingId") REFERENCES "public"."Wedding"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -270,6 +374,18 @@ ALTER TABLE "public"."OrderListing" ADD CONSTRAINT "OrderListing_orderId_fkey" F
 ALTER TABLE "public"."OrderListing" ADD CONSTRAINT "OrderListing_listingId_fkey" FOREIGN KEY ("listingId") REFERENCES "public"."Listing"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "public"."Cart" ADD CONSTRAINT "Cart_adminId_fkey" FOREIGN KEY ("adminId") REFERENCES "public"."Admin"("userId") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "public"."CartItem" ADD CONSTRAINT "CartItem_cartId_fkey" FOREIGN KEY ("cartId") REFERENCES "public"."Cart"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "public"."CartItem" ADD CONSTRAINT "CartItem_listingId_fkey" FOREIGN KEY ("listingId") REFERENCES "public"."Listing"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "public"."Payment" ADD CONSTRAINT "Payment_orderId_fkey" FOREIGN KEY ("orderId") REFERENCES "public"."Order"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "public"."SeatingArrangement" ADD CONSTRAINT "SeatingArrangement_weddingId_fkey" FOREIGN KEY ("weddingId") REFERENCES "public"."Wedding"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -277,4 +393,3 @@ ALTER TABLE "public"."_AdminWeddings" ADD CONSTRAINT "_AdminWeddings_A_fkey" FOR
 
 -- AddForeignKey
 ALTER TABLE "public"."_AdminWeddings" ADD CONSTRAINT "_AdminWeddings_B_fkey" FOREIGN KEY ("B") REFERENCES "public"."Wedding"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-

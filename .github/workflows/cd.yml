@@ -50,6 +50,7 @@ jobs:
           STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
           STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
           FASTAPI_URL: ${{ secrets.FASTAPI_URL }}
+          FRONTEND_URL: ${{ secrets.FRONTEND_URL }}
         run: |
           cd infra
           npx cdk deploy --require-approval never
