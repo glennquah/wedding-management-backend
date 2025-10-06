@@ -14,6 +14,29 @@ export class AiServiceService {
     });
   }
 
+  private async getJsonCompletion<T>(
+    prompt: string,
+    options?: {
+      model?: string;
+      temperature?: number;
+    },
+  ): Promise<T> {
+    const completion = await this.client.chat.completions.create({
+      model: options?.model || 'gpt-4o',
+      messages: [{ role: 'user', content: prompt }],
+      temperature: options?.temperature ?? 0.7,
+      response_format: { type: 'json_object' },
+    });
+
+    const raw = completion.choices[0].message.content;
+
+    try {
+      return typeof raw === 'string' ? JSON.parse(raw) : raw;
+    } catch {
+      throw new Error('OpenAI did not return valid JSON');
+    }
+  }
+
   async generateEmailTemplate(
     dto: GenerateAiEmailTemplateDto,
     weddingDetails?: any,
@@ -64,19 +87,9 @@ export class AiServiceService {
       weddingContext,
     });
 
-    const completion = await this.client.chat.completions.create({
+    return this.getJsonCompletion<EmailTemplateResponse>(systemPrompt, {
       model: 'gpt-4o',
-      messages: [{ role: 'user', content: systemPrompt }],
       temperature: 0.7,
-      response_format: { type: 'json_object' },
     });
-
-    const raw = completion.choices[0].message.content;
-
-    try {
-      return typeof raw === 'string' ? JSON.parse(raw) : raw;
-    } catch {
-      throw new Error('OpenAI did not return valid JSON');
-    }
   }
 }
