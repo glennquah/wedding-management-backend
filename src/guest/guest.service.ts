@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Guest } from '@prisma/client';
 import { ConfirmationStatus } from '../common/confirmation-status.enum';
+import { EmailNotificationService } from '../email-notification/email-notification.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateGuestDto } from './dto/create-guest.dto';
 import { GuestResponseDto } from './dto/guest-response.dto';
@@ -13,24 +14,54 @@ type GuestWithAccompanying = Guest & {
 
 @Injectable()
 export class GuestService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private emailNotificationService: EmailNotificationService,
+  ) {}
 
   async create(dto: CreateGuestDto): Promise<Guest> {
     // Validate that the wedding exists
     const wedding = await this.prisma.wedding.findUnique({
       where: { id: dto.weddingId },
+      include: {
+        microsite: true,
+      },
     });
 
     if (!wedding) {
       throw new NotFoundException(`Wedding with ID ${dto.weddingId} not found`);
     }
 
-    return this.prisma.guest.create({
+    const guest = await this.prisma.guest.create({
       data: dto,
       include: {
         accompanyingGuests: true,
       },
     });
+
+    // Send RSVP if flag is set
+    if (dto.sendEmail) {
+      try {
+        const micrositeUrl = `${process.env.FRONTEND_URL}/microsite/${wedding.microsite.slug}`;
+        const nameParts = guest.name.split(' ');
+        const firstName = nameParts[0] || '';
+        const lastName = nameParts.slice(1).join(' ') || '';
+
+        const rsvpUrl = `${micrositeUrl}?password=${encodeURIComponent(wedding.microsite.password || '')}&firstName=${encodeURIComponent(firstName)}&lastName=${encodeURIComponent(lastName)}`;
+
+        await this.emailNotificationService.sendRsvpInvitationEmail(
+          guest.email,
+          guest.name,
+          wedding.name,
+          rsvpUrl,
+          wedding.id,
+        );
+      } catch (error) {
+        console.error('Failed to send RSVP email:', error);
+      }
+    }
+
+    return guest;
   }
 
   async findByWeddingId(weddingId: number): Promise<Guest[]> {
