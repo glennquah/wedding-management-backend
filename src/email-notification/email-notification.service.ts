@@ -3,8 +3,12 @@ import * as sgMail from '@sendgrid/mail';
 import * as fs from 'fs';
 import * as Handlebars from 'handlebars';
 import * as path from 'path';
+import { AiServiceService } from 'src/ai-service/ai-service.service';
+import { EmailTemplateResponse } from 'src/ai-service/interfaces/email-template-response.interface';
 import { VendorOnboardingStatus } from 'src/common/vendor-onboarding-status.enum';
+import { WeddingService } from 'src/wedding/wedding.service';
 import { NotificationDetailsService } from '../notification-details/notification-details.service';
+import { GenerateAiEmailTemplateDto } from './dto/generate-ai-email-template.dto';
 import { SendBulkEmailDto } from './dto/send-bulk-email.dto';
 import { EmailTemplateType } from './enums/email-template.enum';
 import {
@@ -32,7 +36,11 @@ export class EmailNotificationService {
 
   private templates: Map<string, HandlebarsTemplateDelegate<any>> = new Map();
 
-  constructor(private notificationDetailsService: NotificationDetailsService) {
+  constructor(
+    private notificationDetailsService: NotificationDetailsService,
+    private aiService: AiServiceService,
+    private weddingService: WeddingService,
+  ) {
     const key = process.env.SENDGRID_API_KEY;
     if (!key) {
       throw new Error('SENDGRID_API_KEY is not set in environment variables');
@@ -595,5 +603,13 @@ export class EmailNotificationService {
       }
       throw error;
     }
+  }
+
+  async getAIEmailTemplate(
+    weddingId: number,
+    generateDto: GenerateAiEmailTemplateDto,
+  ): Promise<EmailTemplateResponse> {
+    const weddingDetails = await this.weddingService.findById(weddingId);
+    return this.aiService.generateEmailTemplate(generateDto, weddingDetails);
   }
 }
