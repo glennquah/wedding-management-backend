@@ -35,7 +35,7 @@ export class AiServiceService {
     dto: GenerateAiEmailTemplateDto,
     weddingDetails?: Wedding,
   ): Promise<EmailTemplateResponse> {
-    const brandName = dto.brandName || 'Knotly';
+    const brandName = weddingDetails?.name || 'Knotly';
     const tone = dto.tone || 'friendly';
 
     // Extract wedding information if available

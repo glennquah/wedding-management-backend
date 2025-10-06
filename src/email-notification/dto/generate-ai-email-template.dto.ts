@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsOptional, IsEnum } from 'class-validator';
+import { IsEnum, IsOptional, IsString } from 'class-validator';
 
 export enum EmailTone {
   FORMAL = 'formal',
@@ -10,7 +10,8 @@ export enum EmailTone {
 
 export class GenerateAiEmailTemplateDto {
   @ApiProperty({
-    description: 'The purpose of the email (e.g., "welcome email", "event invitation", "thank you note")',
+    description:
+      'The purpose of the email (e.g., "welcome email", "event invitation", "thank you note")',
     example: 'wedding invitation',
   })
   @IsString()
@@ -72,15 +73,6 @@ export class GenerateAiEmailTemplateDto {
   @IsString()
   @IsOptional()
   buttonUrl?: string;
-
-  @ApiPropertyOptional({
-    description: 'Brand name to use in the template',
-    example: 'Knotly',
-    default: 'Knotly',
-  })
-  @IsString()
-  @IsOptional()
-  brandName?: string;
 
   @ApiPropertyOptional({
     description: 'Additional context or special requirements for the email',
