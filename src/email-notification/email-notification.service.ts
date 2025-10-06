@@ -12,6 +12,7 @@ import {
   CreateAccountData,
   EmailTemplateData,
   PasswordResetData,
+  RsvpInvitationData,
   VendorStatusData,
   VendorSuspensionData,
   VerifyEmailData,
@@ -52,6 +53,10 @@ export class EmailNotificationService {
         {
           name: EmailTemplateType.ADMIN_SUSPENSION,
           file: 'admin-suspension.html',
+        },
+        {
+          name: EmailTemplateType.RSVP_INVITATION,
+          file: 'rsvp-invitation.html',
         },
       ];
 
@@ -277,6 +282,55 @@ export class EmailNotificationService {
     Create Account: ${templateData.signupUrl}
 
     If you don't want to join this wedding planning team, you can safely ignore this email. The invitation link will expire in 7 days.
+
+    ---
+    Knotly - Your Perfect Wedding, Perfectly Planned
+    Website: https://knotly.app`;
+  }
+
+  async sendRsvpInvitationEmail(
+    to: string,
+    name: string,
+    weddingName: string,
+    rsvpUrl: string,
+    weddingId?: number,
+  ): Promise<void> {
+    const templateData: RsvpInvitationData = {
+      name,
+      weddingName,
+      rsvpUrl,
+    };
+
+    const html = this.renderTemplate(
+      EmailTemplateType.RSVP_INVITATION,
+      templateData,
+    );
+    const text = this.generateRsvpInvitationPlainText(templateData);
+
+    await this.sendEmail(
+      to,
+      `You're Invited to ${weddingName}!`,
+      text,
+      html,
+      EmailTemplateType.RSVP_INVITATION,
+      weddingId,
+    );
+  }
+
+  private generateRsvpInvitationPlainText(
+    templateData: RsvpInvitationData,
+  ): string {
+    return `Dear ${templateData.name},
+
+    We are delighted to invite you to our special day! Your presence would mean the world to us as we celebrate our love and commitment.
+
+    Wedding: ${templateData.weddingName}
+
+    Please click the link below to RSVP and let us know if you can join us for this joyous occasion. Your response will help us ensure everything is perfect for our big day.
+
+    RSVP Now: ${templateData.rsvpUrl}
+
+    We look forward to celebrating with you! If you have any questions, please don't hesitate to reach out.
 
     ---
     Knotly - Your Perfect Wedding, Perfectly Planned
