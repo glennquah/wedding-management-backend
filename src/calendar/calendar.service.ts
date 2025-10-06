@@ -460,6 +460,7 @@ export class CalendarService {
             timeMax: dto.endDate,
             singleEvents: true,
             orderBy: 'startTime',
+            timeZone: 'Asia/Singapore', // Use the user's local timezone
           });
 
           busySlots = [];
@@ -470,25 +471,14 @@ export class CalendarService {
             if (event.status === 'cancelled') continue;
 
             // Check if it's an all-day event (uses 'date' instead of 'dateTime')
-            if (event.start?.date) {
-              // All-day event - use UTC to avoid timezone shifts
-              // Google Calendar returns all-day events as YYYY-MM-DD strings
-              const startDateStr = event.start.date;
-              const endDateStr = event.end?.date || event.start.date;
+            if (event.start?.date && event.end?.date) {
+              // All-day event. The end date from the Google API is exclusive.
+              const startDate = new Date(`${event.start.date}T00:00:00Z`);
 
-              // Create dates in UTC to preserve the exact date
-              const [startYear, startMonth, startDay] = startDateStr
-                .split('-')
-                .map(Number);
-              const startDate = new Date(
-                Date.UTC(startYear, startMonth - 1, startDay, 0, 0, 0, 0),
-              );
-
-              const [endYear, endMonth, endDay] = endDateStr
-                .split('-')
-                .map(Number);
+              // To get the inclusive end of the event, we subtract one millisecond
+              // from the start of the exclusive end date.
               const endDate = new Date(
-                Date.UTC(endYear, endMonth - 1, endDay, 23, 59, 59, 999),
+                new Date(`${event.end.date}T00:00:00Z`).getTime() - 1,
               );
 
               busySlots.push({
@@ -511,9 +501,6 @@ export class CalendarService {
           busySlots,
         });
       } catch (error) {
-        this.logger.error(
-          `Error fetching calendar for attendee ${attendeeId}: ${error.message}`,
-        );
         attendees.push({
           attendeeId,
           name,
