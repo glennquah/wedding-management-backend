@@ -21,6 +21,7 @@ export class GuestService {
 
   async create(dto: CreateGuestDto): Promise<Guest> {
     // Validate that the wedding exists
+    console.log('Creating guest with DTO:', dto);
     const wedding = await this.prisma.wedding.findUnique({
       where: { id: dto.weddingId },
       include: {
@@ -32,15 +33,18 @@ export class GuestService {
       throw new NotFoundException(`Wedding with ID ${dto.weddingId} not found`);
     }
 
+    // Separate sendEmail flag from guest data
+    const { sendEmail, ...guestData } = dto;
+
     const guest = await this.prisma.guest.create({
-      data: dto,
+      data: guestData,
       include: {
         accompanyingGuests: true,
       },
     });
 
     // Send RSVP if flag is set
-    if (dto.sendEmail) {
+    if (sendEmail) {
       try {
         const micrositeUrl = `${process.env.FRONTEND_URL}/microsite/${wedding.microsite.slug}`;
         const nameParts = guest.name.split(' ');
