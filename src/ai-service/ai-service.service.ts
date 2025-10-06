@@ -129,7 +129,7 @@ export class AiServiceService {
     }`;
 
     const completion = await this.client.chat.completions.create({
-      model: 'gpt-4-turbo',
+      model: 'gpt-4o',
       messages: [{ role: 'user', content: systemPrompt }],
       temperature: 0.7,
       response_format: { type: 'json_object' },
