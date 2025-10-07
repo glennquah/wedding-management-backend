@@ -228,6 +228,7 @@ model Guest {
   group              String?
   confirmationStatus ConfirmationStatus @default(PENDING)
   attendance         Boolean            @default(false)
+  checkInTime        DateTime?
   weddingId          Int
   wedding            Wedding            @relation(fields: [weddingId], references: [id], onDelete: Cascade)
   primaryGuestId     Int?
