@@ -127,9 +127,12 @@ export class GuestService {
   async checkIn(id: number): Promise<Guest> {
     await this.findById(id);
 
+    const now = new Date();
+    const sgtTime = new Date(now.getTime() + 8 * 60 * 60 * 1000);
+
     return this.prisma.guest.update({
       where: { id },
-      data: { checkInTime: new Date() },
+      data: { checkInTime: sgtTime },
       include: {
         accompanyingGuests: true,
         primaryGuest: true,
