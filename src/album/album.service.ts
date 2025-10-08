@@ -2,12 +2,16 @@ import {
   Injectable,
   NotFoundException,
   ConflictException,
+  ForbiddenException,
+  StreamableFile,
 } from '@nestjs/common';
-import { Album, Prisma } from '@prisma/client';
+import { Album } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { AlbumResponseDto } from './dto/album-response.dto';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
+import * as archiver from 'archiver';
+import axios from 'axios';
 
 @Injectable()
 export class AlbumService {
@@ -16,19 +20,19 @@ export class AlbumService {
   private toAlbumaResponseDto(album: Album): AlbumResponseDto {
     return {
       id: album.id,
+      weddingId: album.weddingId,
       coupleName: album.coupleName,
       inviteCardMessage: album.inviteCardMessage,
       landingMessage: album.landingMessage,
       albumURL: album.albumURL,
+      photos: album.photos,
     };
   }
 
   async getAlbumByWeddingId(weddingId: number): Promise<AlbumResponseDto> {
     const album = await this.prisma.album.findUnique({
-      where: { weddingId: weddingId },
-      include: {
-        wedding: true,
-      },
+      where: { weddingId },
+      include: { wedding: true },
     });
 
     if (!album) {
@@ -40,18 +44,22 @@ export class AlbumService {
     return this.toAlbumaResponseDto(album);
   }
 
+  async getAlbumByAlbumId(albumId: number): Promise<AlbumResponseDto> {
+    const album = await this.prisma.album.findUnique({
+      where: { id: albumId },
+      include: { wedding: true },
+    });
+
+    return this.toAlbumaResponseDto(album);
+  }
+
   async createAlbum(
     userId: number,
     createAlbumDto: CreateAlbumDto,
   ): Promise<AlbumResponseDto> {
-    // Verify admin exists and owns the wedding
     const admin = await this.prisma.admin.findUnique({
       where: { userId },
-      include: {
-        weddings: {
-          where: { id: createAlbumDto.weddingId },
-        },
-      },
+      include: { weddings: { where: { id: createAlbumDto.weddingId } } },
     });
 
     if (!admin) {
@@ -59,12 +67,11 @@ export class AlbumService {
     }
 
     if (admin.weddings.length === 0) {
-      throw new NotFoundException(
+      throw new ForbiddenException(
         `Wedding with ID ${createAlbumDto.weddingId} not found or not owned by admin`,
       );
     }
 
-    // Check if wedding already has a album
     const existingAlbumForWedding = await this.prisma.album.findUnique({
       where: { weddingId: createAlbumDto.weddingId },
     });
@@ -75,7 +82,6 @@ export class AlbumService {
       );
     }
 
-    // Create the album
     const album = await this.prisma.album.create({
       data: {
         coupleName: createAlbumDto.coupleName,
@@ -83,10 +89,9 @@ export class AlbumService {
         landingMessage: createAlbumDto.landingMessage,
         weddingId: createAlbumDto.weddingId,
         albumURL: createAlbumDto.albumURL,
+        photos: [],
       },
-      include: {
-        wedding: true,
-      },
+      include: { wedding: true },
     });
 
     return this.toAlbumaResponseDto(album);
@@ -97,17 +102,10 @@ export class AlbumService {
     albumId: number,
     updateAlbumDto: UpdateAlbumDto,
   ): Promise<AlbumResponseDto> {
-    // First, get the album and verify ownership
     const existingAlbum = await this.prisma.album.findUnique({
       where: { id: albumId },
       include: {
-        wedding: {
-          include: {
-            admins: {
-              where: { userId },
-            },
-          },
-        },
+        wedding: { include: { admins: { where: { userId } } } },
       },
     });
 
@@ -116,12 +114,9 @@ export class AlbumService {
     }
 
     if (existingAlbum.wedding.admins.length === 0) {
-      throw new NotFoundException(
-        `Album with ID ${albumId} not found or not owned by admin`,
-      );
+      throw new ForbiddenException(`You do not have access to this album`);
     }
 
-    // Update the album
     const updatedAlbum = await this.prisma.album.update({
       where: { id: albumId },
       data: {
@@ -130,9 +125,28 @@ export class AlbumService {
         landingMessage: updateAlbumDto.landingMessage,
         albumURL: updateAlbumDto.albumURL,
       },
-      include: {
-        wedding: true,
-      },
+      include: { wedding: true },
+    });
+
+    return this.toAlbumaResponseDto(updatedAlbum);
+  }
+
+  async addPhoto(albumId: number, photoUrl: string): Promise<AlbumResponseDto> {
+    const album = await this.prisma.album.findUnique({
+      where: { id: albumId },
+    });
+
+    if (!album) {
+      throw new NotFoundException(`Album with ID ${albumId} not found`);
+    }
+
+    const updatedPhotos = album.photos
+      ? [...album.photos, photoUrl]
+      : [photoUrl];
+
+    const updatedAlbum = await this.prisma.album.update({
+      where: { id: albumId },
+      data: { photos: updatedPhotos },
     });
 
     return this.toAlbumaResponseDto(updatedAlbum);
@@ -142,17 +156,10 @@ export class AlbumService {
     userId: number,
     albumId: number,
   ): Promise<{ message: string }> {
-    // First, get the album and verify ownership
     const existingAlbum = await this.prisma.album.findUnique({
       where: { id: albumId },
       include: {
-        wedding: {
-          include: {
-            admins: {
-              where: { userId },
-            },
-          },
-        },
+        wedding: { include: { admins: { where: { userId } } } },
       },
     });
 
@@ -161,18 +168,37 @@ export class AlbumService {
     }
 
     if (existingAlbum.wedding.admins.length === 0) {
-      throw new NotFoundException(
-        `Album with ID ${albumId} not found or not owned by admin`,
-      );
+      throw new ForbiddenException(`You do not have access to this album`);
     }
 
-    // Delete the album
-    await this.prisma.album.delete({
-      where: { id: albumId },
-    });
+    await this.prisma.album.delete({ where: { id: albumId } });
 
     return {
       message: `Album with ID ${albumId} has been successfully deleted`,
     };
+  }
+
+  async streamAlbumZip(id: number): Promise<StreamableFile> {
+    const album = await this.getAlbumByAlbumId(id);
+
+    if (!album) throw new NotFoundException('Album not found');
+    if (!album.photos || album.photos.length === 0)
+      throw new NotFoundException('No photos in album');
+
+    const archive = archiver('zip', { zlib: { level: 9 } });
+
+    for (let i = 0; i < album.photos.length; i++) {
+      const url = album.photos[i];
+      const filename = `photo_${i + 1}.${url.split('.').pop().split('?')[0]}`;
+      const response = await axios.get(url, { responseType: 'stream' });
+      archive.append(response.data, { name: filename });
+    }
+
+    await archive.finalize();
+
+    return new StreamableFile(archive, {
+      type: 'application/zip',
+      disposition: `attachment; filename="album.zip"`,
+    });
   }
 }

@@ -9,6 +9,7 @@ import {
   Request,
   UseGuards,
   ParseIntPipe,
+  StreamableFile,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { JwtGuard } from '../auth/guards/jwt.guard';
@@ -27,8 +28,6 @@ export class AlbumController {
   constructor(private albumService: AlbumService) {}
 
   @Get('wedding/:weddingId')
-  @UseGuards(JwtGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Get album details by wedding ID' })
   @ApiResponse({
     status: 200,
@@ -118,5 +117,48 @@ export class AlbumController {
     @Param('id', ParseIntPipe) id: number,
   ): Promise<{ message: string }> {
     return this.albumService.deleteAlbum(req.user.sub, id);
+  }
+
+  @Post(':id/photos')
+  @ApiOperation({ summary: 'Add a photo to an album' })
+  @ApiResponse({
+    status: 200,
+    description: 'Photo successfully added to the album',
+    type: AlbumResponseDto,
+  })
+  @ApiResponse({ status: 400, description: 'Bad request.' })
+  @ApiResponse({
+    status: 404,
+    description: 'Album not found.',
+  })
+  async addPhoto(
+    @Param('id', ParseIntPipe) albumId: number,
+    @Body() body: UpdateAlbumDto,
+  ): Promise<AlbumResponseDto> {
+    return this.albumService.addPhoto(albumId, body.photoUrl);
+  }
+
+  @Get(':id/download')
+  @ApiOperation({ summary: 'Download all photos in an album as a ZIP file' })
+  @ApiResponse({
+    status: 200,
+    description: 'ZIP file containing all album photos',
+    content: {
+      'application/zip': {
+        schema: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Album not found or no photos in album.',
+  })
+  async downloadAlbum(
+    @Param('id', ParseIntPipe) albumId: number,
+  ): Promise<StreamableFile> {
+    return this.albumService.streamAlbumZip(albumId);
   }
 }

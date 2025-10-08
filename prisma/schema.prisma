@@ -227,6 +227,7 @@ model Album {
   inviteCardMessage String
   landingMessage    String
   albumURL          String?
+  photos            String[]
 
   weddingId Int     @unique
   wedding   Wedding @relation(fields: [weddingId], references: [id], onDelete: Cascade)
