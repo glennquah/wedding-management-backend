@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { EmailTemplateType } from '@prisma/client';
 import * as sgMail from '@sendgrid/mail';
 import * as fs from 'fs';
 import * as Handlebars from 'handlebars';
@@ -6,7 +7,6 @@ import * as path from 'path';
 import { VendorOnboardingStatus } from 'src/common/vendor-onboarding-status.enum';
 import { NotificationDetailsService } from '../notification-details/notification-details.service';
 import { SendBulkEmailDto } from './dto/send-bulk-email.dto';
-import { EmailTemplateType } from './enums/email-template.enum';
 import {
   AdminSuspensionData,
   CreateAccountData,

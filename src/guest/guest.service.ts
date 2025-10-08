@@ -44,7 +44,7 @@ export class GuestService {
     });
 
     // Send RSVP if flag is set
-    if (sendEmail) {
+    if (sendEmail && wedding.microsite) {
       try {
         const micrositeUrl = `${process.env.FRONTEND_URL}/microsite/${wedding.microsite.slug}`;
         const nameParts = guest.name.split(' ');
