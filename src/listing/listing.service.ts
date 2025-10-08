@@ -308,14 +308,18 @@ export class ListingService {
     return this.browseListings(enhancedFilters);
   }
 
-  async getCheapestListingForVendor(vendorId: number): Promise<Listing | null> {
+  async getCheapestListingForVendor(vendorId: number): Promise<Listing> {
     const listings = await this.prisma.listing.findMany({
       where: { vendorId },
       orderBy: { price: 'asc' },
       take: 1,
     });
 
-    return listings.length > 0 ? listings[0] : null;
+    if (listings.length === 0) {
+      throw new NotFoundException(`No listings found for vendor ID ${vendorId}`);
+    }
+
+    return listings[0];
   }
 
   toListingResponseDto(listing: Listing): ListingResponseDto {

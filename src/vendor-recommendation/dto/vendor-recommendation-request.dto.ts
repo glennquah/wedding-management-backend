@@ -20,5 +20,5 @@ export class VendorRecommendationRequestDto {
   @IsInt()
   @Min(1)
   @Max(50)
-  top_k?: number = 10;
+  top_k?: number;
 }
