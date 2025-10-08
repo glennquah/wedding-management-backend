@@ -3,15 +3,12 @@ import {
   NotFoundException,
   ConflictException,
   ForbiddenException,
-  StreamableFile,
 } from '@nestjs/common';
 import { Album } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { AlbumResponseDto } from './dto/album-response.dto';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
-import * as archiver from 'archiver';
-import axios from 'axios';
 
 @Injectable()
 export class AlbumService {
