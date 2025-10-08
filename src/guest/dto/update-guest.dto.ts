@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsInt, IsOptional, IsString } from 'class-validator';
+import { IsDate, IsEnum, IsInt, IsOptional, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
 import { ConfirmationStatus } from '../../common/confirmation-status.enum';
 
 export class UpdateGuestDto {
@@ -46,4 +47,13 @@ export class UpdateGuestDto {
   @IsOptional()
   @IsEnum(ConfirmationStatus)
   confirmationStatus?: ConfirmationStatus;
+
+  @ApiProperty({
+    description: 'Check-in timestamp',
+    required: false,
+  })
+  @IsOptional()
+  @IsDate()
+  @Type(() => Date)
+  checkInTime?: Date;
 }
