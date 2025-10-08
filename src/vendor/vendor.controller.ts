@@ -235,4 +235,208 @@ export class VendorController {
       isSuspended: false,
     });
   }
+
+  // Business Certificate endpoints
+  @Post(':id/business-certificate')
+  @Roles(UserRole.VENDOR, UserRole.SUPERADMIN)
+  @ApiOperation({ summary: 'Add business certificate image URL' })
+  @ApiResponse({
+    status: 200,
+    description: 'Business certificate URL added successfully.',
+    type: VendorResponseDto,
+  })
+  @ApiResponse({ status: 404, description: 'Vendor not found.' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        imageUrl: { type: 'string', example: 'https://example.com/cert.jpg' },
+      },
+      required: ['imageUrl'],
+    },
+  })
+  async addBusinessCertificate(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: { imageUrl: string },
+  ): Promise<VendorResponseDto> {
+    return this.service.addBusinessCertificate(id, body.imageUrl);
+  }
+
+  @Put(':id/business-certificate')
+  @Roles(UserRole.VENDOR, UserRole.SUPERADMIN)
+  @ApiOperation({ summary: 'Update business certificate image URL' })
+  @ApiResponse({
+    status: 200,
+    description: 'Business certificate URL updated successfully.',
+    type: VendorResponseDto,
+  })
+  @ApiResponse({ status: 404, description: 'Vendor not found.' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        imageUrl: { type: 'string', example: 'https://example.com/cert.jpg' },
+      },
+      required: ['imageUrl'],
+    },
+  })
+  async updateBusinessCertificate(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: { imageUrl: string },
+  ): Promise<VendorResponseDto> {
+    return this.service.updateBusinessCertificate(id, body.imageUrl);
+  }
+
+  @Delete(':id/business-certificate')
+  @Roles(UserRole.VENDOR, UserRole.SUPERADMIN)
+  @ApiOperation({ summary: 'Delete business certificate image URL' })
+  @ApiResponse({
+    status: 200,
+    description: 'Business certificate URL deleted successfully.',
+    type: VendorResponseDto,
+  })
+  @ApiResponse({ status: 404, description: 'Vendor not found.' })
+  async deleteBusinessCertificate(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<VendorResponseDto> {
+    return this.service.deleteBusinessCertificate(id);
+  }
+
+  // Rating Screenshot endpoints
+  @Post(':id/rating-screenshot')
+  @Roles(UserRole.VENDOR, UserRole.SUPERADMIN)
+  @ApiOperation({ summary: 'Add rating screenshot image URL' })
+  @ApiResponse({
+    status: 200,
+    description: 'Rating screenshot URL added successfully.',
+    type: VendorResponseDto,
+  })
+  @ApiResponse({ status: 404, description: 'Vendor not found.' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        imageUrl: {
+          type: 'string',
+          example: 'https://example.com/rating.jpg',
+        },
+      },
+      required: ['imageUrl'],
+    },
+  })
+  async addRatingScreenshot(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: { imageUrl: string },
+  ): Promise<VendorResponseDto> {
+    return this.service.addRatingScreenshot(id, body.imageUrl);
+  }
+
+  @Put(':id/rating-screenshot')
+  @Roles(UserRole.VENDOR, UserRole.SUPERADMIN)
+  @ApiOperation({ summary: 'Update rating screenshot image URL' })
+  @ApiResponse({
+    status: 200,
+    description: 'Rating screenshot URL updated successfully.',
+    type: VendorResponseDto,
+  })
+  @ApiResponse({ status: 404, description: 'Vendor not found.' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        imageUrl: {
+          type: 'string',
+          example: 'https://example.com/rating.jpg',
+        },
+      },
+      required: ['imageUrl'],
+    },
+  })
+  async updateRatingScreenshot(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: { imageUrl: string },
+  ): Promise<VendorResponseDto> {
+    return this.service.updateRatingScreenshot(id, body.imageUrl);
+  }
+
+  @Delete(':id/rating-screenshot')
+  @Roles(UserRole.VENDOR, UserRole.SUPERADMIN)
+  @ApiOperation({ summary: 'Delete rating screenshot image URL' })
+  @ApiResponse({
+    status: 200,
+    description: 'Rating screenshot URL deleted successfully.',
+    type: VendorResponseDto,
+  })
+  @ApiResponse({ status: 404, description: 'Vendor not found.' })
+  async deleteRatingScreenshot(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<VendorResponseDto> {
+    return this.service.deleteRatingScreenshot(id);
+  }
+
+  // Identity Document endpoints
+  @Post(':id/identity-document')
+  @Roles(UserRole.VENDOR, UserRole.SUPERADMIN)
+  @ApiOperation({ summary: 'Add identity document image URL' })
+  @ApiResponse({
+    status: 200,
+    description: 'Identity document URL added successfully.',
+    type: VendorResponseDto,
+  })
+  @ApiResponse({ status: 404, description: 'Vendor not found.' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        imageUrl: { type: 'string', example: 'https://example.com/id.jpg' },
+      },
+      required: ['imageUrl'],
+    },
+  })
+  async addIdentityDocument(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: { imageUrl: string },
+  ): Promise<VendorResponseDto> {
+    return this.service.addIdentityDocument(id, body.imageUrl);
+  }
+
+  @Put(':id/identity-document')
+  @Roles(UserRole.VENDOR, UserRole.SUPERADMIN)
+  @ApiOperation({ summary: 'Update identity document image URL' })
+  @ApiResponse({
+    status: 200,
+    description: 'Identity document URL updated successfully.',
+    type: VendorResponseDto,
+  })
+  @ApiResponse({ status: 404, description: 'Vendor not found.' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        imageUrl: { type: 'string', example: 'https://example.com/id.jpg' },
+      },
+      required: ['imageUrl'],
+    },
+  })
+  async updateIdentityDocument(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: { imageUrl: string },
+  ): Promise<VendorResponseDto> {
+    return this.service.updateIdentityDocument(id, body.imageUrl);
+  }
+
+  @Delete(':id/identity-document')
+  @Roles(UserRole.VENDOR, UserRole.SUPERADMIN)
+  @ApiOperation({ summary: 'Delete identity document image URL' })
+  @ApiResponse({
+    status: 200,
+    description: 'Identity document URL deleted successfully.',
+    type: VendorResponseDto,
+  })
+  @ApiResponse({ status: 404, description: 'Vendor not found.' })
+  async deleteIdentityDocument(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<VendorResponseDto> {
+    return this.service.deleteIdentityDocument(id);
+  }
 }

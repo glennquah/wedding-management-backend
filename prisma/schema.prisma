@@ -139,6 +139,9 @@ model Vendor {
   styleOffered        WeddingStyle?
   weddingTypes        WeddingType[]
   capacity            Int?
+  businessCertificate String?
+  ratingScreenshot    String?
+  identityDocument    String?
   listings            Listing[]
   onboardingStatus    VendorOnboardingStatus @default(PENDING)
   notificationDetails NotificationDetails?

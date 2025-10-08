@@ -92,6 +92,30 @@ export class CreateVendorDto extends CreateUserDto {
   capacity?: number;
 
   @ApiProperty({
+    description: 'Business certificate image URL',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  businessCertificate?: string;
+
+  @ApiProperty({
+    description: 'Rating screenshot image URL',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  ratingScreenshot?: string;
+
+  @ApiProperty({
+    description: 'Identity document image URL',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  identityDocument?: string;
+
+  @ApiProperty({
     description: 'Onboarding status of vendor',
     enum: VendorOnboardingStatus,
     enumName: 'VendorOnboardingStatus',

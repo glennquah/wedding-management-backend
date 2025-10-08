@@ -67,6 +67,24 @@ export class VendorResponseDto extends UserResponseDto {
   capacity?: number;
 
   @ApiProperty({
+    description: 'Business certificate image URL',
+    required: false,
+  })
+  businessCertificate?: string;
+
+  @ApiProperty({
+    description: 'Rating screenshot image URL',
+    required: false,
+  })
+  ratingScreenshot?: string;
+
+  @ApiProperty({
+    description: 'Identity document image URL',
+    required: false,
+  })
+  identityDocument?: string;
+
+  @ApiProperty({
     description: 'Onboarding status of the vendor',
     enum: VendorOnboardingStatus,
     enumName: 'VendorOnboardingStatus',

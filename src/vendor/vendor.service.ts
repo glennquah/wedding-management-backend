@@ -41,6 +41,9 @@ export class VendorService {
       styleOffered: vendor.styleOffered as WeddingStyle,
       weddingTypes: vendor.weddingTypes as WeddingType[],
       capacity: vendor.capacity,
+      businessCertificate: vendor.businessCertificate,
+      ratingScreenshot: vendor.ratingScreenshot,
+      identityDocument: vendor.identityDocument,
       onboardingStatus: vendor.onboardingStatus as VendorOnboardingStatus,
       isSuspended: vendor.isSuspended,
     };
@@ -95,6 +98,9 @@ export class VendorService {
         styleOffered: dto.styleOffered,
         weddingTypes: dto.weddingTypes,
         capacity: dto.capacity,
+        businessCertificate: dto.businessCertificate,
+        ratingScreenshot: dto.ratingScreenshot,
+        identityDocument: dto.identityDocument,
         notificationDetails: {
           create: {},
         },
@@ -265,5 +271,116 @@ export class VendorService {
       vendors.map((vendor) => this.create(vendor)), // returns VendorResponseDto
     );
     return createdVendors;
+  }
+
+  // Business Certificate image URL operations
+  async addBusinessCertificate(
+    userId: number,
+    imageUrl: string,
+  ): Promise<VendorResponseDto> {
+    await this.findById(userId);
+    const updatedVendor = await this.prisma.vendor.update({
+      where: { userId },
+      data: { businessCertificate: imageUrl },
+      include: { user: true },
+    });
+    return this.toVendorResponseDto(updatedVendor);
+  }
+
+  async updateBusinessCertificate(
+    userId: number,
+    imageUrl: string,
+  ): Promise<VendorResponseDto> {
+    await this.findById(userId);
+    const updatedVendor = await this.prisma.vendor.update({
+      where: { userId },
+      data: { businessCertificate: imageUrl },
+      include: { user: true },
+    });
+    return this.toVendorResponseDto(updatedVendor);
+  }
+
+  async deleteBusinessCertificate(userId: number): Promise<VendorResponseDto> {
+    await this.findById(userId);
+    const updatedVendor = await this.prisma.vendor.update({
+      where: { userId },
+      data: { businessCertificate: null },
+      include: { user: true },
+    });
+    return this.toVendorResponseDto(updatedVendor);
+  }
+
+  // Rating Screenshot image URL operations
+  async addRatingScreenshot(
+    userId: number,
+    imageUrl: string,
+  ): Promise<VendorResponseDto> {
+    await this.findById(userId);
+    const updatedVendor = await this.prisma.vendor.update({
+      where: { userId },
+      data: { ratingScreenshot: imageUrl },
+      include: { user: true },
+    });
+    return this.toVendorResponseDto(updatedVendor);
+  }
+
+  async updateRatingScreenshot(
+    userId: number,
+    imageUrl: string,
+  ): Promise<VendorResponseDto> {
+    await this.findById(userId);
+    const updatedVendor = await this.prisma.vendor.update({
+      where: { userId },
+      data: { ratingScreenshot: imageUrl },
+      include: { user: true },
+    });
+    return this.toVendorResponseDto(updatedVendor);
+  }
+
+  async deleteRatingScreenshot(userId: number): Promise<VendorResponseDto> {
+    await this.findById(userId);
+    const updatedVendor = await this.prisma.vendor.update({
+      where: { userId },
+      data: { ratingScreenshot: null },
+      include: { user: true },
+    });
+    return this.toVendorResponseDto(updatedVendor);
+  }
+
+  // Identity Document image URL operations
+  async addIdentityDocument(
+    userId: number,
+    imageUrl: string,
+  ): Promise<VendorResponseDto> {
+    await this.findById(userId);
+    const updatedVendor = await this.prisma.vendor.update({
+      where: { userId },
+      data: { identityDocument: imageUrl },
+      include: { user: true },
+    });
+    return this.toVendorResponseDto(updatedVendor);
+  }
+
+  async updateIdentityDocument(
+    userId: number,
+    imageUrl: string,
+  ): Promise<VendorResponseDto> {
+    await this.findById(userId);
+    const updatedVendor = await this.prisma.vendor.update({
+      where: { userId },
+      data: { identityDocument: imageUrl },
+      include: { user: true },
+    });
+    return this.toVendorResponseDto(updatedVendor);
+  }
+
+  async deleteIdentityDocument(userId: number): Promise<VendorResponseDto> {
+    await this.findById(userId);
+    const updatedVendor = await this.prisma.vendor.update({
+      where: { userId },
+      data: { identityDocument: null },
+      include: { user: true },
+    });
+    return this.toVendorResponseDto(updatedVendor);
   }
 }
