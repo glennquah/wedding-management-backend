@@ -17,7 +17,7 @@ import axios from 'axios';
 export class AlbumService {
   constructor(private prisma: PrismaService) {}
 
-  private toAlbumaResponseDto(album: Album): AlbumResponseDto {
+  private toAlbumResponseDto(album: Album): AlbumResponseDto {
     return {
       id: album.id,
       weddingId: album.weddingId,
@@ -41,7 +41,7 @@ export class AlbumService {
       );
     }
 
-    return this.toAlbumaResponseDto(album);
+    return this.toAlbumResponseDto(album);
   }
 
   async getAlbumByAlbumId(albumId: number): Promise<AlbumResponseDto> {
@@ -50,7 +50,7 @@ export class AlbumService {
       include: { wedding: true },
     });
 
-    return this.toAlbumaResponseDto(album);
+    return this.toAlbumResponseDto(album);
   }
 
   async createAlbum(
@@ -94,7 +94,7 @@ export class AlbumService {
       include: { wedding: true },
     });
 
-    return this.toAlbumaResponseDto(album);
+    return this.toAlbumResponseDto(album);
   }
 
   async updateAlbum(
@@ -128,7 +128,7 @@ export class AlbumService {
       include: { wedding: true },
     });
 
-    return this.toAlbumaResponseDto(updatedAlbum);
+    return this.toAlbumResponseDto(updatedAlbum);
   }
 
   async addPhoto(albumId: number, photoUrl: string): Promise<AlbumResponseDto> {
@@ -149,7 +149,7 @@ export class AlbumService {
       data: { photos: updatedPhotos },
     });
 
-    return this.toAlbumaResponseDto(updatedAlbum);
+    return this.toAlbumResponseDto(updatedAlbum);
   }
 
   async deleteAlbum(
@@ -176,29 +176,5 @@ export class AlbumService {
     return {
       message: `Album with ID ${albumId} has been successfully deleted`,
     };
-  }
-
-  async streamAlbumZip(id: number): Promise<StreamableFile> {
-    const album = await this.getAlbumByAlbumId(id);
-
-    if (!album) throw new NotFoundException('Album not found');
-    if (!album.photos || album.photos.length === 0)
-      throw new NotFoundException('No photos in album');
-
-    const archive = archiver('zip', { zlib: { level: 9 } });
-
-    for (let i = 0; i < album.photos.length; i++) {
-      const url = album.photos[i];
-      const filename = `photo_${i + 1}.${url.split('.').pop().split('?')[0]}`;
-      const response = await axios.get(url, { responseType: 'stream' });
-      archive.append(response.data, { name: filename });
-    }
-
-    await archive.finalize();
-
-    return new StreamableFile(archive, {
-      type: 'application/zip',
-      disposition: `attachment; filename="album.zip"`,
-    });
   }
 }

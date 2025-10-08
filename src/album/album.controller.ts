@@ -49,7 +49,7 @@ export class AlbumController {
   @Post()
   @UseGuards(JwtGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
-  @ApiOperation({ summary: 'Create a album for a wedding' })
+  @ApiOperation({ summary: 'Create an album for a wedding' })
   @ApiResponse({
     status: 201,
     description: 'The album has been successfully created.',
@@ -59,7 +59,7 @@ export class AlbumController {
   @ApiResponse({ status: 404, description: 'Admin or wedding not found.' })
   @ApiResponse({
     status: 409,
-    description: 'Album slug already exists or wedding already has a album.',
+    description: 'Album slug already exists or wedding already has an album.',
   })
   async createAlbum(
     @Request() req: Request & { user: JwtPayload },
@@ -71,7 +71,7 @@ export class AlbumController {
   @Put(':id')
   @UseGuards(JwtGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
-  @ApiOperation({ summary: 'Update a album' })
+  @ApiOperation({ summary: 'Update an album' })
   @ApiResponse({
     status: 200,
     description: 'The album has been successfully updated.',
@@ -97,7 +97,7 @@ export class AlbumController {
   @Delete(':id')
   @UseGuards(JwtGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
-  @ApiOperation({ summary: 'Delete a album' })
+  @ApiOperation({ summary: 'Delete an album' })
   @ApiResponse({
     status: 200,
     description: 'The album has been successfully deleted.',
