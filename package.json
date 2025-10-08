@@ -48,6 +48,7 @@
     "@sendgrid/mail": "^8.1.5",
     "@types/handlebars": "^4.0.40",
     "@vendia/serverless-express": "^4.12.6",
+    "archiver": "^7.0.1",
     "aws-cdk-lib": "^2.215.0",
     "aws-lambda": "^1.0.7",
     "axios": "^1.12.2",

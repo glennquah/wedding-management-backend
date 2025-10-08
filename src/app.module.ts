@@ -18,6 +18,7 @@ import { VendorModule } from './vendor/vendor.module';
 import { WeddingModule } from './wedding/wedding.module';
 import { MicrositeModule } from './microsite/microsite.module';
 import { CartModule } from './cart/cart.module';
+import { AlbumModule } from './album/album.module';
 import { AiServiceModule } from './ai-service/ai-service.module';
 
 @Module({
@@ -39,6 +40,7 @@ import { AiServiceModule } from './ai-service/ai-service.module';
     OrderModule,
     PaymentModule,
     CartModule,
+    AlbumModule,
     AiServiceModule,
   ],
   controllers: [AppController],
