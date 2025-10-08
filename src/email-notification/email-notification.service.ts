@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { EmailTemplateType } from '@prisma/client';
 import * as sgMail from '@sendgrid/mail';
 import * as fs from 'fs';
 import * as Handlebars from 'handlebars';
 import * as path from 'path';
 import { VendorOnboardingStatus } from 'src/common/vendor-onboarding-status.enum';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { NotificationDetailsService } from '../notification-details/notification-details.service';
 import { SendBulkEmailDto } from './dto/send-bulk-email.dto';
 import {
@@ -29,7 +30,10 @@ export class EmailNotificationService {
   );
   private templates: Map<string, HandlebarsTemplateDelegate<any>> = new Map();
 
-  constructor(private notificationDetailsService: NotificationDetailsService) {
+  constructor(
+    private notificationDetailsService: NotificationDetailsService,
+    private prisma: PrismaService,
+  ) {
     const key = process.env.SENDGRID_API_KEY;
     if (!key) {
       throw new Error('SENDGRID_API_KEY is not set in environment variables');
@@ -286,6 +290,45 @@ export class EmailNotificationService {
     ---
     Knotly - Your Perfect Wedding, Perfectly Planned
     Website: https://knotly.app`;
+  }
+
+  async createRsvpDetails(guestId: number, weddingId: number): Promise<void> {
+    // Fetch guest data
+    const guest = await this.prisma.guest.findUnique({
+      where: { id: guestId },
+    });
+
+    if (!guest) {
+      throw new NotFoundException(`Guest with ID ${guestId} not found`);
+    }
+
+    if (!guest.email) {
+      throw new NotFoundException(
+        `Guest with ID ${guestId} does not have an email`,
+      );
+    }
+
+    // Fetch wedding data
+    const wedding = await this.prisma.wedding.findUnique({
+      where: { id: weddingId },
+    });
+
+    if (!wedding) {
+      throw new NotFoundException(`Wedding with ID ${weddingId} not found`);
+    }
+
+    // Craft RSVP URL
+    const frontendUrl = process.env.FRONTEND_URL || 'https://knotly.app';
+    const rsvpUrl = `${frontendUrl}/rsvp/${weddingId}/${guestId}`;
+
+    // Send the email
+    await this.sendRsvpInvitationEmail(
+      guest.email,
+      guest.name,
+      wedding.name,
+      rsvpUrl,
+      weddingId,
+    );
   }
 
   async sendRsvpInvitationEmail(

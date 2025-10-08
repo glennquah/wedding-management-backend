@@ -1,11 +1,12 @@
 import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { EmailTemplateType } from './enums/email-template.enum';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { SendBulkEmailDto } from './dto/send-bulk-email.dto';
+import { SendRsvpInvitationDto } from './dto/send-rsvp-invitation.dto';
 import { SendSingleEmailDto } from './dto/send-single-email.dto';
 import { EmailNotificationService } from './email-notification.service';
+import { EmailTemplateType } from './enums/email-template.enum';
 
 @ApiTags('email-notification')
 @Controller('email-notification')
@@ -44,6 +45,21 @@ export class EmailNotificationController {
       bulkEmailData,
       EmailTemplateType.CUSTOM,
       bulkEmailData.weddingId,
+    );
+  }
+
+  @Post('send-rsvp-invitation')
+  @ApiOperation({ summary: 'Send RSVP invitation email to a guest' })
+  @ApiResponse({
+    status: 201,
+    description: 'The RSVP invitation email has been successfully sent.',
+  })
+  async sendRsvpInvitation(
+    @Body() rsvpData: SendRsvpInvitationDto,
+  ): Promise<void> {
+    await this.emailNotificationService.createRsvpDetails(
+      rsvpData.guestId,
+      rsvpData.weddingId,
     );
   }
 }
