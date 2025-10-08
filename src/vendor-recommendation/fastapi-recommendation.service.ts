@@ -1,10 +1,10 @@
+import { HttpService } from '@nestjs/axios';
 import {
+  BadRequestException,
   Injectable,
   Logger,
-  BadRequestException,
   NotFoundException,
 } from '@nestjs/common';
-import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
 import { PrismaService } from '../prisma/prisma.service';
@@ -59,7 +59,7 @@ export class FastApiRecommendationService {
         preferred_style: wedding.preferredStyle,
         preferred_services: wedding.preferredServices,
       },
-      top_k: request.top_k || 10,
+      top_k: request.top_k || 20,
     };
 
     try {
