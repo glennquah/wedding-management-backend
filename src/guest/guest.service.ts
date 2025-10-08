@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Guest } from '@prisma/client';
 import { ConfirmationStatus } from '../common/confirmation-status.enum';
 import { EmailNotificationService } from '../email-notification/email-notification.service';
@@ -16,6 +21,7 @@ type GuestWithAccompanying = Guest & {
 export class GuestService {
   constructor(
     private prisma: PrismaService,
+    @Inject(forwardRef(() => EmailNotificationService))
     private emailNotificationService: EmailNotificationService,
   ) {}
 
