@@ -184,4 +184,20 @@ export class GuestController {
     });
     return this.guestService.toGuestResponseDto(guest);
   }
+
+  @Put(':id/mark-attendance')
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
+  @ApiOperation({ summary: 'Toggle guest attendance status' })
+  @ApiResponse({
+    status: 200,
+    description: 'The guest attendance has been toggled.',
+    type: GuestResponseDto,
+  })
+  @ApiResponse({ status: 404, description: 'Guest not found.' })
+  async markAttendance(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<GuestResponseDto> {
+    const guest = await this.guestService.markAttendance(id);
+    return this.guestService.toGuestResponseDto(guest);
+  }
 }

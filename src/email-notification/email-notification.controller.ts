@@ -1,11 +1,21 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Param,
+  ParseIntPipe,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { EmailTemplateType } from './enums/email-template.enum';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { AiServiceService } from '../ai-service/ai-service.service';
+import { EmailTemplateResponse } from '../ai-service/interfaces/email-template-response.interface';
+import { GenerateAiEmailTemplateDto } from './dto/generate-ai-email-template.dto';
 import { SendBulkEmailDto } from './dto/send-bulk-email.dto';
 import { SendSingleEmailDto } from './dto/send-single-email.dto';
 import { EmailNotificationService } from './email-notification.service';
+import { EmailTemplateType } from './enums/email-template.enum';
 
 @ApiTags('email-notification')
 @Controller('email-notification')
@@ -13,6 +23,7 @@ import { EmailNotificationService } from './email-notification.service';
 export class EmailNotificationController {
   constructor(
     private readonly emailNotificationService: EmailNotificationService,
+    private readonly aiService: AiServiceService,
   ) {}
 
   @Post('send')
@@ -44,6 +55,27 @@ export class EmailNotificationController {
       bulkEmailData,
       EmailTemplateType.CUSTOM,
       bulkEmailData.weddingId,
+    );
+  }
+
+  @Post('generate-ai-template/:weddingId')
+  @ApiOperation({
+    summary: 'Generate an AI-powered email template',
+    description:
+      'Uses AI to generate a custom HTML email template based on provided parameters. Returns both the HTML template and a suggested subject line.',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Email template successfully generated.',
+    type: EmailTemplateResponse,
+  })
+  async getAIEmailTemplate(
+    @Param('weddingId', ParseIntPipe) weddingId: number,
+    @Body() generateDto: GenerateAiEmailTemplateDto,
+  ): Promise<EmailTemplateResponse> {
+    return this.emailNotificationService.getAIEmailTemplate(
+      weddingId,
+      generateDto,
     );
   }
 }
