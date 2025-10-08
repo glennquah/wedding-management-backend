@@ -240,6 +240,7 @@ model Guest {
   allergies          String?
   group              String?
   confirmationStatus ConfirmationStatus @default(PENDING)
+  attendance         Boolean            @default(false)
   weddingId          Int
   wedding            Wedding            @relation(fields: [weddingId], references: [id], onDelete: Cascade)
   primaryGuestId     Int?

@@ -43,6 +43,10 @@ module.exports = {
           from: path.resolve(__dirname, 'node_modules/.prisma/client'),
           to: path.resolve(__dirname, 'dist/node_modules/.prisma/client'),
         },
+        {
+          from: path.resolve(__dirname, 'src/email-notification/email-templates'),
+          to: path.resolve(__dirname, 'dist/email-templates'),
+        },
       ],
     }),
   ],
