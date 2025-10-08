@@ -21,7 +21,6 @@ export class GuestService {
 
   async create(dto: CreateGuestDto): Promise<Guest> {
     // Validate that the wedding exists
-    console.log('Creating guest with DTO:', dto);
     const wedding = await this.prisma.wedding.findUnique({
       where: { id: dto.weddingId },
       include: {
