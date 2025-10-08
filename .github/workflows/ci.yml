@@ -39,6 +39,7 @@ jobs:
       FASTAPI_URL: http://localhost:8001
       STRIPE_SECRET_KEY: API_KEY_NOT_ACTUALLY_HERE
       STRIPE_WEBHOOK_SECRET: API_KEY_NOT_ACTUALLY_HERE
+      OPENAI_API_KEY: API_KEY_NOT_ACTUALLY_HERE
 
     steps:
       - name: Checkout code
