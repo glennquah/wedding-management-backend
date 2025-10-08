@@ -9,7 +9,6 @@ import {
   Request,
   UseGuards,
   ParseIntPipe,
-  StreamableFile,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { JwtGuard } from '../auth/guards/jwt.guard';
@@ -136,29 +135,5 @@ export class AlbumController {
     @Body() body: UpdateAlbumDto,
   ): Promise<AlbumResponseDto> {
     return this.albumService.addPhoto(albumId, body.photoUrl);
-  }
-
-  @Get(':id/download')
-  @ApiOperation({ summary: 'Download all photos in an album as a ZIP file' })
-  @ApiResponse({
-    status: 200,
-    description: 'ZIP file containing all album photos',
-    content: {
-      'application/zip': {
-        schema: {
-          type: 'string',
-          format: 'binary',
-        },
-      },
-    },
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Album not found or no photos in album.',
-  })
-  async downloadAlbum(
-    @Param('id', ParseIntPipe) albumId: number,
-  ): Promise<StreamableFile> {
-    return this.albumService.streamAlbumZip(albumId);
   }
 }
