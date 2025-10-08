@@ -454,9 +454,8 @@ export class ListingController {
   async getCheapestListingForVendor(
     @Param('vendorId', ParseIntPipe) vendorId: number,
   ) {
-    const listing = await this.listingService.getCheapestListingForVendor(
-      vendorId,
-    );
+    const listing =
+      await this.listingService.getCheapestListingForVendor(vendorId);
     return this.listingService.toListingResponseDto(listing);
   }
 }
