@@ -1,11 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Listing, WeddingStyle, WeddingType } from '@prisma/client';
+import { WeddingService } from 'src/common/wedding-service.enum';
 import { VendorService } from 'src/vendor/vendor.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateListingDto } from './dto/create-listing.dto';
 import { ListingResponseDto } from './dto/listing-response.dto';
 import { UpdateListingDto } from './dto/update-listing.dto';
-import { WeddingService } from 'src/common/wedding-service.enum';
 
 interface BrowseFilters {
   service?: WeddingService;
@@ -306,6 +306,22 @@ export class ListingService {
     }
 
     return this.browseListings(enhancedFilters);
+  }
+
+  async getCheapestListingForVendor(vendorId: number): Promise<Listing> {
+    const listings = await this.prisma.listing.findMany({
+      where: { vendorId },
+      orderBy: { price: 'asc' },
+      take: 1,
+    });
+
+    if (listings.length === 0) {
+      throw new NotFoundException(
+        `No listings found for vendor ID ${vendorId}`,
+      );
+    }
+
+    return listings[0];
   }
 
   toListingResponseDto(listing: Listing): ListingResponseDto {
