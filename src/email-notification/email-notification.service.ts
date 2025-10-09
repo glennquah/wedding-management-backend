@@ -341,6 +341,31 @@ export class EmailNotificationService {
     );
   }
 
+  async broadcastRsvpInvitations(
+    guestIds: number[],
+    weddingId: number,
+  ): Promise<void> {
+    // Verify wedding exists once
+    const wedding = await this.prisma.wedding.findUnique({
+      where: { id: weddingId },
+    });
+
+    if (!wedding) {
+      throw new NotFoundException(`Wedding with ID ${weddingId} not found`);
+    }
+
+    // Process each guest
+    for (const guestId of guestIds) {
+      try {
+        await this.createRsvpDetails(guestId, weddingId);
+      } catch (error) {
+        throw new Error(
+          `Failed to send RSVP to guest ID ${guestId}: ${error.message}`,
+        );
+      }
+    }
+  }
+
   async sendRsvpInvitationEmail(
     to: string,
     name: string,
