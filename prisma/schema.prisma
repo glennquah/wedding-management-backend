@@ -200,24 +200,25 @@ model Wedding {
   orders              Order[]
   notificationDetails NotificationDetails?
   SeatingArrangement  SeatingArrangement?
-  microsite         Microsite?
+  microsite           Microsite?
+  checklist           Checklist?
 }
 
 model Microsite {
-  id            Int      @id @default(autoincrement())
+  id             Int      @id @default(autoincrement())
   templateNumber Int
-  slug              String           @unique
-  coupleName    String
-  heroImages    String[]
-  imageGallery  String[]  
-  schedule      Json?    
-  faqs          Json?    
-  password      String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  
-  weddingId     Int      @unique
-  wedding       Wedding  @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+  slug           String   @unique
+  coupleName     String
+  heroImages     String[]
+  imageGallery   String[]
+  schedule       Json?
+  faqs           Json?
+  password       String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  weddingId Int     @unique
+  wedding   Wedding @relation(fields: [weddingId], references: [id], onDelete: Cascade)
 }
 
 model Guest {
@@ -237,43 +238,43 @@ model Guest {
 }
 
 model Listing {
-  id             Int            @id @default(autoincrement())
+  id             Int      @id @default(autoincrement())
   listingName    String
   price          Float
   availabilities Json
   remarks        String
   imageUrls      String[]
-  
+
   // Relations
-  vendorId       Int
-  vendor         Vendor         @relation(fields: [vendorId], references: [userId], onDelete: Cascade)
-  
+  vendorId Int
+  vendor   Vendor @relation(fields: [vendorId], references: [userId], onDelete: Cascade)
+
   // Many-to-many with Orders
-  orders         OrderListing[]
-  cartItems      CartItem[]
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
+  orders    OrderListing[]
+  cartItems CartItem[]
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
 }
 
 model Order {
-  id           Int            @id @default(autoincrement())
-  orderStatus  OrderStatus    @default(PENDING)
+  id           Int         @id @default(autoincrement())
+  orderStatus  OrderStatus @default(PENDING)
   totalAmount  Float
-  currency     String         @default("SGD")
-  purchaseDate DateTime       @default(now())
+  currency     String      @default("SGD")
+  purchaseDate DateTime    @default(now())
   remark       String?
-  
+
   // Relations
-  weddingId    Int
-  wedding      Wedding        @relation(fields: [weddingId], references: [id], onDelete: Cascade)
-  
+  weddingId Int
+  wedding   Wedding @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+
   // Many-to-many with Listings
-  listings     OrderListing[]
-  
+  listings OrderListing[]
+
   // Payment relation
-  payments     Payment[]
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
+  payments  Payment[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
 model OrderListing {
@@ -315,13 +316,12 @@ model Payment {
   amount                  Float
   currency                String        @default("SGD")
   paymentStatus           PaymentStatus @default(PENDING)
-  
-  
+
   // Relations
-  orderId                 Int
-  order                   Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  createdAt               DateTime      @default(now())
-  updatedAt               DateTime      @updatedAt
+  orderId   Int
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([stripeCheckoutSessionId])
   @@index([stripePaymentIntentId])
@@ -337,6 +337,28 @@ model SeatingArrangement {
   tablesPerRow    Int?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+}
+
+model Checklist {
+  id        Int             @id @default(autoincrement())
+  weddingId Int             @unique
+  wedding   Wedding         @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+  items     ChecklistItem[]
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+}
+
+model ChecklistItem {
+  id                  Int       @id @default(autoincrement())
+  title               String
+  description         String
+  category            String
+  monthsBeforeWedding Int?
+  completed           Boolean   @default(false)
+  checklistId         Int
+  checklist           Checklist @relation(fields: [checklistId], references: [id], onDelete: Cascade)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 }
 
 model TokenBlacklist {
