@@ -135,6 +135,7 @@ export class WeddingService {
       preferredServices: wedding.preferredServices as WeddingServiceEnum[],
       createdAt: wedding.createdAt.toISOString(),
       updatedAt: wedding.updatedAt.toISOString(),
+      allocatedBudget: wedding.allocatedBudget,
     };
   }
 }
