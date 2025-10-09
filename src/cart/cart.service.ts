@@ -50,9 +50,10 @@ export class CartService {
     });
 
     const total = items.reduce((sum, item) => {
-      const selectedSlots = item.selectedSlots as unknown as AvailabilitySlotDto[];
+      const selectedSlots =
+        item.selectedSlots as unknown as AvailabilitySlotDto[];
       const slotsCount = selectedSlots ? selectedSlots.length : 1;
-      return sum + (item.listing.price * slotsCount);
+      return sum + item.listing.price * slotsCount;
     }, 0);
 
     const cart = await this.prisma.cart.update({
@@ -113,7 +114,8 @@ export class CartService {
 
     if (existingCartItem) {
       // Merge existing slots with new slots, avoiding duplicates
-      const existingSlots = existingCartItem.selectedSlots as unknown as AvailabilitySlotDto[];
+      const existingSlots =
+        existingCartItem.selectedSlots as unknown as AvailabilitySlotDto[];
       const mergedSlots = [...existingSlots];
 
       for (const newSlot of dto.selectedSlots) {

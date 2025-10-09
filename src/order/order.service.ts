@@ -67,7 +67,7 @@ export class OrderService {
       const listing = listings.find((l) => l.id === orderListing.listingId);
       if (!listing) return sum;
       const slotsCount = orderListing.bookedSlots.length;
-      return sum + (listing.price * slotsCount);
+      return sum + listing.price * slotsCount;
     }, 0);
 
     // Create order with listings and booked dates
