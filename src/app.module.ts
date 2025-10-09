@@ -19,6 +19,7 @@ import { WeddingModule } from './wedding/wedding.module';
 import { MicrositeModule } from './microsite/microsite.module';
 import { CartModule } from './cart/cart.module';
 import { AiServiceModule } from './ai-service/ai-service.module';
+import { AnalyticsModule } from './analytics/analytics.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { AiServiceModule } from './ai-service/ai-service.module';
     PaymentModule,
     CartModule,
     AiServiceModule,
+    AnalyticsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
