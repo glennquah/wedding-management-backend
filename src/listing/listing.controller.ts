@@ -1,27 +1,27 @@
 import {
+  Body,
   Controller,
-  Post,
   Delete,
   Get,
-  Body,
   Param,
-  Query,
-  ParseIntPipe,
-  UseGuards,
-  Put,
   ParseFloatPipe,
+  ParseIntPipe,
+  Post,
+  Put,
+  Query,
+  UseGuards,
 } from '@nestjs/common';
-import { ListingService } from './listing.service';
-import { CreateListingDto } from './dto/create-listing.dto';
-import { UpdateListingDto } from './dto/update-listing.dto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { WeddingStyle, WeddingType } from '@prisma/client';
+import { Roles } from 'src/auth/decorators/roles.decorator';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
-import { ListingResponseDto } from './dto/listing-response.dto';
-import { Roles } from 'src/auth/decorators/roles.decorator';
 import { UserRole } from 'src/common/user-role.enum';
 import { WeddingService } from 'src/common/wedding-service.enum';
-import { WeddingStyle, WeddingType } from '@prisma/client';
+import { CreateListingDto } from './dto/create-listing.dto';
+import { ListingResponseDto } from './dto/listing-response.dto';
+import { UpdateListingDto } from './dto/update-listing.dto';
+import { ListingService } from './listing.service';
 
 @ApiTags('listings')
 @Controller('listings')
@@ -440,5 +440,22 @@ export class ListingController {
       page: Math.floor((offset || 0) / (limit || 20)) + 1,
       totalPages: Math.ceil(result.total / (limit || 20)),
     };
+  }
+
+  @Get('vendor/:vendorId/cheapest')
+  @Roles(UserRole.ADMIN, UserRole.VENDOR, UserRole.SUPERADMIN)
+  @ApiOperation({ summary: 'Get cheapest listing for a vendor' })
+  @ApiResponse({
+    status: 200,
+    description: 'Cheapest listing for the vendor.',
+    type: ListingResponseDto,
+  })
+  @ApiResponse({ status: 404, description: 'Vendor or listings not found.' })
+  async getCheapestListingForVendor(
+    @Param('vendorId', ParseIntPipe) vendorId: number,
+  ) {
+    const listing =
+      await this.listingService.getCheapestListingForVendor(vendorId);
+    return this.listingService.toListingResponseDto(listing);
   }
 }
