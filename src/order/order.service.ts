@@ -62,10 +62,13 @@ export class OrderService {
       }
     }
 
-    const totalAmount = listings.reduce(
-      (sum, listing) => sum + listing.price,
-      0,
-    );
+    // Calculate total amount based on price × number of booked slots for each listing
+    const totalAmount = dto.listings.reduce((sum, orderListing) => {
+      const listing = listings.find((l) => l.id === orderListing.listingId);
+      if (!listing) return sum;
+      const slotsCount = orderListing.bookedSlots.length;
+      return sum + (listing.price * slotsCount);
+    }, 0);
 
     // Create order with listings and booked dates
     const order = await this.prisma.order.create({

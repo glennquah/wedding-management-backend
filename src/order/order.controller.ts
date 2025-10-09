@@ -123,7 +123,7 @@ export class OrderController {
   }
 
   @Delete(':id')
-  @Roles(UserRole.SUPERADMIN)
+  @Roles(UserRole.SUPERADMIN, UserRole.ADMIN)
   @ApiOperation({ summary: 'Delete an order' })
   @ApiResponse({
     status: 200,

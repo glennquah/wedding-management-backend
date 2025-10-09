@@ -35,17 +35,22 @@ export class PaymentService {
       }
 
       // Create line items for Stripe Checkout
-      const lineItems = order.listings.map((orderListing) => ({
-        price_data: {
-          currency: order.currency.toLowerCase(),
-          product_data: {
-            name: orderListing.listing.listingName,
-            description: orderListing.listing.remarks || 'Wedding service',
+      const lineItems = order.listings.map((orderListing) => {
+        const bookedSlots = orderListing.bookedSlots as any[];
+        const quantity = bookedSlots ? bookedSlots.length : 1;
+
+        return {
+          price_data: {
+            currency: order.currency.toLowerCase(),
+            product_data: {
+              name: orderListing.listing.listingName,
+              description: orderListing.listing.remarks || 'Wedding service',
+            },
+            unit_amount: Math.round(orderListing.listing.price * 100), // Convert to cents
           },
-          unit_amount: Math.round(orderListing.listing.price * 100), // Convert to cents
-        },
-        quantity: 1,
-      }));
+          quantity: quantity,
+        };
+      });
 
       const baseUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
       const successUrl =
