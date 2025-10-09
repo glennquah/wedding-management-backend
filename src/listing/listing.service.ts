@@ -316,7 +316,9 @@ export class ListingService {
     });
 
     if (listings.length === 0) {
-      throw new NotFoundException(`No listings found for vendor ID ${vendorId}`);
+      throw new NotFoundException(
+        `No listings found for vendor ID ${vendorId}`,
+      );
     }
 
     return listings[0];
