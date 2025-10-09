@@ -318,18 +318,29 @@ export class EmailNotificationService {
       );
     }
 
-    // Fetch wedding data
+    // Fetch wedding data with microsite
     const wedding = await this.prisma.wedding.findUnique({
       where: { id: weddingId },
+      include: { microsite: true },
     });
 
     if (!wedding) {
       throw new NotFoundException(`Wedding with ID ${weddingId} not found`);
     }
 
+    if (!wedding.microsite) {
+      throw new NotFoundException(
+        `Wedding with ID ${weddingId} does not have a microsite`,
+      );
+    }
+
     // Craft RSVP URL
-    const frontendUrl = process.env.FRONTEND_URL || 'https://knotly.app';
-    const rsvpUrl = `${frontendUrl}/rsvp/${weddingId}/${guestId}`;
+    const micrositeUrl = `${process.env.FRONTEND_URL}/microsite/${wedding.microsite.slug}`;
+    const nameParts = guest.name.split(' ');
+    const firstName = nameParts[0] || '';
+    const lastName = nameParts.slice(1).join(' ') || '';
+
+    const rsvpUrl = `${micrositeUrl}?password=${encodeURIComponent(wedding.microsite.password || '')}&firstName=${encodeURIComponent(firstName)}&lastName=${encodeURIComponent(lastName)}`;
 
     // Send the email
     await this.sendRsvpInvitationEmail(
@@ -345,13 +356,20 @@ export class EmailNotificationService {
     guestIds: number[],
     weddingId: number,
   ): Promise<void> {
-    // Verify wedding exists once
+    // Verify wedding exists with microsite once
     const wedding = await this.prisma.wedding.findUnique({
       where: { id: weddingId },
+      include: { microsite: true },
     });
 
     if (!wedding) {
       throw new NotFoundException(`Wedding with ID ${weddingId} not found`);
+    }
+
+    if (!wedding.microsite) {
+      throw new NotFoundException(
+        `Wedding with ID ${weddingId} does not have a microsite`,
+      );
     }
 
     // Process each guest
