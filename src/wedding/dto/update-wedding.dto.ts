@@ -72,4 +72,9 @@ export class UpdateWeddingDto {
   @IsOptional()
   @IsEnum(WeddingService, { each: true })
   preferredServices?: WeddingService[];
+
+  @ApiProperty({ description: 'PayNow QR code link', required: false })
+  @IsOptional()
+  @IsString()
+  paynowQR?: string;
 }

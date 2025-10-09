@@ -202,6 +202,8 @@ model Wedding {
   SeatingArrangement  SeatingArrangement?
   microsite           Microsite?
   album               Album?
+  gifts               Gift[]
+  paynowQR            String?
 }
 
 model Microsite {
@@ -351,6 +353,18 @@ model SeatingArrangement {
   tablesPerRow    Int?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+}
+
+model Gift {
+  id        Int      @id @default(autoincrement())
+  guestName String
+  amount    Float
+  weddingId Int
+  wedding   Wedding  @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([weddingId])
 }
 
 model TokenBlacklist {

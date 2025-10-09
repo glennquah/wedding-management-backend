@@ -91,6 +91,7 @@ export class WeddingService {
       updateData.preferredStyle = dto.preferredStyle;
     if (dto.preferredServices !== undefined)
       updateData.preferredServices = dto.preferredServices;
+    if (dto.paynowQR !== undefined) updateData.paynowQR = dto.paynowQR;
 
     return this.prisma.wedding.update({
       where: { id },
@@ -130,6 +131,7 @@ export class WeddingService {
       guestCountBucket: wedding.guestCountBucket as GuestCountBucket,
       preferredStyle: wedding.preferredStyle as WeddingStyle,
       preferredServices: wedding.preferredServices as WeddingServiceEnum[],
+      paynowQR: wedding.paynowQR,
       createdAt: wedding.createdAt.toISOString(),
       updatedAt: wedding.updatedAt.toISOString(),
     };
