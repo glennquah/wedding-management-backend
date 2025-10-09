@@ -200,4 +200,36 @@ export class GuestController {
     const guest = await this.guestService.markAttendance(id);
     return this.guestService.toGuestResponseDto(guest);
   }
+
+  @Put(':id/check-in')
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
+  @ApiOperation({ summary: 'Check in a guest' })
+  @ApiResponse({
+    status: 200,
+    description: 'The guest has been checked in.',
+    type: GuestResponseDto,
+  })
+  @ApiResponse({ status: 404, description: 'Guest not found.' })
+  async checkIn(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<GuestResponseDto> {
+    const guest = await this.guestService.checkIn(id);
+    return this.guestService.toGuestResponseDto(guest);
+  }
+
+  @Delete(':id/check-in')
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
+  @ApiOperation({ summary: 'Remove guest check-in' })
+  @ApiResponse({
+    status: 200,
+    description: 'The guest check-in has been removed.',
+    type: GuestResponseDto,
+  })
+  @ApiResponse({ status: 404, description: 'Guest not found.' })
+  async removeCheckIn(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<GuestResponseDto> {
+    const guest = await this.guestService.removeCheckIn(id);
+    return this.guestService.toGuestResponseDto(guest);
+  }
 }

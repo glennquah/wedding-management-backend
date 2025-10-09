@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AdminModule } from './admin/admin.module';
 import { AiServiceModule } from './ai-service/ai-service.module';
+import { AlbumModule } from './album/album.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
@@ -40,6 +41,7 @@ import { WeddingModule } from './wedding/wedding.module';
     OrderModule,
     PaymentModule,
     CartModule,
+    AlbumModule,
     AiServiceModule,
     VendorRecommendationModule,
   ],

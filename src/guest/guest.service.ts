@@ -124,6 +124,35 @@ export class GuestService {
     });
   }
 
+  async checkIn(id: number): Promise<Guest> {
+    await this.findById(id);
+
+    const now = new Date();
+    const sgtTime = new Date(now.getTime() + 8 * 60 * 60 * 1000);
+
+    return this.prisma.guest.update({
+      where: { id },
+      data: { checkInTime: sgtTime },
+      include: {
+        accompanyingGuests: true,
+        primaryGuest: true,
+      },
+    });
+  }
+
+  async removeCheckIn(id: number): Promise<Guest> {
+    await this.findById(id);
+
+    return this.prisma.guest.update({
+      where: { id },
+      data: { checkInTime: null },
+      include: {
+        accompanyingGuests: true,
+        primaryGuest: true,
+      },
+    });
+  }
+
   toGuestResponseDto(guest: GuestWithAccompanying): GuestResponseDto {
     return {
       id: guest.id,
@@ -133,6 +162,7 @@ export class GuestService {
       group: guest.group,
       confirmationStatus: guest.confirmationStatus as ConfirmationStatus,
       attendance: guest.attendance,
+      checkInTime: guest.checkInTime,
       weddingId: guest.weddingId,
       weddingName: guest.wedding?.name,
       primaryGuestId: guest.primaryGuestId,
