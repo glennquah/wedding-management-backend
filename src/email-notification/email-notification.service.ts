@@ -1,12 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { EmailTemplateType } from '@prisma/client';
 import * as sgMail from '@sendgrid/mail';
 import * as fs from 'fs';
 import * as Handlebars from 'handlebars';
 import * as path from 'path';
+import { AiServiceService } from 'src/ai-service/ai-service.service';
+import { EmailTemplateResponse } from 'src/ai-service/interfaces/email-template-response.interface';
 import { VendorOnboardingStatus } from 'src/common/vendor-onboarding-status.enum';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { WeddingService } from 'src/wedding/wedding.service';
 import { NotificationDetailsService } from '../notification-details/notification-details.service';
+import { GenerateAiEmailTemplateDto } from './dto/generate-ai-email-template.dto';
 import { SendBulkEmailDto } from './dto/send-bulk-email.dto';
-import { EmailTemplateType } from './enums/email-template.enum';
 import {
   AdminSuspensionData,
   CalendarAccessRequestData,
@@ -14,6 +19,7 @@ import {
   CreateAccountData,
   EmailTemplateData,
   PasswordResetData,
+  RsvpInvitationData,
   VendorStatusData,
   VendorSuspensionData,
   VerifyEmailData,
@@ -22,15 +28,24 @@ import {
 
 @Injectable()
 export class EmailNotificationService {
-  private readonly templateDir = path.join(
-    process.cwd(),
-    'src',
-    'email-notification',
-    'email-templates',
-  );
+  private readonly templateDir =
+    process.env.NODE_ENV === 'production'
+      ? path.join(process.cwd(), 'email-templates') // Lambda: copied by webpack
+      : path.join(
+          process.cwd(),
+          'src',
+          'email-notification',
+          'email-templates',
+        ); // Local dev
+
   private templates: Map<string, HandlebarsTemplateDelegate<any>> = new Map();
 
-  constructor(private notificationDetailsService: NotificationDetailsService) {
+  constructor(
+    private notificationDetailsService: NotificationDetailsService,
+    private prisma: PrismaService,
+    private aiService: AiServiceService,
+    private weddingService: WeddingService,
+  ) {
     const key = process.env.SENDGRID_API_KEY;
     if (!key) {
       throw new Error('SENDGRID_API_KEY is not set in environment variables');
@@ -54,6 +69,10 @@ export class EmailNotificationService {
         {
           name: EmailTemplateType.ADMIN_SUSPENSION,
           file: 'admin-suspension.html',
+        },
+        {
+          name: EmailTemplateType.RSVP_INVITATION,
+          file: 'rsvp-invitation.html',
         },
         {
           name: EmailTemplateType.COLLABORATOR_ADDED,
@@ -144,7 +163,12 @@ export class EmailNotificationService {
       resetPasswordUrl,
     };
 
-    await this.sendCreateAccountTemplate(to, templateData, weddingId, isPartner);
+    await this.sendCreateAccountTemplate(
+      to,
+      templateData,
+      weddingId,
+      isPartner,
+    );
   }
 
   async sendPasswordResetEmail(
@@ -324,7 +348,12 @@ export class EmailNotificationService {
       loginUrl,
     };
 
-    await this.sendCollaboratorAddedTemplate(to, templateData, weddingId, isPartner);
+    await this.sendCollaboratorAddedTemplate(
+      to,
+      templateData,
+      weddingId,
+      isPartner,
+    );
   }
 
   async sendCollaboratorAddedTemplate(
@@ -337,7 +366,10 @@ export class EmailNotificationService {
       EmailTemplateType.COLLABORATOR_ADDED,
       templateData,
     );
-    const text = this.generateCollaboratorAddedPlainText(templateData, isPartner);
+    const text = this.generateCollaboratorAddedPlainText(
+      templateData,
+      isPartner,
+    );
 
     const subject = isPartner
       ? "You've Been Invited to Plan Your Wedding!"
@@ -375,6 +407,137 @@ export class EmailNotificationService {
     Log In: ${templateData.loginUrl}
 
     If you have any questions, feel free to reach out to the person who invited you or contact our support team.
+
+    ---
+    Knotly - Your Perfect Wedding, Perfectly Planned
+    Website: https://knotly.app`;
+  }
+
+  async createRsvpDetails(guestId: number, weddingId: number): Promise<void> {
+    // Fetch guest data
+    const guest = await this.prisma.guest.findUnique({
+      where: { id: guestId },
+    });
+
+    if (!guest) {
+      throw new NotFoundException(`Guest with ID ${guestId} not found`);
+    }
+
+    if (!guest.email) {
+      throw new NotFoundException(
+        `Guest with ID ${guestId} does not have an email`,
+      );
+    }
+
+    // Fetch wedding data with microsite
+    const wedding = await this.prisma.wedding.findUnique({
+      where: { id: weddingId },
+      include: { microsite: true },
+    });
+
+    if (!wedding) {
+      throw new NotFoundException(`Wedding with ID ${weddingId} not found`);
+    }
+
+    if (!wedding.microsite) {
+      throw new NotFoundException(
+        `Wedding with ID ${weddingId} does not have a microsite`,
+      );
+    }
+
+    // Craft RSVP URL
+    const micrositeUrl = `${process.env.FRONTEND_URL}/microsite/${wedding.microsite.slug}`;
+    const nameParts = guest.name.split(' ');
+    const firstName = nameParts[0] || '';
+    const lastName = nameParts.slice(1).join(' ') || '';
+
+    const rsvpUrl = `${micrositeUrl}?password=${encodeURIComponent(wedding.microsite.password || '')}&firstName=${encodeURIComponent(firstName)}&lastName=${encodeURIComponent(lastName)}`;
+
+    // Send the email
+    await this.sendRsvpInvitationEmail(
+      guest.email,
+      guest.name,
+      wedding.name,
+      rsvpUrl,
+      weddingId,
+    );
+  }
+
+  async broadcastRsvpInvitations(
+    guestIds: number[],
+    weddingId: number,
+  ): Promise<void> {
+    // Verify wedding exists with microsite once
+    const wedding = await this.prisma.wedding.findUnique({
+      where: { id: weddingId },
+      include: { microsite: true },
+    });
+
+    if (!wedding) {
+      throw new NotFoundException(`Wedding with ID ${weddingId} not found`);
+    }
+
+    if (!wedding.microsite) {
+      throw new NotFoundException(
+        `Wedding with ID ${weddingId} does not have a microsite`,
+      );
+    }
+
+    // Process each guest
+    for (const guestId of guestIds) {
+      try {
+        await this.createRsvpDetails(guestId, weddingId);
+      } catch (error) {
+        throw new Error(
+          `Failed to send RSVP to guest ID ${guestId}: ${error.message}`,
+        );
+      }
+    }
+  }
+
+  async sendRsvpInvitationEmail(
+    to: string,
+    name: string,
+    weddingName: string,
+    rsvpUrl: string,
+    weddingId?: number,
+  ): Promise<void> {
+    const templateData: RsvpInvitationData = {
+      name,
+      weddingName,
+      rsvpUrl,
+    };
+
+    const html = this.renderTemplate(
+      EmailTemplateType.RSVP_INVITATION,
+      templateData,
+    );
+    const text = this.generateRsvpInvitationPlainText(templateData);
+
+    await this.sendEmail(
+      to,
+      `You're Invited to ${weddingName}!`,
+      text,
+      html,
+      EmailTemplateType.RSVP_INVITATION,
+      weddingId,
+    );
+  }
+
+  private generateRsvpInvitationPlainText(
+    templateData: RsvpInvitationData,
+  ): string {
+    return `Dear ${templateData.name},
+
+    We are delighted to invite you to our special day! Your presence would mean the world to us as we celebrate our love and commitment.
+
+    Wedding: ${templateData.weddingName}
+
+    Please click the link below to RSVP and let us know if you can join us for this joyous occasion. Your response will help us ensure everything is perfect for our big day.
+
+    RSVP Now: ${templateData.rsvpUrl}
+
+    We look forward to celebrating with you! If you have any questions, please don't hesitate to reach out.
 
     ---
     Knotly - Your Perfect Wedding, Perfectly Planned
@@ -738,5 +901,13 @@ Website: https://knotly.app`;
       }
       throw error;
     }
+  }
+
+  async getAIEmailTemplate(
+    weddingId: number,
+    generateDto: GenerateAiEmailTemplateDto,
+  ): Promise<EmailTemplateResponse> {
+    const weddingDetails = await this.weddingService.findById(weddingId);
+    return this.aiService.generateEmailTemplate(generateDto, weddingDetails);
   }
 }

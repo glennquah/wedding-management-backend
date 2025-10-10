@@ -1,6 +1,12 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Guest } from '@prisma/client';
 import { ConfirmationStatus } from '../common/confirmation-status.enum';
+import { EmailNotificationService } from '../email-notification/email-notification.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateGuestDto } from './dto/create-guest.dto';
 import { GuestResponseDto } from './dto/guest-response.dto';
@@ -13,24 +19,58 @@ type GuestWithAccompanying = Guest & {
 
 @Injectable()
 export class GuestService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    @Inject(forwardRef(() => EmailNotificationService))
+    private emailNotificationService: EmailNotificationService,
+  ) {}
 
   async create(dto: CreateGuestDto): Promise<Guest> {
     // Validate that the wedding exists
     const wedding = await this.prisma.wedding.findUnique({
       where: { id: dto.weddingId },
+      include: {
+        microsite: true,
+      },
     });
 
     if (!wedding) {
       throw new NotFoundException(`Wedding with ID ${dto.weddingId} not found`);
     }
 
-    return this.prisma.guest.create({
-      data: dto,
+    // Separate sendEmail flag from guest data
+    const { sendEmail, ...guestData } = dto;
+
+    const guest = await this.prisma.guest.create({
+      data: guestData,
       include: {
         accompanyingGuests: true,
       },
     });
+
+    // Send RSVP if flag is set
+    if (sendEmail && wedding.microsite) {
+      try {
+        const micrositeUrl = `${process.env.FRONTEND_URL}/microsite/${wedding.microsite.slug}`;
+        const nameParts = guest.name.split(' ');
+        const firstName = nameParts[0] || '';
+        const lastName = nameParts.slice(1).join(' ') || '';
+
+        const rsvpUrl = `${micrositeUrl}?password=${encodeURIComponent(wedding.microsite.password || '')}&firstName=${encodeURIComponent(firstName)}&lastName=${encodeURIComponent(lastName)}`;
+
+        await this.emailNotificationService.sendRsvpInvitationEmail(
+          guest.email,
+          guest.name,
+          wedding.name,
+          rsvpUrl,
+          wedding.id,
+        );
+      } catch (error) {
+        console.error('Failed to send RSVP email:', error);
+      }
+    }
+
+    return guest;
   }
 
   async findByWeddingId(weddingId: number): Promise<Guest[]> {
@@ -111,6 +151,48 @@ export class GuestService {
     return createdGuests;
   }
 
+  async markAttendance(id: number): Promise<Guest> {
+    const guest = await this.findById(id);
+
+    return this.prisma.guest.update({
+      where: { id },
+      data: { attendance: !guest.attendance },
+      include: {
+        accompanyingGuests: true,
+        primaryGuest: true,
+      },
+    });
+  }
+
+  async checkIn(id: number): Promise<Guest> {
+    await this.findById(id);
+
+    const now = new Date();
+    const sgtTime = new Date(now.getTime() + 8 * 60 * 60 * 1000);
+
+    return this.prisma.guest.update({
+      where: { id },
+      data: { checkInTime: sgtTime },
+      include: {
+        accompanyingGuests: true,
+        primaryGuest: true,
+      },
+    });
+  }
+
+  async removeCheckIn(id: number): Promise<Guest> {
+    await this.findById(id);
+
+    return this.prisma.guest.update({
+      where: { id },
+      data: { checkInTime: null },
+      include: {
+        accompanyingGuests: true,
+        primaryGuest: true,
+      },
+    });
+  }
+
   toGuestResponseDto(guest: GuestWithAccompanying): GuestResponseDto {
     return {
       id: guest.id,
@@ -119,6 +201,8 @@ export class GuestService {
       allergies: guest.allergies,
       group: guest.group,
       confirmationStatus: guest.confirmationStatus as ConfirmationStatus,
+      attendance: guest.attendance,
+      checkInTime: guest.checkInTime,
       weddingId: guest.weddingId,
       weddingName: guest.wedding?.name,
       primaryGuestId: guest.primaryGuestId,
