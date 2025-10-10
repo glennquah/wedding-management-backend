@@ -117,18 +117,16 @@ export class WeddingService {
     return {
       id: wedding.id,
       mainCouple:
-        wedding.mainCouple?.map(
-          (admin: Admin & { user: User }) => ({
-            id: admin.userId,
-            name: admin.user?.name,
-            email: admin.user?.email,
-            role: admin.user?.role as unknown as UserRole,
-            createdAt: admin.user?.createdAt,
-            updatedAt: admin.user?.updatedAt,
-            isSuspended: admin.isSuspended,
-            onboardedDate: admin.onboardedDate,
-          }),
-        ) || [],
+        wedding.mainCouple?.map((admin: Admin & { user: User }) => ({
+          id: admin.userId,
+          name: admin.user?.name,
+          email: admin.user?.email,
+          role: admin.user?.role as unknown as UserRole,
+          createdAt: admin.user?.createdAt,
+          updatedAt: admin.user?.updatedAt,
+          isSuspended: admin.isSuspended,
+          onboardedDate: admin.onboardedDate,
+        })) || [],
       name: wedding.name,
       date: wedding.date?.toISOString(),
       location: wedding.location,

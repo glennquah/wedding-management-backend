@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { Order } from '@prisma/client';
 import { OrderStatus } from '../common/order-status.enum';
+import { PaymentStatus } from '../common/payment-status.enum';
 import { PaymentService } from '../payment/payment.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -336,6 +337,87 @@ export class OrderService {
     await this.prisma.order.delete({
       where: { id },
     });
+  }
+
+  async deleteListing(orderId: number, listingId: number): Promise<Order | void> {
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+      include: {
+        listings: { include: { listing: true } },
+        payments: true,
+      },
+    });
+
+    if (!order) {
+      throw new NotFoundException(`Order with ID ${orderId} not found`);
+    }
+
+    const orderListing = order.listings.find((l) => l.listingId === listingId);
+    if (!orderListing) {
+      throw new NotFoundException(
+        `Listing with ID ${listingId} not found in order ${orderId}`,
+      );
+    }
+
+    // Don't allow removing listings from an order that's already been paid
+    const hasSuccessfulPayment = order.payments.some(
+      (p) => p.paymentStatus === PaymentStatus.SUCCEEDED,
+    );
+
+    if (hasSuccessfulPayment) {
+      throw new BadRequestException(
+        'Cannot remove listing from an order that has a successful payment',
+      );
+    }
+
+    // Restore booked slots for this listing
+    const listing = orderListing.listing;
+    const bookedSlots = orderListing.bookedSlots as any[];
+    const availableSlots = (listing.availabilities as any) || [];
+    const updatedSlots = [...availableSlots, ...bookedSlots];
+
+    await this.prisma.listing.update({
+      where: { id: listing.id },
+      data: { availabilities: updatedSlots as any },
+    });
+
+    // Compute amount to subtract from order and pending payments
+    const slotsCount = bookedSlots ? bookedSlots.length : 1;
+    const amountToSubtract = listing.price * slotsCount;
+
+    // Delete the OrderListing (composite primary key)
+    await this.prisma.orderListing.delete({
+      where: { orderId_listingId: { orderId, listingId } },
+    });
+
+    // Recompute remaining listings
+    const remainingListings = order.listings.filter(
+      (l) => l.listingId !== listingId,
+    );
+
+    // If no more listings, delete the order (payments will cascade)
+    if (remainingListings.length === 0) {
+      await this.prisma.order.delete({ where: { id: orderId } });
+      return;
+    }
+
+    // Otherwise update order total and any pending payments
+    const newTotal = Math.max(0, order.totalAmount - amountToSubtract);
+    await this.prisma.order.update({ where: { id: orderId }, data: { totalAmount: newTotal } });
+
+    // Adjust pending payments' amounts (if any)
+    for (const payment of order.payments) {
+      if (payment.paymentStatus === PaymentStatus.PENDING) {
+        const newPaymentAmount = Math.max(0, payment.amount - amountToSubtract);
+        await this.prisma.payment.update({
+          where: { id: payment.id },
+          data: { amount: newPaymentAmount },
+        });
+      }
+    }
+
+    // Return updated order
+    return this.findOne(orderId);
   }
 
   async vendorConfirm(id: number): Promise<Order> {

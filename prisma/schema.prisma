@@ -325,7 +325,7 @@ model CartItem {
 model Payment {
   id                      Int           @id @default(autoincrement())
   stripeCheckoutSessionId String        @unique
-  stripePaymentIntentId   String? // This is populated by webhook after payment
+  stripePaymentIntentId   String? 
   amount                  Float
   currency                String        @default("SGD")
   paymentStatus           PaymentStatus @default(PENDING)

@@ -150,6 +150,19 @@ export class OrderController {
     await this.orderService.delete(id);
   }
 
+  @Delete(':orderId/listings/:listingId')
+  @Roles(UserRole.SUPERADMIN, UserRole.ADMIN)
+  @ApiOperation({ summary: 'Delete a single listing from an order' })
+  @ApiResponse({ status: 200, description: 'The order listing has been deleted.' })
+  @ApiResponse({ status: 404, description: 'Order or listing not found.' })
+  async deleteListing(
+    @Param('orderId', ParseIntPipe) orderId: number,
+    @Param('listingId', ParseIntPipe) listingId: number,
+  ): Promise<OrderResponseDto | void> {
+    const updated = await this.orderService.deleteListing(orderId, listingId);
+    if (updated) return this.orderService.toOrderResponseDto(updated);
+  }
+
   @Post(':id/vendor-confirm')
   @Roles(UserRole.VENDOR)
   @ApiOperation({ summary: 'Vendor confirms an order' })
