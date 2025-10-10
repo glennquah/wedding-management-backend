@@ -7,10 +7,12 @@ import {
   ParseIntPipe,
   Post,
   Put,
+  Request,
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { JwtPayload } from '../auth/dto/jwt-payload.interface';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { UserRole } from '../common/user-role.enum';
@@ -153,7 +155,10 @@ export class OrderController {
   @Delete(':orderId/listings/:listingId')
   @Roles(UserRole.SUPERADMIN, UserRole.ADMIN)
   @ApiOperation({ summary: 'Delete a single listing from an order' })
-  @ApiResponse({ status: 200, description: 'The order listing has been deleted.' })
+  @ApiResponse({
+    status: 200,
+    description: 'The order listing has been deleted.',
+  })
   @ApiResponse({ status: 404, description: 'Order or listing not found.' })
   async deleteListing(
     @Param('orderId', ParseIntPipe) orderId: number,
@@ -163,46 +168,61 @@ export class OrderController {
     if (updated) return this.orderService.toOrderResponseDto(updated);
   }
 
-  @Post(':id/vendor-confirm')
+  @Post(':orderId/listings/:listingId/vendor-confirm')
   @Roles(UserRole.VENDOR)
-  @ApiOperation({ summary: 'Vendor confirms an order' })
+  @ApiOperation({ summary: 'Vendor confirms a specific listing in an order' })
   @ApiResponse({
     status: 200,
-    description: 'The order has been successfully confirmed by the vendor.',
+    description: 'The listing has been successfully confirmed by the vendor.',
     type: OrderResponseDto,
   })
-  @ApiResponse({ status: 404, description: 'Order not found.' })
-  @ApiResponse({ status: 400, description: 'Order cannot be confirmed.' })
+  @ApiResponse({ status: 404, description: 'Order or listing not found.' })
+  @ApiResponse({ status: 400, description: 'Listing cannot be confirmed.' })
   @ApiResponse({
     status: 403,
-    description: 'Vendor does not own the listings in this order.',
+    description: 'Vendor does not own this listing.',
   })
-  async vendorConfirm(
-    @Param('id', ParseIntPipe) id: number,
+  async vendorConfirmListing(
+    @Param('orderId', ParseIntPipe) orderId: number,
+    @Param('listingId', ParseIntPipe) listingId: number,
+    @Request() req: Request & { user: JwtPayload },
   ): Promise<OrderResponseDto> {
-    const order = await this.orderService.vendorConfirm(id);
+    const order = await this.orderService.vendorConfirmListing(
+      orderId,
+      listingId,
+      req.user.sub,
+    );
     return this.orderService.toOrderResponseDto(order);
   }
 
-  @Post(':id/vendor-reject')
+  @Post(':orderId/listings/:listingId/vendor-reject')
   @Roles(UserRole.VENDOR)
-  @ApiOperation({ summary: 'Vendor rejects an order and triggers refund' })
+  @ApiOperation({
+    summary:
+      'Vendor rejects a specific listing in an order and triggers partial refund',
+  })
   @ApiResponse({
     status: 200,
     description:
-      'The order has been successfully rejected by the vendor and payment refunded.',
+      'The listing has been successfully rejected by the vendor and partial refund processed.',
     type: OrderResponseDto,
   })
-  @ApiResponse({ status: 404, description: 'Order not found.' })
-  @ApiResponse({ status: 400, description: 'Order cannot be rejected.' })
+  @ApiResponse({ status: 404, description: 'Order or listing not found.' })
+  @ApiResponse({ status: 400, description: 'Listing cannot be rejected.' })
   @ApiResponse({
     status: 403,
-    description: 'Vendor does not own the listings in this order.',
+    description: 'Vendor does not own this listing.',
   })
-  async vendorReject(
-    @Param('id', ParseIntPipe) id: number,
+  async vendorRejectListing(
+    @Param('orderId', ParseIntPipe) orderId: number,
+    @Param('listingId', ParseIntPipe) listingId: number,
+    @Request() req: Request & { user: JwtPayload },
   ): Promise<OrderResponseDto> {
-    const order = await this.orderService.vendorReject(id);
+    const order = await this.orderService.vendorRejectListing(
+      orderId,
+      listingId,
+      req.user.sub,
+    );
     return this.orderService.toOrderResponseDto(order);
   }
 }
