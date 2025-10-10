@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Guest, Wedding } from '@prisma/client';
+import { Wedding } from '@prisma/client';
 import { BudgetBucket } from '../common/budget-bucket.enum';
 import { ConfirmationStatus } from '../common/confirmation-status.enum';
 import { GuestCountBucket } from '../common/guest-count-bucket.enum';
@@ -10,10 +10,6 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateWeddingDto } from './dto/create-wedding.dto';
 import { UpdateWeddingDto } from './dto/update-wedding.dto';
 import { WeddingResponseDto } from './dto/wedding-response.dto';
-
-type WeddingWithGuests = Wedding & {
-  guests?: Guest[];
-};
 
 @Injectable()
 export class WeddingService {
@@ -65,6 +61,11 @@ export class WeddingService {
       include: {
         guests: true,
         microsite: true,
+        mainCouple: {
+          include: {
+            user: true,
+          },
+        },
       },
     });
 
@@ -106,13 +107,23 @@ export class WeddingService {
     });
   }
 
-  toWeddingResponseDto(wedding: WeddingWithGuests): WeddingResponseDto {
+  toWeddingResponseDto(wedding: any): WeddingResponseDto {
     return {
       id: wedding.id,
+      mainCouple: wedding.mainCouple?.map((admin: any) => ({
+        id: admin.userId,
+        name: admin.user?.name,
+        email: admin.user?.email,
+        role: admin.user?.role,
+        createdAt: admin.user?.createdAt?.toISOString(),
+        updatedAt: admin.user?.updatedAt?.toISOString(),
+        isSuspended: admin.isSuspended,
+        onboardedDate: admin.onboardedDate?.toISOString(),
+      })) || [],
       name: wedding.name,
       date: wedding.date?.toISOString(),
       location: wedding.location,
-      guests: wedding.guests?.map((guest) => ({
+      guests: wedding.guests?.map((guest: any) => ({
         id: guest.id,
         name: guest.name,
         email: guest.email,

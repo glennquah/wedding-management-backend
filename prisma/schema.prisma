@@ -63,18 +63,16 @@ enum GuestCountBucket {
 enum OrderStatus {
   PENDING
   PAID
+  CONFIRMED
   CANCELLED
   COMPLETED
 }
 
 enum PaymentStatus {
   PENDING
-  PROCESSING
   SUCCEEDED
-  FAILED
   CANCELLED
   REFUNDED
-  PARTIALLY_REFUNDED
 }
 
 enum VendorOnboardingStatus {

@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { Order } from '@prisma/client';
 import { OrderStatus } from '../common/order-status.enum';
+import { PaymentService } from '../payment/payment.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { OrderResponseDto } from './dto/order-response.dto';
@@ -12,7 +13,10 @@ import { UpdateOrderDto } from './dto/update-order.dto';
 
 @Injectable()
 export class OrderService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private paymentService: PaymentService,
+  ) {}
 
   async create(dto: CreateOrderDto): Promise<Order> {
     // Verify wedding exists
@@ -183,6 +187,42 @@ export class OrderService {
     });
   }
 
+  async findByVendor(vendorId: number): Promise<Order[]> {
+    // Verify vendor exists
+    const vendor = await this.prisma.vendor.findUnique({
+      where: { userId: vendorId },
+    });
+
+    if (!vendor) {
+      throw new NotFoundException(`Vendor with ID ${vendorId} not found`);
+    }
+
+    // Find all orders that contain listings belonging to this vendor
+    const orders = await this.prisma.order.findMany({
+      where: {
+        listings: {
+          some: {
+            listing: {
+              vendorId: vendorId,
+            },
+          },
+        },
+      },
+      include: {
+        listings: {
+          include: {
+            listing: true,
+          },
+        },
+        payments: true,
+        wedding: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return orders;
+  }
+
   async update(id: number, dto: UpdateOrderDto): Promise<Order> {
     const existingOrder = await this.prisma.order.findUnique({
       where: { id },
@@ -295,6 +335,111 @@ export class OrderService {
 
     await this.prisma.order.delete({
       where: { id },
+    });
+  }
+
+  async vendorConfirm(id: number): Promise<Order> {
+    const order = await this.prisma.order.findUnique({
+      where: { id },
+      include: {
+        listings: {
+          include: {
+            listing: true,
+          },
+        },
+        payments: true,
+      },
+    });
+
+    if (!order) {
+      throw new NotFoundException(`Order with ID ${id} not found`);
+    }
+
+    // Validate order status - can only confirm PAID orders
+    if (order.orderStatus !== OrderStatus.PAID) {
+      throw new BadRequestException(
+        `Order must be in PAID status to be confirmed. Current status: ${order.orderStatus}`,
+      );
+    }
+
+    // Update order status to CONFIRMED
+    return this.prisma.order.update({
+      where: { id },
+      data: { orderStatus: OrderStatus.CONFIRMED },
+      include: {
+        listings: {
+          include: {
+            listing: true,
+          },
+        },
+        payments: true,
+      },
+    });
+  }
+
+  async vendorReject(id: number): Promise<Order> {
+    const order = await this.prisma.order.findUnique({
+      where: { id },
+      include: {
+        listings: {
+          include: {
+            listing: true,
+          },
+        },
+        payments: true,
+      },
+    });
+
+    if (!order) {
+      throw new NotFoundException(`Order with ID ${id} not found`);
+    }
+
+    // Validate order status - can only reject PAID orders
+    if (
+      order.orderStatus !== OrderStatus.PAID
+    ) {
+      throw new BadRequestException(
+        `Order must be in PAID status to be rejected. Current status: ${order.orderStatus}`,
+      );
+    }
+
+    // Check if payment exists and needs refund
+    const hasSuccessfulPayment = order.payments.some(
+      (p) => p.paymentStatus === 'SUCCEEDED',
+    );
+
+    if (hasSuccessfulPayment) {
+      // Process refund through payment service
+      await this.paymentService.refundPayment(id);
+    }
+
+    // Restore booked slots back to listing availabilities
+    for (const orderListing of order.listings) {
+      const listing = orderListing.listing;
+      const bookedSlots = orderListing.bookedSlots as any[];
+
+      const availableSlots = (listing.availabilities as any) || [];
+      // Add the rejected order's slots back to available slots
+      const updatedSlots = [...availableSlots, ...bookedSlots];
+
+      await this.prisma.listing.update({
+        where: { id: listing.id },
+        data: { availabilities: updatedSlots as any },
+      });
+    }
+
+    // Update order status to CANCELLED
+    return this.prisma.order.update({
+      where: { id },
+      data: { orderStatus: OrderStatus.CANCELLED },
+      include: {
+        listings: {
+          include: {
+            listing: true,
+          },
+        },
+        payments: true,
+      },
     });
   }
 

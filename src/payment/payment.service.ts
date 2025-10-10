@@ -99,6 +99,48 @@ export class PaymentService {
     });
   }
 
+  async refundPayment(orderId: number): Promise<void> {
+    // Find the succeeded payment for this order
+    const payment = await this.prisma.payment.findFirst({
+      where: {
+        orderId,
+        paymentStatus: PaymentStatus.SUCCEEDED,
+      },
+    });
+
+    if (!payment) {
+      throw new BadRequestException(
+        'No successful payment found for this order',
+      );
+    }
+
+    if (!payment.stripePaymentIntentId) {
+      throw new BadRequestException(
+        'Payment intent not found. Cannot process refund.',
+      );
+    }
+
+    try {
+      // Create a refund in Stripe
+      const refund = await this.stripe.refunds.create({
+        payment_intent: payment.stripePaymentIntentId,
+      });
+
+      // Update payment status to REFUNDED
+      await this.prisma.payment.update({
+        where: { id: payment.id },
+        data: { paymentStatus: PaymentStatus.REFUNDED },
+      });
+
+      console.log(
+        `Successfully refunded payment ${payment.id} for order ${orderId}. Refund ID: ${refund.id}`,
+      );
+    } catch (error) {
+      console.error('Error processing refund:', error);
+      throw new InternalServerErrorException('Failed to process refund');
+    }
+  }
+
   async handleWebhook(
     signature: string,
     payload: Buffer,

@@ -87,6 +87,22 @@ export class OrderController {
     return orders.map((order) => this.orderService.toOrderResponseDto(order));
   }
 
+  @Get('vendor/:vendorId')
+  @Roles(UserRole.VENDOR, UserRole.SUPERADMIN)
+  @ApiOperation({ summary: 'Get orders by vendor ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of orders containing listings from this vendor.',
+    type: [OrderResponseDto],
+  })
+  @ApiResponse({ status: 404, description: 'Vendor not found.' })
+  async findByVendor(
+    @Param('vendorId', ParseIntPipe) vendorId: number,
+  ): Promise<OrderResponseDto[]> {
+    const orders = await this.orderService.findByVendor(vendorId);
+    return orders.map((order) => this.orderService.toOrderResponseDto(order));
+  }
+
   @Put(':id')
   @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Update an order' })
@@ -132,5 +148,48 @@ export class OrderController {
   @ApiResponse({ status: 404, description: 'Order not found.' })
   async delete(@Param('id', ParseIntPipe) id: number): Promise<void> {
     await this.orderService.delete(id);
+  }
+
+  @Post(':id/vendor-confirm')
+  @Roles(UserRole.VENDOR)
+  @ApiOperation({ summary: 'Vendor confirms an order' })
+  @ApiResponse({
+    status: 200,
+    description: 'The order has been successfully confirmed by the vendor.',
+    type: OrderResponseDto,
+  })
+  @ApiResponse({ status: 404, description: 'Order not found.' })
+  @ApiResponse({ status: 400, description: 'Order cannot be confirmed.' })
+  @ApiResponse({
+    status: 403,
+    description: 'Vendor does not own the listings in this order.',
+  })
+  async vendorConfirm(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<OrderResponseDto> {
+    const order = await this.orderService.vendorConfirm(id);
+    return this.orderService.toOrderResponseDto(order);
+  }
+
+  @Post(':id/vendor-reject')
+  @Roles(UserRole.VENDOR)
+  @ApiOperation({ summary: 'Vendor rejects an order and triggers refund' })
+  @ApiResponse({
+    status: 200,
+    description:
+      'The order has been successfully rejected by the vendor and payment refunded.',
+    type: OrderResponseDto,
+  })
+  @ApiResponse({ status: 404, description: 'Order not found.' })
+  @ApiResponse({ status: 400, description: 'Order cannot be rejected.' })
+  @ApiResponse({
+    status: 403,
+    description: 'Vendor does not own the listings in this order.',
+  })
+  async vendorReject(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<OrderResponseDto> {
+    const order = await this.orderService.vendorReject(id);
+    return this.orderService.toOrderResponseDto(order);
   }
 }
