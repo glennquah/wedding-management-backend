@@ -110,16 +110,17 @@ export class WeddingService {
   toWeddingResponseDto(wedding: any): WeddingResponseDto {
     return {
       id: wedding.id,
-      mainCouple: wedding.mainCouple?.map((admin: any) => ({
-        id: admin.userId,
-        name: admin.user?.name,
-        email: admin.user?.email,
-        role: admin.user?.role,
-        createdAt: admin.user?.createdAt?.toISOString(),
-        updatedAt: admin.user?.updatedAt?.toISOString(),
-        isSuspended: admin.isSuspended,
-        onboardedDate: admin.onboardedDate?.toISOString(),
-      })) || [],
+      mainCouple:
+        wedding.mainCouple?.map((admin: any) => ({
+          id: admin.userId,
+          name: admin.user?.name,
+          email: admin.user?.email,
+          role: admin.user?.role,
+          createdAt: admin.user?.createdAt?.toISOString(),
+          updatedAt: admin.user?.updatedAt?.toISOString(),
+          isSuspended: admin.isSuspended,
+          onboardedDate: admin.onboardedDate?.toISOString(),
+        })) || [],
       name: wedding.name,
       date: wedding.date?.toISOString(),
       location: wedding.location,

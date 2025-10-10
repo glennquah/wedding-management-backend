@@ -395,9 +395,7 @@ export class OrderService {
     }
 
     // Validate order status - can only reject PAID orders
-    if (
-      order.orderStatus !== OrderStatus.PAID
-    ) {
+    if (order.orderStatus !== OrderStatus.PAID) {
       throw new BadRequestException(
         `Order must be in PAID status to be rejected. Current status: ${order.orderStatus}`,
       );

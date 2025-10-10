@@ -11,7 +11,10 @@ export class WeddingResponseDto {
   @ApiProperty({ description: 'Wedding ID' })
   id: number;
 
-  @ApiProperty({ description: 'The ID of the couple getting married', type: [AdminResponseDto] })
+  @ApiProperty({
+    description: 'The ID of the couple getting married',
+    type: [AdminResponseDto],
+  })
   mainCouple?: AdminResponseDto[];
 
   @ApiProperty({ description: 'The name of the wedding' })
