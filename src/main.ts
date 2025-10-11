@@ -27,7 +27,7 @@ async function bootstrap() {
       'https://knotly.app',
       'https://core.knotly.app',
     ],
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     credentials: true,
   });
 
