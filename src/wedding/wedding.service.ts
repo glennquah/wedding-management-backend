@@ -107,6 +107,22 @@ export class WeddingService {
     });
   }
 
+  async setWeddingDate(weddingId: number, date: string): Promise<Wedding> {
+    await this.findById(weddingId);
+
+    const updatedWedding = await this.prisma.wedding.update({
+      where: { id: weddingId },
+      data: {
+        date: new Date(date),
+      },
+      include: {
+        guests: true,
+      },
+    });
+
+    return updatedWedding;
+  }
+
   toWeddingResponseDto(wedding: WeddingWithGuests): WeddingResponseDto {
     return {
       id: wedding.id,
