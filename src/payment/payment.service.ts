@@ -99,6 +99,100 @@ export class PaymentService {
     });
   }
 
+  async refundPayment(orderId: number): Promise<void> {
+    // Find the succeeded payment for this order
+    const payment = await this.prisma.payment.findFirst({
+      where: {
+        orderId,
+        paymentStatus: PaymentStatus.SUCCEEDED,
+      },
+    });
+
+    if (!payment) {
+      throw new BadRequestException(
+        'No successful payment found for this order',
+      );
+    }
+
+    if (!payment.stripePaymentIntentId) {
+      throw new BadRequestException(
+        'Payment intent not found. Cannot process refund.',
+      );
+    }
+
+    try {
+      // Create a full refund in Stripe
+      const refund = await this.stripe.refunds.create({
+        payment_intent: payment.stripePaymentIntentId,
+      });
+
+      // Update payment status to REFUNDED
+      await this.prisma.payment.update({
+        where: { id: payment.id },
+        data: { paymentStatus: PaymentStatus.REFUNDED },
+      });
+
+      console.log(
+        `Successfully refunded payment ${payment.id} for order ${orderId}. Refund ID: ${refund.id}`,
+      );
+    } catch (error) {
+      console.error('Error processing refund:', error);
+      throw new InternalServerErrorException('Failed to process refund');
+    }
+  }
+
+  async refundPartialPayment(orderId: number, amount: number): Promise<void> {
+    // Find the succeeded payment for this order
+    const payment = await this.prisma.payment.findFirst({
+      where: {
+        orderId,
+        paymentStatus: PaymentStatus.SUCCEEDED,
+      },
+    });
+
+    if (!payment) {
+      throw new BadRequestException(
+        'No successful payment found for this order',
+      );
+    }
+
+    if (!payment.stripePaymentIntentId) {
+      throw new BadRequestException(
+        'Payment intent not found. Cannot process refund.',
+      );
+    }
+
+    try {
+      // Create a partial refund in Stripe
+      const refund = await this.stripe.refunds.create({
+        payment_intent: payment.stripePaymentIntentId,
+        amount: Math.round(amount * 100), // Convert to cents
+      });
+
+      // Check if payment is now partially or fully refunded
+      const totalRefunded = payment.amount - amount;
+      const newStatus =
+        totalRefunded > 0
+          ? PaymentStatus.PARTIALLY_REFUNDED
+          : PaymentStatus.REFUNDED;
+
+      // Update payment status
+      await this.prisma.payment.update({
+        where: { id: payment.id },
+        data: { paymentStatus: newStatus },
+      });
+
+      console.log(
+        `Successfully partially refunded payment ${payment.id} for order ${orderId}. Refund amount: ${amount}, Refund ID: ${refund.id}`,
+      );
+    } catch (error) {
+      console.error('Error processing partial refund:', error);
+      throw new InternalServerErrorException(
+        'Failed to process partial refund',
+      );
+    }
+  }
+
   async handleWebhook(
     signature: string,
     payload: Buffer,
@@ -135,9 +229,17 @@ export class PaymentService {
   private async handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     const payment = await this.prisma.payment.findUnique({
       where: { stripeCheckoutSessionId: session.id },
+      include: {
+        order: {
+          include: {
+            listings: true,
+          },
+        },
+      },
     });
 
     if (payment) {
+      // Update payment status to SUCCEEDED
       await this.prisma.payment.update({
         where: { stripeCheckoutSessionId: session.id },
         data: {
@@ -146,10 +248,18 @@ export class PaymentService {
         },
       });
 
-      await this.prisma.order.update({
-        where: { id: payment.orderId },
-        data: { orderStatus: OrderStatus.PAID },
-      });
+      // Update all OrderListing statuses to PAID
+      for (const orderListing of payment.order.listings) {
+        await this.prisma.orderListing.update({
+          where: {
+            orderId_listingId: {
+              orderId: payment.orderId,
+              listingId: orderListing.listingId,
+            },
+          },
+          data: { bookingStatus: OrderStatus.PAID },
+        });
+      }
     }
   }
 
