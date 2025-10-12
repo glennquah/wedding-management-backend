@@ -1,3 +1,4 @@
+import { faker } from '@faker-js/faker';
 import {
   BudgetBucket,
   GuestCountBucket,
@@ -6,19 +7,20 @@ import {
   WeddingStyle,
   WeddingType,
 } from '@prisma/client';
-import { faker } from '@faker-js/faker';
 
 export async function seedRecommendationWeddings(prisma: PrismaClient) {
   // Set deterministic seed for consistent data generation across runs
   faker.seed(12345);
 
-  console.log('✅ Seeding 1000 recommendation weddings with realistic distribution...');
+  console.log(
+    '✅ Seeding 1000 recommendation weddings with realistic distribution...',
+  );
 
   // Get all enum values
-  const weddingTypes = Object.values(WeddingType);
-  const budgetBuckets = Object.values(BudgetBucket);
-  const guestCountBuckets = Object.values(GuestCountBucket);
-  const weddingStyles = Object.values(WeddingStyle);
+  // const weddingTypes = Object.values(WeddingType);
+  // const budgetBuckets = Object.values(BudgetBucket);
+  // const guestCountBuckets = Object.values(GuestCountBucket);
+  // const weddingStyles = Object.values(WeddingStyle);
   const allServices = Object.values(WeddingService);
 
   const locations = [
@@ -74,17 +76,20 @@ export async function seedRecommendationWeddings(prisma: PrismaClient) {
     // Use weighted random selection for realistic distribution
     const weddingType = faker.helpers.weightedArrayElement(weddingTypeWeights);
     const budgetBucket = faker.helpers.weightedArrayElement(budgetWeights);
-    const guestCountBucket = faker.helpers.weightedArrayElement(guestCountWeights);
+    const guestCountBucket =
+      faker.helpers.weightedArrayElement(guestCountWeights);
     const preferredStyle = faker.helpers.weightedArrayElement(styleWeights);
 
     // Select 2-4 preferred services randomly
     const numServices = faker.number.int({ min: 2, max: 4 });
-    const preferredServices = faker.helpers.shuffle([...allServices]).slice(0, numServices);
+    const preferredServices = faker.helpers
+      .shuffle([...allServices])
+      .slice(0, numServices);
 
     // Generate wedding date between 2022-2023 (past dates to avoid overlap with listing availabilities)
     const weddingDate = faker.date.between({
       from: new Date('2022-01-01'), // Start of 2022
-      to: new Date('2023-12-31'),   // End of 2023
+      to: new Date('2023-12-31'), // End of 2023
     });
 
     // Use fixed IDs starting from 20000 to avoid conflicts
@@ -102,6 +107,7 @@ export async function seedRecommendationWeddings(prisma: PrismaClient) {
         guestCountBucket,
         preferredStyle,
         preferredServices,
+        allocatedBudget: faker.number.int({ min: 5000, max: 100000 }),
         notificationDetails: {
           create: {},
         },
@@ -117,15 +123,21 @@ export async function seedRecommendationWeddings(prisma: PrismaClient) {
   }
 
   // Calculate actual distribution for logging
-  const typeDistribution = weddings.reduce((acc, w) => {
-    acc[w.weddingType] = (acc[w.weddingType] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+  const typeDistribution = weddings.reduce(
+    (acc, w) => {
+      acc[w.weddingType] = (acc[w.weddingType] || 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>,
+  );
 
-  const budgetDistribution = weddings.reduce((acc, w) => {
-    acc[w.budgetBucket] = (acc[w.budgetBucket] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+  const budgetDistribution = weddings.reduce(
+    (acc, w) => {
+      acc[w.budgetBucket] = (acc[w.budgetBucket] || 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>,
+  );
 
   console.log('✅ Created 1000 weddings with realistic weighted distribution');
   console.log('   - Wedding Types:', typeDistribution);
