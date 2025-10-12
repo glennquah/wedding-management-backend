@@ -581,6 +581,7 @@ export class OrderService {
         bookingStatus: ol.bookingStatus,
       })),
       payments: order.payments,
+      status: order.status,
     };
   }
 }

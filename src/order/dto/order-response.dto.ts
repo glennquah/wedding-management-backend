@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { OrderStatus } from '../../common/order-status.enum';
 
 export class OrderResponseDto {
   @ApiProperty({ description: 'Unique identifier for the order' })
@@ -9,6 +10,13 @@ export class OrderResponseDto {
 
   @ApiProperty({ description: 'Currency code for the order' })
   currency: string;
+
+  @ApiProperty({
+    description: 'Current status of the order',
+    enum: OrderStatus,
+    enumName: 'OrderStatus',
+  })
+  status: OrderStatus;
 
   @ApiProperty({ description: 'Date when the order was purchased' })
   purchaseDate: Date;

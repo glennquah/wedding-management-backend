@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConfirmationStatus } from '../common/confirmation-status.enum';
 import { PrismaService } from '../prisma/prisma.service';
 import { GuestCountResponseDto } from './dto/guest-count-response.dto';
 import { RsvpCountResponseDto } from './dto/rsvp-count-response.dto';
@@ -97,11 +98,14 @@ export class AnalyticsService {
     const totalInvited = allGuests.length;
 
     // Count guests who confirmed attendance
-    const confirmed = allGuests.filter((guest) => guest.attendance === true)
-      .length;
+    const confirmed = allGuests.filter(
+      (guest) => guest.confirmationStatus === ConfirmationStatus.CONFIRMED,
+    ).length;
 
     // Count guests who haven't RSVPed yet
-    const pending = totalInvited - confirmed;
+    const pending = allGuests.filter(
+      (guest) => guest.confirmationStatus === ConfirmationStatus.PENDING,
+    ).length;
 
     // Calculate RSVP percentage
     const rsvpPercentage =
