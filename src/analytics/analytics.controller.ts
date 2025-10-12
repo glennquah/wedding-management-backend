@@ -6,9 +6,10 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
+import { RevenuePeriod } from '../common/revenue-period.enum';
 import { AnalyticsService } from './analytics.service';
 import { GuestCountResponseDto } from './dto/guest-count-response.dto';
 import { RevenueOverTimeResponseDto } from './dto/revenue-over-time-response.dto';
@@ -112,7 +113,14 @@ export class AnalyticsController {
   @ApiOperation({
     summary: 'Get vendor revenue over time',
     description:
-      'Returns monthly revenue data for a vendor, suitable for line charts.',
+      'Returns revenue data for a vendor: MONTHLY (current month by days), YEARLY (current year by months), ALL (all time by months).',
+  })
+  @ApiQuery({
+    name: 'period',
+    required: false,
+    enum: RevenuePeriod,
+    description:
+      'Time period: MONTHLY=daily breakdown for current month, YEARLY=monthly breakdown for current year, ALL=monthly breakdown for all time (default: MONTHLY)',
   })
   @ApiResponse({
     status: 200,
@@ -125,8 +133,9 @@ export class AnalyticsController {
   })
   async getVendorRevenueOverTime(
     @Param('vendorId', ParseIntPipe) vendorId: number,
+    @Query('period') period: RevenuePeriod = RevenuePeriod.MONTHLY,
   ): Promise<RevenueOverTimeResponseDto> {
-    return this.analyticsService.getVendorRevenueOverTime(vendorId);
+    return this.analyticsService.getVendorRevenueOverTime(vendorId, period);
   }
 
   @Get('vendor/:vendorId/top-products')

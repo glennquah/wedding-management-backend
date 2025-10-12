@@ -1,22 +1,32 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { RevenuePeriod } from '../../common/revenue-period.enum';
 
-export class MonthlyRevenueData {
-  @ApiProperty({ description: 'Month in YYYY-MM format' })
-  month: string;
+export class RevenueDataPoint {
+  @ApiProperty({
+    description:
+      'Period label (YYYY-MM-DD for daily breakdown, YYYY-MM for monthly breakdown)',
+  })
+  period: string;
 
-  @ApiProperty({ description: 'Revenue for the month' })
+  @ApiProperty({ description: 'Revenue for the period' })
   revenue: number;
 
-  @ApiProperty({ description: 'Number of orders in the month' })
+  @ApiProperty({ description: 'Number of orders in the period' })
   orderCount: number;
 }
 
 export class RevenueOverTimeResponseDto {
   @ApiProperty({
-    description: 'Monthly revenue data',
-    type: [MonthlyRevenueData],
+    description: 'Revenue data points over time',
+    type: [RevenueDataPoint],
   })
-  monthlyData: MonthlyRevenueData[];
+  data: RevenueDataPoint[];
+
+  @ApiProperty({
+    description: 'Period type',
+    enum: RevenuePeriod,
+  })
+  periodType: RevenuePeriod;
 
   @ApiProperty({ description: 'Currency code' })
   currency: string;

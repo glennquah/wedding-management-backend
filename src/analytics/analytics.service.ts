@@ -1,10 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { ConfirmationStatus } from '../common/confirmation-status.enum';
 import { OrderStatus } from '../common/order-status.enum';
+import { RevenuePeriod } from '../common/revenue-period.enum';
 import { PrismaService } from '../prisma/prisma.service';
 import { GuestCountResponseDto } from './dto/guest-count-response.dto';
 import {
-  MonthlyRevenueData,
+  RevenueDataPoint,
   RevenueOverTimeResponseDto,
 } from './dto/revenue-over-time-response.dto';
 import { RsvpCountResponseDto } from './dto/rsvp-count-response.dto';
@@ -205,6 +207,7 @@ export class AnalyticsService {
 
   async getVendorRevenueOverTime(
     vendorId: number,
+    period: RevenuePeriod = RevenuePeriod.MONTHLY,
   ): Promise<RevenueOverTimeResponseDto> {
     const vendor = await this.prisma.vendor.findUnique({
       where: { userId: vendorId },
@@ -214,20 +217,38 @@ export class AnalyticsService {
       throw new NotFoundException(`Vendor with ID ${vendorId} not found`);
     }
 
-    // Get all orders for this vendor's listings
-    const orders = await this.prisma.order.findMany({
-      where: {
-        listings: {
-          some: {
-            listing: {
-              vendorId: vendorId,
-            },
+    // Filter orders based on period and get all orders for this vendor's listings
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfYear = new Date(now.getFullYear(), 0, 1);
+
+    const whereClause: Prisma.OrderWhereInput = {
+      listings: {
+        some: {
+          listing: {
+            vendorId: vendorId,
           },
         },
-        orderStatus: {
-          in: [OrderStatus.PAID, OrderStatus.COMPLETED],
-        },
       },
+      orderStatus: {
+        in: [OrderStatus.PAID, OrderStatus.COMPLETED],
+      },
+    };
+
+    // Add date filter based on period
+    if (period === RevenuePeriod.MONTHLY) {
+      whereClause.purchaseDate = {
+        gte: startOfMonth,
+      };
+    } else if (period === RevenuePeriod.YEARLY) {
+      whereClause.purchaseDate = {
+        gte: startOfYear,
+      };
+    }
+    // For ALL, no date filter is applied
+
+    const orders = await this.prisma.order.findMany({
+      where: whereClause,
       include: {
         listings: {
           where: {
@@ -245,36 +266,46 @@ export class AnalyticsService {
       },
     });
 
-    // Group by month
-    const monthlyMap = new Map<string, { revenue: number; count: number }>();
+    // Group by the specified period
+    const periodMap = new Map<string, { revenue: number; count: number }>();
 
     orders.forEach((order) => {
-      const monthKey = order.purchaseDate.toISOString().substring(0, 7); // YYYY-MM
+      let periodKey: string;
+
+      if (period === RevenuePeriod.MONTHLY) {
+        periodKey = order.purchaseDate.toISOString().substring(0, 10);
+      } else if (period === RevenuePeriod.YEARLY) {
+        periodKey = order.purchaseDate.toISOString().substring(0, 7);
+      } else {
+        periodKey = order.purchaseDate.toISOString().substring(0, 7);
+      }
+
       const vendorRevenue = order.listings.reduce(
         (sum, ol) => sum + ol.listing.price,
         0,
       );
 
-      if (!monthlyMap.has(monthKey)) {
-        monthlyMap.set(monthKey, { revenue: 0, count: 0 });
+      if (!periodMap.has(periodKey)) {
+        periodMap.set(periodKey, { revenue: 0, count: 0 });
       }
 
-      const monthData = monthlyMap.get(monthKey)!;
-      monthData.revenue += vendorRevenue;
-      monthData.count += 1;
+      const periodData = periodMap.get(periodKey)!;
+      periodData.revenue += vendorRevenue;
+      periodData.count += 1;
     });
 
-    // Convert map to array and sort
-    const monthlyData: MonthlyRevenueData[] = Array.from(monthlyMap.entries())
-      .map(([month, data]) => ({
-        month,
-        revenue: Math.round(data.revenue * 100) / 100,
-        orderCount: data.count,
+    // Convert map to array and sort chronologically
+    const data: RevenueDataPoint[] = Array.from(periodMap.entries())
+      .map(([periodKey, periodData]) => ({
+        period: periodKey,
+        revenue: Math.round(periodData.revenue * 100) / 100,
+        orderCount: periodData.count,
       }))
-      .sort((a, b) => a.month.localeCompare(b.month));
+      .sort((a, b) => a.period.localeCompare(b.period));
 
     return {
-      monthlyData,
+      data,
+      periodType: period,
       currency: 'SGD',
     };
   }
