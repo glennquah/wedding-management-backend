@@ -49,7 +49,12 @@ export class CartService {
       include: { listing: true },
     });
 
-    const total = items.reduce((sum, item) => sum + item.listing.price, 0);
+    const total = items.reduce((sum, item) => {
+      const selectedSlots =
+        item.selectedSlots as unknown as AvailabilitySlotDto[];
+      const slotsCount = selectedSlots ? selectedSlots.length : 1;
+      return sum + item.listing.price * slotsCount;
+    }, 0);
 
     const cart = await this.prisma.cart.update({
       where: { id: cartId },
@@ -100,35 +105,69 @@ export class CartService {
       );
     }
 
-    await this.prisma.cartItem.upsert({
+    // Check if cart item already exists
+    const existingCartItem = await this.prisma.cartItem.findUnique({
       where: {
         cartId_listingId: { cartId: cart.id, listingId: dto.listingId },
       },
-      update: {
-        selectedSlots: dto.selectedSlots as any,
-      },
-      create: {
-        cartId: cart.id,
-        listingId: dto.listingId,
-        selectedSlots: dto.selectedSlots as any,
-      },
     });
+
+    if (existingCartItem) {
+      // Merge existing slots with new slots, avoiding duplicates
+      const existingSlots =
+        existingCartItem.selectedSlots as unknown as AvailabilitySlotDto[];
+      const mergedSlots = [...existingSlots];
+
+      for (const newSlot of dto.selectedSlots) {
+        const isDuplicate = existingSlots.some(
+          (existing) =>
+            existing.startTime === newSlot.startTime &&
+            existing.endTime === newSlot.endTime &&
+            existing.date === newSlot.date,
+        );
+
+        if (!isDuplicate) {
+          mergedSlots.push(newSlot);
+        }
+      }
+
+      await this.prisma.cartItem.update({
+        where: {
+          cartId_listingId: { cartId: cart.id, listingId: dto.listingId },
+        },
+        data: {
+          selectedSlots: mergedSlots as any,
+        },
+      });
+    } else {
+      // Create new cart item
+      await this.prisma.cartItem.create({
+        data: {
+          cartId: cart.id,
+          listingId: dto.listingId,
+          selectedSlots: dto.selectedSlots as any,
+        },
+      });
+    }
 
     return this.recalculateTotal(cart.id);
   }
 
   async getCart(adminId: number): Promise<CartResponseDto> {
-    let cart = await this.prisma.cart.findUnique({
+    const admin = await this.prisma.admin.findUnique({
+      where: { userId: adminId },
+    });
+    if (!admin) {
+      throw new NotFoundException(`Admin with ID ${adminId} not found`);
+    }
+
+    const cart = await this.prisma.cart.upsert({
       where: { adminId },
+      update: {},
+      create: { adminId },
       include: { items: { include: { listing: true } } },
     });
 
-    if (!cart) {
-      cart = await this.prisma.cart.create({
-        data: { adminId },
-        include: { items: { include: { listing: true } } },
-      });
-    }
     return this.toCartResponseDto(cart);
   }
 
