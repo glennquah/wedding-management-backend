@@ -1,13 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConfirmationStatus } from '../common/confirmation-status.enum';
 import { OrderStatus } from '../common/order-status.enum';
-import { WeddingService } from '../common/wedding-service.enum';
 import { PrismaService } from '../prisma/prisma.service';
 import { GuestCountResponseDto } from './dto/guest-count-response.dto';
-import {
-  CategoryRevenueData,
-  RevenueByCategoryResponseDto,
-} from './dto/revenue-by-category-response.dto';
 import {
   MonthlyRevenueData,
   RevenueOverTimeResponseDto,
@@ -341,76 +336,6 @@ export class AnalyticsService {
 
     return {
       topProducts: productData,
-      currency: 'SGD',
-    };
-  }
-
-  async getVendorRevenueByCategory(
-    vendorId: number,
-  ): Promise<RevenueByCategoryResponseDto> {
-    // Verify vendor exists
-    const vendor = await this.prisma.vendor.findUnique({
-      where: { userId: vendorId },
-      include: {
-        listings: {
-          include: {
-            orders: {
-              where: {
-                order: {
-                  orderStatus: {
-                    in: [OrderStatus.PAID, OrderStatus.COMPLETED],
-                  },
-                },
-              },
-              include: {
-                order: true,
-              },
-            },
-          },
-        },
-      },
-    });
-
-    if (!vendor) {
-      throw new NotFoundException(`Vendor with ID ${vendorId} not found`);
-    }
-
-    // Calculate total revenue and booking count per listing
-    let totalRevenue = 0;
-    const listingStats = vendor.listings.map((listing) => {
-      const bookingCount = listing.orders.length;
-      const revenue = listing.orders.reduce(
-        (sum, _ol) => sum + listing.price,
-        0,
-      );
-      totalRevenue += revenue;
-
-      return {
-        revenue,
-        bookingCount,
-      };
-    });
-
-    // Since vendor only has one serviceOffered, create a single category
-    const categories: CategoryRevenueData[] = [];
-
-    if (vendor.serviceOffered && totalRevenue > 0) {
-      const totalBookings = listingStats.reduce(
-        (sum, stat) => sum + stat.bookingCount,
-        0,
-      );
-
-      categories.push({
-        category: vendor.serviceOffered as WeddingService,
-        revenue: Math.round(totalRevenue * 100) / 100,
-        percentage: 100,
-        bookingCount: totalBookings,
-      });
-    }
-
-    return {
-      categories,
-      totalRevenue: Math.round(totalRevenue * 100) / 100,
       currency: 'SGD',
     };
   }

@@ -11,7 +11,6 @@ import { JwtGuard } from '../auth/guards/jwt.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { AnalyticsService } from './analytics.service';
 import { GuestCountResponseDto } from './dto/guest-count-response.dto';
-import { RevenueByCategoryResponseDto } from './dto/revenue-by-category-response.dto';
 import { RevenueOverTimeResponseDto } from './dto/revenue-over-time-response.dto';
 import { RsvpCountResponseDto } from './dto/rsvp-count-response.dto';
 import { SpendingResponseDto } from './dto/spending-response.dto';
@@ -150,27 +149,6 @@ export class AnalyticsController {
     @Query('limit', ParseIntPipe) limit: number = 10,
   ): Promise<VendorTopProductsResponseDto> {
     return this.analyticsService.getVendorTopProducts(vendorId, limit);
-  }
-
-  @Get('vendor/:vendorId/revenue-by-category')
-  @ApiOperation({
-    summary: 'Get vendor revenue by category',
-    description:
-      'Returns revenue breakdown by service category for a vendor, suitable for pie charts.',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Revenue by category retrieved successfully',
-    type: RevenueByCategoryResponseDto,
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Vendor not found',
-  })
-  async getVendorRevenueByCategory(
-    @Param('vendorId', ParseIntPipe) vendorId: number,
-  ): Promise<RevenueByCategoryResponseDto> {
-    return this.analyticsService.getVendorRevenueByCategory(vendorId);
   }
 
   @Get('vendor/:vendorId/bookings')

@@ -13,14 +13,24 @@ export async function seedOrders(prisma: PrismaClient) {
 
   let totalOrders = 0;
 
+  // Generate dates across multiple months for better analytics
+  const generateRandomDate = () => {
+    const monthsAgo = Math.floor(Math.random() * 12); // 0-11 months ago
+    const daysAgo = Math.floor(Math.random() * 30); // Random day within that month
+    const date = new Date();
+    date.setMonth(date.getMonth() - monthsAgo);
+    date.setDate(date.getDate() - daysAgo);
+    return date;
+  };
+
   for (const wedding of weddings) {
-    // Create 6-8 orders per wedding
-    const orderCount = Math.floor(Math.random() * 3) + 6; // Random number between 6-8
+    // Create 12-18 orders per wedding (increased from 6-8)
+    const orderCount = Math.floor(Math.random() * 7) + 12; // Random number between 12-18
     let totalSpendingForWedding = 0;
 
     for (let i = 0; i < orderCount; i++) {
-      // Randomly select 1-3 listings for this order
-      const listingsInOrder = Math.floor(Math.random() * 3) + 1;
+      // Randomly select 1-4 listings for this order (increased from 1-3)
+      const listingsInOrder = Math.floor(Math.random() * 4) + 1;
       const selectedListings: typeof listings = [];
       const usedIndices = new Set<number>();
 
@@ -36,8 +46,8 @@ export async function seedOrders(prisma: PrismaClient) {
       // Calculate total amount for this order
       let orderTotal = 0;
       selectedListings.forEach((listing) => {
-        // For per-person pricing (catering), use a random number of guests (50-150)
-        if (listing.price < 200) {
+        // For per-person pricing (catering, makeup), use a random number of guests (50-150)
+        if (listing.price < 1000) {
           const guestCount = Math.floor(Math.random() * 101) + 50;
           orderTotal += listing.price * guestCount;
         } else {
@@ -45,18 +55,21 @@ export async function seedOrders(prisma: PrismaClient) {
         }
       });
 
-      // Determine order status (80% paid, 15% pending, 5% completed)
+      // Determine order status with better distribution
+      // 70% paid, 10% completed, 15% pending, 5% cancelled
       const statusRandom = Math.random();
       let orderStatus: OrderStatus;
-      if (statusRandom < 0.8) {
+      if (statusRandom < 0.7) {
         orderStatus = OrderStatus.PAID;
+      } else if (statusRandom < 0.8) {
+        orderStatus = OrderStatus.COMPLETED;
       } else if (statusRandom < 0.95) {
         orderStatus = OrderStatus.PENDING;
       } else {
-        orderStatus = OrderStatus.COMPLETED;
+        orderStatus = OrderStatus.CANCELLED;
       }
 
-      // Create the order
+      // Create the order with date spread across months
       const order = await prisma.order.create({
         data: {
           weddingId: wedding.id,
@@ -64,13 +77,11 @@ export async function seedOrders(prisma: PrismaClient) {
           currency: 'SGD',
           orderStatus,
           remark: `Order ${i + 1} for ${wedding.name}`,
-          purchaseDate: new Date(
-            Date.now() - Math.floor(Math.random() * 30) * 24 * 60 * 60 * 1000,
-          ), // Random date within last 30 days
+          purchaseDate: generateRandomDate(),
         },
       });
 
-      // Create OrderListing entries
+      // Create OrderListing entries with booking status matching order status
       for (const listing of selectedListings) {
         const availabilities = listing.availabilities as any[];
         const randomAvailability =
@@ -81,11 +92,18 @@ export async function seedOrders(prisma: PrismaClient) {
             orderId: order.id,
             listingId: listing.id,
             bookedSlots: [randomAvailability],
+            bookingStatus: orderStatus, // Match the order status
           },
         });
       }
 
-      totalSpendingForWedding += orderTotal;
+      // Only add to spending if order is paid or completed
+      if (
+        orderStatus === OrderStatus.PAID ||
+        orderStatus === OrderStatus.COMPLETED
+      ) {
+        totalSpendingForWedding += orderTotal;
+      }
       totalOrders++;
     }
 
@@ -96,7 +114,7 @@ export async function seedOrders(prisma: PrismaClient) {
     });
 
     console.log(
-      `✅ Created ${orderCount} orders for ${wedding.name} (Total: $${totalSpendingForWedding.toFixed(2)})`,
+      `✅ Created ${orderCount} orders for ${wedding.name} (Total spending: $${totalSpendingForWedding.toFixed(2)})`,
     );
   }
 
