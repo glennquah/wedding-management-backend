@@ -377,15 +377,6 @@ export class AdminService {
       throw new NotFoundException(`Wedding with id ${dto.weddingId} not found`);
     }
 
-    // Check if guest exists
-    const guest = await this.prisma.guest.findUnique({
-      where: { id: dto.guestId },
-    });
-
-    if (!guest) {
-      throw new NotFoundException(`Guest with id ${dto.guestId} not found`);
-    }
-
     // Check if user with this email already exists
     const existingUser = await this.prisma.user.findUnique({
       where: { email: dto.email },
@@ -767,7 +758,9 @@ export class AdminService {
     }
 
     // Check if user is in main couple
-    const isInMainCouple = wedding.mainCouple.some((mc) => mc.userId === userId);
+    const isInMainCouple = wedding.mainCouple.some(
+      (mc) => mc.userId === userId,
+    );
     if (!isInMainCouple) {
       throw new NotFoundException('User is not in main couple');
     }
