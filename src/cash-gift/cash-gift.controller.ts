@@ -23,7 +23,9 @@ export class CashGiftController {
   constructor(private cashGiftService: CashGiftService) {}
 
   @Post()
-  @ApiOperation({ summary: 'Create a new cash gift record for a wedding (public endpoint)' })
+  @ApiOperation({
+    summary: 'Create a new cash gift record for a wedding (public endpoint)',
+  })
   @ApiResponse({
     status: 201,
     description: 'The cash gift record has been successfully created.',
@@ -49,7 +51,9 @@ export class CashGiftController {
     @Param('weddingId', ParseIntPipe) weddingId: number,
   ): Promise<CashGiftResponseDto[]> {
     const cashGifts = await this.cashGiftService.findByWeddingId(weddingId);
-    return cashGifts.map((cashGift) => this.cashGiftService.toCashGiftResponseDto(cashGift));
+    return cashGifts.map((cashGift) =>
+      this.cashGiftService.toCashGiftResponseDto(cashGift),
+    );
   }
 
   @Get(':id')

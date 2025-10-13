@@ -11,7 +11,9 @@ export class CreateCashGiftDto {
   @Min(0)
   amount: number;
 
-  @ApiProperty({ description: 'The ID of the wedding this cash gift belongs to' })
+  @ApiProperty({
+    description: 'The ID of the wedding this cash gift belongs to',
+  })
   @IsInt()
   weddingId: number;
 }

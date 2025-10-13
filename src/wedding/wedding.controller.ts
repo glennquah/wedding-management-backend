@@ -86,7 +86,10 @@ export class WeddingController {
     description: 'Public wedding details for cash gift page',
     type: WeddingPublicResponseDto,
   })
-  @ApiResponse({ status: 404, description: 'Wedding not found or PayNow QR not available.' })
+  @ApiResponse({
+    status: 404,
+    description: 'Wedding not found or PayNow QR not available.',
+  })
   async findPublic(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<WeddingPublicResponseDto> {

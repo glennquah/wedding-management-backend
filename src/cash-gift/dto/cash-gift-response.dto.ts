@@ -13,7 +13,9 @@ export class CashGiftResponseDto {
   @ApiProperty({ description: 'The amount of the cash gift' })
   amount: number;
 
-  @ApiProperty({ description: 'The ID of the wedding this cash gift belongs to' })
+  @ApiProperty({
+    description: 'The ID of the wedding this cash gift belongs to',
+  })
   weddingId: number;
 
   @ApiProperty({ description: 'The creation date of the cash gift record' })

@@ -413,7 +413,9 @@ export class WeddingService {
     }
 
     if (!wedding.paynowQR) {
-      throw new NotFoundException(`Wedding with ID ${id} does not have a PayNow QR code`);
+      throw new NotFoundException(
+        `Wedding with ID ${id} does not have a PayNow QR code`,
+      );
     }
 
     return {

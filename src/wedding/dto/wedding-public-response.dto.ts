@@ -15,6 +15,9 @@ export class WeddingPublicResponseDto {
   @ApiProperty({ description: 'PayNow QR code URL' })
   paynowQR: string;
 
-  @ApiProperty({ description: 'List of guests with minimal info', type: [GuestMinimalDto] })
+  @ApiProperty({
+    description: 'List of guests with minimal info',
+    type: [GuestMinimalDto],
+  })
   guests: GuestMinimalDto[];
 }

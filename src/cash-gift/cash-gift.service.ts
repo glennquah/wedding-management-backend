@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { CashGift } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCashGiftDto } from './dto/create-cash-gift.dto';
@@ -29,7 +33,7 @@ export class CashGiftService {
 
     if (guest.weddingId !== dto.weddingId) {
       throw new BadRequestException(
-        `Guest with ID ${dto.guestId} does not belong to wedding with ID ${dto.weddingId}`
+        `Guest with ID ${dto.guestId} does not belong to wedding with ID ${dto.weddingId}`,
       );
     }
 
