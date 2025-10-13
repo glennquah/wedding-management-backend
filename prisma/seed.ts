@@ -4,6 +4,7 @@ import { seedEmailHistory } from './seeds/email-history.seed';
 import { seedEmailTemplates } from './seeds/email-templates.seed';
 import { seedGuests } from './seeds/guests.seed';
 import { seedListings } from './seeds/listings.seed';
+import { seedOrders } from './seeds/orders.seed';
 import { seedUsers } from './seeds/users.seed';
 import { seedVendors } from './seeds/vendors.seed';
 import { seedWeddings } from './seeds/weddings.seed';
@@ -53,7 +54,10 @@ async function main() {
   // 8. Seed listings (depends on vendors)
   await seedListings(prisma);
 
-  // 9. Seed guests (depends on weddings)
+  // 9. Seed orders (depends on weddings and listings)
+  await seedOrders(prisma);
+
+  // 10. Seed guests (depends on weddings)
   await seedGuests(prisma);
 
   // Print final summary
@@ -73,6 +77,7 @@ async function main() {
     '- 250 Email Notification History entries (10 per wedding + 10 per vendor)',
   );
   console.log('- Multiple listings for vendors');
+  console.log('- 6-8 orders per wedding with updated spending');
   console.log(
     '- ~80 primary guests per wedding (some with accompanying guests)',
   );

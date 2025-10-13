@@ -192,6 +192,8 @@ model Wedding {
   admins              Admin[]              @relation("AdminWeddings")
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
+  allocatedBudget     Float
+  currentSpending     Float                @default(0)
   weddingType         WeddingType
   budgetBucket        BudgetBucket
   guestCountBucket    GuestCountBucket
@@ -222,7 +224,7 @@ model Microsite {
 }
 
 model Album {
-  id                Int     @id @default(autoincrement())
+  id                Int      @id @default(autoincrement())
   coupleName        String
   inviteCardMessage String
   landingMessage    String
@@ -271,10 +273,11 @@ model Listing {
 }
 
 model Order {
-  id           Int      @id @default(autoincrement())
+  id           Int         @id @default(autoincrement())
+  orderStatus  OrderStatus @default(PENDING)
   totalAmount  Float
-  currency     String   @default("SGD")
-  purchaseDate DateTime @default(now())
+  currency     String      @default("SGD")
+  purchaseDate DateTime    @default(now())
   remark       String?
 
   // Relations
@@ -328,7 +331,7 @@ model CartItem {
 model Payment {
   id                      Int           @id @default(autoincrement())
   stripeCheckoutSessionId String        @unique
-  stripePaymentIntentId   String? 
+  stripePaymentIntentId   String?
   amount                  Float
   currency                String        @default("SGD")
   paymentStatus           PaymentStatus @default(PENDING)

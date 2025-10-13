@@ -63,6 +63,7 @@ describe('Auth (e2e)', () => {
       guestCountBucket: GuestCountBucket.MEDIUM,
       preferredStyle: WeddingStyle.MODERN,
       preferredServices: [WeddingService.VENUE, WeddingService.CATERING],
+      allocatedBudget: 50000,
     };
 
     // Create super admin first to create wedding

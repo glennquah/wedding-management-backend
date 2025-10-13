@@ -3,6 +3,7 @@ import {
   IsDateString,
   IsEnum,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
 } from 'class-validator';
@@ -77,4 +78,13 @@ export class CreateWeddingDto {
   @IsNotEmpty()
   @IsEnum(WeddingService, { each: true })
   preferredServices: WeddingService[];
+
+  @ApiProperty({
+    description: 'Allocated budget for the wedding',
+    example: 50000,
+    required: true,
+  })
+  @IsNotEmpty()
+  @IsNumber()
+  allocatedBudget: number;
 }

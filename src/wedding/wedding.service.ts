@@ -32,6 +32,7 @@ export class WeddingService {
         guestCountBucket: dto.guestCountBucket,
         preferredStyle: dto.preferredStyle,
         preferredServices: dto.preferredServices,
+        allocatedBudget: dto.allocatedBudget,
         notificationDetails: {
           create: {},
         },
@@ -98,6 +99,8 @@ export class WeddingService {
       updateData.preferredStyle = dto.preferredStyle;
     if (dto.preferredServices !== undefined)
       updateData.preferredServices = dto.preferredServices;
+    if (dto.allocatedBudget !== undefined)
+      updateData.allocatedBudget = dto.allocatedBudget;
 
     return this.prisma.wedding.update({
       where: { id },
@@ -150,6 +153,7 @@ export class WeddingService {
       preferredServices: wedding.preferredServices as WeddingServiceEnum[],
       createdAt: wedding.createdAt.toISOString(),
       updatedAt: wedding.updatedAt.toISOString(),
+      allocatedBudget: wedding.allocatedBudget,
     };
   }
 }
