@@ -1,8 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Guest, Wedding } from '@prisma/client';
+import { Admin, Guest, User, Wedding } from '@prisma/client';
 import { BudgetBucket } from '../common/budget-bucket.enum';
 import { ConfirmationStatus } from '../common/confirmation-status.enum';
 import { GuestCountBucket } from '../common/guest-count-bucket.enum';
+import { UserRole } from '../common/user-role.enum';
 import { WeddingService as WeddingServiceEnum } from '../common/wedding-service.enum';
 import { WeddingStyle } from '../common/wedding-style.enum';
 import { WeddingType } from '../common/wedding-type.enum';
@@ -12,8 +13,9 @@ import { UpdateWeddingDto } from './dto/update-wedding.dto';
 import { WeddingResponseDto } from './dto/wedding-response.dto';
 import { OptimizeDateResponseDto } from '../calendar/dto/date-optimization.dto';
 
-type WeddingWithGuests = Wedding & {
+type WeddingWithRelations = Wedding & {
   guests?: Guest[];
+  mainCouple?: (Admin & { user: User })[];
 };
 
 @Injectable()
@@ -66,6 +68,11 @@ export class WeddingService {
       include: {
         guests: true,
         microsite: true,
+        mainCouple: {
+          include: {
+            user: true,
+          },
+        },
       },
     });
 
@@ -123,13 +130,40 @@ export class WeddingService {
     return updatedWedding;
   }
 
-  toWeddingResponseDto(wedding: WeddingWithGuests): WeddingResponseDto {
+  async setWeddingDate(weddingId: number, date: string): Promise<Wedding> {
+    await this.findById(weddingId);
+
+    const updatedWedding = await this.prisma.wedding.update({
+      where: { id: weddingId },
+      data: {
+        date: new Date(date),
+      },
+      include: {
+        guests: true,
+      },
+    });
+
+    return updatedWedding;
+  }
+
+  toWeddingResponseDto(wedding: WeddingWithRelations): WeddingResponseDto {
     return {
       id: wedding.id,
+      mainCouple:
+        wedding.mainCouple?.map((admin: Admin & { user: User }) => ({
+          id: admin.userId,
+          name: admin.user?.name,
+          email: admin.user?.email,
+          role: admin.user?.role as unknown as UserRole,
+          createdAt: admin.user?.createdAt,
+          updatedAt: admin.user?.updatedAt,
+          isSuspended: admin.isSuspended,
+          onboardedDate: admin.onboardedDate,
+        })) || [],
       name: wedding.name,
       date: wedding.date?.toISOString(),
       location: wedding.location,
-      guests: wedding.guests?.map((guest) => ({
+      guests: wedding.guests?.map((guest: Guest) => ({
         id: guest.id,
         name: guest.name,
         email: guest.email,

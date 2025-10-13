@@ -80,7 +80,7 @@ export class WeddingController {
 
   @Get(':id')
   @UseGuards(JwtGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.VENDOR)
   @ApiOperation({ summary: 'Get a wedding by ID' })
   @ApiResponse({
     status: 200,

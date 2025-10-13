@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { AdminResponseDto } from 'src/admin/dto/admin-response.dto';
 import { BudgetBucket } from '../../common/budget-bucket.enum';
 import { GuestCountBucket } from '../../common/guest-count-bucket.enum';
 import { WeddingService } from '../../common/wedding-service.enum';
@@ -9,6 +10,12 @@ import { GuestResponseDto } from '../../guest/dto/guest-response.dto';
 export class WeddingResponseDto {
   @ApiProperty({ description: 'Wedding ID' })
   id: number;
+
+  @ApiProperty({
+    description: 'The ID of the couple getting married',
+    type: [AdminResponseDto],
+  })
+  mainCouple?: AdminResponseDto[];
 
   @ApiProperty({ description: 'The name of the wedding' })
   name: string;

@@ -154,17 +154,20 @@ export class CartService {
   }
 
   async getCart(adminId: number): Promise<CartResponseDto> {
-    let cart = await this.prisma.cart.findUnique({
+    const admin = await this.prisma.admin.findUnique({
+      where: { userId: adminId },
+    });
+    if (!admin) {
+      throw new NotFoundException(`Admin with ID ${adminId} not found`);
+    }
+
+    const cart = await this.prisma.cart.upsert({
       where: { adminId },
+      update: {},
+      create: { adminId },
       include: { items: { include: { listing: true } } },
     });
 
-    if (!cart) {
-      cart = await this.prisma.cart.create({
-        data: { adminId },
-        include: { items: { include: { listing: true } } },
-      });
-    }
     return this.toCartResponseDto(cart);
   }
 

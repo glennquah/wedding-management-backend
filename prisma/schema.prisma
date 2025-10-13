@@ -63,15 +63,14 @@ enum GuestCountBucket {
 enum OrderStatus {
   PENDING
   PAID
+  CONFIRMED
   CANCELLED
   COMPLETED
 }
 
 enum PaymentStatus {
   PENDING
-  PROCESSING
   SUCCEEDED
-  FAILED
   CANCELLED
   REFUNDED
   PARTIALLY_REFUNDED
@@ -303,11 +302,10 @@ model Listing {
 }
 
 model Order {
-  id           Int         @id @default(autoincrement())
-  orderStatus  OrderStatus @default(PENDING)
+  id           Int      @id @default(autoincrement())
   totalAmount  Float
-  currency     String      @default("SGD")
-  purchaseDate DateTime    @default(now())
+  currency     String   @default("SGD")
+  purchaseDate DateTime @default(now())
   remark       String?
 
   // Relations
@@ -324,11 +322,14 @@ model Order {
 }
 
 model OrderListing {
-  orderId     Int
-  listingId   Int
-  bookedSlots Json
-  order       Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  listing     Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  orderId       Int
+  listingId     Int
+  bookedSlots   Json
+  bookingStatus OrderStatus @default(PENDING)
+  order         Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  listing       Listing     @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 
   @@id([orderId, listingId])
 }
@@ -358,7 +359,7 @@ model CartItem {
 model Payment {
   id                      Int           @id @default(autoincrement())
   stripeCheckoutSessionId String        @unique
-  stripePaymentIntentId   String? // This is populated by webhook after payment
+  stripePaymentIntentId   String? 
   amount                  Float
   currency                String        @default("SGD")
   paymentStatus           PaymentStatus @default(PENDING)
