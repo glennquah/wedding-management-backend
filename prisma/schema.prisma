@@ -63,15 +63,14 @@ enum GuestCountBucket {
 enum OrderStatus {
   PENDING
   PAID
+  CONFIRMED
   CANCELLED
   COMPLETED
 }
 
 enum PaymentStatus {
   PENDING
-  PROCESSING
   SUCCEEDED
-  FAILED
   CANCELLED
   REFUNDED
   PARTIALLY_REFUNDED
@@ -91,7 +90,17 @@ enum EmailTemplateType {
   VENDOR_STATUS
   VENDOR_SUSPENSION
   ADMIN_SUSPENSION
+  COLLABORATOR_ADDED
+  CALENDAR_ACCESS_REQUEST
+  RSVP_INVITATION
   CUSTOM
+}
+
+enum CalendarAccessStatus {
+  NOT_REQUESTED
+  REQUESTED
+  REJECTED
+  CONNECTED
 }
 
 model User {
@@ -109,15 +118,31 @@ model User {
 }
 
 model Admin {
-  userId        Int       @id
-  user          User      @relation(fields: [userId], references: [id])
-  isSuspended   Boolean   @default(false)
-  onboardedDate DateTime  @default(now())
-  weddings      Wedding[] @relation("AdminWeddings")
-  mainWedding   Wedding?  @relation("MainCouple", fields: [mainWeddingId], references: [id])
-  mainWeddingId Int?
+  userId                   Int                       @id
+  user                     User                      @relation(fields: [userId], references: [id])
+  isSuspended              Boolean                   @default(false)
+  onboardedDate            DateTime                  @default(now())
+  weddings                 Wedding[]                 @relation("AdminWeddings")
+  mainWedding              Wedding?                  @relation("MainCouple", fields: [mainWeddingId], references: [id])
+  mainWeddingId            Int?
+  cart                     Cart?
+  googleCalendarConnection GoogleCalendarConnection?
+}
 
-  cart Cart?
+model GoogleCalendarConnection {
+  id                Int                  @id @default(autoincrement())
+  guestId           Int?                 @unique
+  guest             Guest?               @relation(fields: [guestId], references: [id], onDelete: Cascade)
+  adminId           Int?                 @unique
+  admin             Admin?               @relation(fields: [adminId], references: [userId], onDelete: Cascade)
+  accessToken       String
+  refreshToken      String
+  tokenExpiry       DateTime
+  email             String
+  accessStatus      CalendarAccessStatus @default(NOT_REQUESTED)
+  accessRequestedAt DateTime?
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
 }
 
 model SuperAdmin {
@@ -183,27 +208,32 @@ model NotificationDetails {
 }
 
 model Wedding {
-  id                  Int                  @id @default(autoincrement())
-  mainCouple          Admin[]              @relation("MainCouple")
-  name                String
-  date                DateTime?
-  location            String?
-  guests              Guest[]
-  admins              Admin[]              @relation("AdminWeddings")
-  createdAt           DateTime             @default(now())
-  updatedAt           DateTime             @updatedAt
-  weddingType         WeddingType
-  budgetBucket        BudgetBucket
-  guestCountBucket    GuestCountBucket
-  preferredStyle      WeddingStyle
-  preferredServices   WeddingService[]
-  orders              Order[]
-  notificationDetails NotificationDetails?
-  SeatingArrangement  SeatingArrangement?
-  microsite           Microsite?
+  id                       Int                  @id @default(autoincrement())
+  mainCouple               Admin[]              @relation("MainCouple")
+  name                     String
+  date                     DateTime?
+  location                 String?
+  guests                   Guest[]
+  admins                   Admin[]              @relation("AdminWeddings")
+  keyAttendeeIds           Int[]                @default([])
+  createdAt                DateTime             @default(now())
+  updatedAt                DateTime             @updatedAt
+  allocatedBudget     Float
+  currentSpending     Float                @default(0)
+  weddingType              WeddingType
+  budgetBucket             BudgetBucket
+  guestCountBucket         GuestCountBucket
+  preferredStyle           WeddingStyle
+  preferredServices        WeddingService[]
+  orders                   Order[]
+  notificationDetails      NotificationDetails?
+  SeatingArrangement       SeatingArrangement?
+  microsite                  Microsite?
   album               Album?
-  gifts               Gift[]
-  paynowQR            String?
+  dateOptimizerEarliestDate String?
+  dateOptimizerLatestDate  String?
+  dateOptimizerPreferredDays String[]           @default([])
+  dateOptimizerLastResults Json?
 }
 
 model Microsite {
@@ -224,7 +254,7 @@ model Microsite {
 }
 
 model Album {
-  id                Int     @id @default(autoincrement())
+  id                Int      @id @default(autoincrement())
   coupleName        String
   inviteCardMessage String
   landingMessage    String
@@ -236,21 +266,22 @@ model Album {
 }
 
 model Guest {
-  id                 Int                @id @default(autoincrement())
-  email              String
-  name               String
-  allergies          String?
-  group              String?
-  confirmationStatus ConfirmationStatus @default(PENDING)
+  id                       Int                        @id @default(autoincrement())
+  email                    String
+  name                     String
+  allergies                String?
+  group                    String?
+  confirmationStatus       ConfirmationStatus         @default(PENDING)
   attendance         Boolean            @default(false)
   checkInTime        DateTime?
-  weddingId          Int
-  wedding            Wedding            @relation(fields: [weddingId], references: [id], onDelete: Cascade)
-  primaryGuestId     Int?
-  primaryGuest       Guest?             @relation("AccompanyingGuests", fields: [primaryGuestId], references: [id])
-  accompanyingGuests Guest[]            @relation("AccompanyingGuests")
-  createdAt          DateTime           @default(now())
-  updatedAt          DateTime           @updatedAt
+  weddingId                Int
+  wedding                  Wedding                    @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+  primaryGuestId           Int?
+  primaryGuest             Guest?                     @relation("AccompanyingGuests", fields: [primaryGuestId], references: [id])
+  accompanyingGuests       Guest[]                    @relation("AccompanyingGuests")
+  googleCalendarConnection GoogleCalendarConnection?
+  createdAt                DateTime                   @default(now())
+  updatedAt                DateTime                   @updatedAt
 }
 
 model Listing {
@@ -294,11 +325,14 @@ model Order {
 }
 
 model OrderListing {
-  orderId     Int
-  listingId   Int
-  bookedSlots Json
-  order       Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  listing     Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  orderId       Int
+  listingId     Int
+  bookedSlots   Json
+  bookingStatus OrderStatus @default(PENDING)
+  order         Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  listing       Listing     @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 
   @@id([orderId, listingId])
 }
@@ -328,7 +362,7 @@ model CartItem {
 model Payment {
   id                      Int           @id @default(autoincrement())
   stripeCheckoutSessionId String        @unique
-  stripePaymentIntentId   String? // This is populated by webhook after payment
+  stripePaymentIntentId   String?
   amount                  Float
   currency                String        @default("SGD")
   paymentStatus           PaymentStatus @default(PENDING)

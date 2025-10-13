@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { WeddingModule } from 'src/wedding/wedding.module';
 import { AiServiceModule } from '../ai-service/ai-service.module';
@@ -11,7 +11,7 @@ import { EmailNotificationService } from './email-notification.service';
     JwtModule,
     NotificationDetailsModule,
     AiServiceModule,
-    WeddingModule,
+    forwardRef(() => WeddingModule),
   ],
   controllers: [EmailNotificationController],
   providers: [EmailNotificationService],

@@ -1,4 +1,5 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { EmailTemplateType } from '@prisma/client';
 import * as sgMail from '@sendgrid/mail';
 import * as fs from 'fs';
 import * as Handlebars from 'handlebars';
@@ -6,16 +7,19 @@ import * as path from 'path';
 import { AiServiceService } from 'src/ai-service/ai-service.service';
 import { EmailTemplateResponse } from 'src/ai-service/interfaces/email-template-response.interface';
 import { VendorOnboardingStatus } from 'src/common/vendor-onboarding-status.enum';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { WeddingService } from 'src/wedding/wedding.service';
 import { NotificationDetailsService } from '../notification-details/notification-details.service';
 import { GenerateAiEmailTemplateDto } from './dto/generate-ai-email-template.dto';
 import { SendBulkEmailDto } from './dto/send-bulk-email.dto';
-import { EmailTemplateType } from './enums/email-template.enum';
 import {
   AdminSuspensionData,
+  CalendarAccessRequestData,
+  CollaboratorAddedData,
   CreateAccountData,
   EmailTemplateData,
   PasswordResetData,
+  RsvpInvitationData,
   VendorStatusData,
   VendorSuspensionData,
   VerifyEmailData,
@@ -38,6 +42,7 @@ export class EmailNotificationService {
 
   constructor(
     private notificationDetailsService: NotificationDetailsService,
+    private prisma: PrismaService,
     private aiService: AiServiceService,
     private weddingService: WeddingService,
   ) {
@@ -64,6 +69,18 @@ export class EmailNotificationService {
         {
           name: EmailTemplateType.ADMIN_SUSPENSION,
           file: 'admin-suspension.html',
+        },
+        {
+          name: EmailTemplateType.RSVP_INVITATION,
+          file: 'rsvp-invitation.html',
+        },
+        {
+          name: EmailTemplateType.COLLABORATOR_ADDED,
+          file: 'collaborator-added.html',
+        },
+        {
+          name: EmailTemplateType.CALENDAR_ACCESS_REQUEST,
+          file: 'calendar-access-request.html',
         },
       ];
 
@@ -132,20 +149,26 @@ export class EmailNotificationService {
 
   async sendCreateAccountEmail(
     to: string,
-    signupUrl: string,
+    resetPasswordUrl: string,
     name: string,
     weddingName: string,
     inviterName: string,
     weddingId?: number,
+    isPartner?: boolean,
   ): Promise<void> {
     const templateData: CreateAccountData = {
       name,
       weddingName,
       inviterName,
-      signupUrl,
+      resetPasswordUrl,
     };
 
-    await this.sendCreateAccountTemplate(to, templateData, weddingId);
+    await this.sendCreateAccountTemplate(
+      to,
+      templateData,
+      weddingId,
+      isPartner,
+    );
   }
 
   async sendPasswordResetEmail(
@@ -256,16 +279,21 @@ export class EmailNotificationService {
     to: string,
     templateData: CreateAccountData,
     weddingId: number,
+    isPartner?: boolean,
   ): Promise<void> {
     const html = this.renderTemplate(
       EmailTemplateType.CREATE_ACCOUNT,
       templateData,
     );
-    const text = this.generateCreateAccountPlainText(templateData);
+    const text = this.generateCreateAccountPlainText(templateData, isPartner);
+
+    const subject = isPartner
+      ? "You've Been Invited to Plan Your Wedding!"
+      : "You've Been Invited to Plan a Wedding!";
 
     await this.sendEmail(
       to,
-      "You've Been Invited to Plan a Wedding!",
+      subject,
       text,
       html,
       EmailTemplateType.CREATE_ACCOUNT,
@@ -275,20 +303,241 @@ export class EmailNotificationService {
 
   private generateCreateAccountPlainText(
     templateData: CreateAccountData,
+    isPartner?: boolean,
   ): string {
-    return `Hello ${templateData.name}!
+    const greeting = `Hello ${templateData.name}!`;
+    const message = isPartner
+      ? `Great news! You've been invited by your partner to plan your wedding together on Knotly! An account has been created for you.`
+      : `Great news! You've been invited to help plan and coordinate an upcoming wedding. An account has been created for you on Knotly!`;
+    const action = isPartner
+      ? `To get started, click the link below to set your password for your new account. Once you've set your password, you can log in and start planning your special day together!`
+      : `To get started, click the link below to set your password for your new account. Once you've set your password, you can log in and start collaborating!`;
 
-    Great news! You've been invited to help plan and coordinate an upcoming wedding. Join the team and be part of making this special day perfect!
+    return `${greeting}
+
+    ${message}
 
     Wedding Details:
     Wedding: ${templateData.weddingName}
     Invited by: ${templateData.inviterName}
 
-    Click the link below to create your account and start collaborating on this amazing wedding journey!
+    ${action}
 
-    Create Account: ${templateData.signupUrl}
+    Set Your Password: ${templateData.resetPasswordUrl}
 
-    If you don't want to join this wedding planning team, you can safely ignore this email. The invitation link will expire in 7 days.
+    If you don't want to join this wedding planning team, you can safely ignore this email. This link will expire in 7 days.
+
+    ---
+    Knotly - Your Perfect Wedding, Perfectly Planned
+    Website: https://knotly.app`;
+  }
+
+  async sendCollaboratorAddedEmail(
+    to: string,
+    name: string,
+    weddingName: string,
+    inviterName: string,
+    loginUrl: string,
+    weddingId?: number,
+    isPartner?: boolean,
+  ): Promise<void> {
+    const templateData: CollaboratorAddedData = {
+      name,
+      weddingName,
+      inviterName,
+      loginUrl,
+    };
+
+    await this.sendCollaboratorAddedTemplate(
+      to,
+      templateData,
+      weddingId,
+      isPartner,
+    );
+  }
+
+  async sendCollaboratorAddedTemplate(
+    to: string,
+    templateData: CollaboratorAddedData,
+    weddingId: number,
+    isPartner?: boolean,
+  ): Promise<void> {
+    const html = this.renderTemplate(
+      EmailTemplateType.COLLABORATOR_ADDED,
+      templateData,
+    );
+    const text = this.generateCollaboratorAddedPlainText(
+      templateData,
+      isPartner,
+    );
+
+    const subject = isPartner
+      ? "You've Been Invited to Plan Your Wedding!"
+      : "You've Been Added as a Collaborator!";
+
+    await this.sendEmail(
+      to,
+      subject,
+      text,
+      html,
+      EmailTemplateType.COLLABORATOR_ADDED,
+      weddingId,
+    );
+  }
+
+  private generateCollaboratorAddedPlainText(
+    templateData: CollaboratorAddedData,
+    isPartner?: boolean,
+  ): string {
+    const greeting = `Hello ${templateData.name}!`;
+    const message = isPartner
+      ? `You've been invited by your partner to plan your wedding together on Knotly!`
+      : `You've been added as a collaborator to help plan an upcoming wedding!`;
+
+    return `${greeting}
+
+    ${message}
+
+    Wedding Details:
+    Wedding: ${templateData.weddingName}
+    ${isPartner ? 'Invited by' : 'Added by'}: ${templateData.inviterName}
+
+    Log in to your Knotly account to access the wedding dashboard and start collaborating with the team!
+
+    Log In: ${templateData.loginUrl}
+
+    If you have any questions, feel free to reach out to the person who invited you or contact our support team.
+
+    ---
+    Knotly - Your Perfect Wedding, Perfectly Planned
+    Website: https://knotly.app`;
+  }
+
+  async createRsvpDetails(guestId: number, weddingId: number): Promise<void> {
+    // Fetch guest data
+    const guest = await this.prisma.guest.findUnique({
+      where: { id: guestId },
+    });
+
+    if (!guest) {
+      throw new NotFoundException(`Guest with ID ${guestId} not found`);
+    }
+
+    if (!guest.email) {
+      throw new NotFoundException(
+        `Guest with ID ${guestId} does not have an email`,
+      );
+    }
+
+    // Fetch wedding data with microsite
+    const wedding = await this.prisma.wedding.findUnique({
+      where: { id: weddingId },
+      include: { microsite: true },
+    });
+
+    if (!wedding) {
+      throw new NotFoundException(`Wedding with ID ${weddingId} not found`);
+    }
+
+    if (!wedding.microsite) {
+      throw new NotFoundException(
+        `Wedding with ID ${weddingId} does not have a microsite`,
+      );
+    }
+
+    // Craft RSVP URL
+    const micrositeUrl = `${process.env.FRONTEND_URL}/microsite/${wedding.microsite.slug}`;
+    const nameParts = guest.name.split(' ');
+    const firstName = nameParts[0] || '';
+    const lastName = nameParts.slice(1).join(' ') || '';
+
+    const rsvpUrl = `${micrositeUrl}?password=${encodeURIComponent(wedding.microsite.password || '')}&firstName=${encodeURIComponent(firstName)}&lastName=${encodeURIComponent(lastName)}`;
+
+    // Send the email
+    await this.sendRsvpInvitationEmail(
+      guest.email,
+      guest.name,
+      wedding.name,
+      rsvpUrl,
+      weddingId,
+    );
+  }
+
+  async broadcastRsvpInvitations(
+    guestIds: number[],
+    weddingId: number,
+  ): Promise<void> {
+    // Verify wedding exists with microsite once
+    const wedding = await this.prisma.wedding.findUnique({
+      where: { id: weddingId },
+      include: { microsite: true },
+    });
+
+    if (!wedding) {
+      throw new NotFoundException(`Wedding with ID ${weddingId} not found`);
+    }
+
+    if (!wedding.microsite) {
+      throw new NotFoundException(
+        `Wedding with ID ${weddingId} does not have a microsite`,
+      );
+    }
+
+    // Process each guest
+    for (const guestId of guestIds) {
+      try {
+        await this.createRsvpDetails(guestId, weddingId);
+      } catch (error) {
+        throw new Error(
+          `Failed to send RSVP to guest ID ${guestId}: ${error.message}`,
+        );
+      }
+    }
+  }
+
+  async sendRsvpInvitationEmail(
+    to: string,
+    name: string,
+    weddingName: string,
+    rsvpUrl: string,
+    weddingId?: number,
+  ): Promise<void> {
+    const templateData: RsvpInvitationData = {
+      name,
+      weddingName,
+      rsvpUrl,
+    };
+
+    const html = this.renderTemplate(
+      EmailTemplateType.RSVP_INVITATION,
+      templateData,
+    );
+    const text = this.generateRsvpInvitationPlainText(templateData);
+
+    await this.sendEmail(
+      to,
+      `You're Invited to ${weddingName}!`,
+      text,
+      html,
+      EmailTemplateType.RSVP_INVITATION,
+      weddingId,
+    );
+  }
+
+  private generateRsvpInvitationPlainText(
+    templateData: RsvpInvitationData,
+  ): string {
+    return `Dear ${templateData.name},
+
+    We are delighted to invite you to our special day! Your presence would mean the world to us as we celebrate our love and commitment.
+
+    Wedding: ${templateData.weddingName}
+
+    Please click the link below to RSVP and let us know if you can join us for this joyous occasion. Your response will help us ensure everything is perfect for our big day.
+
+    RSVP Now: ${templateData.rsvpUrl}
+
+    We look forward to celebrating with you! If you have any questions, please don't hesitate to reach out.
 
     ---
     Knotly - Your Perfect Wedding, Perfectly Planned
@@ -517,6 +766,55 @@ export class EmailNotificationService {
     Knotly - Your Perfect Wedding, Perfectly Planned
     Website: https://knotly.app`;
     }
+  }
+
+  async sendCalendarAccessRequest(
+    to: string,
+    name: string,
+    weddingName: string,
+    authUrl: string,
+    weddingId?: number,
+  ): Promise<void> {
+    const templateData: CalendarAccessRequestData = {
+      name,
+      weddingName,
+      buttonUrl: authUrl,
+    };
+
+    const htmlContent = this.renderTemplate(
+      EmailTemplateType.CALENDAR_ACCESS_REQUEST,
+      templateData,
+    );
+
+    const textContent = `Hi ${name}!
+
+You've been requested to connect your Google Calendar to help optimize the wedding date for ${weddingName}.
+
+How It Works:
+- We'll check your calendar availability
+- Our AI will suggest dates when everyone is free
+- You can disconnect anytime
+- We only read availability, not event details
+
+Click the link below to securely connect your Google Calendar:
+${authUrl}
+
+Your Privacy Matters: We only access your calendar to check if you're free or busy. We never read event titles, descriptions, or any other details.
+
+Questions about calendar access? Contact the wedding planner or reach out to our support team.
+
+---
+Knotly - Your Perfect Wedding, Perfectly Planned
+Website: https://knotly.app`;
+
+    await this.sendEmail(
+      to,
+      'Calendar Access Request for Wedding Planning',
+      textContent,
+      htmlContent,
+      EmailTemplateType.CALENDAR_ACCESS_REQUEST,
+      weddingId,
+    );
   }
 
   async sendEmail(
