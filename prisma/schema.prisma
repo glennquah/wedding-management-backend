@@ -280,6 +280,7 @@ model Guest {
   primaryGuest             Guest?                     @relation("AccompanyingGuests", fields: [primaryGuestId], references: [id])
   accompanyingGuests       Guest[]                    @relation("AccompanyingGuests")
   googleCalendarConnection GoogleCalendarConnection?
+  cashGifts                CashGift[]
   createdAt                DateTime                   @default(now())
   updatedAt                DateTime                   @updatedAt
 }
@@ -389,9 +390,10 @@ model SeatingArrangement {
   updatedAt       DateTime @updatedAt
 }
 
-model Gift {
+model CashGift {
   id        Int      @id @default(autoincrement())
-  guestName String
+  guestId   Int
+  guest     Guest    @relation(fields: [guestId], references: [id], onDelete: Cascade)
   amount    Float
   weddingId Int
   wedding   Wedding  @relation(fields: [weddingId], references: [id], onDelete: Cascade)
@@ -399,6 +401,7 @@ model Gift {
   updatedAt DateTime @updatedAt
 
   @@index([weddingId])
+  @@index([guestId])
 }
 
 model TokenBlacklist {

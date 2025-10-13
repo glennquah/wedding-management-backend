@@ -10,7 +10,7 @@ import { AuthModule } from './auth/auth.module';
 import { CartModule } from './cart/cart.module';
 import { CalendarModule } from './calendar/calendar.module';
 import { EmailNotificationModule } from './email-notification/email-notification.module';
-import { GiftModule } from './gift/gift.module';
+import { CashGiftModule } from './cash-gift/cash-gift.module';
 import { GuestModule } from './guest/guest.module';
 import { ListingModule } from './listing/listing.module';
 import { MicrositeModule } from './microsite/microsite.module';
@@ -35,7 +35,7 @@ import { WeddingModule } from './wedding/wedding.module';
     SuperAdminModule,
     ConfigModule.forRoot(),
     AuthModule,
-    GiftModule,
+    CashGiftModule,
     GuestModule,
     WeddingModule,
     SeatingArrangementModule,
