@@ -80,7 +80,9 @@ async function main() {
   console.log(
     '- 12-18 orders per wedding (~75 total orders) with dates spread across 12 months',
   );
-  console.log('- Order status: 70% paid, 10% completed, 15% pending, 5% cancelled');
+  console.log(
+    '- Order status: 70% paid, 10% completed, 15% pending, 5% cancelled',
+  );
   console.log(
     '- ~80 primary guests per wedding (some with accompanying guests)',
   );

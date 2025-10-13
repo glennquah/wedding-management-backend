@@ -326,30 +326,49 @@ export class AnalyticsService {
       return [];
     }
 
-    // Use (1 year) data points for trend analysis (or all if less than 12)
-    const recentData = historicalData.slice(-12);
+    // Use last 6 months for trend analysis (more responsive to recent changes)
+    const recentData = historicalData.slice(-6);
 
+    // Calculate averages
     const avgRevenue =
       recentData.reduce((sum, point) => sum + point.revenue, 0) /
       recentData.length;
 
-    // Calculate linear regression to detect trend
-    let trend = 0;
+    const avgOrderCount =
+      recentData.reduce((sum, point) => sum + point.orderCount, 0) /
+      recentData.length;
+
+    if (avgRevenue === 0) {
+      return [];
+    }
+
+    // Calculate linear regression for revenue trend
+    let revenueTrend = 0;
+    let orderTrend = 0;
+
     if (recentData.length >= 2) {
       const n = recentData.length;
       let sumX = 0;
-      let sumY = 0;
-      let sumXY = 0;
+      let sumYRevenue = 0;
+      let sumYOrders = 0;
+      let sumXYRevenue = 0;
+      let sumXYOrders = 0;
       let sumX2 = 0;
 
       recentData.forEach((point, index) => {
         sumX += index;
-        sumY += point.revenue;
-        sumXY += index * point.revenue;
+        sumYRevenue += point.revenue;
+        sumYOrders += point.orderCount;
+        sumXYRevenue += index * point.revenue;
+        sumXYOrders += index * point.orderCount;
         sumX2 += index * index;
       });
 
-      trend = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+      const denominator = n * sumX2 - sumX * sumX;
+      if (denominator !== 0) {
+        revenueTrend = (n * sumXYRevenue - sumX * sumYRevenue) / denominator;
+        orderTrend = (n * sumXYOrders - sumX * sumYOrders) / denominator;
+      }
     }
 
     const predictions: RevenueDataPoint[] = [];
@@ -362,16 +381,30 @@ export class AnalyticsService {
 
       const periodStr = nextDate.toISOString().substring(0, 7);
 
-      // Predict revenue using moving average + trend
-      const predictedRevenue = avgRevenue + trend * (recentData.length + i - 1);
+      // Simple approach: use average + trend projection
+      // If trend is negative and would make prediction negative, just use average
+      const trendComponent = revenueTrend * i;
+      const basePrediction = avgRevenue + trendComponent;
 
-      // Ensure predicted revenue is non-negative
+      // If prediction would be too low (< 50% of average), use average instead
+      const predictedRevenue =
+        basePrediction < avgRevenue * 0.5 ? avgRevenue : basePrediction;
+
+      const orderTrendComponent = orderTrend * i;
+      const baseOrderPrediction = avgOrderCount + orderTrendComponent;
+      const predictedOrderCount =
+        baseOrderPrediction < avgOrderCount * 0.5
+          ? avgOrderCount
+          : baseOrderPrediction;
+
+      // Ensure predicted values are non-negative
       const finalRevenue = Math.max(0, predictedRevenue);
+      const finalOrderCount = Math.max(0, Math.round(predictedOrderCount));
 
       predictions.push({
         period: periodStr,
         revenue: Math.round(finalRevenue * 100) / 100,
-        orderCount: 0,
+        orderCount: finalOrderCount,
         isPredictedValue: true,
       });
     }
