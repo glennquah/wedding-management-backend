@@ -14,6 +14,8 @@ import { GenerateAiEmailTemplateDto } from './dto/generate-ai-email-template.dto
 import { SendBulkEmailDto } from './dto/send-bulk-email.dto';
 import {
   AdminSuspensionData,
+  CalendarAccessRequestData,
+  CollaboratorAddedData,
   CreateAccountData,
   EmailTemplateData,
   PasswordResetData,
@@ -71,6 +73,14 @@ export class EmailNotificationService {
         {
           name: EmailTemplateType.RSVP_INVITATION,
           file: 'rsvp-invitation.html',
+        },
+        {
+          name: EmailTemplateType.COLLABORATOR_ADDED,
+          file: 'collaborator-added.html',
+        },
+        {
+          name: EmailTemplateType.CALENDAR_ACCESS_REQUEST,
+          file: 'calendar-access-request.html',
         },
       ];
 
@@ -139,20 +149,26 @@ export class EmailNotificationService {
 
   async sendCreateAccountEmail(
     to: string,
-    signupUrl: string,
+    resetPasswordUrl: string,
     name: string,
     weddingName: string,
     inviterName: string,
     weddingId?: number,
+    isPartner?: boolean,
   ): Promise<void> {
     const templateData: CreateAccountData = {
       name,
       weddingName,
       inviterName,
-      signupUrl,
+      resetPasswordUrl,
     };
 
-    await this.sendCreateAccountTemplate(to, templateData, weddingId);
+    await this.sendCreateAccountTemplate(
+      to,
+      templateData,
+      weddingId,
+      isPartner,
+    );
   }
 
   async sendPasswordResetEmail(
@@ -263,16 +279,21 @@ export class EmailNotificationService {
     to: string,
     templateData: CreateAccountData,
     weddingId: number,
+    isPartner?: boolean,
   ): Promise<void> {
     const html = this.renderTemplate(
       EmailTemplateType.CREATE_ACCOUNT,
       templateData,
     );
-    const text = this.generateCreateAccountPlainText(templateData);
+    const text = this.generateCreateAccountPlainText(templateData, isPartner);
+
+    const subject = isPartner
+      ? "You've Been Invited to Plan Your Wedding!"
+      : "You've Been Invited to Plan a Wedding!";
 
     await this.sendEmail(
       to,
-      "You've Been Invited to Plan a Wedding!",
+      subject,
       text,
       html,
       EmailTemplateType.CREATE_ACCOUNT,
@@ -282,20 +303,110 @@ export class EmailNotificationService {
 
   private generateCreateAccountPlainText(
     templateData: CreateAccountData,
+    isPartner?: boolean,
   ): string {
-    return `Hello ${templateData.name}!
+    const greeting = `Hello ${templateData.name}!`;
+    const message = isPartner
+      ? `Great news! You've been invited by your partner to plan your wedding together on Knotly! An account has been created for you.`
+      : `Great news! You've been invited to help plan and coordinate an upcoming wedding. An account has been created for you on Knotly!`;
+    const action = isPartner
+      ? `To get started, click the link below to set your password for your new account. Once you've set your password, you can log in and start planning your special day together!`
+      : `To get started, click the link below to set your password for your new account. Once you've set your password, you can log in and start collaborating!`;
 
-    Great news! You've been invited to help plan and coordinate an upcoming wedding. Join the team and be part of making this special day perfect!
+    return `${greeting}
+
+    ${message}
 
     Wedding Details:
     Wedding: ${templateData.weddingName}
     Invited by: ${templateData.inviterName}
 
-    Click the link below to create your account and start collaborating on this amazing wedding journey!
+    ${action}
 
-    Create Account: ${templateData.signupUrl}
+    Set Your Password: ${templateData.resetPasswordUrl}
 
-    If you don't want to join this wedding planning team, you can safely ignore this email. The invitation link will expire in 7 days.
+    If you don't want to join this wedding planning team, you can safely ignore this email. This link will expire in 7 days.
+
+    ---
+    Knotly - Your Perfect Wedding, Perfectly Planned
+    Website: https://knotly.app`;
+  }
+
+  async sendCollaboratorAddedEmail(
+    to: string,
+    name: string,
+    weddingName: string,
+    inviterName: string,
+    loginUrl: string,
+    weddingId?: number,
+    isPartner?: boolean,
+  ): Promise<void> {
+    const templateData: CollaboratorAddedData = {
+      name,
+      weddingName,
+      inviterName,
+      loginUrl,
+    };
+
+    await this.sendCollaboratorAddedTemplate(
+      to,
+      templateData,
+      weddingId,
+      isPartner,
+    );
+  }
+
+  async sendCollaboratorAddedTemplate(
+    to: string,
+    templateData: CollaboratorAddedData,
+    weddingId: number,
+    isPartner?: boolean,
+  ): Promise<void> {
+    const html = this.renderTemplate(
+      EmailTemplateType.COLLABORATOR_ADDED,
+      templateData,
+    );
+    const text = this.generateCollaboratorAddedPlainText(
+      templateData,
+      isPartner,
+    );
+
+    const subject = isPartner
+      ? "You've Been Invited to Plan Your Wedding!"
+      : "You've Been Added as a Collaborator!";
+
+    await this.sendEmail(
+      to,
+      subject,
+      text,
+      html,
+      EmailTemplateType.COLLABORATOR_ADDED,
+      weddingId,
+    );
+  }
+
+  private generateCollaboratorAddedPlainText(
+    templateData: CollaboratorAddedData,
+    isPartner?: boolean,
+  ): string {
+    const greeting = `Hello ${templateData.name}!`;
+    const message = isPartner
+      ? `You've been invited by your partner to plan your wedding together on Knotly!`
+      : `You've been added as a collaborator to help plan an upcoming wedding!`;
+
+    return `${greeting}
+
+    ${message}
+
+    Wedding Details:
+    Wedding: ${templateData.weddingName}
+    ${isPartner ? 'Invited by' : 'Added by'}: ${templateData.inviterName}
+
+    Log in to your Knotly account to access the wedding dashboard and start collaborating with the team!
+
+    Log In: ${templateData.loginUrl}
+
+    If you have any questions, feel free to reach out to the person who invited you or contact our support team.
 
     ---
     Knotly - Your Perfect Wedding, Perfectly Planned
@@ -655,6 +766,55 @@ export class EmailNotificationService {
     Knotly - Your Perfect Wedding, Perfectly Planned
     Website: https://knotly.app`;
     }
+  }
+
+  async sendCalendarAccessRequest(
+    to: string,
+    name: string,
+    weddingName: string,
+    authUrl: string,
+    weddingId?: number,
+  ): Promise<void> {
+    const templateData: CalendarAccessRequestData = {
+      name,
+      weddingName,
+      buttonUrl: authUrl,
+    };
+
+    const htmlContent = this.renderTemplate(
+      EmailTemplateType.CALENDAR_ACCESS_REQUEST,
+      templateData,
+    );
+
+    const textContent = `Hi ${name}!
+
+You've been requested to connect your Google Calendar to help optimize the wedding date for ${weddingName}.
+
+How It Works:
+- We'll check your calendar availability
+- Our AI will suggest dates when everyone is free
+- You can disconnect anytime
+- We only read availability, not event details
+
+Click the link below to securely connect your Google Calendar:
+${authUrl}
+
+Your Privacy Matters: We only access your calendar to check if you're free or busy. We never read event titles, descriptions, or any other details.
+
+Questions about calendar access? Contact the wedding planner or reach out to our support team.
+
+---
+Knotly - Your Perfect Wedding, Perfectly Planned
+Website: https://knotly.app`;
+
+    await this.sendEmail(
+      to,
+      'Calendar Access Request for Wedding Planning',
+      textContent,
+      htmlContent,
+      EmailTemplateType.CALENDAR_ACCESS_REQUEST,
+      weddingId,
+    );
   }
 
   async sendEmail(

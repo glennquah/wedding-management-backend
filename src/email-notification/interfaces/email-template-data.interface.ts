@@ -19,7 +19,20 @@ export interface CreateAccountData {
   name: string;
   weddingName: string;
   inviterName: string;
-  signupUrl: string;
+  resetPasswordUrl: string;
+}
+
+export interface CollaboratorAddedData {
+  name: string;
+  weddingName: string;
+  inviterName: string;
+  loginUrl: string;
+}
+
+export interface CalendarAccessRequestData {
+  name: string;
+  weddingName: string;
+  buttonUrl: string;
 }
 
 export interface SuccessfulBookingData {
@@ -77,6 +90,8 @@ export type EmailTemplateData =
   | WelcomeEmailData
   | VerifyEmailData
   | CreateAccountData
+  | CollaboratorAddedData
+  | CalendarAccessRequestData
   | SuccessfulBookingData
   | VendorStatusData
   | AdminStatusData

@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { seedCalendarConnections } from './seeds/calendar-connections.seed';
 import { seedCouples } from './seeds/couples.seed';
 import { seedEmailHistory } from './seeds/email-history.seed';
 import { seedEmailTemplates } from './seeds/email-templates.seed';
@@ -22,6 +23,7 @@ async function main() {
     await prisma.payment.deleteMany();
     await prisma.order.deleteMany();
     await prisma.listing.deleteMany();
+    await prisma.googleCalendarConnection.deleteMany();
     await prisma.guest.deleteMany();
     await prisma.wedding.deleteMany();
     await prisma.vendor.deleteMany();
@@ -60,6 +62,9 @@ async function main() {
   // 10. Seed guests (depends on weddings)
   await seedGuests(prisma);
 
+  // 10. Seed Google Calendar connections (depends on weddings, couples, and guests)
+  await seedCalendarConnections(prisma);
+
   // Print final summary
   console.log('\n========================================');
   console.log('✅ Database seeded successfully!');
@@ -85,7 +90,12 @@ async function main() {
   console.log(
     '- Accompanying guests have individual confirmation status and dietary requirements',
   );
-  console.log('========================================\n');
+  console.log(`\n✨ DATE OPTIMIZER TEST DATA (All Weddings):`);
+  console.log(`- All main couples have mock calendar connections`);
+  console.log(`- 5 key attendees added per wedding`);
+  console.log(`\n📧 Test Login Credentials:`);
+  console.log(`  Email: couple@wedding.com`);
+  console.log(`  Password: password123`);
 }
 
 main()

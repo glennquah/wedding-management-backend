@@ -8,6 +8,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { CartModule } from './cart/cart.module';
+import { CalendarModule } from './calendar/calendar.module';
 import { EmailNotificationModule } from './email-notification/email-notification.module';
 import { GuestModule } from './guest/guest.module';
 import { ListingModule } from './listing/listing.module';
@@ -46,6 +47,7 @@ import { WeddingModule } from './wedding/wedding.module';
     AiServiceModule,
     AnalyticsModule,
     VendorRecommendationModule,
+    CalendarModule,
   ],
   controllers: [AppController],
   providers: [AppService],
