@@ -47,7 +47,11 @@ export class CalendarService {
   /**
    * Generate OAuth URL for a guest or admin to authorize calendar access
    */
-  generateAuthUrl(userId: number, isAdmin: boolean, returnUrl?: string): string {
+  generateAuthUrl(
+    userId: number,
+    isAdmin: boolean,
+    returnUrl?: string,
+  ): string {
     const authUrl = this.oauth2Client.generateAuthUrl({
       access_type: 'offline',
       scope: [
@@ -117,11 +121,12 @@ export class CalendarService {
     const email = userInfo.data.email;
 
     // Calculate token expiry (default 1 hour from now)
-    const expiryDate = new Date();
-    expiryDate.setSeconds(
-      expiryDate.getSeconds() +
-        (tokens.expiry_date ? tokens.expiry_date / 1000 : 3600),
-    );
+    let expiryDate: Date;
+    if (tokens.expiry_date) {
+      expiryDate = new Date(tokens.expiry_date * 1000);
+    } else {
+      expiryDate = new Date(Date.now() + 3600 * 1000);
+    }
 
     // Store or update connection
     if (isAdmin) {
@@ -503,7 +508,7 @@ export class CalendarService {
         attendees.push({
           attendeeId,
           name,
-          isConnected: true,
+          isConnected: false,
           busySlots,
         });
       } catch (error) {

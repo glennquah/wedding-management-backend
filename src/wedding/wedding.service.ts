@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Admin, Guest, User, Wedding } from '@prisma/client';
+import { plainToInstance } from 'class-transformer';
 import { BudgetBucket } from '../common/budget-bucket.enum';
 import { ConfirmationStatus } from '../common/confirmation-status.enum';
 import { GuestCountBucket } from '../common/guest-count-bucket.enum';
@@ -303,9 +304,13 @@ export class WeddingService {
       earliestDate: wedding.dateOptimizerEarliestDate,
       latestDate: wedding.dateOptimizerLatestDate,
       preferredDays: wedding.dateOptimizerPreferredDays,
-      lastResults: wedding.dateOptimizerLastResults as unknown as
-        | OptimizeDateResponseDto
-        | undefined,
+      lastResults: wedding.dateOptimizerLastResults
+        ? plainToInstance(
+            OptimizeDateResponseDto,
+            wedding.dateOptimizerLastResults,
+            { excludeExtraneousValues: false },
+          )
+        : undefined,
     };
   }
 

@@ -1,9 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class InvitePartnerDto {
   @ApiProperty({
-    description: 'Guest ID to invite as partner (optional if email and name provided)',
+    description:
+      'Guest ID to invite as partner (optional if email and name provided)',
     example: 1,
     required: false,
   })

@@ -341,7 +341,10 @@ export class AdminController {
   })
   @ApiResponse({ status: 404, description: 'Wedding or guest not found.' })
   @ApiResponse({ status: 400, description: 'Bad request.' })
-  @ApiResponse({ status: 409, description: 'Main couple already has 2 members.' })
+  @ApiResponse({
+    status: 409,
+    description: 'Main couple already has 2 members.',
+  })
   async invitePartner(
     @Request() req: Request & { user: JwtPayload },
     @Body() dto: InvitePartnerDto,
