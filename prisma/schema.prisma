@@ -230,6 +230,7 @@ model Wedding {
   SeatingArrangement       SeatingArrangement?
   microsite                  Microsite?
   album               Album?
+  cashGifts                CashGift[]
   dateOptimizerEarliestDate String?
   dateOptimizerLatestDate  String?
   dateOptimizerPreferredDays String[]           @default([])
