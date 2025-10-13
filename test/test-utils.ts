@@ -124,6 +124,7 @@ export async function authenticateUsers(app: INestApplication): Promise<{
     guestCountBucket: GuestCountBucket.MEDIUM,
     preferredStyle: WeddingStyle.MODERN,
     preferredServices: [WeddingService.VENUE, WeddingService.CATERING],
+    allocatedBudget: 50000,
   };
 
   const testWeddingResponse = await request(app.getHttpServer())
@@ -216,6 +217,7 @@ export async function seedWeddings(
       guestCountBucket: GuestCountBucket.MEDIUM,
       preferredStyle: WeddingStyle.MODERN,
       preferredServices: [WeddingService.VENUE, WeddingService.CATERING],
+      allocatedBudget: 50000,
     };
 
     const requestBuilder = request(app.getHttpServer()).post('/weddings');

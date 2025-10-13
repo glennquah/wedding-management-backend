@@ -74,4 +74,10 @@ export class WeddingResponseDto {
 
   @ApiProperty({ description: 'Last update timestamp' })
   updatedAt: string;
+
+  @ApiProperty({
+    description: 'Allocated budget for the wedding',
+    required: false,
+  })
+  allocatedBudget?: number;
 }
