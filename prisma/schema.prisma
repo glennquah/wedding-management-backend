@@ -202,6 +202,7 @@ model Wedding {
   SeatingArrangement  SeatingArrangement?
   microsite           Microsite?
   album               Album?
+  gratitudeCard       GratitudeCard?
 }
 
 model Microsite {
@@ -221,8 +222,21 @@ model Microsite {
   wedding   Wedding @relation(fields: [weddingId], references: [id], onDelete: Cascade)
 }
 
+model GratitudeCard {
+  id                      Int     @id @default(autoincrement())
+  signOffName             String
+  guestCardMessage        String?
+  collaboratorCardMessage String?
+  vendorCardMessage       String?
+  guestCardPhotoURL          String?
+  collaboratorCardPhotoURL   String?
+
+  weddingId Int     @unique
+  wedding   Wedding @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+}
+
 model Album {
-  id                Int     @id @default(autoincrement())
+  id                Int      @id @default(autoincrement())
   coupleName        String
   inviteCardMessage String
   landingMessage    String
