@@ -512,6 +512,10 @@ export class CalendarService {
           busySlots,
         });
       } catch (error) {
+        this.logger.error(
+          `Error fetching calendar for attendee ${attendeeId}:`,
+          error,
+        );
         attendees.push({
           attendeeId,
           name,
