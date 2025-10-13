@@ -300,14 +300,83 @@ export class AnalyticsService {
         period: periodKey,
         revenue: Math.round(periodData.revenue * 100) / 100,
         orderCount: periodData.count,
+        isPredictedValue: false,
       }))
       .sort((a, b) => a.period.localeCompare(b.period));
 
+    // Generate predictions for the next 3 months only for YEARLY or ALL periods
+    let allData = data;
+    if (period === RevenuePeriod.YEARLY || period === RevenuePeriod.ALL) {
+      const predictions = this.generateRevenuePredictions(data, 3);
+      allData = [...data, ...predictions];
+    }
+
     return {
-      data,
+      data: allData,
       periodType: period,
       currency: 'SGD',
     };
+  }
+
+  private generateRevenuePredictions(
+    historicalData: RevenueDataPoint[],
+    periodsToPredict: number,
+  ): RevenueDataPoint[] {
+    if (historicalData.length === 0) {
+      return [];
+    }
+
+    // Use (1 year) data points for trend analysis (or all if less than 12)
+    const recentData = historicalData.slice(-12);
+
+    const avgRevenue =
+      recentData.reduce((sum, point) => sum + point.revenue, 0) /
+      recentData.length;
+
+    // Calculate linear regression to detect trend
+    let trend = 0;
+    if (recentData.length >= 2) {
+      const n = recentData.length;
+      let sumX = 0;
+      let sumY = 0;
+      let sumXY = 0;
+      let sumX2 = 0;
+
+      recentData.forEach((point, index) => {
+        sumX += index;
+        sumY += point.revenue;
+        sumXY += index * point.revenue;
+        sumX2 += index * index;
+      });
+
+      trend = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+    }
+
+    const predictions: RevenueDataPoint[] = [];
+    const lastPeriod = historicalData[historicalData.length - 1].period;
+    const lastDate = new Date(lastPeriod);
+
+    for (let i = 1; i <= periodsToPredict; i++) {
+      const nextDate = new Date(lastDate);
+      nextDate.setMonth(nextDate.getMonth() + i);
+
+      const periodStr = nextDate.toISOString().substring(0, 7);
+
+      // Predict revenue using moving average + trend
+      const predictedRevenue = avgRevenue + trend * (recentData.length + i - 1);
+
+      // Ensure predicted revenue is non-negative
+      const finalRevenue = Math.max(0, predictedRevenue);
+
+      predictions.push({
+        period: periodStr,
+        revenue: Math.round(finalRevenue * 100) / 100,
+        orderCount: 0,
+        isPredictedValue: true,
+      });
+    }
+
+    return predictions;
   }
 
   async getVendorTopProducts(

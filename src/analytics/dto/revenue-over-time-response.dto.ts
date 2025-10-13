@@ -13,6 +13,12 @@ export class RevenueDataPoint {
 
   @ApiProperty({ description: 'Number of orders in the period' })
   orderCount: number;
+
+  @ApiProperty({
+    description: 'Whether this data point is a predicted value',
+    default: false,
+  })
+  isPredictedValue: boolean;
 }
 
 export class RevenueOverTimeResponseDto {
