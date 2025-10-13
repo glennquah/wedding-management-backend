@@ -47,14 +47,14 @@ export class CalendarService {
   /**
    * Generate OAuth URL for a guest or admin to authorize calendar access
    */
-  generateAuthUrl(userId: number, isAdmin: boolean): string {
+  generateAuthUrl(userId: number, isAdmin: boolean, returnUrl?: string): string {
     const authUrl = this.oauth2Client.generateAuthUrl({
       access_type: 'offline',
       scope: [
         'https://www.googleapis.com/auth/calendar.events.readonly', // Read calendar events (includes all-day events)
         'https://www.googleapis.com/auth/userinfo.email',
       ],
-      state: JSON.stringify({ userId, isAdmin }), // Pass userId and type in state
+      state: JSON.stringify({ userId, isAdmin, returnUrl }), // Pass userId, type, and return URL in state
       prompt: 'consent', // Force consent screen to always get refresh token
     });
 
@@ -64,14 +64,16 @@ export class CalendarService {
   /**
    * Handle OAuth callback and store tokens
    */
-  async handleOAuthCallback(code: string, state: string): Promise<void> {
+  async handleOAuthCallback(code: string, state: string): Promise<string> {
     let userId: number;
     let isAdmin: boolean;
+    let returnUrl: string | undefined;
 
     try {
       const parsedState = JSON.parse(state);
       userId = parsedState.userId;
       isAdmin = parsedState.isAdmin;
+      returnUrl = parsedState.returnUrl;
     } catch {
       throw new BadRequestException('Invalid state parameter');
     }
@@ -165,6 +167,10 @@ export class CalendarService {
 
       this.logger.log(`Calendar connected for guest ${userId}`);
     }
+
+    // Return the URL to redirect to (use returnUrl if provided, otherwise default to root)
+    // If returnUrl is provided, use it; otherwise redirect to home page
+    return returnUrl || '/';
   }
 
   /**

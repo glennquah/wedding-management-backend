@@ -69,6 +69,12 @@ export class CalendarController {
     required: false,
     type: Boolean,
   })
+  @ApiQuery({
+    name: 'returnUrl',
+    description: 'URL path to redirect to after OAuth callback (e.g., /admin/date-optimizer)',
+    required: false,
+    type: String,
+  })
   @ApiResponse({
     status: 200,
     description: 'Authorization URL generated',
@@ -82,10 +88,12 @@ export class CalendarController {
   getAuthUrl(
     @Param('userId', ParseIntPipe) userId: number,
     @Query('isAdmin') isAdmin?: string,
+    @Query('returnUrl') returnUrl?: string,
   ): { authUrl: string } {
     const authUrl = this.calendarService.generateAuthUrl(
       userId,
       isAdmin === 'true',
+      returnUrl,
     );
     return { authUrl };
   }
@@ -113,12 +121,12 @@ export class CalendarController {
     @Query('code') code: string,
     @Query('state') state: string,
   ) {
-    await this.calendarService.handleOAuthCallback(code, state);
+    const returnPath = await this.calendarService.handleOAuthCallback(code, state);
 
-    // Redirect to frontend landing page
+    // Redirect to the specified return URL or date-optimizer page
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
     return {
-      url: `${frontendUrl}/`,
+      url: `${frontendUrl}${returnPath}`,
     };
   }
 
