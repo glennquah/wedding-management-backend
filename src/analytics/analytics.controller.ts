@@ -3,15 +3,21 @@ import {
   Get,
   Param,
   ParseIntPipe,
+  Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
+import { RevenuePeriod } from '../common/revenue-period.enum';
 import { AnalyticsService } from './analytics.service';
 import { GuestCountResponseDto } from './dto/guest-count-response.dto';
+import { RevenueOverTimeResponseDto } from './dto/revenue-over-time-response.dto';
 import { RsvpCountResponseDto } from './dto/rsvp-count-response.dto';
 import { SpendingResponseDto } from './dto/spending-response.dto';
+import { VendorBookingsResponseDto } from './dto/vendor-bookings-response.dto';
+import { VendorRevenueResponseDto } from './dto/vendor-revenue-response.dto';
+import { VendorTopProductsResponseDto } from './dto/vendor-top-products-response.dto';
 
 @ApiTags('analytics')
 @Controller('analytics')
@@ -80,5 +86,98 @@ export class AnalyticsController {
     @Param('weddingId', ParseIntPipe) weddingId: number,
   ): Promise<RsvpCountResponseDto> {
     return this.analyticsService.getRsvpCount(weddingId);
+  }
+
+  @Get('vendor/:vendorId/revenue')
+  @ApiOperation({
+    summary: 'Get vendor revenue analytics',
+    description:
+      'Returns MTD (Month-to-Date), YTD (Year-to-Date), and all-time revenue for a vendor.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Vendor revenue retrieved successfully',
+    type: VendorRevenueResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Vendor not found',
+  })
+  async getVendorRevenue(
+    @Param('vendorId', ParseIntPipe) vendorId: number,
+  ): Promise<VendorRevenueResponseDto> {
+    return this.analyticsService.getVendorRevenue(vendorId);
+  }
+
+  @Get('vendor/:vendorId/revenue-over-time')
+  @ApiOperation({
+    summary: 'Get vendor revenue over time',
+    description:
+      'Returns revenue data for a vendor: MONTHLY (current month by days), YEARLY (current year by months), ALL (all time by months).',
+  })
+  @ApiQuery({
+    name: 'period',
+    required: false,
+    enum: RevenuePeriod,
+    description:
+      'Time period: MONTHLY=daily breakdown for current month, YEARLY=monthly breakdown for current year, ALL=monthly breakdown for all time (default: MONTHLY)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Revenue over time retrieved successfully',
+    type: RevenueOverTimeResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Vendor not found',
+  })
+  async getVendorRevenueOverTime(
+    @Param('vendorId', ParseIntPipe) vendorId: number,
+    @Query('period') period: RevenuePeriod = RevenuePeriod.MONTHLY,
+  ): Promise<RevenueOverTimeResponseDto> {
+    return this.analyticsService.getVendorRevenueOverTime(vendorId, period);
+  }
+
+  @Get('vendor/:vendorId/top-products')
+  @ApiOperation({
+    summary: 'Get vendor top selling products',
+    description:
+      'Returns the top selling products (listings) for a vendor, sorted by revenue.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Top products retrieved successfully',
+    type: VendorTopProductsResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Vendor not found',
+  })
+  async getVendorTopProducts(
+    @Param('vendorId', ParseIntPipe) vendorId: number,
+    @Query('limit', ParseIntPipe) limit: number = 10,
+  ): Promise<VendorTopProductsResponseDto> {
+    return this.analyticsService.getVendorTopProducts(vendorId, limit);
+  }
+
+  @Get('vendor/:vendorId/bookings')
+  @ApiOperation({
+    summary: 'Get vendor bookings count',
+    description:
+      'Returns total bookings count and breakdown by status (pending, confirmed, completed, cancelled).',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Bookings count retrieved successfully',
+    type: VendorBookingsResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Vendor not found',
+  })
+  async getVendorBookings(
+    @Param('vendorId', ParseIntPipe) vendorId: number,
+  ): Promise<VendorBookingsResponseDto> {
+    return this.analyticsService.getVendorBookings(vendorId);
   }
 }

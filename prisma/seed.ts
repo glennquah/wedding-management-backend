@@ -81,8 +81,13 @@ async function main() {
   console.log(
     '- 250 Email Notification History entries (10 per wedding + 10 per vendor)',
   );
-  console.log('- Multiple listings for vendors');
-  console.log('- 6-8 orders per wedding with updated spending');
+  console.log('- 40+ listings across all vendors (2-3 per vendor)');
+  console.log(
+    '- 12-18 orders per wedding (~75 total orders) with dates spread across 12 months',
+  );
+  console.log(
+    '- Order status: 70% paid, 10% completed, 15% pending, 5% cancelled',
+  );
   console.log(
     '- ~80 primary guests per wedding (some with accompanying guests)',
   );
