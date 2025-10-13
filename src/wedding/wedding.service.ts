@@ -103,6 +103,7 @@ export class WeddingService {
       updateData.preferredServices = dto.preferredServices;
     if (dto.allocatedBudget !== undefined)
       updateData.allocatedBudget = dto.allocatedBudget;
+    if (dto.paynowQR !== undefined) updateData.paynowQR = dto.paynowQR;
 
     return this.prisma.wedding.update({
       where: { id },
@@ -388,5 +389,37 @@ export class WeddingService {
         },
       },
     });
+  }
+
+  async findPublicById(id: number): Promise<{
+    name: string;
+    paynowQR: string;
+    guests: { id: number; name: string }[];
+  }> {
+    const wedding = await this.prisma.wedding.findUnique({
+      where: { id },
+      include: {
+        guests: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
+
+    if (!wedding) {
+      throw new NotFoundException(`Wedding with ID ${id} not found`);
+    }
+
+    if (!wedding.paynowQR) {
+      throw new NotFoundException(`Wedding with ID ${id} does not have a PayNow QR code`);
+    }
+
+    return {
+      name: wedding.name,
+      paynowQR: wedding.paynowQR,
+      guests: wedding.guests,
+    };
   }
 }

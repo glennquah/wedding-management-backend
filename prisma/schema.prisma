@@ -225,6 +225,7 @@ model Wedding {
   guestCountBucket         GuestCountBucket
   preferredStyle           WeddingStyle
   preferredServices        WeddingService[]
+  paynowQR                 String?
   orders                   Order[]
   notificationDetails      NotificationDetails?
   SeatingArrangement       SeatingArrangement?

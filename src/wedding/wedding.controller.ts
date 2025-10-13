@@ -20,6 +20,7 @@ import { CreateWeddingDto } from './dto/create-wedding.dto';
 import { DateOptimizerPreferencesDto } from './dto/date-optimizer-preferences.dto';
 import { UpdateWeddingDto } from './dto/update-wedding.dto';
 import { WeddingResponseDto } from './dto/wedding-response.dto';
+import { WeddingPublicResponseDto } from './dto/wedding-public-response.dto';
 import { WeddingService } from './wedding.service';
 import { SetWeddingDateDto } from './dto/set-wedding-date.dto';
 
@@ -76,6 +77,20 @@ export class WeddingController {
     return weddings.map((wedding) =>
       this.service.toWeddingResponseDto(wedding),
     );
+  }
+
+  @Get(':id/public')
+  @ApiOperation({ summary: 'Get public wedding details (no auth required)' })
+  @ApiResponse({
+    status: 200,
+    description: 'Public wedding details for cash gift page',
+    type: WeddingPublicResponseDto,
+  })
+  @ApiResponse({ status: 404, description: 'Wedding not found or PayNow QR not available.' })
+  async findPublic(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<WeddingPublicResponseDto> {
+    return this.service.findPublicById(id);
   }
 
   @Get(':id')

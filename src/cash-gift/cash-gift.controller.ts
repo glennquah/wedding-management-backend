@@ -19,26 +19,25 @@ import { CashGiftService } from './cash-gift.service';
 
 @ApiTags('cash-gifts')
 @Controller('cash-gifts')
-@UseGuards(JwtGuard, RolesGuard)
 export class CashGiftController {
   constructor(private cashGiftService: CashGiftService) {}
 
   @Post()
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
-  @ApiOperation({ summary: 'Create a new cash gift record for a wedding' })
+  @ApiOperation({ summary: 'Create a new cash gift record for a wedding (public endpoint)' })
   @ApiResponse({
     status: 201,
     description: 'The cash gift record has been successfully created.',
     type: CashGiftResponseDto,
   })
   @ApiResponse({ status: 400, description: 'Bad request.' })
-  @ApiResponse({ status: 404, description: 'Wedding not found.' })
+  @ApiResponse({ status: 404, description: 'Wedding or guest not found.' })
   async create(@Body() body: CreateCashGiftDto): Promise<CashGiftResponseDto> {
     const cashGift = await this.cashGiftService.create(body);
     return this.cashGiftService.toCashGiftResponseDto(cashGift);
   }
 
   @Get('wedding/:weddingId')
+  @UseGuards(JwtGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Get all cash gifts for a specific wedding' })
   @ApiResponse({
@@ -54,6 +53,7 @@ export class CashGiftController {
   }
 
   @Get(':id')
+  @UseGuards(JwtGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Get a cash gift by ID' })
   @ApiResponse({
@@ -70,6 +70,7 @@ export class CashGiftController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Delete a cash gift record' })
   @ApiResponse({
