@@ -1,9 +1,11 @@
 import { PrismaClient } from '@prisma/client';
+import { seedCalendarConnections } from './seeds/calendar-connections.seed';
 import { seedCouples } from './seeds/couples.seed';
 import { seedEmailHistory } from './seeds/email-history.seed';
 import { seedEmailTemplates } from './seeds/email-templates.seed';
 import { seedGuests } from './seeds/guests.seed';
 import { seedListings } from './seeds/listings.seed';
+import { seedOrders } from './seeds/orders.seed';
 import { seedUsers } from './seeds/users.seed';
 import { seedVendors } from './seeds/vendors.seed';
 import { seedWeddings } from './seeds/weddings.seed';
@@ -21,6 +23,7 @@ async function main() {
     await prisma.payment.deleteMany();
     await prisma.order.deleteMany();
     await prisma.listing.deleteMany();
+    await prisma.googleCalendarConnection.deleteMany();
     await prisma.guest.deleteMany();
     await prisma.wedding.deleteMany();
     await prisma.vendor.deleteMany();
@@ -53,8 +56,14 @@ async function main() {
   // 8. Seed listings (depends on vendors)
   await seedListings(prisma);
 
-  // 9. Seed guests (depends on weddings)
+  // 9. Seed orders (depends on weddings and listings)
+  await seedOrders(prisma);
+
+  // 10. Seed guests (depends on weddings)
   await seedGuests(prisma);
+
+  // 10. Seed Google Calendar connections (depends on weddings, couples, and guests)
+  await seedCalendarConnections(prisma);
 
   // Print final summary
   console.log('\n========================================');
@@ -72,7 +81,13 @@ async function main() {
   console.log(
     '- 250 Email Notification History entries (10 per wedding + 10 per vendor)',
   );
-  console.log('- Multiple listings for vendors');
+  console.log('- 40+ listings across all vendors (2-3 per vendor)');
+  console.log(
+    '- 12-18 orders per wedding (~75 total orders) with dates spread across 12 months',
+  );
+  console.log(
+    '- Order status: 70% paid, 10% completed, 15% pending, 5% cancelled',
+  );
   console.log(
     '- ~80 primary guests per wedding (some with accompanying guests)',
   );
@@ -80,7 +95,12 @@ async function main() {
   console.log(
     '- Accompanying guests have individual confirmation status and dietary requirements',
   );
-  console.log('========================================\n');
+  console.log(`\n✨ DATE OPTIMIZER TEST DATA (All Weddings):`);
+  console.log(`- All main couples have mock calendar connections`);
+  console.log(`- 5 key attendees added per wedding`);
+  console.log(`\n📧 Test Login Credentials:`);
+  console.log(`  Email: couple@wedding.com`);
+  console.log(`  Password: password123`);
 }
 
 main()

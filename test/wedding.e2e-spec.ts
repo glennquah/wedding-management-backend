@@ -33,6 +33,7 @@ describe('Wedding (e2e)', () => {
         guestCountBucket: GuestCountBucket.LARGE,
         preferredStyle: WeddingStyle.LUXURY,
         preferredServices: [WeddingService.VENUE, WeddingService.CATERING],
+        allocatedBudget: 100000,
       };
 
       const response = await request(app.getHttpServer())
@@ -151,6 +152,7 @@ describe('Wedding (e2e)', () => {
         guestCountBucket: GuestCountBucket.MEDIUM,
         preferredStyle: WeddingStyle.MODERN,
         preferredServices: [WeddingService.VENUE, WeddingService.CATERING],
+        allocatedBudget: 50000,
       };
 
       const createResponse = await request(app.getHttpServer())

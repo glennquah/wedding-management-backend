@@ -13,7 +13,14 @@ import {
   HttpStatus,
   UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiQuery,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { ChecklistService } from './checklist.service';
 import { CreateChecklistDto } from './dto/create-checklist.dto';
 import { UpdateChecklistDto } from './dto/update-checklist.dto';
@@ -21,6 +28,7 @@ import { CreateChecklistItemDto } from './dto/create-checklist-item.dto';
 import { UpdateChecklistItemDto } from './dto/update-checklist-item.dto';
 import { ChecklistResponseDto } from './dto/checklist-response.dto';
 import { ChecklistItemResponseDto } from './dto/checklist-item-response.dto';
+import { ChatMessageResponseDto } from './dto/chat-message-response.dto';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -43,8 +51,13 @@ export class ChecklistController {
   })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 404, description: 'Wedding not found' })
-  @ApiResponse({ status: 409, description: 'Checklist already exists for this wedding' })
-  async create(@Body() createChecklistDto: CreateChecklistDto): Promise<ChecklistResponseDto> {
+  @ApiResponse({
+    status: 409,
+    description: 'Checklist already exists for this wedding',
+  })
+  async create(
+    @Body() createChecklistDto: CreateChecklistDto,
+  ): Promise<ChecklistResponseDto> {
     return this.checklistService.create(createChecklistDto);
   }
 
@@ -74,7 +87,9 @@ export class ChecklistController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'Checklist not found' })
-  async findOne(@Param('id', ParseIntPipe) id: number): Promise<ChecklistResponseDto> {
+  async findOne(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<ChecklistResponseDto> {
     return this.checklistService.findOne(id);
   }
 
@@ -89,9 +104,65 @@ export class ChecklistController {
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
-  @ApiResponse({ status: 404, description: 'Checklist not found for this wedding' })
-  async findByWeddingId(@Param('weddingId', ParseIntPipe) weddingId: number): Promise<ChecklistResponseDto> {
+  @ApiResponse({
+    status: 404,
+    description: 'Checklist not found for this wedding',
+  })
+  async findByWeddingId(
+    @Param('weddingId', ParseIntPipe) weddingId: number,
+  ): Promise<ChecklistResponseDto> {
     return this.checklistService.findByWeddingId(weddingId);
+  }
+
+  @Get('wedding/:weddingId/chat-history')
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
+  @ApiOperation({ summary: 'Get chat history for checklist by wedding ID' })
+  @ApiParam({ name: 'weddingId', description: 'Wedding ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Chat history retrieved successfully',
+    type: [ChatMessageResponseDto],
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  @ApiResponse({
+    status: 404,
+    description: 'Checklist not found for this wedding',
+  })
+  async getChatHistoryByWeddingId(
+    @Param('weddingId', ParseIntPipe) weddingId: number,
+  ): Promise<ChatMessageResponseDto[]> {
+    return this.checklistService.getChatHistoryByWeddingId(weddingId);
+  }
+
+  @Put('wedding/:weddingId')
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
+  @ApiOperation({
+    summary:
+      'Update checklist by wedding ID - for updating items and stage progression',
+    description:
+      'Updates checklist items and current stage. Used for saving state on Next Category clicks.',
+  })
+  @ApiParam({ name: 'weddingId', description: 'Wedding ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Checklist updated successfully',
+    type: ChecklistResponseDto,
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  @ApiResponse({
+    status: 404,
+    description: 'Checklist not found for this wedding',
+  })
+  async updateByWeddingId(
+    @Param('weddingId', ParseIntPipe) weddingId: number,
+    @Body() updateChecklistDto: UpdateChecklistDto,
+  ): Promise<ChecklistResponseDto> {
+    return this.checklistService.updateByWeddingId(
+      weddingId,
+      updateChecklistDto,
+    );
   }
 
   @Put(':id')
@@ -169,11 +240,16 @@ export class ChecklistController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete a checklist item' })
   @ApiParam({ name: 'itemId', description: 'Checklist item ID' })
-  @ApiResponse({ status: 204, description: 'Checklist item deleted successfully' })
+  @ApiResponse({
+    status: 204,
+    description: 'Checklist item deleted successfully',
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'Checklist item not found' })
-  async removeItem(@Param('itemId', ParseIntPipe) itemId: number): Promise<void> {
+  async removeItem(
+    @Param('itemId', ParseIntPipe) itemId: number,
+  ): Promise<void> {
     return this.checklistService.removeItem(itemId);
   }
 
@@ -189,7 +265,9 @@ export class ChecklistController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'Checklist item not found' })
-  async markItemCompleted(@Param('itemId', ParseIntPipe) itemId: number): Promise<ChecklistItemResponseDto> {
+  async markItemCompleted(
+    @Param('itemId', ParseIntPipe) itemId: number,
+  ): Promise<ChecklistItemResponseDto> {
     return this.checklistService.markItemCompleted(itemId);
   }
 
@@ -205,7 +283,9 @@ export class ChecklistController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'Checklist item not found' })
-  async markItemUncompleted(@Param('itemId', ParseIntPipe) itemId: number): Promise<ChecklistItemResponseDto> {
+  async markItemUncompleted(
+    @Param('itemId', ParseIntPipe) itemId: number,
+  ): Promise<ChecklistItemResponseDto> {
     return this.checklistService.markItemUncompleted(itemId);
   }
 
@@ -221,7 +301,9 @@ export class ChecklistController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'Checklist item not found' })
-  async toggleItemCompletion(@Param('itemId', ParseIntPipe) itemId: number): Promise<ChecklistItemResponseDto> {
+  async toggleItemCompletion(
+    @Param('itemId', ParseIntPipe) itemId: number,
+  ): Promise<ChecklistItemResponseDto> {
     return this.checklistService.toggleItemCompletion(itemId);
   }
 
@@ -279,7 +361,10 @@ export class ChecklistController {
     total: number;
     completed: number;
     percentage: number;
-    byCategory: Record<string, { total: number; completed: number; percentage: number }>;
+    byCategory: Record<
+      string,
+      { total: number; completed: number; percentage: number }
+    >;
   }> {
     return this.checklistService.getCompletionStats(id);
   }

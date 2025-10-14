@@ -1,5 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsEnum, IsInt, IsOptional, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsBoolean,
+  IsEnum,
+  IsInt,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { ConfirmationStatus } from '../../common/confirmation-status.enum';
 
 export class CreateGuestDto {
@@ -43,6 +50,14 @@ export class CreateGuestDto {
   @IsOptional()
   @IsInt()
   primaryGuestId?: number;
+
+  @ApiProperty({
+    description: 'Whether to send an email invitation to the guest',
+    required: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  sendEmail?: boolean;
 
   @ApiProperty({
     description: 'Confirmation status of the guest',

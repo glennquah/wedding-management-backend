@@ -39,6 +39,7 @@ jobs:
       FASTAPI_URL: http://localhost:8001
       STRIPE_SECRET_KEY: API_KEY_NOT_ACTUALLY_HERE
       STRIPE_WEBHOOK_SECRET: API_KEY_NOT_ACTUALLY_HERE
+      OPENAI_API_KEY: API_KEY_NOT_ACTUALLY_HERE
 
     steps:
       - name: Checkout code
@@ -63,7 +64,7 @@ jobs:
         run: npm run lint:check
 
       - name: Run e2e tests
-        run: npm run test:e2e
+        run: NODE_OPTIONS="--max-old-space-size=4096" npm run test:e2e
 
       - name: Build application
         run: npm run build

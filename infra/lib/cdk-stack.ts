@@ -57,6 +57,10 @@ export class CdkStack extends cdk.Stack {
         DATABASE_URL: process.env.DATABASE_URL,
         JWT_SECRET_KEY: process.env.JWT_SECRET_KEY,
         JWT_REFRESH_KEY: process.env.JWT_REFRESH_KEY,
+        SENDGRID_API_KEY: process.env.SENDGRID_API_KEY,
+        STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
+        STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
+        FASTAPI_URL: process.env.FASTAPI_URL
       },
       memorySize: 512,
       timeout: cdk.Duration.seconds(30),

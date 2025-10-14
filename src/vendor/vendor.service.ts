@@ -102,6 +102,14 @@ export class VendorService {
       include: { user: true }, // include the user relation for mapping
     });
 
+    // Send vendor status email for new vendor account (PENDING by default)
+    await this.emailService.sendVendorStatusEmail(
+      user.email,
+      user.name,
+      VendorOnboardingStatus.PENDING,
+      user.id,
+    );
+
     return this.toVendorResponseDto(vendor);
   }
 
