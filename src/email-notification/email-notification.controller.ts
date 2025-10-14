@@ -78,4 +78,48 @@ export class EmailNotificationController {
       generateDto,
     );
   }
+
+  @Post('broadcast-guest-gratitude/:weddingId')
+  @ApiOperation({
+    summary: 'Broadcast guest gratitude card emails to primary guests',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'The guest gratitude card emails have been processed.',
+  })
+  async broadcastGuestGratitude(
+    @Param('weddingId', ParseIntPipe) weddingId: number,
+  ): Promise<void> {
+    await this.emailNotificationService.broadcastGuestGratitude(weddingId);
+  }
+
+  @Post('broadcast-collaborator-gratitude/:weddingId')
+  @ApiOperation({
+    summary: 'Broadcast collaborator gratitude card emails to collaborators',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'The collaborator gratitude card emails have been processed.',
+  })
+  async broadcastCollaboratorGratitude(
+    @Param('weddingId', ParseIntPipe) weddingId: number,
+  ): Promise<void> {
+    await this.emailNotificationService.broadcastCollaboratorGratitude(
+      weddingId,
+    );
+  }
+
+  @Post('broadcast-vendor-gratitude/:weddingId')
+  @ApiOperation({
+    summary: 'Broadcast vendor gratitude card emails to vendors',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'The vendor gratitude card emails have been processed.',
+  })
+  async broadcastVendorGratitude(
+    @Param('weddingId', ParseIntPipe) weddingId: number,
+  ): Promise<void> {
+    await this.emailNotificationService.broadcastVendorGratitude(weddingId);
+  }
 }
