@@ -86,6 +86,12 @@ export interface AdminSuspensionData {
   dashboardUrl: string;
 }
 
+export interface RsvpInvitationData {
+  name: string;
+  weddingName: string;
+  rsvpUrl: string;
+}
+
 export type EmailTemplateData =
   | PasswordResetData
   | WelcomeEmailData
@@ -98,4 +104,5 @@ export type EmailTemplateData =
   | VendorStatusData
   | AdminStatusData
   | VendorSuspensionData
-  | AdminSuspensionData;
+  | AdminSuspensionData
+  | RsvpInvitationData;

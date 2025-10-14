@@ -63,15 +63,14 @@ enum GuestCountBucket {
 enum OrderStatus {
   PENDING
   PAID
+  CONFIRMED
   CANCELLED
   COMPLETED
 }
 
 enum PaymentStatus {
   PENDING
-  PROCESSING
   SUCCEEDED
-  FAILED
   CANCELLED
   REFUNDED
   PARTIALLY_REFUNDED
@@ -94,6 +93,7 @@ enum EmailTemplateType {
   ADMIN_SUSPENSION
   COLLABORATOR_ADDED
   CALENDAR_ACCESS_REQUEST
+  RSVP_INVITATION
   CUSTOM
 }
 
@@ -219,6 +219,8 @@ model Wedding {
   keyAttendeeIds           Int[]                @default([])
   createdAt                DateTime             @default(now())
   updatedAt                DateTime             @updatedAt
+  allocatedBudget     Float
+  currentSpending     Float                @default(0)
   weddingType              WeddingType
   budgetBucket             BudgetBucket
   guestCountBucket         GuestCountBucket
@@ -227,7 +229,8 @@ model Wedding {
   orders                   Order[]
   notificationDetails      NotificationDetails?
   SeatingArrangement       SeatingArrangement?
-  microsite                Microsite?
+  microsite                  Microsite?
+  album               Album?
   dateOptimizerEarliestDate String?
   dateOptimizerLatestDate  String?
   dateOptimizerPreferredDays String[]           @default([])
@@ -235,20 +238,32 @@ model Wedding {
 }
 
 model Microsite {
-  id            Int      @id @default(autoincrement())
+  id             Int      @id @default(autoincrement())
   templateNumber Int
-  slug              String           @unique
-  coupleName    String
-  heroImages    String[]
-  imageGallery  String[]  
-  schedule      Json?    
-  faqs          Json?    
-  password      String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  
-  weddingId     Int      @unique
-  wedding       Wedding  @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+  slug           String   @unique
+  coupleName     String
+  heroImages     String[]
+  imageGallery   String[]
+  schedule       Json?
+  faqs           Json?
+  password       String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  weddingId Int     @unique
+  wedding   Wedding @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+}
+
+model Album {
+  id                Int      @id @default(autoincrement())
+  coupleName        String
+  inviteCardMessage String
+  landingMessage    String
+  albumURL          String?
+  photos            String[]
+
+  weddingId Int     @unique
+  wedding   Wedding @relation(fields: [weddingId], references: [id], onDelete: Cascade)
 }
 
 model Guest {
@@ -258,6 +273,8 @@ model Guest {
   allergies                String?
   group                    String?
   confirmationStatus       ConfirmationStatus         @default(PENDING)
+  attendance         Boolean            @default(false)
+  checkInTime        DateTime?
   weddingId                Int
   wedding                  Wedding                    @relation(fields: [weddingId], references: [id], onDelete: Cascade)
   primaryGuestId           Int?
@@ -269,51 +286,54 @@ model Guest {
 }
 
 model Listing {
-  id             Int            @id @default(autoincrement())
+  id             Int      @id @default(autoincrement())
   listingName    String
   price          Float
   availabilities Json
   remarks        String
   imageUrls      String[]
-  
+
   // Relations
-  vendorId       Int
-  vendor         Vendor         @relation(fields: [vendorId], references: [userId], onDelete: Cascade)
-  
+  vendorId Int
+  vendor   Vendor @relation(fields: [vendorId], references: [userId], onDelete: Cascade)
+
   // Many-to-many with Orders
-  orders         OrderListing[]
-  cartItems      CartItem[]
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
+  orders    OrderListing[]
+  cartItems CartItem[]
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
 }
 
 model Order {
-  id           Int            @id @default(autoincrement())
-  orderStatus  OrderStatus    @default(PENDING)
+  id           Int         @id @default(autoincrement())
+  orderStatus  OrderStatus @default(PENDING)
   totalAmount  Float
-  currency     String         @default("SGD")
-  purchaseDate DateTime       @default(now())
+  currency     String      @default("SGD")
+  purchaseDate DateTime    @default(now())
   remark       String?
-  
+
   // Relations
-  weddingId    Int
-  wedding      Wedding        @relation(fields: [weddingId], references: [id], onDelete: Cascade)
-  
+  weddingId Int
+  wedding   Wedding @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+
   // Many-to-many with Listings
-  listings     OrderListing[]
-  
+  listings OrderListing[]
+
   // Payment relation
-  payments     Payment[]
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
+  payments  Payment[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
 model OrderListing {
-  orderId     Int
-  listingId   Int
-  bookedSlots Json
-  order       Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  listing     Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  orderId       Int
+  listingId     Int
+  bookedSlots   Json
+  bookingStatus OrderStatus @default(PENDING)
+  order         Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  listing       Listing     @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 
   @@id([orderId, listingId])
 }
@@ -343,17 +363,16 @@ model CartItem {
 model Payment {
   id                      Int           @id @default(autoincrement())
   stripeCheckoutSessionId String        @unique
-  stripePaymentIntentId   String? // This is populated by webhook after payment
+  stripePaymentIntentId   String?
   amount                  Float
   currency                String        @default("SGD")
   paymentStatus           PaymentStatus @default(PENDING)
-  
-  
+
   // Relations
-  orderId                 Int
-  order                   Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  createdAt               DateTime      @default(now())
-  updatedAt               DateTime      @updatedAt
+  orderId   Int
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([stripeCheckoutSessionId])
   @@index([stripePaymentIntentId])

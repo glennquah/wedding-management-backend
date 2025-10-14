@@ -25,6 +25,7 @@ import { AdminResponseDto } from './dto/admin-response.dto';
 import { CollaboratorResponseDto } from './dto/collaborator-response.dto';
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { InviteCollaboratorDto } from './dto/invite-collaborator.dto';
+import { InvitePartnerDto } from './dto/invite-partner.dto';
 import { UpdateAdminDto } from './dto/update-admin.dto';
 import { WeddingResponseDto } from '../wedding/dto/wedding-response.dto';
 
@@ -290,9 +291,10 @@ export class AdminController {
   @ApiResponse({ status: 404, description: 'Wedding or guest not found.' })
   @ApiResponse({ status: 400, description: 'Bad request.' })
   async inviteCollaborator(
+    @Request() req: Request & { user: JwtPayload },
     @Body() dto: InviteCollaboratorDto,
   ): Promise<CollaboratorResponseDto> {
-    return this.adminService.inviteCollaborator(dto);
+    return this.adminService.inviteCollaborator(dto, req.user.sub);
   }
 
   @Get('wedding/:weddingId/collaborators')
@@ -327,5 +329,41 @@ export class AdminController {
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<void> {
     return this.adminService.removeCollaborator(weddingId, userId);
+  }
+
+  @Post('invite-partner')
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Invite a person as partner to the main couple' })
+  @ApiResponse({
+    status: 201,
+    description: 'Partner has been successfully invited.',
+    type: CollaboratorResponseDto,
+  })
+  @ApiResponse({ status: 404, description: 'Wedding or guest not found.' })
+  @ApiResponse({ status: 400, description: 'Bad request.' })
+  @ApiResponse({
+    status: 409,
+    description: 'Main couple already has 2 members.',
+  })
+  async invitePartner(
+    @Request() req: Request & { user: JwtPayload },
+    @Body() dto: InvitePartnerDto,
+  ): Promise<CollaboratorResponseDto> {
+    return this.adminService.invitePartner(dto, req.user.sub);
+  }
+
+  @Delete('wedding/:weddingId/partner/:userId')
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Remove a partner from the main couple' })
+  @ApiResponse({
+    status: 200,
+    description: 'Partner has been successfully removed from main couple.',
+  })
+  @ApiResponse({ status: 404, description: 'Wedding or partner not found.' })
+  async removePartner(
+    @Param('weddingId', ParseIntPipe) weddingId: number,
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<void> {
+    return this.adminService.removePartner(weddingId, userId);
   }
 }

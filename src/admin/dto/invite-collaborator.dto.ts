@@ -3,14 +3,6 @@ import { IsEmail, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class InviteCollaboratorDto {
   @ApiProperty({
-    description: 'Guest ID to invite as collaborator',
-    example: 1,
-  })
-  @IsNotEmpty()
-  @IsNumber()
-  guestId: number;
-
-  @ApiProperty({
     description: 'Email of the guest being invited',
     example: 'guest@example.com',
   })

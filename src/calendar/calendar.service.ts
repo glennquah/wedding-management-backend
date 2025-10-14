@@ -47,14 +47,18 @@ export class CalendarService {
   /**
    * Generate OAuth URL for a guest or admin to authorize calendar access
    */
-  generateAuthUrl(userId: number, isAdmin: boolean): string {
+  generateAuthUrl(
+    userId: number,
+    isAdmin: boolean,
+    returnUrl?: string,
+  ): string {
     const authUrl = this.oauth2Client.generateAuthUrl({
       access_type: 'offline',
       scope: [
         'https://www.googleapis.com/auth/calendar.events.readonly', // Read calendar events (includes all-day events)
         'https://www.googleapis.com/auth/userinfo.email',
       ],
-      state: JSON.stringify({ userId, isAdmin }), // Pass userId and type in state
+      state: JSON.stringify({ userId, isAdmin, returnUrl }), // Pass userId, type, and return URL in state
       prompt: 'consent', // Force consent screen to always get refresh token
     });
 
@@ -64,14 +68,16 @@ export class CalendarService {
   /**
    * Handle OAuth callback and store tokens
    */
-  async handleOAuthCallback(code: string, state: string): Promise<void> {
+  async handleOAuthCallback(code: string, state: string): Promise<string> {
     let userId: number;
     let isAdmin: boolean;
+    let returnUrl: string | undefined;
 
     try {
       const parsedState = JSON.parse(state);
       userId = parsedState.userId;
       isAdmin = parsedState.isAdmin;
+      returnUrl = parsedState.returnUrl;
     } catch {
       throw new BadRequestException('Invalid state parameter');
     }
@@ -115,11 +121,12 @@ export class CalendarService {
     const email = userInfo.data.email;
 
     // Calculate token expiry (default 1 hour from now)
-    const expiryDate = new Date();
-    expiryDate.setSeconds(
-      expiryDate.getSeconds() +
-        (tokens.expiry_date ? tokens.expiry_date / 1000 : 3600),
-    );
+    let expiryDate: Date;
+    if (tokens.expiry_date) {
+      expiryDate = new Date(tokens.expiry_date * 1000);
+    } else {
+      expiryDate = new Date(Date.now() + 3600 * 1000);
+    }
 
     // Store or update connection
     if (isAdmin) {
@@ -165,6 +172,10 @@ export class CalendarService {
 
       this.logger.log(`Calendar connected for guest ${userId}`);
     }
+
+    // Return the URL to redirect to (use returnUrl if provided, otherwise default to root)
+    // If returnUrl is provided, use it; otherwise redirect to home page
+    return returnUrl || '/';
   }
 
   /**
@@ -460,6 +471,7 @@ export class CalendarService {
             timeMax: dto.endDate,
             singleEvents: true,
             orderBy: 'startTime',
+            timeZone: 'Asia/Singapore', // Use the user's local timezone
           });
 
           busySlots = [];
@@ -470,25 +482,14 @@ export class CalendarService {
             if (event.status === 'cancelled') continue;
 
             // Check if it's an all-day event (uses 'date' instead of 'dateTime')
-            if (event.start?.date) {
-              // All-day event - use UTC to avoid timezone shifts
-              // Google Calendar returns all-day events as YYYY-MM-DD strings
-              const startDateStr = event.start.date;
-              const endDateStr = event.end?.date || event.start.date;
+            if (event.start?.date && event.end?.date) {
+              // All-day event. The end date from the Google API is exclusive.
+              const startDate = new Date(`${event.start.date}T00:00:00Z`);
 
-              // Create dates in UTC to preserve the exact date
-              const [startYear, startMonth, startDay] = startDateStr
-                .split('-')
-                .map(Number);
-              const startDate = new Date(
-                Date.UTC(startYear, startMonth - 1, startDay, 0, 0, 0, 0),
-              );
-
-              const [endYear, endMonth, endDay] = endDateStr
-                .split('-')
-                .map(Number);
+              // To get the inclusive end of the event, we subtract one millisecond
+              // from the start of the exclusive end date.
               const endDate = new Date(
-                Date.UTC(endYear, endMonth - 1, endDay, 23, 59, 59, 999),
+                new Date(`${event.end.date}T00:00:00Z`).getTime() - 1,
               );
 
               busySlots.push({
@@ -507,12 +508,13 @@ export class CalendarService {
         attendees.push({
           attendeeId,
           name,
-          isConnected: true,
+          isConnected: false,
           busySlots,
         });
       } catch (error) {
         this.logger.error(
-          `Error fetching calendar for attendee ${attendeeId}: ${error.message}`,
+          `Error fetching calendar for attendee ${attendeeId}:`,
+          error,
         );
         attendees.push({
           attendeeId,

@@ -1,22 +1,22 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { OrderStatus } from '@prisma/client';
+import { OrderStatus } from '../../common/order-status.enum';
 
 export class OrderResponseDto {
   @ApiProperty({ description: 'Unique identifier for the order' })
   id: number;
-
-  @ApiProperty({
-    description: 'Status of the order',
-    enum: OrderStatus,
-    enumName: 'OrderStatus',
-  })
-  orderStatus: OrderStatus;
 
   @ApiProperty({ description: 'Total amount for the order' })
   totalAmount: number;
 
   @ApiProperty({ description: 'Currency code for the order' })
   currency: string;
+
+  @ApiProperty({
+    description: 'Current status of the order',
+    enum: OrderStatus,
+    enumName: 'OrderStatus',
+  })
+  status: OrderStatus;
 
   @ApiProperty({ description: 'Date when the order was purchased' })
   purchaseDate: Date;
@@ -37,7 +37,7 @@ export class OrderResponseDto {
   updatedAt: Date;
 
   @ApiProperty({
-    description: 'Listings included in this order',
+    description: 'Listings included in this order with their booking status',
     required: false,
   })
   listings?: any[];

@@ -21,6 +21,7 @@ import { DateOptimizerPreferencesDto } from './dto/date-optimizer-preferences.dt
 import { UpdateWeddingDto } from './dto/update-wedding.dto';
 import { WeddingResponseDto } from './dto/wedding-response.dto';
 import { WeddingService } from './wedding.service';
+import { SetWeddingDateDto } from './dto/set-wedding-date.dto';
 
 @ApiTags('weddings')
 @Controller('weddings')
@@ -79,7 +80,7 @@ export class WeddingController {
 
   @Get(':id')
   @UseGuards(JwtGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN, UserRole.VENDOR)
   @ApiOperation({ summary: 'Get a wedding by ID' })
   @ApiResponse({
     status: 200,
@@ -240,5 +241,26 @@ export class WeddingController {
     @Param('id', ParseIntPipe) weddingId: number,
   ): Promise<DateOptimizerPreferencesDto> {
     return this.service.getDateOptimizerPreferences(weddingId);
+  }
+
+  @Put(':id/date')
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
+  @ApiOperation({ summary: 'Set the official wedding date' })
+  @ApiResponse({
+    status: 200,
+    description: 'Wedding date updated successfully.',
+    type: WeddingResponseDto,
+  })
+  @ApiResponse({ status: 404, description: 'Wedding not found.' })
+  async setWeddingDate(
+    @Param('id', ParseIntPipe) weddingId: number,
+    @Body() body: SetWeddingDateDto,
+  ): Promise<WeddingResponseDto> {
+    const updatedWedding = await this.service.setWeddingDate(
+      weddingId,
+      body.date,
+    );
+    return this.service.toWeddingResponseDto(updatedWedding);
   }
 }
