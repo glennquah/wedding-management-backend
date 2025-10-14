@@ -23,6 +23,7 @@ import {
   GuestGratitudeCardData,
   PasswordResetData,
   RsvpInvitationData,
+  SuperAdminOnboardingData,
   VendorGratitudeCardData,
   VendorStatusData,
   VendorSuspensionData,
@@ -65,6 +66,10 @@ export class EmailNotificationService {
         { name: EmailTemplateType.WELCOME, file: 'welcome.html' },
         { name: EmailTemplateType.VERIFY_EMAIL, file: 'verify-email.html' },
         { name: EmailTemplateType.CREATE_ACCOUNT, file: 'create-account.html' },
+        {
+          name: EmailTemplateType.SUPER_ADMIN_ONBOARDING,
+          file: 'super-admin-onboarding.html',
+        },
         { name: EmailTemplateType.VENDOR_STATUS, file: 'vendor-status.html' },
         {
           name: EmailTemplateType.VENDOR_SUSPENSION,
@@ -133,6 +138,47 @@ export class EmailNotificationService {
     };
 
     await this.sendPasswordResetEmail(to, templateData);
+  }
+
+  async sendSuperAdminCreatedEmail(
+    to: string,
+    name: string,
+    resetLink: string,
+    dashboardUrl: string,
+  ): Promise<void> {
+    const supportEmail = 'hello.knotly@gmail.com';
+
+    const templateData: SuperAdminOnboardingData = {
+      name,
+      buttonUrl: resetLink,
+      dashboardUrl,
+      supportEmail,
+    };
+
+    const html = this.renderTemplate(
+      EmailTemplateType.SUPER_ADMIN_ONBOARDING,
+      templateData,
+    );
+    const text = `Hello ${name}!
+
+Welcome to the Knotly Super Admin team. Use the link below to set your password and activate your account.
+
+${resetLink}
+
+The link expires in 7 days. If you weren't expecting this invitation, let us know at ${supportEmail}.
+
+Once you're set up, visit your dashboard at ${dashboardUrl} to get started.
+
+Best regards,
+The Knotly Team`;
+
+    await this.sendEmail(
+      to,
+      'Knotly Super Admin Access - Set Up Your Account',
+      text,
+      html,
+      EmailTemplateType.SUPER_ADMIN_ONBOARDING,
+    );
   }
 
   async sendWelcomeEmail(

@@ -94,7 +94,7 @@ export class AuthService {
       where: { email },
     });
 
-    if (!user || user.role === UserRole.SUPERADMIN) return;
+    if (!user) return;
 
     const token = await this.jwtService.signAsync(
       {
@@ -107,7 +107,13 @@ export class AuthService {
       },
     );
 
-    const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
+    // Determine the correct frontend URL based on user role
+    const frontendUrl =
+      user.role === UserRole.SUPERADMIN
+        ? process.env.ADMIN_FRONTEND_URL
+        : process.env.FRONTEND_URL;
+
+    const resetLink = `${frontendUrl}/reset-password?token=${token}`;
 
     await this.emailNotificationService.sendForgetPasswordEmail(
       email,

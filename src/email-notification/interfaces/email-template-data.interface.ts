@@ -22,6 +22,13 @@ export interface CreateAccountData {
   resetPasswordUrl: string;
 }
 
+export interface SuperAdminOnboardingData {
+  name: string;
+  buttonUrl: string;
+  dashboardUrl: string;
+  supportEmail: string;
+}
+
 export interface CollaboratorAddedData {
   name: string;
   weddingName: string;
@@ -113,6 +120,7 @@ export type EmailTemplateData =
   | WelcomeEmailData
   | VerifyEmailData
   | CreateAccountData
+  | SuperAdminOnboardingData
   | CollaboratorAddedData
   | CalendarAccessRequestData
   | SuccessfulBookingData
