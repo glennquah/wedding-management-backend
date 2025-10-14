@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsEnum, IsNotEmpty, IsString } from 'class-validator';
+import {
+  IsEmail,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { UserRole } from '../../common/user-role.enum';
 
 export class CreateSuperAdminDto {
@@ -12,6 +18,14 @@ export class CreateSuperAdminDto {
   @IsNotEmpty()
   @IsEmail()
   email: string;
+
+  @ApiProperty({
+    description: 'Password for the super admin account',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  password?: string;
 
   @ApiProperty({
     description: 'Role of the user',

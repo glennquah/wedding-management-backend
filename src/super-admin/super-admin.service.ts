@@ -38,6 +38,7 @@ export class SuperAdminService {
   async create(dto: {
     name: string;
     email: string;
+    password?: string;
   }): Promise<SuperAdminResponseDto> {
     // Check if user with the same email already exists
     const existingUser = await this.prisma.user.findUnique({
@@ -47,14 +48,14 @@ export class SuperAdminService {
       throw new ConflictException('User with this email already exists');
     }
 
-    // Generate a temporary password (will be changed via password reset)
-    const tempPassword = Math.random().toString(36).slice(-8);
+    // Use provided password or generate a temporary one
+    const password = dto.password || Math.random().toString(36).slice(-8);
 
     // Create the user first
     const user = await this.userService.create({
       name: dto.name,
       email: dto.email,
-      password: await hash(tempPassword, 10),
+      password: await hash(password, 10),
       role: UserRole.SUPERADMIN,
     });
 
@@ -66,30 +67,33 @@ export class SuperAdminService {
       include: { user: true },
     });
 
-    // Generate password reset token (7 days)
-    const token = await this.jwtService.signAsync(
-      {
-        sub: user.id,
-        email: user.email,
-      },
-      {
-        expiresIn: '7d',
-        secret: process.env.JWT_SECRET_KEY,
-      },
-    );
+    // Only send password reset email if no password was provided (production flow)
+    if (!dto.password) {
+      // Generate password reset token (7 days)
+      const token = await this.jwtService.signAsync(
+        {
+          sub: user.id,
+          email: user.email,
+        },
+        {
+          expiresIn: '7d',
+          secret: process.env.JWT_SECRET_KEY,
+        },
+      );
 
-    // Construct URLs for the email
-    const frontendUrl =
-      process.env.ADMIN_FRONTEND_URL || 'https://internal.knotly.app';
-    const resetLink = `${frontendUrl}/reset-password?token=${token}`;
+      // Construct URLs for the email
+      const frontendUrl =
+        process.env.ADMIN_FRONTEND_URL || 'https://internal.knotly.app';
+      const resetLink = `${frontendUrl}/reset-password?token=${token}`;
 
-    // Send password reset email
-    await this.emailService.sendSuperAdminCreatedEmail(
-      dto.email,
-      dto.name,
-      resetLink,
-      frontendUrl,
-    );
+      // Send password reset email
+      await this.emailService.sendSuperAdminCreatedEmail(
+        dto.email,
+        dto.name,
+        resetLink,
+        frontendUrl,
+      );
+    }
 
     return this.userService.toUserResponseDto(superAdmin.user);
   }
@@ -199,7 +203,7 @@ export class SuperAdminService {
   }
 
   async createMultiple(
-    superAdmins: { name: string; email: string }[],
+    superAdmins: { name: string; email: string; password?: string }[],
   ): Promise<SuperAdminResponseDto[]> {
     const createdSuperAdmins = await Promise.all(
       superAdmins.map((dto) => this.create(dto)),
