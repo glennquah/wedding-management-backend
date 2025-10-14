@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>A Heartfelt Thank You!</title>
+    <!--[if !mso]><!-->
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+    <!--<![endif]-->
+    <style>
+      /* Main Template Styles */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background-color: #f8f9fa;
+      }
+      .email-container {
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: #ffffff;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+      .header {
+        background: linear-gradient(135deg, #ff5a5f 0%, #45292f 100%);
+        padding: 40px 20px;
+        text-align: center;
+      }
+      .logo-img {
+        width: 150px;
+        height: 50px;
+        object-fit: contain;
+        display: block;
+        margin: 0 auto;
+      }
+      .tagline {
+        color: #ffffff;
+        font-size: 14px;
+        margin-top: 8px;
+        opacity: 0.9;
+      }
+      .content {
+        padding: 40px 30px 20px; /* Reduced bottom padding */
+      }
+      .greeting {
+        font-size: 22px;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 15px;
+      }
+      .message {
+        font-size: 16px;
+        line-height: 1.7;
+        color: #555;
+      }
+      .footer {
+        background-color: #f8f9fa;
+        padding: 30px;
+        text-align: center;
+        border-top: 1px solid #e9ecef;
+      }
+      .footer-text {
+        font-size: 14px;
+        color: #6c757d;
+        margin-bottom: 15px;
+      }
+      .social-links {
+        margin: 20px 0;
+      }
+      .social-link {
+        display: inline-block;
+        margin: 0 10px;
+        color: #ff5a5f;
+        text-decoration: none;
+        font-size: 14px;
+      }
+      
+      /* Guest Card Specific Styles */
+      .guest-card-wrapper {
+          width: 100%;
+          table-layout: fixed;
+          background-color: #fdf5f7;
+          padding: 20px 0;
+      }
+      .guest-card-main {
+        background-color: #ffffff;
+        margin: 0 auto;
+        width: 100%;
+        max-width: 600px; /* Adjusted from 720px */
+        border-spacing: 0;
+        font-family: sans-serif;
+      }
+      .guest-card-text-column {
+          width: 40%;
+          background-color: #ffffff;
+          text-align: center;
+          padding: 20px;
+      }
+      .guest-card-image-column {
+          width: 60%;
+      }
+
+      /* Responsive Styles */
+      @media (max-width: 600px) {
+        .email-container {
+          width: 100% !important;
+          margin: 0;
+          border-radius: 0;
+        }
+        .header, .footer, .content {
+          padding-left: 20px;
+          padding-right: 20px;
+        }
+        .greeting {
+          font-size: 20px;
+        }
+        .guest-card-stack .column {
+          width: 100% !important;
+          display: block !important;
+        }
+        .guest-card-image-column img {
+            height: 300px !important;
+            width: 100% !important;
+            object-fit: cover;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="email-container">
+      <!-- Header -->
+      <div class="header">
+        <div style="text-align: center">
+          <img
+            src="https://res.cloudinary.com/doudbsnya/image/upload/v1758432610/logo_ptrwb6.png"
+            alt="Knotly Logo"
+            class="logo-img"
+          />
+        </div>
+        <div class="tagline">Your Perfect Wedding, Perfectly Planned</div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="content">
+        <div class="greeting">Dear {{guestName}},</div>
+        <div class="message">
+          Having you with us on our wedding day meant the world. We wanted to share this small note to express our heartfelt thanks.
+        </div>
+      </div>
+
+      <!-- GUEST CARD COMPONENT START -->
+      <center class="guest-card-wrapper">
+        <table class="guest-card-main" width="100%">
+          <tr>
+            <td>
+              <table
+                class="guest-card-stack"
+                width="100%"
+                role="presentation"
+                style="border-spacing: 0"
+              >
+                <tr>
+                  <td class="column guest-card-text-column" valign="middle">
+                    <table width="100%" role="presentation" style="border-spacing: 0">
+                      <tr>
+                        <td>
+                          <p style="font-family: 'Playfair Display', serif; font-size: 14px; letter-spacing: 0.6em; line-height: 1.6; text-transform: uppercase; color: #384A5C; margin: 0;">
+                            {{message}}
+                          </p>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <p style="font-family: 'Playfair Display', serif; color: #5a728c; font-size: 24px; font-style: italic; margin: 20px 0;">
+                            {{signOff}}
+                          </p>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <span style="font-family: 'Playfair Display', serif; font-size: 11px; color: #8a9aaf; text-transform: uppercase; letter-spacing: 0.2em;">
+                            {{weddingDate}}
+                          </span>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                  <td class="column guest-card-image-column" valign="middle">
+                    <img
+                      src="{{photoUrl}}"
+                      alt="Wedding photo"
+                      width="360" /* 60% of 600px */
+                      style="max-width: 360px; height: 417px; object-fit: cover; display: block;"
+                    />
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </center>
+      <!-- GUEST CARD COMPONENT END -->
+
+      <!-- Footer -->
+      <div class="footer">
+        <a href="https://knotly.app" class="logo">
+          <img
+            src="https://res.cloudinary.com/doudbsnya/image/upload/v1758432610/logo_ptrwb6.png"
+            alt="Knotly Logo"
+            class="logo-img"
+          />
+        </a>
+        <div class="footer-text">
+          Making your dream wedding a reality, one detail at a time.
+        </div>
+
+        <div class="social-links">
+          <a href="https://knotly.app" class="social-link">Website</a>
+          <a href="https://knotly.app/support" class="social-link">Support</a>
+          <a href="mailto:hello@knotly.app" class="social-link">Contact</a>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+

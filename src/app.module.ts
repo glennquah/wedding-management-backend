@@ -23,6 +23,7 @@ import { UserModule } from './user/user.module';
 import { VendorRecommendationModule } from './vendor-recommendation/vendor-recommendation.module';
 import { VendorModule } from './vendor/vendor.module';
 import { WeddingModule } from './wedding/wedding.module';
+import { GratitudeCardModule } from './gratitude-card/gratitude-card.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { WeddingModule } from './wedding/wedding.module';
     AiServiceModule,
     AnalyticsModule,
     VendorRecommendationModule,
+    GratitudeCardModule,
     CalendarModule,
   ],
   controllers: [AppController],
