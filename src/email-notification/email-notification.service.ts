@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Admin, Guest, OrderStatus, User } from '@prisma/client';
+import { Guest, OrderStatus } from '@prisma/client';
 import * as sgMail from '@sendgrid/mail';
 import * as fs from 'fs';
 import * as Handlebars from 'handlebars';
