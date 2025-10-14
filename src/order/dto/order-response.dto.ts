@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { OrderStatus } from '../../common/order-status.enum';
-
 export class OrderResponseDto {
   @ApiProperty({ description: 'Unique identifier for the order' })
   id: number;
@@ -14,7 +13,7 @@ export class OrderResponseDto {
   @ApiProperty({
     description: 'Current status of the order',
     enum: OrderStatus,
-    enumName: 'OrderStatus',
+    default: OrderStatus.PENDING,
   })
   status: OrderStatus;
 
