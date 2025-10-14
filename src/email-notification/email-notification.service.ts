@@ -1103,7 +1103,7 @@ Website: https://knotly.app`;
         );
       } catch (error) {
         console.error(
-          `Failed to send gratitude email to vendor ${vendor.user.name} (${vendor.userId}): ${error.user.message}`,
+          `Failed to send gratitude email to vendor ${vendor.user.name} (${vendor.userId}): ${error.message}`,
         );
       }
     }

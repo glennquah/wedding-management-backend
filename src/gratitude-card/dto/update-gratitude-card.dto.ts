@@ -10,7 +10,7 @@ export class UpdateGratitudeCardDto {
   weddingId: number;
 
   @ApiProperty({
-    description: 'Card recipeint',
+    description: 'Card recipient',
   })
   @IsString()
   recipient: string;

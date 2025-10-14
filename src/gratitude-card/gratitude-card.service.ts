@@ -54,6 +54,10 @@ export class GratitudeCardService {
       include: { wedding: true },
     });
 
+    if (!card) {
+      throw new NotFoundException(`Gratitude card with ID ${cardId} not found`);
+    }
+
     return this.toGratitudeCardResponseDto(card);
   }
 
