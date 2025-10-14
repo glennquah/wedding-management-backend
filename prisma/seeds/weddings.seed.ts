@@ -25,6 +25,7 @@ export async function seedWeddings(prisma: PrismaClient) {
         WeddingService.CATERING,
         WeddingService.DECORATION,
       ],
+      allocatedBudget: 100000,
     },
     {
       name: "Marcus & Sarah's Traditional Chinese Tea Ceremony",
@@ -39,6 +40,7 @@ export async function seedWeddings(prisma: PrismaClient) {
         WeddingService.PHOTOGRAPHY,
         WeddingService.CATERING,
       ],
+      allocatedBudget: 50000,
     },
     {
       name: "Amir & Siti's Malay Cultural Celebration",
@@ -53,6 +55,7 @@ export async function seedWeddings(prisma: PrismaClient) {
         WeddingService.PHOTOGRAPHY,
         WeddingService.CATERING,
       ],
+      allocatedBudget: 45000,
     },
     {
       name: "Raj & Priya's Grand Indian Wedding",
@@ -67,6 +70,7 @@ export async function seedWeddings(prisma: PrismaClient) {
         WeddingService.PHOTOGRAPHY,
         WeddingService.CATERING,
       ],
+      allocatedBudget: 60000,
     },
     {
       name: "David & Emma's Modern Beach Wedding",
@@ -81,6 +85,7 @@ export async function seedWeddings(prisma: PrismaClient) {
         WeddingService.PHOTOGRAPHY,
         WeddingService.CATERING,
       ],
+      allocatedBudget: 55000,
     },
   ];
 
@@ -96,6 +101,7 @@ export async function seedWeddings(prisma: PrismaClient) {
         guestCountBucket: theme.guestCountBucket,
         preferredStyle: theme.preferredStyle,
         preferredServices: theme.preferredServices,
+        allocatedBudget: theme.allocatedBudget,
         notificationDetails: {
           create: {},
         },

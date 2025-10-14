@@ -3,10 +3,12 @@ import { ConfigModule } from '@nestjs/config';
 import { AdminModule } from './admin/admin.module';
 import { AiServiceModule } from './ai-service/ai-service.module';
 import { AlbumModule } from './album/album.module';
+import { AnalyticsModule } from './analytics/analytics.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { CartModule } from './cart/cart.module';
+import { CalendarModule } from './calendar/calendar.module';
 import { EmailNotificationModule } from './email-notification/email-notification.module';
 import { GuestModule } from './guest/guest.module';
 import { ListingModule } from './listing/listing.module';
@@ -44,8 +46,10 @@ import { GratitudeCardModule } from './gratitude-card/gratitude-card.module';
     CartModule,
     AlbumModule,
     AiServiceModule,
+    AnalyticsModule,
     VendorRecommendationModule,
     GratitudeCardModule,
+    CalendarModule,
   ],
   controllers: [AppController],
   providers: [AppService],

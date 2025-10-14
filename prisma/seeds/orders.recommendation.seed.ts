@@ -1,9 +1,9 @@
 import { faker } from '@faker-js/faker';
 import {
-    BudgetBucket,
-    GuestCountBucket,
-    PrismaClient,
-    WeddingService
+  BudgetBucket,
+  GuestCountBucket,
+  PrismaClient,
+  WeddingService
 } from '@prisma/client';
 
 export async function seedRecommendationOrders(prisma: PrismaClient) {
@@ -155,7 +155,6 @@ export async function seedRecommendationOrders(prisma: PrismaClient) {
       data: {
         weddingId: wedding.id,
         totalAmount,
-        orderStatus: 'PAID',
         remark: `Wedding ${wedding.id} order`,
         listings: {
           createMany: {
@@ -166,6 +165,7 @@ export async function seedRecommendationOrders(prisma: PrismaClient) {
                 startTime: '09:00:00',
                 endTime: '18:00:00',
               },
+              bookingStatus: 'PAID'
             })),
           },
         },

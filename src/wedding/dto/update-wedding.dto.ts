@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDateString, IsEnum, IsOptional, IsString } from 'class-validator';
+import {
+  IsDateString,
+  IsEnum,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { BudgetBucket } from '../../common/budget-bucket.enum';
 import { GuestCountBucket } from '../../common/guest-count-bucket.enum';
 import { WeddingService } from '../../common/wedding-service.enum';
@@ -72,4 +78,13 @@ export class UpdateWeddingDto {
   @IsOptional()
   @IsEnum(WeddingService, { each: true })
   preferredServices?: WeddingService[];
+
+  @ApiProperty({
+    description: 'Allocated budget for the wedding',
+    example: 50000,
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber()
+  allocatedBudget?: number;
 }
