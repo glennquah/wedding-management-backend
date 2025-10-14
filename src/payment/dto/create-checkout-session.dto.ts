@@ -7,7 +7,8 @@ export class CreateCheckoutSessionDto {
   orderId: number;
 
   @ApiProperty({
-    description: 'Optional array of listing IDs to pay for. If not provided, all listings in the order will be included.',
+    description:
+      'Optional array of listing IDs to pay for. If not provided, all listings in the order will be included.',
     required: false,
   })
   @IsOptional()
