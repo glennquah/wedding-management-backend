@@ -394,6 +394,7 @@ export class MicrositeService {
 
     // Pass wedding object to AI service for content generation
     const content = await this.aiService.generateMicrosite(dto, wedding);
+    console.log('Generated microsite content:', content);
     return content;
   }
 }

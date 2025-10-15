@@ -26,24 +26,35 @@ REQUIREMENTS:
    - Example: "john-and-jane" or "sarah-david-wedding"
 
 2. HERO IMAGES (heroImages):
-   - Provide 3-5 wedding-themed image URLs using Unsplash's source API
-   - IMPORTANT: Use ONLY the following format to ensure valid URLs:
-     * Format: "https://source.unsplash.com/1600x900/?wedding,ceremony"
-     * Or: "https://source.unsplash.com/1600x900/?wedding,venue"
-     * Or: "https://source.unsplash.com/1600x900/?wedding,couple"
-     * Or: "https://source.unsplash.com/1600x900/?wedding,romantic"
-   - This format automatically fetches random high-quality images from Unsplash
-   - Vary the search terms (wedding,ceremony / wedding,venue / wedding,couple / wedding,romantic / wedding,celebration)
-   - Format: array of 3-5 URLs
+   - Provide exactly 3 wedding-themed image URLs
+   - IMPORTANT: Choose ONLY from this list of verified Unsplash wedding photos:
+     * "https://images.unsplash.com/photo-1519741497674-611481863552" (Outdoor wedding ceremony)
+     * "https://images.unsplash.com/photo-1606800052052-a08af7148866" (Wedding venue setup)
+     * "https://images.unsplash.com/photo-1511285560929-80b456fea0bc" (Romantic couple)
+     * "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6" (Wedding altar)
+     * "https://images.unsplash.com/photo-1583939003579-730e3918a45a" (Beach wedding)
+     * "https://images.unsplash.com/photo-1520854221256-17451cc331bf" (Wedding reception)
+   - Select 3 different URLs from the list above
+   - These are real, verified Unsplash photo URLs that will always work
 
 3. IMAGE GALLERY (imageGallery):
-   - Provide 8-12 wedding-themed image URLs using Unsplash's source API
-   - IMPORTANT: Use ONLY the following format to ensure valid URLs:
-     * Format: "https://source.unsplash.com/800x600/?wedding,{keyword}"
-     * Replace {keyword} with: flowers, decoration, venue, couple, celebration, cake, rings, bouquet, reception, ceremony
-   - This format automatically fetches random high-quality images from Unsplash
-   - Use diverse keywords to get variety: flowers, decoration, venue, couple, celebration, cake, rings, bouquet, reception, ceremony, dancing, toast
-   - Format: array of 8-12 URLs with different keywords
+   - Provide exactly 8-10 wedding-themed image URLs
+   - IMPORTANT: Choose ONLY from this list of verified Unsplash wedding photos:
+     * "https://images.unsplash.com/photo-1511285560929-80b456fea0bc" (Wedding bouquet)
+     * "https://images.unsplash.com/photo-1464366400600-7168b8af9bc3" (Wedding decoration)
+     * "https://images.unsplash.com/photo-1519225421980-715cb0215aed" (Wedding venue interior)
+     * "https://images.unsplash.com/photo-1522673607200-164d1b6ce486" (Couple celebrating)
+     * "https://images.unsplash.com/photo-1511795409834-ef04bbd61622" (Wedding celebration)
+     * "https://images.unsplash.com/photo-1535254973040-607b474cb50d" (Wedding cake)
+     * "https://images.unsplash.com/photo-1606216794074-735e91aa2c92" (Wedding rings)
+     * "https://images.unsplash.com/photo-1478146896981-b80fe463b330" (Flowers bouquet)
+     * "https://images.unsplash.com/photo-1519741497674-611481863552" (Wedding reception scene)
+     * "https://images.unsplash.com/photo-1520854221256-17451cc331bf" (Wedding dinner)
+     * "https://images.unsplash.com/photo-1469371670807-013ccf25f16a" (Dancing at wedding)
+     * "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8" (Toast/champagne)
+   - Select 8-10 different URLs from the list above
+   - Use a good variety to showcase different aspects of the wedding
+   - These are real, verified Unsplash photo URLs that will always work
 
 4. WEDDING SCHEDULE (schedule):
    - Create a realistic 6-8 event timeline for the wedding day
@@ -70,9 +81,10 @@ IMPORTANT:
 - Ensure all text is grammatically perfect
 - Make the schedule realistic and flow naturally
 - FAQs should anticipate real guest concerns
-- CRITICAL: For images, ONLY use the Unsplash source API format specified above (https://source.unsplash.com/...)
-- DO NOT create fake photo IDs or make up image URLs - use only the source API format with keywords
-- The source API format ensures all images will be valid, high-quality, and automatically fetched from Unsplash
+- CRITICAL: For images, ONLY select from the verified Unsplash URLs provided in the lists above
+- DO NOT create new URLs or modify the URLs - copy them exactly as provided
+- DO NOT use the old source.unsplash.com format - only use images.unsplash.com URLs from the lists
+- These are real, tested, accessible Unsplash photos that will always work
 
 Return JSON format exactly matching this TypeScript interface:
 {
@@ -80,19 +92,19 @@ Return JSON format exactly matching this TypeScript interface:
   "slug": "couple-names-slug",
   "coupleName": "formatted couple name",
   "heroImages": [
-    "https://source.unsplash.com/1600x900/?wedding,ceremony",
-    "https://source.unsplash.com/1600x900/?wedding,venue",
-    "https://source.unsplash.com/1600x900/?wedding,couple"
+    "https://images.unsplash.com/photo-1519741497674-611481863552",
+    "https://images.unsplash.com/photo-1606800052052-a08af7148866",
+    "https://images.unsplash.com/photo-1511285560929-80b456fea0bc"
   ],
   "imageGallery": [
-    "https://source.unsplash.com/800x600/?wedding,flowers",
-    "https://source.unsplash.com/800x600/?wedding,decoration",
-    "https://source.unsplash.com/800x600/?wedding,venue",
-    "https://source.unsplash.com/800x600/?wedding,couple",
-    "https://source.unsplash.com/800x600/?wedding,celebration",
-    "https://source.unsplash.com/800x600/?wedding,cake",
-    "https://source.unsplash.com/800x600/?wedding,rings",
-    "https://source.unsplash.com/800x600/?wedding,bouquet"
+    "https://images.unsplash.com/photo-1511285560929-80b456fea0bc",
+    "https://images.unsplash.com/photo-1464366400600-7168b8af9bc3",
+    "https://images.unsplash.com/photo-1519225421980-715cb0215aed",
+    "https://images.unsplash.com/photo-1522673607200-164d1b6ce486",
+    "https://images.unsplash.com/photo-1511795409834-ef04bbd61622",
+    "https://images.unsplash.com/photo-1535254973040-607b474cb50d",
+    "https://images.unsplash.com/photo-1606216794074-735e91aa2c92",
+    "https://images.unsplash.com/photo-1478146896981-b80fe463b330"
   ],
   "schedule": [
     {
