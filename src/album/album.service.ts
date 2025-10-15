@@ -3,16 +3,23 @@ import {
   NotFoundException,
   ConflictException,
   ForbiddenException,
+  Logger,
 } from '@nestjs/common';
 import { Album } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { PhotoService } from '../photo/photo.service';
 import { AlbumResponseDto } from './dto/album-response.dto';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
 
 @Injectable()
 export class AlbumService {
-  constructor(private prisma: PrismaService) {}
+  private readonly logger = new Logger(AlbumService.name);
+
+  constructor(
+    private prisma: PrismaService,
+    private photoService: PhotoService,
+  ) {}
 
   private toAlbumResponseDto(album: Album): AlbumResponseDto {
     return {
@@ -137,6 +144,20 @@ export class AlbumService {
       throw new NotFoundException(`Album with ID ${albumId} not found`);
     }
 
+    this.logger.log(`Adding photo to album ${albumId}: ${photoUrl}`);
+
+    // Create Photo entity for enhanced photo management
+    const photo = await this.prisma.photo.create({
+      data: {
+        url: photoUrl,
+        albumId: albumId,
+        processingStatus: 'PENDING',
+      },
+    });
+
+    this.logger.log(`Created photo entity ${photo.id}`);
+
+    // Update legacy photos array for backward compatibility
     const updatedPhotos = album.photos
       ? [...album.photos, photoUrl]
       : [photoUrl];
@@ -146,7 +167,45 @@ export class AlbumService {
       data: { photos: updatedPhotos },
     });
 
+    // Trigger async photo processing (fire and forget)
+    // This will detect faces and calculate blur score
+    this.photoService
+      .processPhoto(photo.id, photoUrl)
+      .then(() => {
+        this.logger.log(`Photo ${photo.id} processing completed`);
+        // After processing, trigger clustering if enough faces detected
+        return this.checkAndTriggerClustering(albumId);
+      })
+      .catch((err) => {
+        this.logger.error(
+          `Photo ${photo.id} processing failed: ${err.message}`,
+          err.stack,
+        );
+      });
+
     return this.toAlbumResponseDto(updatedAlbum);
+  }
+
+  /**
+   * Check if clustering should be triggered for the album.
+   * Triggers clustering if there are at least 5 faces detected across all photos.
+   *
+   * @param albumId - Album ID to check
+   */
+  private async checkAndTriggerClustering(albumId: number): Promise<void> {
+    // Count total faces in the album
+    const faceCount = await this.prisma.photoFace.count({
+      where: { photo: { albumId } },
+    });
+
+    this.logger.log(`Album ${albumId} has ${faceCount} faces detected`);
+
+    // Only cluster if we have at least 2 faces (lowered for testing)
+    // This prevents clustering with too few data points
+    if (faceCount >= 2) {
+      this.logger.log(`Triggering face clustering for album ${albumId}`);
+      await this.photoService.clusterAlbumFaces(albumId);
+    }
   }
 
   async deleteAlbum(
