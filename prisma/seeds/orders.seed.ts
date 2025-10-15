@@ -18,9 +18,13 @@ export async function seedOrders(prisma: PrismaClient) {
 
   let totalOrders = 0;
   const weddingSpending = new Map<number, number>();
+  const weddingBudgetLimits = new Map<number, number>();
 
-  // Initialize wedding spending tracker
-  weddings.forEach((wedding) => weddingSpending.set(wedding.id, 0));
+  // Initialize wedding spending tracker and budget limits (80% of allocated budget)
+  weddings.forEach((wedding) => {
+    weddingSpending.set(wedding.id, 0);
+    weddingBudgetLimits.set(wedding.id, wedding.allocatedBudget * 0.8);
+  });
 
   // Configuration: Orders increase from 4/month to 14/month over 9 months (~90 orders per vendor)
   const numberOfMonths = 9;
@@ -84,10 +88,6 @@ export async function seedOrders(prisma: PrismaClient) {
         orderInMonth < ordersThisMonth;
         orderInMonth++
       ) {
-        // Randomly select a wedding for this order
-        const randomWedding =
-          weddings[Math.floor(Math.random() * weddings.length)];
-
         // Randomly select 1-3 listings from this vendor
         const listingsInOrder = Math.min(
           Math.floor(Math.random() * 3) + 1,
@@ -133,10 +133,40 @@ export async function seedOrders(prisma: PrismaClient) {
           orderStatus = OrderStatus.CANCELLED;
         }
 
+        // Find a wedding that has enough budget remaining
+        // Shuffle weddings to get random distribution
+        const shuffledWeddings = [...weddings].sort(() => Math.random() - 0.5);
+        let selectedWedding = null;
+
+        for (const wedding of shuffledWeddings) {
+          const currentSpending = weddingSpending.get(wedding.id) || 0;
+          const budgetLimit = weddingBudgetLimits.get(wedding.id) || 0;
+
+          // For paid/completed orders, check if wedding has budget remaining
+          if (
+            orderStatus === OrderStatus.PAID ||
+            orderStatus === OrderStatus.COMPLETED
+          ) {
+            if (currentSpending + orderTotal <= budgetLimit) {
+              selectedWedding = wedding;
+              break;
+            }
+          } else {
+            // For pending/cancelled orders, always allow (they don't count towards spending)
+            selectedWedding = wedding;
+            break;
+          }
+        }
+
+        // Skip this order if no wedding has budget remaining
+        if (!selectedWedding) {
+          continue;
+        }
+
         // Create the order in the specific month
         const order = await prisma.order.create({
           data: {
-            weddingId: randomWedding.id,
+            weddingId: selectedWedding.id,
             totalAmount: orderTotal,
             currency: 'SGD',
             orderStatus,
@@ -166,8 +196,8 @@ export async function seedOrders(prisma: PrismaClient) {
           orderStatus === OrderStatus.PAID ||
           orderStatus === OrderStatus.COMPLETED
         ) {
-          const currentSpending = weddingSpending.get(randomWedding.id) || 0;
-          weddingSpending.set(randomWedding.id, currentSpending + orderTotal);
+          const currentSpending = weddingSpending.get(selectedWedding.id) || 0;
+          weddingSpending.set(selectedWedding.id, currentSpending + orderTotal);
         }
 
         vendorOrderCount++;
@@ -180,15 +210,24 @@ export async function seedOrders(prisma: PrismaClient) {
     );
   }
 
-  // Update all weddings' currentSpending
+  // Update all weddings' currentSpending and log budget usage
+  console.log('\n💰 Wedding Budget Summary:');
   for (const [weddingId, spending] of weddingSpending.entries()) {
+    const wedding = weddings.find((w) => w.id === weddingId);
+    const budgetLimit = weddingBudgetLimits.get(weddingId) || 0;
+    const percentageUsed = ((spending / budgetLimit) * 100).toFixed(1);
+
     await prisma.wedding.update({
       where: { id: weddingId },
       data: { currentSpending: spending },
     });
+
+    console.log(
+      `  ${wedding?.name}: $${spending.toFixed(2)} / $${budgetLimit.toFixed(2)} (${percentageUsed}%)`,
+    );
   }
 
   console.log(
-    `✅ Created total of ${totalOrders} orders (${Math.floor(totalOrders / vendors.length)} per vendor)`,
+    `\n✅ Created total of ${totalOrders} orders (avg ${Math.floor(totalOrders / vendors.length)} per vendor)`,
   );
 }

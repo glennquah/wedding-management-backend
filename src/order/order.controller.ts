@@ -17,6 +17,7 @@ import { JwtGuard } from '../auth/guards/jwt.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { UserRole } from '../common/user-role.enum';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { OrderListingDetailResponseDto } from './dto/order-listing-detail-response.dto';
 import { OrderResponseDto } from './dto/order-response.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { OrderService } from './order.service';
@@ -87,6 +88,43 @@ export class OrderController {
   ): Promise<OrderResponseDto[]> {
     const orders = await this.orderService.findByWedding(weddingId);
     return orders.map((order) => this.orderService.toOrderResponseDto(order));
+  }
+
+  @Get('wedding/:weddingId/successful')
+  @Roles(UserRole.ADMIN, UserRole.VENDOR, UserRole.SUPERADMIN)
+  @ApiOperation({
+    summary: 'Get successful orders (PAID or COMPLETED) by wedding ID',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of successful orders for the wedding.',
+    type: [OrderResponseDto],
+  })
+  @ApiResponse({ status: 404, description: 'Wedding not found.' })
+  async findSuccessfulOrdersByWedding(
+    @Param('weddingId', ParseIntPipe) weddingId: number,
+  ): Promise<OrderResponseDto[]> {
+    const orders =
+      await this.orderService.findSuccessfulOrdersByWedding(weddingId);
+    return orders.map((order) => this.orderService.toOrderResponseDto(order));
+  }
+
+  @Get('wedding/:weddingId/listing-details')
+  @Roles(UserRole.ADMIN, UserRole.VENDOR, UserRole.SUPERADMIN)
+  @ApiOperation({
+    summary:
+      'Get detailed order listing information (listing name, date, status, amount) by wedding ID',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of order listing details for the wedding.',
+    type: [OrderListingDetailResponseDto],
+  })
+  @ApiResponse({ status: 404, description: 'Wedding not found.' })
+  async getOrderListingDetailsByWedding(
+    @Param('weddingId', ParseIntPipe) weddingId: number,
+  ): Promise<OrderListingDetailResponseDto[]> {
+    return this.orderService.getOrderListingDetailsByWedding(weddingId);
   }
 
   @Get('vendor/:vendorId')
