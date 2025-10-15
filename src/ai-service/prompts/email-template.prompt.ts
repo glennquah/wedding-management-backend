@@ -73,7 +73,8 @@ STRUCTURE:
   ${micrositeUrl ? `- First button: "View More" linking to: ${micrositeUrl}` : ''}
   ${locationMapUrl ? `- Second button: "View On Map" linking to: ${locationMapUrl}` : ''}
   ${!micrositeUrl && !locationMapUrl ? '- No call-to-action buttons available' : ''}
-  ${micrositeUrl && locationMapUrl ? '- Display both buttons side by side in the same row with equal width and spacing' : ''}
+  ${micrositeUrl && locationMapUrl ? '- Display both buttons side by side in the same row with equal width and 15-20px gap/margin between them' : ''}
+  ${micrositeUrl && locationMapUrl ? '- Use margin-right on the first button OR margin-left on the second button to create spacing' : ''}
 
   - Tone: ${tone}
   ${additionalContext ? `- Additional requirements: ${additionalContext}` : ''}
@@ -87,6 +88,7 @@ ${weddingContext}
   - Use inline-important styles for email client compatibility (!important for colors and critical styles)
   - Include footer with social links, website link, and contact information
   - If wedding details are provided, incorporate them naturally into the email content
+  - CRITICAL: When displaying two CTA buttons side by side, add proper spacing between them (15-20px margin/gap) so they don't touch each other
 
 Return JSON format:
 {

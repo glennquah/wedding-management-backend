@@ -393,6 +393,7 @@ export class MicrositeService {
     }
 
     // Pass wedding object to AI service for content generation
-    return this.aiService.generateMicrosite(dto, wedding);
+    const content = await this.aiService.generateMicrosite(dto, wedding);
+    return content;
   }
 }
