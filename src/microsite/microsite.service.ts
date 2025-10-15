@@ -4,11 +4,15 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { MicrositeResponseDto } from './dto/microsite-response.dto';
+import {
+  MicrositeResponseDto,
+  ScheduleItemDto,
+  FaqItemDto,
+} from './dto/microsite-response.dto';
 import { CreateMicrositeDto } from './dto/create-microsite.dto';
 import { UpdateMicrositeDto } from './dto/update-microsite.dto';
 import { GuestResponseDto } from '../guest/dto/guest-response.dto';
-import { Microsite, Prisma } from '@prisma/client';
+import { Microsite, Prisma, Wedding } from '@prisma/client';
 import { ConfirmationStatus } from '../common/confirmation-status.enum';
 
 @Injectable()
@@ -16,7 +20,7 @@ export class MicrositeService {
   constructor(private prisma: PrismaService) {}
 
   private toMicrositeResponseDto(
-    microsite: Microsite & { wedding?: any },
+    microsite: Microsite & { wedding?: Wedding | null },
   ): MicrositeResponseDto {
     return {
       id: microsite.id,
@@ -25,8 +29,8 @@ export class MicrositeService {
       coupleName: microsite.coupleName,
       heroImages: microsite.heroImages,
       imageGallery: microsite.imageGallery,
-      schedule: microsite.schedule as any[],
-      faqs: microsite.faqs as any[],
+      schedule: microsite.schedule as unknown as ScheduleItemDto[],
+      faqs: microsite.faqs as unknown as FaqItemDto[],
       weddingId: microsite.weddingId,
       weddingName: microsite.wedding?.name || '',
       weddingLocation: microsite.wedding?.location || null,

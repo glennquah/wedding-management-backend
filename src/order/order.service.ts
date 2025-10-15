@@ -254,16 +254,27 @@ export class OrderService {
 
     for (const order of orders) {
       for (const orderListing of order.listings) {
+        // Skip cancelled orders
+        if (orderListing.bookingStatus === OrderStatus.CANCELLED) {
+          continue;
+        }
+
         const listing = orderListing.listing;
         const bookedSlots = orderListing.bookedSlots as any[];
         const slotsCount = bookedSlots ? bookedSlots.length : 1;
         const amount = listing.price * slotsCount;
 
-        // Use the first booked slot date or order purchase date
-        const date =
-          bookedSlots && bookedSlots.length > 0 && bookedSlots[0].date
-            ? bookedSlots[0].date
-            : order.purchaseDate.toISOString().split('T')[0];
+        // Extract date from the first booked slot
+        let date = order.purchaseDate.toISOString().split('T')[0]; // Default to purchase date
+        if (bookedSlots && bookedSlots.length > 0) {
+          const firstSlot = bookedSlots[0];
+          // Try to get date from the date field, or extract from startTime
+          if (firstSlot.date) {
+            date = firstSlot.date;
+          } else if (firstSlot.startTime) {
+            date = new Date(firstSlot.startTime).toISOString().split('T')[0];
+          }
+        }
 
         listingDetails.push({
           orderId: order.id,
