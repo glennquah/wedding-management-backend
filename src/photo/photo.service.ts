@@ -1,4 +1,10 @@
-import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  HttpException,
+  HttpStatus,
+  BadRequestException,
+} from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
@@ -21,10 +27,12 @@ export class PhotoService {
     private readonly configService: ConfigService,
   ) {
     // Use existing FASTAPI_URL for AI microservice
-    this.aiBackendUrl =
-      this.configService.get<string>('FASTAPI_URL') ||
-      'http://localhost:8000';
-    this.logger.log(`AI Backend URL: ${this.aiBackendUrl}`);
+    this.aiBackendUrl = this.configService.get<string>('FASTAPI_URL');
+    if (!this.aiBackendUrl) {
+      this.logger.error(
+        'FASTAPI_URL not configured. Please set FASTAPI_URL environment variable.',
+      );
+    }
   }
 
   /**
@@ -37,6 +45,12 @@ export class PhotoService {
    * @throws HttpException if processing fails
    */
   async processPhoto(photoId: number, url: string): Promise<void> {
+    if (!this.aiBackendUrl) {
+      throw new BadRequestException(
+        'FastAPI service not configured. Please contact administrator.',
+      );
+    }
+
     this.logger.log(`Processing photo ${photoId} from ${url}`);
 
     try {
@@ -84,7 +98,9 @@ export class PhotoService {
           })),
         });
 
-        this.logger.log(`Created ${faces.length} face records for photo ${photoId}`);
+        this.logger.log(
+          `Created ${faces.length} face records for photo ${photoId}`,
+        );
       }
     } catch (error) {
       this.logger.error(
@@ -123,6 +139,12 @@ export class PhotoService {
    * @throws HttpException if clustering fails
    */
   async clusterAlbumFaces(albumId: number): Promise<void> {
+    if (!this.aiBackendUrl) {
+      throw new BadRequestException(
+        'FastAPI service not configured. Please contact administrator.',
+      );
+    }
+
     this.logger.log(`Starting face clustering for album ${albumId}`);
 
     try {
