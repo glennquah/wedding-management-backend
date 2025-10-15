@@ -7,6 +7,7 @@ export interface EmailTemplatePromptParams {
   mainMessage?: string;
   micrositeUrl?: string;
   locationMapUrl?: string;
+  eventLocation?: string;
   tone: string;
   additionalContext?: string;
   weddingContext: string;
@@ -24,6 +25,7 @@ export const generateEmailTemplatePrompt = (
     mainMessage,
     micrositeUrl,
     locationMapUrl,
+    eventLocation,
     tone,
     additionalContext,
     weddingContext,
@@ -65,6 +67,7 @@ STRUCTURE:
   - Email purpose: ${emailPurpose}
   ${audience ? `- Greeting audience: ${audience}` : '- Use a warm, inclusive greeting like "Dear Close Ones" or "Dear Family and Friends"'}
   ${mainMessage ? `- Main message: ${mainMessage}` : ''}
+  ${eventLocation ? `- Event Location: ${eventLocation} (IMPORTANT: Use this location in the email content, not any location from the wedding context)` : ''}
 
   CALL-TO-ACTION BUTTONS (display in the same row):
   ${micrositeUrl ? `- First button: "View More" linking to: ${micrositeUrl}` : ''}

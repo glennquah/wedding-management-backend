@@ -20,6 +20,7 @@ import { UserRole } from '../common/user-role.enum';
 import { GuestResponseDto } from '../guest/dto/guest-response.dto';
 import { ConfirmGuestDto } from './dto/confirm-guest.dto';
 import { CreateMicrositeDto } from './dto/create-microsite.dto';
+import { GenerateMicrositeDto } from './dto/generate-microsite.dto';
 import { GuestLookupDto } from './dto/guest-lookup.dto';
 import { MicrositeLoginDto } from './dto/microsite-login.dto';
 import { MicrositeResponseDto } from './dto/microsite-response.dto';
@@ -136,6 +137,25 @@ export class MicrositeController {
       confirmDto.weddingId,
       confirmDto.allergies,
     );
+  }
+
+  @Post('generate')
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
+  @ApiOperation({
+    summary: 'Generate microsite content using AI based on wedding details',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Microsite content generated successfully',
+    type: CreateMicrositeDto,
+  })
+  @ApiResponse({ status: 400, description: 'Bad request.' })
+  @ApiResponse({ status: 404, description: 'Wedding not found.' })
+  async generateMicrositeContent(
+    @Body() dto: GenerateMicrositeDto,
+  ): Promise<Omit<CreateMicrositeDto, 'password' | 'weddingId'>> {
+    return this.micrositeService.generateMicrositeContent(dto);
   }
 
   @Post()

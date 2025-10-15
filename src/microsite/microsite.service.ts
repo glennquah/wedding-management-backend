@@ -4,10 +4,12 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Microsite, Prisma, Wedding } from '@prisma/client';
+import { AiServiceService } from '../ai-service/ai-service.service';
 import { ConfirmationStatus } from '../common/confirmation-status.enum';
 import { GuestResponseDto } from '../guest/dto/guest-response.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateMicrositeDto } from './dto/create-microsite.dto';
+import { GenerateMicrositeDto } from './dto/generate-microsite.dto';
 import {
   FaqItemDto,
   MicrositeResponseDto,
@@ -17,7 +19,10 @@ import { UpdateMicrositeDto } from './dto/update-microsite.dto';
 
 @Injectable()
 export class MicrositeService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private aiService: AiServiceService,
+  ) {}
 
   private toMicrositeResponseDto(
     microsite: Microsite & { wedding?: Wedding | null },
@@ -373,5 +378,21 @@ export class MicrositeService {
     return {
       message: `Microsite with ID ${micrositeId} has been successfully deleted`,
     };
+  }
+
+  async generateMicrositeContent(
+    dto: GenerateMicrositeDto,
+  ): Promise<Omit<CreateMicrositeDto, 'password' | 'weddingId'>> {
+    // Fetch wedding details
+    const wedding = await this.prisma.wedding.findUnique({
+      where: { id: dto.weddingId },
+    });
+
+    if (!wedding) {
+      throw new NotFoundException(`Wedding with ID ${dto.weddingId} not found`);
+    }
+
+    // Pass wedding object to AI service for content generation
+    return this.aiService.generateMicrosite(dto, wedding);
   }
 }
