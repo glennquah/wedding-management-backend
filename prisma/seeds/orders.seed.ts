@@ -174,7 +174,23 @@ export async function seedOrders(prisma: PrismaClient) {
           continue;
         }
 
-        // Create the order in the specific month
+        // Select availability slot first to ensure purchase date is before the booked date
+        const firstListing = selectedListings[0];
+        const availabilities = firstListing.availabilities as any[];
+        const randomAvailability =
+          availabilities[Math.floor(Math.random() * availabilities.length)];
+
+        // Parse the availability date
+        const bookedDate = new Date(randomAvailability.date);
+
+        // Generate purchase date: 1-60 days before the booked date
+        const daysBeforeBooking = Math.floor(Math.random() * 60) + 1; // 1-60 days
+        const purchaseDate = new Date(bookedDate);
+        purchaseDate.setDate(purchaseDate.getDate() - daysBeforeBooking);
+        purchaseDate.setHours(Math.floor(Math.random() * 24));
+        purchaseDate.setMinutes(Math.floor(Math.random() * 60));
+
+        // Create the order with purchase date before booked date
         const order = await prisma.order.create({
           data: {
             weddingId: selectedWedding.id,
@@ -182,21 +198,21 @@ export async function seedOrders(prisma: PrismaClient) {
             currency: 'SGD',
             orderStatus,
             remark: `Order for vendor ${vendor.userId} - Month ${numberOfMonths - monthIndex}`,
-            purchaseDate: generateDateInMonth(monthIndex),
+            purchaseDate: purchaseDate,
           },
         });
 
         // Create OrderListing entries with booking status matching order status
         for (const listing of selectedListings) {
-          const availabilities = listing.availabilities as any[];
-          const randomAvailability =
-            availabilities[Math.floor(Math.random() * availabilities.length)];
+          const listingAvailabilities = listing.availabilities as any[];
+          const selectedAvailability =
+            listingAvailabilities[Math.floor(Math.random() * listingAvailabilities.length)];
 
           await prisma.orderListing.create({
             data: {
               orderId: order.id,
               listingId: listing.id,
-              bookedSlots: [randomAvailability],
+              bookedSlots: [selectedAvailability],
               bookingStatus: orderStatus, // Match the order status
             },
           });
@@ -300,6 +316,20 @@ export async function seedOrders(prisma: PrismaClient) {
 
         if (!selectedWedding) continue;
 
+        // Select a future date for the booking
+        const futureBookingDate = generateFutureDateInMonth(monthsAhead);
+
+        // Generate purchase date: 1-30 days before the future booking date (but not in the past)
+        const daysBeforeBooking = Math.floor(Math.random() * 30) + 1; // 1-30 days
+        const purchaseDate = new Date(futureBookingDate);
+        purchaseDate.setDate(purchaseDate.getDate() - daysBeforeBooking);
+        purchaseDate.setHours(Math.floor(Math.random() * 24));
+        purchaseDate.setMinutes(Math.floor(Math.random() * 60));
+
+        // Ensure purchase date is not in the past
+        const now = new Date();
+        const finalPurchaseDate = purchaseDate < now ? now : purchaseDate;
+
         // Create future order
         const order = await prisma.order.create({
           data: {
@@ -308,7 +338,7 @@ export async function seedOrders(prisma: PrismaClient) {
             currency: 'SGD',
             orderStatus,
             remark: `Upcoming order for vendor ${vendor.userId} - ${monthsAhead} months ahead`,
-            purchaseDate: new Date(), // Purchased now, but service is in the future
+            purchaseDate: finalPurchaseDate,
           },
         });
 
@@ -321,9 +351,7 @@ export async function seedOrders(prisma: PrismaClient) {
           // Create a future date slot based on the availability
           const futureSlot = {
             ...randomAvailability,
-            date: generateFutureDateInMonth(monthsAhead)
-              .toISOString()
-              .split('T')[0],
+            date: futureBookingDate.toISOString().split('T')[0],
           };
 
           await prisma.orderListing.create({

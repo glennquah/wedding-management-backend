@@ -17,19 +17,19 @@ export async function seedListings(prisma: PrismaClient) {
           price: 18000,
           availabilities: [
             {
-              startTime: '2024-12-15T08:00:00Z',
-              endTime: '2024-12-15T17:00:00Z',
-              date: '2024-12-15',
+              startTime: '2025-12-15T08:00:00Z',
+              endTime: '2025-12-15T17:00:00Z',
+              date: '2025-12-15',
             },
             {
-              startTime: '2025-01-25T08:00:00Z',
-              endTime: '2025-01-25T17:00:00Z',
-              date: '2025-01-25',
+              startTime: '2026-01-25T08:00:00Z',
+              endTime: '2026-01-25T17:00:00Z',
+              date: '2026-01-25',
             },
             {
-              startTime: '2025-02-14T08:00:00Z',
-              endTime: '2025-02-14T17:00:00Z',
-              date: '2025-02-14',
+              startTime: '2026-02-14T08:00:00Z',
+              endTime: '2026-02-14T17:00:00Z',
+              date: '2026-02-14',
             },
           ],
           imageUrls: [
@@ -44,19 +44,19 @@ export async function seedListings(prisma: PrismaClient) {
           price: 15000,
           availabilities: [
             {
-              startTime: '2024-11-08T08:00:00Z',
-              endTime: '2024-11-08T17:00:00Z',
-              date: '2024-11-08',
+              startTime: '2025-11-08T08:00:00Z',
+              endTime: '2025-11-08T17:00:00Z',
+              date: '2025-11-08',
             },
             {
-              startTime: '2024-12-20T08:00:00Z',
-              endTime: '2024-12-20T17:00:00Z',
-              date: '2024-12-20',
+              startTime: '2025-12-20T08:00:00Z',
+              endTime: '2025-12-20T17:00:00Z',
+              date: '2025-12-20',
             },
             {
-              startTime: '2025-03-15T08:00:00Z',
-              endTime: '2025-03-15T17:00:00Z',
-              date: '2025-03-15',
+              startTime: '2026-03-15T08:00:00Z',
+              endTime: '2026-03-15T17:00:00Z',
+              date: '2026-03-15',
             },
           ],
           imageUrls: [
@@ -70,19 +70,19 @@ export async function seedListings(prisma: PrismaClient) {
           price: 12000,
           availabilities: [
             {
-              startTime: '2024-10-20T08:00:00Z',
-              endTime: '2024-10-20T17:00:00Z',
-              date: '2024-10-20',
+              startTime: '2025-10-20T08:00:00Z',
+              endTime: '2025-10-20T17:00:00Z',
+              date: '2025-10-20',
             },
             {
-              startTime: '2024-09-30T08:00:00Z',
-              endTime: '2024-09-30T17:00:00Z',
-              date: '2024-09-30',
+              startTime: '2026-09-30T08:00:00Z',
+              endTime: '2026-09-30T17:00:00Z',
+              date: '2026-09-30',
             },
             {
-              startTime: '2025-04-12T08:00:00Z',
-              endTime: '2025-04-12T17:00:00Z',
-              date: '2025-04-12',
+              startTime: '2026-04-12T08:00:00Z',
+              endTime: '2026-04-12T17:00:00Z',
+              date: '2026-04-12',
             },
           ],
           imageUrls: [
@@ -95,19 +95,19 @@ export async function seedListings(prisma: PrismaClient) {
           price: 9000,
           availabilities: [
             {
-              startTime: '2024-09-15T08:00:00Z',
-              endTime: '2024-09-15T17:00:00Z',
-              date: '2024-09-15',
+              startTime: '2026-09-15T08:00:00Z',
+              endTime: '2026-09-15T17:00:00Z',
+              date: '2026-09-15',
             },
             {
-              startTime: '2024-10-10T08:00:00Z',
-              endTime: '2024-10-10T17:00:00Z',
-              date: '2024-10-10',
+              startTime: '2025-11-10T08:00:00Z',
+              endTime: '2025-11-10T17:00:00Z',
+              date: '2025-11-10',
             },
             {
-              startTime: '2025-05-20T08:00:00Z',
-              endTime: '2025-05-20T17:00:00Z',
-              date: '2025-05-20',
+              startTime: '2026-05-20T08:00:00Z',
+              endTime: '2026-05-20T17:00:00Z',
+              date: '2026-05-20',
             },
           ],
           imageUrls: [
@@ -120,19 +120,19 @@ export async function seedListings(prisma: PrismaClient) {
           price: 13500,
           availabilities: [
             {
-              startTime: '2024-11-15T08:00:00Z',
-              endTime: '2024-11-15T17:00:00Z',
-              date: '2024-11-15',
+              startTime: '2025-11-15T08:00:00Z',
+              endTime: '2025-11-15T17:00:00Z',
+              date: '2025-11-15',
             },
             {
-              startTime: '2025-01-10T08:00:00Z',
-              endTime: '2025-01-10T17:00:00Z',
-              date: '2025-01-10',
+              startTime: '2026-01-10T08:00:00Z',
+              endTime: '2026-01-10T17:00:00Z',
+              date: '2026-01-10',
             },
             {
-              startTime: '2025-06-25T08:00:00Z',
-              endTime: '2025-06-25T17:00:00Z',
-              date: '2025-06-25',
+              startTime: '2026-06-25T08:00:00Z',
+              endTime: '2026-06-25T17:00:00Z',
+              date: '2026-06-25',
             },
           ],
           imageUrls: [
@@ -145,19 +145,19 @@ export async function seedListings(prisma: PrismaClient) {
           price: 10500,
           availabilities: [
             {
-              startTime: '2024-10-05T08:00:00Z',
-              endTime: '2024-10-05T17:00:00Z',
-              date: '2024-10-05',
+              startTime: '2025-11-05T08:00:00Z',
+              endTime: '2025-11-05T17:00:00Z',
+              date: '2025-11-05',
             },
             {
-              startTime: '2024-11-22T08:00:00Z',
-              endTime: '2024-11-22T17:00:00Z',
-              date: '2024-11-22',
+              startTime: '2025-11-22T08:00:00Z',
+              endTime: '2025-11-22T17:00:00Z',
+              date: '2025-11-22',
             },
             {
-              startTime: '2025-07-15T08:00:00Z',
-              endTime: '2025-07-15T17:00:00Z',
-              date: '2025-07-15',
+              startTime: '2026-07-15T08:00:00Z',
+              endTime: '2026-07-15T17:00:00Z',
+              date: '2026-07-15',
             },
           ],
           imageUrls: [
@@ -170,19 +170,19 @@ export async function seedListings(prisma: PrismaClient) {
           price: 7500,
           availabilities: [
             {
-              startTime: '2024-09-20T08:00:00Z',
-              endTime: '2024-09-20T17:00:00Z',
-              date: '2024-09-20',
+              startTime: '2026-09-20T08:00:00Z',
+              endTime: '2026-09-20T17:00:00Z',
+              date: '2026-09-20',
             },
             {
-              startTime: '2024-12-05T08:00:00Z',
-              endTime: '2024-12-05T17:00:00Z',
-              date: '2024-12-05',
+              startTime: '2025-12-05T08:00:00Z',
+              endTime: '2025-12-05T17:00:00Z',
+              date: '2025-12-05',
             },
             {
-              startTime: '2025-08-08T08:00:00Z',
-              endTime: '2025-08-08T17:00:00Z',
-              date: '2025-08-08',
+              startTime: '2026-08-08T08:00:00Z',
+              endTime: '2026-08-08T17:00:00Z',
+              date: '2026-08-08',
             },
           ],
           imageUrls: [
@@ -195,14 +195,14 @@ export async function seedListings(prisma: PrismaClient) {
           price: 16500,
           availabilities: [
             {
-              startTime: '2024-11-30T08:00:00Z',
-              endTime: '2024-11-30T17:00:00Z',
-              date: '2024-11-30',
+              startTime: '2025-11-30T08:00:00Z',
+              endTime: '2025-11-30T17:00:00Z',
+              date: '2025-11-30',
             },
             {
-              startTime: '2025-02-20T08:00:00Z',
-              endTime: '2025-02-20T17:00:00Z',
-              date: '2025-02-20',
+              startTime: '2026-02-20T08:00:00Z',
+              endTime: '2026-02-20T17:00:00Z',
+              date: '2026-02-20',
             },
           ],
           imageUrls: [
@@ -215,19 +215,19 @@ export async function seedListings(prisma: PrismaClient) {
           price: 5500,
           availabilities: [
             {
-              startTime: '2024-10-15T08:00:00Z',
-              endTime: '2024-10-15T17:00:00Z',
-              date: '2024-10-15',
+              startTime: '2025-10-15T08:00:00Z',
+              endTime: '2025-10-15T17:00:00Z',
+              date: '2025-10-15',
             },
             {
-              startTime: '2024-11-25T08:00:00Z',
-              endTime: '2024-11-25T17:00:00Z',
-              date: '2024-11-25',
+              startTime: '2025-11-25T08:00:00Z',
+              endTime: '2025-11-25T17:00:00Z',
+              date: '2025-11-25',
             },
             {
-              startTime: '2025-09-10T08:00:00Z',
-              endTime: '2025-09-10T17:00:00Z',
-              date: '2025-09-10',
+              startTime: '2026-09-10T08:00:00Z',
+              endTime: '2026-09-10T17:00:00Z',
+              date: '2026-09-10',
             },
           ],
           imageUrls: [
@@ -240,14 +240,14 @@ export async function seedListings(prisma: PrismaClient) {
           price: 3000,
           availabilities: [
             {
-              startTime: '2024-12-15T08:00:00Z',
-              endTime: '2024-12-15T17:00:00Z',
-              date: '2024-12-15',
+              startTime: '2025-12-15T08:00:00Z',
+              endTime: '2025-12-15T17:00:00Z',
+              date: '2025-12-15',
             },
             {
-              startTime: '2025-01-25T08:00:00Z',
-              endTime: '2025-01-25T17:00:00Z',
-              date: '2025-01-25',
+              startTime: '2026-01-25T08:00:00Z',
+              endTime: '2026-01-25T17:00:00Z',
+              date: '2026-01-25',
             },
           ],
           imageUrls: [],
@@ -264,14 +264,14 @@ export async function seedListings(prisma: PrismaClient) {
           price: 8000,
           availabilities: [
             {
-              startTime: '2024-09-30T08:00:00Z',
-              endTime: '2024-09-30T17:00:00Z',
-              date: '2024-09-30',
+              startTime: '2026-09-30T08:00:00Z',
+              endTime: '2026-09-30T17:00:00Z',
+              date: '2026-09-30',
             },
             {
-              startTime: '2024-10-20T08:00:00Z',
-              endTime: '2024-10-20T17:00:00Z',
-              date: '2024-10-20',
+              startTime: '2025-10-20T08:00:00Z',
+              endTime: '2025-10-20T17:00:00Z',
+              date: '2025-10-20',
             },
           ],
           imageUrls: [
@@ -284,14 +284,14 @@ export async function seedListings(prisma: PrismaClient) {
           price: 10000,
           availabilities: [
             {
-              startTime: '2024-12-15T08:00:00Z',
-              endTime: '2024-12-15T17:00:00Z',
-              date: '2024-12-15',
+              startTime: '2025-12-15T08:00:00Z',
+              endTime: '2025-12-15T17:00:00Z',
+              date: '2025-12-15',
             },
             {
-              startTime: '2025-01-25T08:00:00Z',
-              endTime: '2025-01-25T17:00:00Z',
-              date: '2025-01-25',
+              startTime: '2026-01-25T08:00:00Z',
+              endTime: '2026-01-25T17:00:00Z',
+              date: '2026-01-25',
             },
           ],
           imageUrls: [
@@ -309,14 +309,14 @@ export async function seedListings(prisma: PrismaClient) {
           price: 6000,
           availabilities: [
             {
-              startTime: '2024-11-08T08:00:00Z',
-              endTime: '2024-11-08T17:00:00Z',
-              date: '2024-11-08',
+              startTime: '2025-11-08T08:00:00Z',
+              endTime: '2025-11-08T17:00:00Z',
+              date: '2025-11-08',
             },
             {
-              startTime: '2025-01-25T08:00:00Z',
-              endTime: '2025-01-25T17:00:00Z',
-              date: '2025-01-25',
+              startTime: '2026-01-25T08:00:00Z',
+              endTime: '2026-01-25T17:00:00Z',
+              date: '2026-01-25',
             },
           ],
           imageUrls: [
@@ -335,19 +335,19 @@ export async function seedListings(prisma: PrismaClient) {
           price: 120,
           availabilities: [
             {
-              startTime: '2024-12-15T08:00:00Z',
-              endTime: '2024-12-15T17:00:00Z',
-              date: '2024-12-15',
+              startTime: '2025-12-15T08:00:00Z',
+              endTime: '2025-12-15T17:00:00Z',
+              date: '2025-12-15',
             },
             {
-              startTime: '2024-11-08T08:00:00Z',
-              endTime: '2024-11-08T17:00:00Z',
-              date: '2024-11-08',
+              startTime: '2025-11-08T08:00:00Z',
+              endTime: '2025-11-08T17:00:00Z',
+              date: '2025-11-08',
             },
             {
-              startTime: '2025-01-25T08:00:00Z',
-              endTime: '2025-01-25T17:00:00Z',
-              date: '2025-01-25',
+              startTime: '2026-01-25T08:00:00Z',
+              endTime: '2026-01-25T17:00:00Z',
+              date: '2026-01-25',
             },
           ],
           imageUrls: [
@@ -360,14 +360,14 @@ export async function seedListings(prisma: PrismaClient) {
           price: 80,
           availabilities: [
             {
-              startTime: '2024-09-30T08:00:00Z',
-              endTime: '2024-09-30T17:00:00Z',
-              date: '2024-09-30',
+              startTime: '2026-09-30T08:00:00Z',
+              endTime: '2026-09-30T17:00:00Z',
+              date: '2026-09-30',
             },
             {
-              startTime: '2024-10-20T08:00:00Z',
-              endTime: '2024-10-20T17:00:00Z',
-              date: '2024-10-20',
+              startTime: '2025-10-20T08:00:00Z',
+              endTime: '2025-10-20T17:00:00Z',
+              date: '2025-10-20',
             },
           ],
           imageUrls: [
@@ -385,14 +385,14 @@ export async function seedListings(prisma: PrismaClient) {
           price: 100,
           availabilities: [
             {
-              startTime: '2024-11-08T08:00:00Z',
-              endTime: '2024-11-08T17:00:00Z',
-              date: '2024-11-08',
+              startTime: '2025-11-08T08:00:00Z',
+              endTime: '2025-11-08T17:00:00Z',
+              date: '2025-11-08',
             },
             {
-              startTime: '2025-01-25T08:00:00Z',
-              endTime: '2025-01-25T17:00:00Z',
-              date: '2025-01-25',
+              startTime: '2026-01-25T08:00:00Z',
+              endTime: '2026-01-25T17:00:00Z',
+              date: '2026-01-25',
             },
           ],
           imageUrls: [
@@ -411,19 +411,19 @@ export async function seedListings(prisma: PrismaClient) {
           price: 3500,
           availabilities: [
             {
-              startTime: '2024-12-15T08:00:00Z',
-              endTime: '2024-12-15T17:00:00Z',
-              date: '2024-12-15',
+              startTime: '2025-12-15T08:00:00Z',
+              endTime: '2025-12-15T17:00:00Z',
+              date: '2025-12-15',
             },
             {
-              startTime: '2024-11-08T08:00:00Z',
-              endTime: '2024-11-08T17:00:00Z',
-              date: '2024-11-08',
+              startTime: '2025-11-08T08:00:00Z',
+              endTime: '2025-11-08T17:00:00Z',
+              date: '2025-11-08',
             },
             {
-              startTime: '2025-01-25T08:00:00Z',
-              endTime: '2025-01-25T17:00:00Z',
-              date: '2025-01-25',
+              startTime: '2026-01-25T08:00:00Z',
+              endTime: '2026-01-25T17:00:00Z',
+              date: '2026-01-25',
             },
           ],
           imageUrls: [
@@ -436,14 +436,14 @@ export async function seedListings(prisma: PrismaClient) {
           price: 800,
           availabilities: [
             {
-              startTime: '2024-09-30T08:00:00Z',
-              endTime: '2024-09-30T17:00:00Z',
-              date: '2024-09-30',
+              startTime: '2026-09-30T08:00:00Z',
+              endTime: '2026-09-30T17:00:00Z',
+              date: '2026-09-30',
             },
             {
-              startTime: '2024-10-20T08:00:00Z',
-              endTime: '2024-10-20T17:00:00Z',
-              date: '2024-10-20',
+              startTime: '2025-10-20T08:00:00Z',
+              endTime: '2025-10-20T17:00:00Z',
+              date: '2025-10-20',
             },
           ],
           imageUrls: [
@@ -461,14 +461,14 @@ export async function seedListings(prisma: PrismaClient) {
           price: 2800,
           availabilities: [
             {
-              startTime: '2024-09-30T08:00:00Z',
-              endTime: '2024-09-30T17:00:00Z',
-              date: '2024-09-30',
+              startTime: '2026-09-30T08:00:00Z',
+              endTime: '2026-09-30T17:00:00Z',
+              date: '2026-09-30',
             },
             {
-              startTime: '2024-10-20T08:00:00Z',
-              endTime: '2024-10-20T17:00:00Z',
-              date: '2024-10-20',
+              startTime: '2025-10-20T08:00:00Z',
+              endTime: '2025-10-20T17:00:00Z',
+              date: '2025-10-20',
             },
           ],
           imageUrls: [
@@ -487,14 +487,14 @@ export async function seedListings(prisma: PrismaClient) {
           price: 4500,
           availabilities: [
             {
-              startTime: '2024-12-15T08:00:00Z',
-              endTime: '2024-12-15T17:00:00Z',
-              date: '2024-12-15',
+              startTime: '2025-12-15T08:00:00Z',
+              endTime: '2025-12-15T17:00:00Z',
+              date: '2025-12-15',
             },
             {
-              startTime: '2025-01-25T08:00:00Z',
-              endTime: '2025-01-25T17:00:00Z',
-              date: '2025-01-25',
+              startTime: '2026-01-25T08:00:00Z',
+              endTime: '2026-01-25T17:00:00Z',
+              date: '2026-01-25',
             },
           ],
           imageUrls: [
@@ -507,14 +507,14 @@ export async function seedListings(prisma: PrismaClient) {
           price: 1500,
           availabilities: [
             {
-              startTime: '2024-11-08T08:00:00Z',
-              endTime: '2024-11-08T17:00:00Z',
-              date: '2024-11-08',
+              startTime: '2025-11-08T08:00:00Z',
+              endTime: '2025-11-08T17:00:00Z',
+              date: '2025-11-08',
             },
             {
-              startTime: '2024-09-30T08:00:00Z',
-              endTime: '2024-09-30T17:00:00Z',
-              date: '2024-09-30',
+              startTime: '2026-09-30T08:00:00Z',
+              endTime: '2026-09-30T17:00:00Z',
+              date: '2026-09-30',
             },
           ],
           imageUrls: [
@@ -527,14 +527,14 @@ export async function seedListings(prisma: PrismaClient) {
           price: 2800,
           availabilities: [
             {
-              startTime: '2024-10-20T08:00:00Z',
-              endTime: '2024-10-20T17:00:00Z',
-              date: '2024-10-20',
+              startTime: '2025-10-20T08:00:00Z',
+              endTime: '2025-10-20T17:00:00Z',
+              date: '2025-10-20',
             },
             {
-              startTime: '2025-01-25T08:00:00Z',
-              endTime: '2025-01-25T17:00:00Z',
-              date: '2025-01-25',
+              startTime: '2026-01-25T08:00:00Z',
+              endTime: '2026-01-25T17:00:00Z',
+              date: '2026-01-25',
             },
           ],
           imageUrls: [
@@ -552,14 +552,14 @@ export async function seedListings(prisma: PrismaClient) {
           price: 3200,
           availabilities: [
             {
-              startTime: '2024-11-08T08:00:00Z',
-              endTime: '2024-11-08T17:00:00Z',
-              date: '2024-11-08',
+              startTime: '2025-11-08T08:00:00Z',
+              endTime: '2025-11-08T17:00:00Z',
+              date: '2025-11-08',
             },
             {
-              startTime: '2024-12-15T08:00:00Z',
-              endTime: '2024-12-15T17:00:00Z',
-              date: '2024-12-15',
+              startTime: '2025-12-15T08:00:00Z',
+              endTime: '2025-12-15T17:00:00Z',
+              date: '2025-12-15',
             },
           ],
           imageUrls: [
@@ -572,14 +572,14 @@ export async function seedListings(prisma: PrismaClient) {
           price: 1800,
           availabilities: [
             {
-              startTime: '2024-09-30T08:00:00Z',
-              endTime: '2024-09-30T17:00:00Z',
-              date: '2024-09-30',
+              startTime: '2026-09-30T08:00:00Z',
+              endTime: '2026-09-30T17:00:00Z',
+              date: '2026-09-30',
             },
             {
-              startTime: '2024-10-20T08:00:00Z',
-              endTime: '2024-10-20T17:00:00Z',
-              date: '2024-10-20',
+              startTime: '2025-10-20T08:00:00Z',
+              endTime: '2025-10-20T17:00:00Z',
+              date: '2025-10-20',
             },
           ],
           imageUrls: [
@@ -597,14 +597,14 @@ export async function seedListings(prisma: PrismaClient) {
           price: 3800,
           availabilities: [
             {
-              startTime: '2024-11-08T08:00:00Z',
-              endTime: '2024-11-08T17:00:00Z',
-              date: '2024-11-08',
+              startTime: '2025-11-08T08:00:00Z',
+              endTime: '2025-11-08T17:00:00Z',
+              date: '2025-11-08',
             },
             {
-              startTime: '2025-01-25T08:00:00Z',
-              endTime: '2025-01-25T17:00:00Z',
-              date: '2025-01-25',
+              startTime: '2026-01-25T08:00:00Z',
+              endTime: '2026-01-25T17:00:00Z',
+              date: '2026-01-25',
             },
           ],
           imageUrls: [
@@ -617,14 +617,14 @@ export async function seedListings(prisma: PrismaClient) {
           price: 2200,
           availabilities: [
             {
-              startTime: '2024-09-30T08:00:00Z',
-              endTime: '2024-09-30T17:00:00Z',
-              date: '2024-09-30',
+              startTime: '2026-09-30T08:00:00Z',
+              endTime: '2026-09-30T17:00:00Z',
+              date: '2026-09-30',
             },
             {
-              startTime: '2024-12-15T08:00:00Z',
-              endTime: '2024-12-15T17:00:00Z',
-              date: '2024-12-15',
+              startTime: '2025-12-15T08:00:00Z',
+              endTime: '2025-12-15T17:00:00Z',
+              date: '2025-12-15',
             },
           ],
           imageUrls: [
@@ -643,14 +643,14 @@ export async function seedListings(prisma: PrismaClient) {
           price: 5500,
           availabilities: [
             {
-              startTime: '2024-12-15T08:00:00Z',
-              endTime: '2024-12-15T17:00:00Z',
-              date: '2024-12-15',
+              startTime: '2025-12-15T08:00:00Z',
+              endTime: '2025-12-15T17:00:00Z',
+              date: '2025-12-15',
             },
             {
-              startTime: '2025-01-25T08:00:00Z',
-              endTime: '2025-01-25T17:00:00Z',
-              date: '2025-01-25',
+              startTime: '2026-01-25T08:00:00Z',
+              endTime: '2026-01-25T17:00:00Z',
+              date: '2026-01-25',
             },
           ],
           imageUrls: [],
@@ -661,14 +661,14 @@ export async function seedListings(prisma: PrismaClient) {
           price: 2200,
           availabilities: [
             {
-              startTime: '2024-09-30T08:00:00Z',
-              endTime: '2024-09-30T17:00:00Z',
-              date: '2024-09-30',
+              startTime: '2026-09-30T08:00:00Z',
+              endTime: '2026-09-30T17:00:00Z',
+              date: '2026-09-30',
             },
             {
-              startTime: '2024-11-08T08:00:00Z',
-              endTime: '2024-11-08T17:00:00Z',
-              date: '2024-11-08',
+              startTime: '2025-11-08T08:00:00Z',
+              endTime: '2025-11-08T17:00:00Z',
+              date: '2025-11-08',
             },
           ],
           imageUrls: [],
@@ -679,14 +679,14 @@ export async function seedListings(prisma: PrismaClient) {
           price: 3200,
           availabilities: [
             {
-              startTime: '2024-10-20T08:00:00Z',
-              endTime: '2024-10-20T17:00:00Z',
-              date: '2024-10-20',
+              startTime: '2025-10-20T08:00:00Z',
+              endTime: '2025-10-20T17:00:00Z',
+              date: '2025-10-20',
             },
             {
-              startTime: '2024-12-15T08:00:00Z',
-              endTime: '2024-12-15T17:00:00Z',
-              date: '2024-12-15',
+              startTime: '2025-12-15T08:00:00Z',
+              endTime: '2025-12-15T17:00:00Z',
+              date: '2025-12-15',
             },
           ],
           imageUrls: [],
@@ -702,14 +702,14 @@ export async function seedListings(prisma: PrismaClient) {
           price: 2800,
           availabilities: [
             {
-              startTime: '2024-11-08T08:00:00Z',
-              endTime: '2024-11-08T17:00:00Z',
-              date: '2024-11-08',
+              startTime: '2025-11-08T08:00:00Z',
+              endTime: '2025-11-08T17:00:00Z',
+              date: '2025-11-08',
             },
             {
-              startTime: '2025-01-25T08:00:00Z',
-              endTime: '2025-01-25T17:00:00Z',
-              date: '2025-01-25',
+              startTime: '2026-01-25T08:00:00Z',
+              endTime: '2026-01-25T17:00:00Z',
+              date: '2026-01-25',
             },
           ],
           imageUrls: [],
@@ -720,14 +720,14 @@ export async function seedListings(prisma: PrismaClient) {
           price: 1800,
           availabilities: [
             {
-              startTime: '2024-09-30T08:00:00Z',
-              endTime: '2024-09-30T17:00:00Z',
-              date: '2024-09-30',
+              startTime: '2026-09-30T08:00:00Z',
+              endTime: '2026-09-30T17:00:00Z',
+              date: '2026-09-30',
             },
             {
-              startTime: '2024-12-15T08:00:00Z',
-              endTime: '2024-12-15T17:00:00Z',
-              date: '2024-12-15',
+              startTime: '2025-12-15T08:00:00Z',
+              endTime: '2025-12-15T17:00:00Z',
+              date: '2025-12-15',
             },
           ],
           imageUrls: [],
@@ -744,14 +744,14 @@ export async function seedListings(prisma: PrismaClient) {
           price: 6500,
           availabilities: [
             {
-              startTime: '2024-12-15T08:00:00Z',
-              endTime: '2024-12-15T17:00:00Z',
-              date: '2024-12-15',
+              startTime: '2025-12-15T08:00:00Z',
+              endTime: '2025-12-15T17:00:00Z',
+              date: '2025-12-15',
             },
             {
-              startTime: '2025-01-25T08:00:00Z',
-              endTime: '2025-01-25T17:00:00Z',
-              date: '2025-01-25',
+              startTime: '2026-01-25T08:00:00Z',
+              endTime: '2026-01-25T17:00:00Z',
+              date: '2026-01-25',
             },
           ],
           imageUrls: [],
@@ -762,14 +762,14 @@ export async function seedListings(prisma: PrismaClient) {
           price: 2500,
           availabilities: [
             {
-              startTime: '2024-09-30T08:00:00Z',
-              endTime: '2024-09-30T17:00:00Z',
-              date: '2024-09-30',
+              startTime: '2026-09-30T08:00:00Z',
+              endTime: '2026-09-30T17:00:00Z',
+              date: '2026-09-30',
             },
             {
-              startTime: '2024-11-08T08:00:00Z',
-              endTime: '2024-11-08T17:00:00Z',
-              date: '2024-11-08',
+              startTime: '2025-11-08T08:00:00Z',
+              endTime: '2025-11-08T17:00:00Z',
+              date: '2025-11-08',
             },
           ],
           imageUrls: [],
@@ -780,14 +780,14 @@ export async function seedListings(prisma: PrismaClient) {
           price: 1200,
           availabilities: [
             {
-              startTime: '2024-10-20T08:00:00Z',
-              endTime: '2024-10-20T17:00:00Z',
-              date: '2024-10-20',
+              startTime: '2025-10-20T08:00:00Z',
+              endTime: '2025-10-20T17:00:00Z',
+              date: '2025-10-20',
             },
             {
-              startTime: '2024-12-15T08:00:00Z',
-              endTime: '2024-12-15T17:00:00Z',
-              date: '2024-12-15',
+              startTime: '2025-12-15T08:00:00Z',
+              endTime: '2025-12-15T17:00:00Z',
+              date: '2025-12-15',
             },
           ],
           imageUrls: [],
@@ -803,14 +803,14 @@ export async function seedListings(prisma: PrismaClient) {
           price: 3200,
           availabilities: [
             {
-              startTime: '2024-11-08T08:00:00Z',
-              endTime: '2024-11-08T17:00:00Z',
-              date: '2024-11-08',
+              startTime: '2025-11-08T08:00:00Z',
+              endTime: '2025-11-08T17:00:00Z',
+              date: '2025-11-08',
             },
             {
-              startTime: '2025-01-25T08:00:00Z',
-              endTime: '2025-01-25T17:00:00Z',
-              date: '2025-01-25',
+              startTime: '2026-01-25T08:00:00Z',
+              endTime: '2026-01-25T17:00:00Z',
+              date: '2026-01-25',
             },
           ],
           imageUrls: [],
@@ -821,14 +821,14 @@ export async function seedListings(prisma: PrismaClient) {
           price: 2800,
           availabilities: [
             {
-              startTime: '2024-09-30T08:00:00Z',
-              endTime: '2024-09-30T17:00:00Z',
-              date: '2024-09-30',
+              startTime: '2026-09-30T08:00:00Z',
+              endTime: '2026-09-30T17:00:00Z',
+              date: '2026-09-30',
             },
             {
-              startTime: '2024-12-15T08:00:00Z',
-              endTime: '2024-12-15T17:00:00Z',
-              date: '2024-12-15',
+              startTime: '2025-12-15T08:00:00Z',
+              endTime: '2025-12-15T17:00:00Z',
+              date: '2025-12-15',
             },
           ],
           imageUrls: [],
@@ -845,14 +845,14 @@ export async function seedListings(prisma: PrismaClient) {
           price: 1500,
           availabilities: [
             {
-              startTime: '2024-12-15T08:00:00Z',
-              endTime: '2024-12-15T17:00:00Z',
-              date: '2024-12-15',
+              startTime: '2025-12-15T08:00:00Z',
+              endTime: '2025-12-15T17:00:00Z',
+              date: '2025-12-15',
             },
             {
-              startTime: '2025-01-25T08:00:00Z',
-              endTime: '2025-01-25T17:00:00Z',
-              date: '2025-01-25',
+              startTime: '2026-01-25T08:00:00Z',
+              endTime: '2026-01-25T17:00:00Z',
+              date: '2026-01-25',
             },
           ],
           imageUrls: [],
@@ -863,14 +863,14 @@ export async function seedListings(prisma: PrismaClient) {
           price: 600,
           availabilities: [
             {
-              startTime: '2024-09-30T08:00:00Z',
-              endTime: '2024-09-30T17:00:00Z',
-              date: '2024-09-30',
+              startTime: '2026-09-30T08:00:00Z',
+              endTime: '2026-09-30T17:00:00Z',
+              date: '2026-09-30',
             },
             {
-              startTime: '2024-11-08T08:00:00Z',
-              endTime: '2024-11-08T17:00:00Z',
-              date: '2024-11-08',
+              startTime: '2025-11-08T08:00:00Z',
+              endTime: '2025-11-08T17:00:00Z',
+              date: '2025-11-08',
             },
           ],
           imageUrls: [],
@@ -881,14 +881,14 @@ export async function seedListings(prisma: PrismaClient) {
           price: 300,
           availabilities: [
             {
-              startTime: '2024-10-20T08:00:00Z',
-              endTime: '2024-10-20T17:00:00Z',
-              date: '2024-10-20',
+              startTime: '2025-10-20T08:00:00Z',
+              endTime: '2025-10-20T17:00:00Z',
+              date: '2025-10-20',
             },
             {
-              startTime: '2024-12-15T08:00:00Z',
-              endTime: '2024-12-15T17:00:00Z',
-              date: '2024-12-15',
+              startTime: '2025-12-15T08:00:00Z',
+              endTime: '2025-12-15T17:00:00Z',
+              date: '2025-12-15',
             },
           ],
           imageUrls: [],
@@ -904,14 +904,14 @@ export async function seedListings(prisma: PrismaClient) {
           price: 1200,
           availabilities: [
             {
-              startTime: '2024-11-08T08:00:00Z',
-              endTime: '2024-11-08T17:00:00Z',
-              date: '2024-11-08',
+              startTime: '2025-11-08T08:00:00Z',
+              endTime: '2025-11-08T17:00:00Z',
+              date: '2025-11-08',
             },
             {
-              startTime: '2025-01-25T08:00:00Z',
-              endTime: '2025-01-25T17:00:00Z',
-              date: '2025-01-25',
+              startTime: '2026-01-25T08:00:00Z',
+              endTime: '2026-01-25T17:00:00Z',
+              date: '2026-01-25',
             },
           ],
           imageUrls: [],
@@ -922,14 +922,14 @@ export async function seedListings(prisma: PrismaClient) {
           price: 400,
           availabilities: [
             {
-              startTime: '2024-09-30T08:00:00Z',
-              endTime: '2024-09-30T17:00:00Z',
-              date: '2024-09-30',
+              startTime: '2026-09-30T08:00:00Z',
+              endTime: '2026-09-30T17:00:00Z',
+              date: '2026-09-30',
             },
             {
-              startTime: '2024-12-15T08:00:00Z',
-              endTime: '2024-12-15T17:00:00Z',
-              date: '2024-12-15',
+              startTime: '2025-12-15T08:00:00Z',
+              endTime: '2025-12-15T17:00:00Z',
+              date: '2025-12-15',
             },
           ],
           imageUrls: [],
@@ -946,14 +946,14 @@ export async function seedListings(prisma: PrismaClient) {
           price: 2500,
           availabilities: [
             {
-              startTime: '2024-12-15T08:00:00Z',
-              endTime: '2024-12-15T17:00:00Z',
-              date: '2024-12-15',
+              startTime: '2025-12-15T08:00:00Z',
+              endTime: '2025-12-15T17:00:00Z',
+              date: '2025-12-15',
             },
             {
-              startTime: '2025-01-25T08:00:00Z',
-              endTime: '2025-01-25T17:00:00Z',
-              date: '2025-01-25',
+              startTime: '2026-01-25T08:00:00Z',
+              endTime: '2026-01-25T17:00:00Z',
+              date: '2026-01-25',
             },
           ],
           imageUrls: [],
@@ -964,14 +964,14 @@ export async function seedListings(prisma: PrismaClient) {
           price: 1800,
           availabilities: [
             {
-              startTime: '2024-09-30T08:00:00Z',
-              endTime: '2024-09-30T17:00:00Z',
-              date: '2024-09-30',
+              startTime: '2026-09-30T08:00:00Z',
+              endTime: '2026-09-30T17:00:00Z',
+              date: '2026-09-30',
             },
             {
-              startTime: '2024-11-08T08:00:00Z',
-              endTime: '2024-11-08T17:00:00Z',
-              date: '2024-11-08',
+              startTime: '2025-11-08T08:00:00Z',
+              endTime: '2025-11-08T17:00:00Z',
+              date: '2025-11-08',
             },
           ],
           imageUrls: [],
@@ -982,14 +982,14 @@ export async function seedListings(prisma: PrismaClient) {
           price: 1200,
           availabilities: [
             {
-              startTime: '2024-10-20T08:00:00Z',
-              endTime: '2024-10-20T17:00:00Z',
-              date: '2024-10-20',
+              startTime: '2025-10-20T08:00:00Z',
+              endTime: '2025-10-20T17:00:00Z',
+              date: '2025-10-20',
             },
             {
-              startTime: '2024-12-15T08:00:00Z',
-              endTime: '2024-12-15T17:00:00Z',
-              date: '2024-12-15',
+              startTime: '2025-12-15T08:00:00Z',
+              endTime: '2025-12-15T17:00:00Z',
+              date: '2025-12-15',
             },
           ],
           imageUrls: [],
