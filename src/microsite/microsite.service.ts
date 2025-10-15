@@ -1,19 +1,19 @@
 import {
+  ConflictException,
   Injectable,
   NotFoundException,
-  ConflictException,
 } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import {
-  MicrositeResponseDto,
-  ScheduleItemDto,
-  FaqItemDto,
-} from './dto/microsite-response.dto';
-import { CreateMicrositeDto } from './dto/create-microsite.dto';
-import { UpdateMicrositeDto } from './dto/update-microsite.dto';
-import { GuestResponseDto } from '../guest/dto/guest-response.dto';
 import { Microsite, Prisma, Wedding } from '@prisma/client';
 import { ConfirmationStatus } from '../common/confirmation-status.enum';
+import { GuestResponseDto } from '../guest/dto/guest-response.dto';
+import { PrismaService } from '../prisma/prisma.service';
+import { CreateMicrositeDto } from './dto/create-microsite.dto';
+import {
+  FaqItemDto,
+  MicrositeResponseDto,
+  ScheduleItemDto,
+} from './dto/microsite-response.dto';
+import { UpdateMicrositeDto } from './dto/update-microsite.dto';
 
 @Injectable()
 export class MicrositeService {
@@ -107,7 +107,12 @@ export class MicrositeService {
         wedding: {
           include: {
             guests: {
-              where: { name: fullName },
+              where: {
+                name: {
+                  equals: fullName,
+                  mode: 'insensitive',
+                },
+              },
             },
           },
         },
