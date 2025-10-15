@@ -34,8 +34,24 @@ export class PaymentService {
         throw new BadRequestException('Order not found');
       }
 
+      // Filter listings if listingIds are provided
+      let listingsToCharge = order.listings;
+      if (dto.listingIds && dto.listingIds.length > 0) {
+        // Convert string IDs to numbers for comparison
+        const numericListingIds = dto.listingIds.map((id) => Number(id));
+        listingsToCharge = order.listings.filter((orderListing) =>
+          numericListingIds.includes(orderListing.listingId),
+        );
+
+        if (listingsToCharge.length === 0) {
+          throw new BadRequestException(
+            'No valid listings found with the provided listing IDs',
+          );
+        }
+      }
+
       // Create line items for Stripe Checkout
-      const lineItems = order.listings.map((orderListing) => {
+      const lineItems = listingsToCharge.map((orderListing) => {
         const bookedSlots = orderListing.bookedSlots as any[];
         const quantity = bookedSlots ? bookedSlots.length : 1;
 
@@ -52,6 +68,13 @@ export class PaymentService {
         };
       });
 
+      // Calculate the total amount for the listings being charged
+      const chargeAmount = listingsToCharge.reduce((sum, orderListing) => {
+        const bookedSlots = orderListing.bookedSlots as any[];
+        const quantity = bookedSlots ? bookedSlots.length : 1;
+        return sum + orderListing.listing.price * quantity;
+      }, 0);
+
       const baseUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
       const successUrl =
         dto.successUrl ||
@@ -66,13 +89,14 @@ export class PaymentService {
         cancel_url: cancelUrl,
         metadata: {
           orderId: dto.orderId.toString(),
+          listingIds: dto.listingIds ? JSON.stringify(dto.listingIds) : '',
         },
       });
 
       const payment = await this.prisma.payment.create({
         data: {
           stripeCheckoutSessionId: session.id,
-          amount: order.totalAmount,
+          amount: chargeAmount,
           currency: order.currency,
           paymentStatus: PaymentStatus.PENDING,
           orderId: dto.orderId,
@@ -248,17 +272,50 @@ export class PaymentService {
         },
       });
 
-      // Update all OrderListing statuses to PAID
+      // Get listing IDs from metadata (if specific listings were paid for)
+      const listingIdsMetadata = session.metadata?.listingIds;
+      let listingIdsToPay: number[] = [];
+
+      console.log('Stripe session metadata:', session.metadata);
+      console.log('listingIdsMetadata:', listingIdsMetadata);
+
+      if (listingIdsMetadata && listingIdsMetadata.trim() !== '') {
+        try {
+          const parsed = JSON.parse(listingIdsMetadata);
+          listingIdsToPay = Array.isArray(parsed)
+            ? parsed.map((id) => Number(id))
+            : [];
+        } catch (error) {
+          console.error('Error parsing listingIds from metadata:', error);
+          // If parsing fails, pay for all listings
+          listingIdsToPay = payment.order.listings.map((ol) => ol.listingId);
+        }
+      } else {
+        listingIdsToPay = payment.order.listings.map((ol) => ol.listingId);
+      }
+
+      // Update OrderListing statuses to PAID only for the paid listings
       for (const orderListing of payment.order.listings) {
-        await this.prisma.orderListing.update({
-          where: {
-            orderId_listingId: {
-              orderId: payment.orderId,
-              listingId: orderListing.listingId,
+        console.log(
+          `Checking listing ${orderListing.listingId} against listingIdsToPay:`,
+          listingIdsToPay,
+        );
+        if (listingIdsToPay.includes(orderListing.listingId)) {
+          console.log(
+            `Updating OrderListing ${orderListing.listingId} to PAID status`,
+          );
+          await this.prisma.orderListing.update({
+            where: {
+              orderId_listingId: {
+                orderId: payment.orderId,
+                listingId: orderListing.listingId,
+              },
             },
-          },
-          data: { bookingStatus: OrderStatus.PAID },
-        });
+            data: { bookingStatus: OrderStatus.PAID },
+          });
+        } else {
+          console.log(`Skipping listing ${orderListing.listingId}`);
+        }
       }
     }
   }

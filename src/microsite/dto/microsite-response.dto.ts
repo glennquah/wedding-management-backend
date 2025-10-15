@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-class ScheduleItemDto {
+export class ScheduleItemDto {
   @ApiProperty({ description: 'Scheduled time', example: '2:00 PM' })
   time: string;
 
@@ -17,7 +17,7 @@ class ScheduleItemDto {
   description: string;
 }
 
-class FaqItemDto {
+export class FaqItemDto {
   @ApiProperty({
     description: 'FAQ question',
     example: 'What is the dress code?',

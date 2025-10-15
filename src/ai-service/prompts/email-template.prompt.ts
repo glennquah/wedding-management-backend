@@ -7,6 +7,7 @@ export interface EmailTemplatePromptParams {
   mainMessage?: string;
   micrositeUrl?: string;
   locationMapUrl?: string;
+  eventLocation?: string;
   tone: string;
   additionalContext?: string;
   weddingContext: string;
@@ -24,6 +25,7 @@ export const generateEmailTemplatePrompt = (
     mainMessage,
     micrositeUrl,
     locationMapUrl,
+    eventLocation,
     tone,
     additionalContext,
     weddingContext,
@@ -65,12 +67,14 @@ STRUCTURE:
   - Email purpose: ${emailPurpose}
   ${audience ? `- Greeting audience: ${audience}` : '- Use a warm, inclusive greeting like "Dear Close Ones" or "Dear Family and Friends"'}
   ${mainMessage ? `- Main message: ${mainMessage}` : ''}
+  ${eventLocation ? `- Event Location: ${eventLocation} (IMPORTANT: Use this location in the email content, not any location from the wedding context)` : ''}
 
   CALL-TO-ACTION BUTTONS (display in the same row):
   ${micrositeUrl ? `- First button: "View More" linking to: ${micrositeUrl}` : ''}
   ${locationMapUrl ? `- Second button: "View On Map" linking to: ${locationMapUrl}` : ''}
   ${!micrositeUrl && !locationMapUrl ? '- No call-to-action buttons available' : ''}
-  ${micrositeUrl && locationMapUrl ? '- Display both buttons side by side in the same row with equal width and spacing' : ''}
+  ${micrositeUrl && locationMapUrl ? '- Display both buttons side by side in the same row with equal width and 15-20px gap/margin between them' : ''}
+  ${micrositeUrl && locationMapUrl ? '- Use margin-right on the first button OR margin-left on the second button to create spacing' : ''}
 
   - Tone: ${tone}
   ${additionalContext ? `- Additional requirements: ${additionalContext}` : ''}
@@ -84,6 +88,7 @@ ${weddingContext}
   - Use inline-important styles for email client compatibility (!important for colors and critical styles)
   - Include footer with social links, website link, and contact information
   - If wedding details are provided, incorporate them naturally into the email content
+  - CRITICAL: When displaying two CTA buttons side by side, add proper spacing between them (15-20px margin/gap) so they don't touch each other
 
 Return JSON format:
 {

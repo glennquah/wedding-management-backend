@@ -1,30 +1,31 @@
 import {
+  Body,
   Controller,
+  Delete,
   Get,
+  Param,
+  ParseIntPipe,
   Post,
   Put,
-  Delete,
-  Body,
-  Param,
   Query,
   Request,
   UseGuards,
-  ParseIntPipe,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
-import { MicrositeService } from './microsite.service';
-import { MicrositeResponseDto } from './dto/microsite-response.dto';
-import { CreateMicrositeDto } from './dto/create-microsite.dto';
-import { UpdateMicrositeDto } from './dto/update-microsite.dto';
-import { MicrositeLoginDto } from './dto/microsite-login.dto';
-import { GuestLookupDto } from './dto/guest-lookup.dto';
-import { ConfirmGuestDto } from './dto/confirm-guest.dto';
-import { GuestResponseDto } from '../guest/dto/guest-response.dto';
+import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { JwtPayload } from '../auth/dto/jwt-payload.interface';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
-import { Roles } from '../auth/decorators/roles.decorator';
 import { UserRole } from '../common/user-role.enum';
-import { JwtPayload } from '../auth/dto/jwt-payload.interface';
+import { GuestResponseDto } from '../guest/dto/guest-response.dto';
+import { ConfirmGuestDto } from './dto/confirm-guest.dto';
+import { CreateMicrositeDto } from './dto/create-microsite.dto';
+import { GenerateMicrositeDto } from './dto/generate-microsite.dto';
+import { GuestLookupDto } from './dto/guest-lookup.dto';
+import { MicrositeLoginDto } from './dto/microsite-login.dto';
+import { MicrositeResponseDto } from './dto/microsite-response.dto';
+import { UpdateMicrositeDto } from './dto/update-microsite.dto';
+import { MicrositeService } from './microsite.service';
 
 @ApiTags('microsite')
 @Controller('microsite')
@@ -136,6 +137,25 @@ export class MicrositeController {
       confirmDto.weddingId,
       confirmDto.allergies,
     );
+  }
+
+  @Post('generate')
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
+  @ApiOperation({
+    summary: 'Generate microsite content using AI based on wedding details',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Microsite content generated successfully',
+    type: CreateMicrositeDto,
+  })
+  @ApiResponse({ status: 400, description: 'Bad request.' })
+  @ApiResponse({ status: 404, description: 'Wedding not found.' })
+  async generateMicrositeContent(
+    @Body() dto: GenerateMicrositeDto,
+  ): Promise<Omit<CreateMicrositeDto, 'password' | 'weddingId'>> {
+    return this.micrositeService.generateMicrositeContent(dto);
   }
 
   @Post()

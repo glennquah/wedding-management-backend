@@ -1,8 +1,26 @@
 import { Injectable } from '@nestjs/common';
+import { Wedding } from '@prisma/client';
 import OpenAI from 'openai';
 import { GenerateAiEmailTemplateDto } from '../email-notification/dto/generate-ai-email-template.dto';
+import {
+  CreateMicrositeDto,
+  FaqItemDto,
+  ScheduleItemDto,
+} from '../microsite/dto/create-microsite.dto';
+import { GenerateMicrositeDto } from '../microsite/dto/generate-microsite.dto';
 import { EmailTemplateResponse } from './interfaces/email-template-response.interface';
 import { generateEmailTemplatePrompt } from './prompts/email-template.prompt';
+import { generateMicrositePrompt } from './prompts/microsite.prompt';
+
+interface GeneratedMicrositeContent {
+  templateNumber: number;
+  slug: string;
+  coupleName: string;
+  heroImages: string[];
+  imageGallery: string[];
+  schedule: ScheduleItemDto[];
+  faqs: FaqItemDto[];
+}
 
 @Injectable()
 export class AiServiceService {
@@ -50,6 +68,7 @@ export class AiServiceService {
       : null;
 
     // Build Google Maps URL if location is provided (from DTO or wedding details)
+    // Priority: DTO mapLocation > wedding location
     const location = dto.mapLocation || weddingDetails?.location;
     const locationMapUrl = location
       ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`
@@ -61,7 +80,6 @@ export class AiServiceService {
         WEDDING CONTEXT (use this to personalize the email):
           - Wedding Name: ${weddingDetails.name || 'N/A'}
           - Wedding Date: ${weddingDetails.date ? new Date(weddingDetails.date).toLocaleDateString() : 'Not set'}
-          - Location: ${weddingDetails.location || 'Not specified'}
           - Wedding Type: ${weddingDetails.weddingType || 'Not specified'}
           - Budget Range: ${weddingDetails.budgetBucket || 'Not set'}
           - Guest Count Range: ${weddingDetails.guestCountBucket || 'Not set'}
@@ -82,6 +100,7 @@ export class AiServiceService {
       mainMessage: dto.mainMessage,
       micrositeUrl,
       locationMapUrl,
+      eventLocation: location,
       tone,
       additionalContext: dto.additionalContext,
       weddingContext,
@@ -90,6 +109,34 @@ export class AiServiceService {
     return this.getJsonCompletion<EmailTemplateResponse>(systemPrompt, {
       model: 'gpt-4o',
       temperature: 0.7,
+    });
+  }
+
+  async generateMicrosite(
+    dto: GenerateMicrositeDto,
+    wedding: Wedding,
+  ): Promise<Omit<CreateMicrositeDto, 'password' | 'weddingId'>> {
+    // Build wedding context from wedding details
+    const weddingContext = `
+      - Wedding Date: ${wedding.date ? new Date(wedding.date).toLocaleDateString() : 'Not set'}
+      - Location: ${wedding.location || 'Not specified'}
+      - Wedding Type: ${wedding.weddingType || 'Not specified'}
+      - Guest Count Range: ${wedding.guestCountBucket || 'Not set'}
+      - Preferred Style: ${wedding.preferredStyle || 'Not specified'}
+      - Preferred Services: ${wedding.preferredServices?.join(', ') || 'Not specified'}
+    `;
+
+    // Generate prompt
+    const systemPrompt = generateMicrositePrompt({
+      coupleName: dto.coupleName,
+      weddingContext,
+      additionalContext: dto.additionalContext,
+      theme: dto.theme,
+    });
+
+    return this.getJsonCompletion<GeneratedMicrositeContent>(systemPrompt, {
+      model: 'gpt-4o',
+      temperature: 0.8,
     });
   }
 }

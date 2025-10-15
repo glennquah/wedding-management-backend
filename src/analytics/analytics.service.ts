@@ -67,11 +67,14 @@ export class AnalyticsService {
       where: { weddingId },
     });
 
-    // Calculate total spending from orders
-    const totalSpending = orders.reduce(
-      (sum, order) => sum + order.totalAmount,
-      0,
-    );
+    // Calculate total spending from orders (only PAID and COMPLETED orders count towards spending)
+    const totalSpending = orders
+      .filter(
+        (order) =>
+          order.orderStatus === OrderStatus.PAID ||
+          order.orderStatus === OrderStatus.COMPLETED,
+      )
+      .reduce((sum, order) => sum + order.totalAmount, 0);
 
     // Calculate remaining budget
     const allocatedBudget = wedding.allocatedBudget;
@@ -82,14 +85,24 @@ export class AnalyticsService {
     const budgetUsedPercentage =
       allocatedBudget > 0 ? (currentSpending / allocatedBudget) * 100 : 0;
 
+    // Count only paid and completed orders
+    const paidOrCompletedOrders = orders.filter(
+      (order) =>
+        order.orderStatus === OrderStatus.PAID ||
+        order.orderStatus === OrderStatus.COMPLETED,
+    );
+
     return {
       totalSpending,
       allocatedBudget,
       currentSpending,
       remainingBudget,
       budgetUsedPercentage: Math.round(budgetUsedPercentage * 100) / 100, // Round to 2 decimal places
-      orderCount: orders.length,
-      currency: orders.length > 0 ? orders[0].currency : 'SGD',
+      orderCount: paidOrCompletedOrders.length,
+      currency:
+        paidOrCompletedOrders.length > 0
+          ? paidOrCompletedOrders[0].currency
+          : 'SGD',
     };
   }
 
