@@ -368,14 +368,14 @@ export class OrderService {
       );
     }
 
-    // Don't allow removing listings from an order that's already been paid
-    const hasSuccessfulPayment = order.payments.some(
-      (p) => p.paymentStatus === PaymentStatus.SUCCEEDED,
-    );
-
-    if (hasSuccessfulPayment) {
+    // Don't allow removing a listing that's already been paid
+    if (
+      orderListing.bookingStatus === OrderStatus.PAID ||
+      orderListing.bookingStatus === OrderStatus.CONFIRMED ||
+      orderListing.bookingStatus === OrderStatus.COMPLETED
+    ) {
       throw new BadRequestException(
-        'Cannot remove listing from an order that has a successful payment',
+        `Cannot remove listing that has status: ${orderListing.bookingStatus}. Only PENDING or CANCELLED listings can be removed.`,
       );
     }
 
