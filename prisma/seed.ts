@@ -87,7 +87,11 @@ async function main() {
   const recommendationWeddings = await seedRecommendationWeddings(prisma);
 
   // 12. Seed recommendation couples (1000 couples / 2000 admins)
-  await seedRecommendationCouples(prisma, recommendationWeddings, hashedPassword);
+  await seedRecommendationCouples(
+    prisma,
+    recommendationWeddings,
+    hashedPassword,
+  );
 
   // 13. Seed recommendation vendors (200 vendors)
   await seedRecommendationVendors(prisma, hashedPassword);
@@ -139,8 +143,12 @@ async function main() {
   console.log('- 200 Vendor users');
   console.log('- 400+ Listings (2 per recommendation vendor)');
   console.log('- 1000 Orders (1 per recommendation wedding)');
-  console.log('- Orders connect recommendation weddings → recommendation vendors ONLY');
-  console.log('- Realistic matching based on budget, wedding type, style, and capacity');
+  console.log(
+    '- Orders connect recommendation weddings → recommendation vendors ONLY',
+  );
+  console.log(
+    '- Realistic matching based on budget, wedding type, style, and capacity',
+  );
 
   console.log(`\n📧 Test Login Credentials:`);
   console.log(`  Regular: couple@wedding.com`);

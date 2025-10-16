@@ -3,25 +3,38 @@ import {
   BudgetBucket,
   GuestCountBucket,
   PrismaClient,
-  WeddingService
+  WeddingService,
 } from '@prisma/client';
 
 export async function seedRecommendationOrders(prisma: PrismaClient) {
   // Set deterministic seed for consistent data generation across runs
   faker.seed(6767);
 
-  console.log('✅ Seeding recommendation orders with intelligent booking rules...');
+  console.log(
+    '✅ Seeding recommendation orders with intelligent booking rules...',
+  );
 
   // Budget bucket mapping (±1 bucket)
   const budgetToPriceRanges: Record<BudgetBucket, BudgetBucket[]> = {
     [BudgetBucket.LOW]: [BudgetBucket.LOW],
-    [BudgetBucket.MEDIUM]: [BudgetBucket.LOW, BudgetBucket.MEDIUM, BudgetBucket.HIGH],
-    [BudgetBucket.HIGH]: [BudgetBucket.MEDIUM, BudgetBucket.HIGH, BudgetBucket.LUXURY],
+    [BudgetBucket.MEDIUM]: [
+      BudgetBucket.LOW,
+      BudgetBucket.MEDIUM,
+      BudgetBucket.HIGH,
+    ],
+    [BudgetBucket.HIGH]: [
+      BudgetBucket.MEDIUM,
+      BudgetBucket.HIGH,
+      BudgetBucket.LUXURY,
+    ],
     [BudgetBucket.LUXURY]: [BudgetBucket.HIGH, BudgetBucket.LUXURY],
   };
 
   // Guest count to capacity mapping
-  const guestCountToCapacity: Record<GuestCountBucket, { min: number; max: number }> = {
+  const guestCountToCapacity: Record<
+    GuestCountBucket,
+    { min: number; max: number }
+  > = {
     [GuestCountBucket.SMALL]: { min: 1, max: 50 },
     [GuestCountBucket.MEDIUM]: { min: 50, max: 150 },
     [GuestCountBucket.LARGE]: { min: 150, max: 1000 },
@@ -77,7 +90,7 @@ export async function seedRecommendationOrders(prisma: PrismaClient) {
     const selectedListings: typeof listings = [];
 
     // Helper function: Check if listing is eligible for this wedding
-    const isEligible = (listing: typeof listings[0]): boolean => {
+    const isEligible = (listing: (typeof listings)[0]): boolean => {
       const vendor = listing.vendor;
 
       // Rule 1: Wedding type must match
@@ -94,7 +107,10 @@ export async function seedRecommendationOrders(prisma: PrismaClient) {
       }
 
       // Rule 3: Budget alignment (calculate budget bucket from price)
-      const listingBudgetBucket = getPriceBucket(listing.price, vendor.serviceOffered!);
+      const listingBudgetBucket = getPriceBucket(
+        listing.price,
+        vendor.serviceOffered!,
+      );
       const allowedBuckets = budgetToPriceRanges[wedding.budgetBucket];
       if (!allowedBuckets.includes(listingBudgetBucket)) {
         return false;
@@ -104,7 +120,7 @@ export async function seedRecommendationOrders(prisma: PrismaClient) {
     };
 
     // Helper function: Check if style matches (80% chance requirement)
-    const matchesStyle = (listing: typeof listings[0]): boolean => {
+    const matchesStyle = (listing: (typeof listings)[0]): boolean => {
       if (listing.vendor.styleOffered === wedding.preferredStyle) {
         return true;
       }
@@ -116,11 +132,11 @@ export async function seedRecommendationOrders(prisma: PrismaClient) {
     const eligibleListings = listings.filter(isEligible);
 
     // Separate preferred vs other service listings
-    const preferredListings = eligibleListings.filter(
-      (l) => wedding.preferredServices.includes(l.vendor.serviceOffered!)
+    const preferredListings = eligibleListings.filter((l) =>
+      wedding.preferredServices.includes(l.vendor.serviceOffered!),
     );
     const otherListings = eligibleListings.filter(
-      (l) => !wedding.preferredServices.includes(l.vendor.serviceOffered!)
+      (l) => !wedding.preferredServices.includes(l.vendor.serviceOffered!),
     );
 
     // Book preferred services first (1 listing per service)
@@ -143,7 +159,10 @@ export async function seedRecommendationOrders(prisma: PrismaClient) {
       for (const listing of shuffledOthers) {
         const service = listing.vendor.serviceOffered!;
 
-        if (!bookedServices.has(service) && faker.number.float({ min: 0, max: 1 }) < 0.3) {
+        if (
+          !bookedServices.has(service) &&
+          faker.number.float({ min: 0, max: 1 }) < 0.3
+        ) {
           selectedListings.push(listing);
           bookedServices.add(service);
         }
@@ -177,7 +196,7 @@ export async function seedRecommendationOrders(prisma: PrismaClient) {
                 startTime: '09:00:00',
                 endTime: '18:00:00',
               },
-              bookingStatus: 'PAID'
+              bookingStatus: 'PAID',
             })),
           },
         },
@@ -193,16 +212,25 @@ export async function seedRecommendationOrders(prisma: PrismaClient) {
     }
   }
 
-  console.log(`✅ Created ${totalOrders} orders with ${totalOrderListings} order-listing relationships`);
+  console.log(
+    `✅ Created ${totalOrders} orders with ${totalOrderListings} order-listing relationships`,
+  );
   console.log(`   - 1 order per wedding (total: ${totalOrders} orders)`);
-  console.log(`   - Average ${(totalOrderListings / totalOrders).toFixed(1)} listings per order`);
-  console.log(`   - Booking rules applied: budget ±1, capacity check, wedding type match, 80% style match`);
+  console.log(
+    `   - Average ${(totalOrderListings / totalOrders).toFixed(1)} listings per order`,
+  );
+  console.log(
+    `   - Booking rules applied: budget ±1, capacity check, wedding type match, 80% style match`,
+  );
 }
 
 // Helper function to categorize listing price into budget bucket
 function getPriceBucket(price: number, service: WeddingService): BudgetBucket {
   // Price thresholds vary by service type
-  const thresholds: Record<WeddingService, { low: number; medium: number; high: number }> = {
+  const thresholds: Record<
+    WeddingService,
+    { low: number; medium: number; high: number }
+  > = {
     [WeddingService.VENUE]: { low: 8000, medium: 12000, high: 16000 },
     [WeddingService.CATERING]: { low: 90, medium: 110, high: 130 },
     [WeddingService.PHOTOGRAPHY]: { low: 2500, medium: 3500, high: 4500 },
