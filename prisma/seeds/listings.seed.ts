@@ -8,13 +8,13 @@ export async function seedListings(prisma: PrismaClient) {
   });
 
   const listingsData = [
-    // Venue listings - vendor@wedding.com with multiple product offerings
+    // Venue listings - vendor@wedding.com with balanced offerings
     {
       vendorEmail: 'vendor@wedding.com',
       listings: [
         {
-          listingName: 'Grand Ballroom - Platinum Package',
-          price: 18000,
+          listingName: 'Grand Ballroom Package',
+          price: 12000,
           availabilities: [
             {
               startTime: '2024-12-15T08:00:00Z',
@@ -37,87 +37,11 @@ export async function seedListings(prisma: PrismaClient) {
             'https://res.cloudinary.com/dnyxxyolp/image/upload/v1759302892/flowers_i5p5iq.jpg',
           ],
           remarks:
-            'All-inclusive: Premium lighting, sound, decor, bridal suite, and champagne reception',
+            'Elegant ballroom with premium lighting, sound system, and decoration',
         },
         {
-          listingName: 'Grand Ballroom - Premium Package',
-          price: 15000,
-          availabilities: [
-            {
-              startTime: '2024-11-08T08:00:00Z',
-              endTime: '2024-11-08T17:00:00Z',
-              date: '2024-11-08',
-            },
-            {
-              startTime: '2024-12-20T08:00:00Z',
-              endTime: '2024-12-20T17:00:00Z',
-              date: '2024-12-20',
-            },
-            {
-              startTime: '2025-03-15T08:00:00Z',
-              endTime: '2025-03-15T17:00:00Z',
-              date: '2025-03-15',
-            },
-          ],
-          imageUrls: [
-            'https://res.cloudinary.com/dnyxxyolp/image/upload/v1759302508/ballroom_1_vrgb7s.jpg',
-          ],
-          remarks:
-            'Includes premium lighting, sound system, and elegant decoration',
-        },
-        {
-          listingName: 'Grand Ballroom - Standard Package',
-          price: 12000,
-          availabilities: [
-            {
-              startTime: '2024-10-20T08:00:00Z',
-              endTime: '2024-10-20T17:00:00Z',
-              date: '2024-10-20',
-            },
-            {
-              startTime: '2024-09-30T08:00:00Z',
-              endTime: '2024-09-30T17:00:00Z',
-              date: '2024-09-30',
-            },
-            {
-              startTime: '2025-04-12T08:00:00Z',
-              endTime: '2025-04-12T17:00:00Z',
-              date: '2025-04-12',
-            },
-          ],
-          imageUrls: [
-            'https://res.cloudinary.com/dnyxxyolp/image/upload/v1759302416/ballroom_2_hx5bzf.jpg',
-          ],
-          remarks: 'Basic venue rental with standard amenities',
-        },
-        {
-          listingName: 'Grand Ballroom - Economy Package',
-          price: 9000,
-          availabilities: [
-            {
-              startTime: '2024-09-15T08:00:00Z',
-              endTime: '2024-09-15T17:00:00Z',
-              date: '2024-09-15',
-            },
-            {
-              startTime: '2024-10-10T08:00:00Z',
-              endTime: '2024-10-10T17:00:00Z',
-              date: '2024-10-10',
-            },
-            {
-              startTime: '2025-05-20T08:00:00Z',
-              endTime: '2025-05-20T17:00:00Z',
-              date: '2025-05-20',
-            },
-          ],
-          imageUrls: [
-            'https://res.cloudinary.com/dnyxxyolp/image/upload/v1759302416/ballroom_2_hx5bzf.jpg',
-          ],
-          remarks: 'Budget-friendly option with essential venue features',
-        },
-        {
-          listingName: 'Waterfront Terrace - Premium',
-          price: 13500,
+          listingName: 'Waterfront Terrace Wedding',
+          price: 10500,
           availabilities: [
             {
               startTime: '2024-11-15T08:00:00Z',
@@ -136,63 +60,13 @@ export async function seedListings(prisma: PrismaClient) {
             },
           ],
           imageUrls: [
-            'https://res.cloudinary.com/dnyxxyolp/image/upload/v1759302508/ballroom_1_vrgb7s.jpg',
+            'https://res.cloudinary.com/dnyxxyolp/image/upload/v1759302561/garden_qtylu6.jpg',
           ],
           remarks: 'Stunning waterfront views with outdoor ceremony space',
         },
         {
-          listingName: 'Waterfront Terrace - Standard',
-          price: 10500,
-          availabilities: [
-            {
-              startTime: '2024-10-05T08:00:00Z',
-              endTime: '2024-10-05T17:00:00Z',
-              date: '2024-10-05',
-            },
-            {
-              startTime: '2024-11-22T08:00:00Z',
-              endTime: '2024-11-22T17:00:00Z',
-              date: '2024-11-22',
-            },
-            {
-              startTime: '2025-07-15T08:00:00Z',
-              endTime: '2025-07-15T17:00:00Z',
-              date: '2025-07-15',
-            },
-          ],
-          imageUrls: [
-            'https://res.cloudinary.com/dnyxxyolp/image/upload/v1759302561/garden_qtylu6.jpg',
-          ],
-          remarks: 'Scenic outdoor venue with covered pavilion option',
-        },
-        {
-          listingName: 'Intimate Garden Chapel',
-          price: 7500,
-          availabilities: [
-            {
-              startTime: '2024-09-20T08:00:00Z',
-              endTime: '2024-09-20T17:00:00Z',
-              date: '2024-09-20',
-            },
-            {
-              startTime: '2024-12-05T08:00:00Z',
-              endTime: '2024-12-05T17:00:00Z',
-              date: '2024-12-05',
-            },
-            {
-              startTime: '2025-08-08T08:00:00Z',
-              endTime: '2025-08-08T17:00:00Z',
-              date: '2025-08-08',
-            },
-          ],
-          imageUrls: [
-            'https://res.cloudinary.com/dnyxxyolp/image/upload/v1759302561/garden_qtylu6.jpg',
-          ],
-          remarks: 'Perfect for smaller ceremonies up to 100 guests',
-        },
-        {
-          listingName: 'Rooftop Sky Lounge - Premium',
-          price: 16500,
+          listingName: 'Rooftop Sky Lounge',
+          price: 9500,
           availabilities: [
             {
               startTime: '2024-11-30T08:00:00Z',
@@ -208,51 +82,7 @@ export async function seedListings(prisma: PrismaClient) {
           imageUrls: [
             'https://res.cloudinary.com/dnyxxyolp/image/upload/v1759302508/ballroom_1_vrgb7s.jpg',
           ],
-          remarks: 'Panoramic city skyline views with modern luxury setting',
-        },
-        {
-          listingName: 'Cocktail Reception Package',
-          price: 5500,
-          availabilities: [
-            {
-              startTime: '2024-10-15T08:00:00Z',
-              endTime: '2024-10-15T17:00:00Z',
-              date: '2024-10-15',
-            },
-            {
-              startTime: '2024-11-25T08:00:00Z',
-              endTime: '2024-11-25T17:00:00Z',
-              date: '2024-11-25',
-            },
-            {
-              startTime: '2025-09-10T08:00:00Z',
-              endTime: '2025-09-10T17:00:00Z',
-              date: '2025-09-10',
-            },
-          ],
-          imageUrls: [
-            'https://res.cloudinary.com/dnyxxyolp/image/upload/v1759302416/ballroom_2_hx5bzf.jpg',
-          ],
-          remarks: 'Standing reception with bar and lounge seating',
-        },
-        {
-          listingName: 'Weekend Premium Add-on',
-          price: 3000,
-          availabilities: [
-            {
-              startTime: '2024-12-15T08:00:00Z',
-              endTime: '2024-12-15T17:00:00Z',
-              date: '2024-12-15',
-            },
-            {
-              startTime: '2025-01-25T08:00:00Z',
-              endTime: '2025-01-25T17:00:00Z',
-              date: '2025-01-25',
-            },
-          ],
-          imageUrls: [],
-          remarks:
-            'Extended hours, premium bar setup, and VIP bridal suite access',
+          remarks: 'Modern rooftop venue with panoramic city skyline views',
         },
       ],
     },
