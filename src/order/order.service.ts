@@ -6,6 +6,7 @@ import {
 import { Order } from '@prisma/client';
 import { OrderStatus } from '../common/order-status.enum';
 import { PaymentStatus } from '../common/payment-status.enum';
+import { EmailNotificationService } from '../email-notification/email-notification.service';
 import { PaymentService } from '../payment/payment.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -18,6 +19,7 @@ export class OrderService {
   constructor(
     private prisma: PrismaService,
     private paymentService: PaymentService,
+    private emailService: EmailNotificationService,
   ) {}
 
   async create(dto: CreateOrderDto): Promise<Order> {
@@ -585,6 +587,46 @@ export class OrderService {
       data: { bookingStatus: OrderStatus.CONFIRMED },
     });
 
+    // Send confirmation email to vendor
+    const vendor = await this.prisma.vendor.findUnique({
+      where: { userId: vendorId },
+      include: { user: true },
+    });
+
+    if (vendor) {
+      const wedding = await this.prisma.wedding.findUnique({
+        where: { id: order.weddingId },
+        include: { mainCouple: { include: { user: true } } },
+      });
+
+      if (wedding) {
+        const coupleName = wedding.mainCouple
+          .map((couple) => couple.user.name)
+          .join(' & ');
+        const bookedSlots = orderListing.bookedSlots as any[];
+        const slotsCount = bookedSlots ? bookedSlots.length : 1;
+        const amount = `${order.currency} ${orderListing.listing.price * slotsCount}`;
+        const weddingDate = wedding.date
+          ? wedding.date.toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })
+          : 'TBD';
+
+        await this.emailService.sendVendorBookingConfirmationEmail(
+          vendor.user.email,
+          vendor.user.name,
+          coupleName,
+          orderListing.listing.listingName,
+          weddingDate,
+          amount,
+          orderId,
+          vendorId,
+        );
+      }
+    }
+
     // Return updated order
     return this.findOne(orderId);
   }
@@ -664,6 +706,46 @@ export class OrderService {
       where: { orderId_listingId: { orderId, listingId } },
       data: { bookingStatus: OrderStatus.CANCELLED },
     });
+
+    // Send rejection email to vendor
+    const vendor = await this.prisma.vendor.findUnique({
+      where: { userId: vendorId },
+      include: { user: true },
+    });
+
+    if (vendor) {
+      const wedding = await this.prisma.wedding.findUnique({
+        where: { id: order.weddingId },
+        include: { mainCouple: { include: { user: true } } },
+      });
+
+      if (wedding) {
+        const coupleName = wedding.mainCouple
+          .map((couple) => couple.user.name)
+          .join(' & ');
+        const bookedSlots = orderListing.bookedSlots as any[];
+        const slotsCount = bookedSlots ? bookedSlots.length : 1;
+        const amount = `${order.currency} ${orderListing.listing.price * slotsCount}`;
+        const weddingDate = wedding.date
+          ? wedding.date.toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })
+          : 'TBD';
+
+        await this.emailService.sendVendorBookingRejectionEmail(
+          vendor.user.email,
+          vendor.user.name,
+          coupleName,
+          orderListing.listing.listingName,
+          weddingDate,
+          amount,
+          orderId,
+          vendorId,
+        );
+      }
+    }
 
     // Return updated order
     return this.findOne(orderId);
