@@ -8,13 +8,13 @@ export async function seedListings(prisma: PrismaClient) {
   });
 
   const listingsData = [
-    // Venue listings - vendor@wedding.com with balanced offerings
+    // Venue listings - vendor@wedding.com with balanced pricing (2 listings)
     {
       vendorEmail: 'vendor@wedding.com',
       listings: [
         {
           listingName: 'Grand Ballroom Package',
-          price: 12000,
+          price: 8500,
           availabilities: [
             {
               startTime: '2024-12-15T08:00:00Z',
@@ -41,7 +41,7 @@ export async function seedListings(prisma: PrismaClient) {
         },
         {
           listingName: 'Waterfront Terrace Wedding',
-          price: 10500,
+          price: 7500,
           availabilities: [
             {
               startTime: '2024-11-15T08:00:00Z',
@@ -63,26 +63,6 @@ export async function seedListings(prisma: PrismaClient) {
             'https://res.cloudinary.com/dnyxxyolp/image/upload/v1759302561/garden_qtylu6.jpg',
           ],
           remarks: 'Stunning waterfront views with outdoor ceremony space',
-        },
-        {
-          listingName: 'Rooftop Sky Lounge',
-          price: 9500,
-          availabilities: [
-            {
-              startTime: '2024-11-30T08:00:00Z',
-              endTime: '2024-11-30T17:00:00Z',
-              date: '2024-11-30',
-            },
-            {
-              startTime: '2025-02-20T08:00:00Z',
-              endTime: '2025-02-20T17:00:00Z',
-              date: '2025-02-20',
-            },
-          ],
-          imageUrls: [
-            'https://res.cloudinary.com/dnyxxyolp/image/upload/v1759302508/ballroom_1_vrgb7s.jpg',
-          ],
-          remarks: 'Modern rooftop venue with panoramic city skyline views',
         },
       ],
     },
@@ -153,6 +133,26 @@ export async function seedListings(prisma: PrismaClient) {
             'https://res.cloudinary.com/dnyxxyolp/image/upload/v1759303164/temple_k1qe4z.jpg',
           ],
           remarks: 'Authentic traditional setting for cultural ceremonies',
+        },
+        {
+          listingName: 'Heritage Hall - Reception Package',
+          price: 7200,
+          availabilities: [
+            {
+              startTime: '2024-12-15T08:00:00Z',
+              endTime: '2024-12-15T17:00:00Z',
+              date: '2024-12-15',
+            },
+            {
+              startTime: '2025-02-20T08:00:00Z',
+              endTime: '2025-02-20T17:00:00Z',
+              date: '2025-02-20',
+            },
+          ],
+          imageUrls: [
+            'https://res.cloudinary.com/dnyxxyolp/image/upload/v1759303164/temple_k1qe4z.jpg',
+          ],
+          remarks: 'Traditional banquet hall for receptions',
         },
       ],
     },
@@ -230,6 +230,26 @@ export async function seedListings(prisma: PrismaClient) {
           ],
           remarks: 'Per person pricing for authentic Chinese cuisine',
         },
+        {
+          listingName: 'Traditional Tea Ceremony Package',
+          price: 85,
+          availabilities: [
+            {
+              startTime: '2024-09-30T08:00:00Z',
+              endTime: '2024-09-30T17:00:00Z',
+              date: '2024-09-30',
+            },
+            {
+              startTime: '2024-12-15T08:00:00Z',
+              endTime: '2024-12-15T17:00:00Z',
+              date: '2024-12-15',
+            },
+          ],
+          imageUrls: [
+            'https://res.cloudinary.com/dnyxxyolp/image/upload/v1759302684/chinese_lxil0v.jpg',
+          ],
+          remarks: 'Per person pricing for traditional tea ceremony',
+        },
       ],
     },
     // Photography listings
@@ -306,6 +326,26 @@ export async function seedListings(prisma: PrismaClient) {
           ],
           remarks: 'Natural storytelling photography style',
         },
+        {
+          listingName: 'Pre-Wedding Shoot',
+          price: 1200,
+          availabilities: [
+            {
+              startTime: '2024-11-08T08:00:00Z',
+              endTime: '2024-11-08T17:00:00Z',
+              date: '2024-11-08',
+            },
+            {
+              startTime: '2025-01-25T08:00:00Z',
+              endTime: '2025-01-25T17:00:00Z',
+              date: '2025-01-25',
+            },
+          ],
+          imageUrls: [
+            'https://res.cloudinary.com/dnyxxyolp/image/upload/v1759303156/candid_geijp4.jpg',
+          ],
+          remarks: 'Outdoor pre-wedding photography session',
+        },
       ],
     },
     // Decoration listings
@@ -351,26 +391,6 @@ export async function seedListings(prisma: PrismaClient) {
             'https://res.cloudinary.com/dnyxxyolp/image/upload/v1759302888/premium_flowers_ys61y0.jpg',
           ],
           remarks: 'Bridal bouquet with matching table centerpieces',
-        },
-        {
-          listingName: 'Statement Flower Archway',
-          price: 2800,
-          availabilities: [
-            {
-              startTime: '2024-10-20T08:00:00Z',
-              endTime: '2024-10-20T17:00:00Z',
-              date: '2024-10-20',
-            },
-            {
-              startTime: '2025-01-25T08:00:00Z',
-              endTime: '2025-01-25T17:00:00Z',
-              date: '2025-01-25',
-            },
-          ],
-          imageUrls: [
-            'https://res.cloudinary.com/dnyxxyolp/image/upload/v1759302892/flowers_i5p5iq.jpg',
-          ],
-          remarks: 'Large floral archway perfect for ceremony backdrop',
         },
       ],
     },
@@ -504,24 +524,6 @@ export async function seedListings(prisma: PrismaClient) {
           imageUrls: [],
           remarks: 'Elegant string quartet for intimate ceremonies',
         },
-        {
-          listingName: 'Live Jazz Band',
-          price: 3200,
-          availabilities: [
-            {
-              startTime: '2024-10-20T08:00:00Z',
-              endTime: '2024-10-20T17:00:00Z',
-              date: '2024-10-20',
-            },
-            {
-              startTime: '2024-12-15T08:00:00Z',
-              endTime: '2024-12-15T17:00:00Z',
-              date: '2024-12-15',
-            },
-          ],
-          imageUrls: [],
-          remarks: 'Jazz ensemble for cocktail hour and reception',
-        },
       ],
     },
     {
@@ -604,24 +606,6 @@ export async function seedListings(prisma: PrismaClient) {
           ],
           imageUrls: [],
           remarks: 'Designer gown rental with alterations',
-        },
-        {
-          listingName: 'Groom Tuxedo Package',
-          price: 1200,
-          availabilities: [
-            {
-              startTime: '2024-10-20T08:00:00Z',
-              endTime: '2024-10-20T17:00:00Z',
-              date: '2024-10-20',
-            },
-            {
-              startTime: '2024-12-15T08:00:00Z',
-              endTime: '2024-12-15T17:00:00Z',
-              date: '2024-12-15',
-            },
-          ],
-          imageUrls: [],
-          remarks: 'Complete tuxedo package with accessories',
         },
       ],
     },
@@ -706,24 +690,6 @@ export async function seedListings(prisma: PrismaClient) {
           imageUrls: [],
           remarks: 'Makeup service for bridesmaids (price per person)',
         },
-        {
-          listingName: 'Trial Makeup Session',
-          price: 300,
-          availabilities: [
-            {
-              startTime: '2024-10-20T08:00:00Z',
-              endTime: '2024-10-20T17:00:00Z',
-              date: '2024-10-20',
-            },
-            {
-              startTime: '2024-12-15T08:00:00Z',
-              endTime: '2024-12-15T17:00:00Z',
-              date: '2024-12-15',
-            },
-          ],
-          imageUrls: [],
-          remarks: 'Pre-wedding makeup trial',
-        },
       ],
     },
     {
@@ -806,24 +772,6 @@ export async function seedListings(prisma: PrismaClient) {
           ],
           imageUrls: [],
           remarks: 'Classic vintage car for memorable photos',
-        },
-        {
-          listingName: 'Guest Shuttle Service',
-          price: 1200,
-          availabilities: [
-            {
-              startTime: '2024-10-20T08:00:00Z',
-              endTime: '2024-10-20T17:00:00Z',
-              date: '2024-10-20',
-            },
-            {
-              startTime: '2024-12-15T08:00:00Z',
-              endTime: '2024-12-15T17:00:00Z',
-              date: '2024-12-15',
-            },
-          ],
-          imageUrls: [],
-          remarks: 'Shuttle bus service for wedding guests',
         },
       ],
     },

@@ -42,6 +42,7 @@ export async function seedRecommendationVendors(
 
   const vendors = [];
   const batchSize = 50;
+  const numberOfMonths = 12; // Spread over 12 months for better distribution
 
   // Service-specific name prefixes for realistic vendor names
   const serviceNamePrefixes = {
@@ -110,17 +111,24 @@ export async function seedRecommendationVendors(
     const onboardingStatus = VendorOnboardingStatus.ONBOARDED;
     const isSuspended = false;
 
-    // Use fixed IDs starting from 10000 to avoid conflicts with real users
-    // This ensures vendor IDs remain consistent across database resets
-    const fixedUserId = 10000 + i;
+    const email = `vendor${i}@recommendation.com`;
+
+    // Calculate signup date (spread over 12 months, older to newer)
+    const monthIndex = Math.floor(i / (200 / numberOfMonths));
+    const monthsAgo = numberOfMonths - 1 - monthIndex;
+    const createdDate = new Date();
+    createdDate.setMonth(createdDate.getMonth() - monthsAgo);
+    createdDate.setDate(Math.floor(Math.random() * 28) + 1);
+    createdDate.setHours(Math.floor(Math.random() * 24));
+    createdDate.setMinutes(Math.floor(Math.random() * 60));
 
     const vendor = await prisma.user.create({
       data: {
-        id: fixedUserId,
         name: vendorName,
-        email: `vendor${i}@recommendation.com`,
+        email,
         password: hashedPassword,
         role: UserRole.VENDOR,
+        createdAt: createdDate,
         vendor: {
           create: {
             vendorWebsite: faker.internet.url(),
@@ -133,6 +141,7 @@ export async function seedRecommendationVendors(
             capacity,
             onboardingStatus,
             isSuspended,
+            onboardedDate: createdDate,
             notificationDetails: {
               create: {},
             },
@@ -167,7 +176,7 @@ export async function seedRecommendationVendors(
 
   const avgRating = vendors.reduce((sum, v) => sum + (v.vendor!.rating || 0), 0) / vendors.length;
 
-  console.log('✅ Created 200 vendors with realistic weighted distribution');
+  console.log('✅ Created 200 vendors distributed over 12 months with realistic weighted distribution');
   console.log('   - Services:', serviceDistribution);
   console.log('   - Styles:', styleDistribution);
   console.log(`   - Average rating: ${avgRating.toFixed(2)} stars`);
