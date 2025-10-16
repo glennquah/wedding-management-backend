@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { Guest, OrderStatus } from '@prisma/client';
 import { EmailTemplateType } from '@prisma/client';
 import * as sgMail from '@sendgrid/mail';
 import * as fs from 'fs';
@@ -14,12 +15,16 @@ import { GenerateAiEmailTemplateDto } from './dto/generate-ai-email-template.dto
 import { SendBulkEmailDto } from './dto/send-bulk-email.dto';
 import {
   AdminSuspensionData,
+  CollaboratorGratitudeCardData,
   CalendarAccessRequestData,
   CollaboratorAddedData,
   CreateAccountData,
   EmailTemplateData,
+  GuestGratitudeCardData,
   PasswordResetData,
   RsvpInvitationData,
+  SuperAdminOnboardingData,
+  VendorGratitudeCardData,
   VendorStatusData,
   VendorSuspensionData,
   VerifyEmailData,
@@ -61,6 +66,10 @@ export class EmailNotificationService {
         { name: EmailTemplateType.WELCOME, file: 'welcome.html' },
         { name: EmailTemplateType.VERIFY_EMAIL, file: 'verify-email.html' },
         { name: EmailTemplateType.CREATE_ACCOUNT, file: 'create-account.html' },
+        {
+          name: EmailTemplateType.SUPER_ADMIN_ONBOARDING,
+          file: 'super-admin-onboarding.html',
+        },
         { name: EmailTemplateType.VENDOR_STATUS, file: 'vendor-status.html' },
         {
           name: EmailTemplateType.VENDOR_SUSPENSION,
@@ -69,6 +78,18 @@ export class EmailNotificationService {
         {
           name: EmailTemplateType.ADMIN_SUSPENSION,
           file: 'admin-suspension.html',
+        },
+        {
+          name: EmailTemplateType.GUEST_GRATITUDE_CARD,
+          file: 'guest-gratitude-card.html',
+        },
+        {
+          name: EmailTemplateType.COLLABORATOR_GRATITUDE_CARD,
+          file: 'collaborator-gratitude-card.html',
+        },
+        {
+          name: EmailTemplateType.VENDOR_GRATITUDE_CARD,
+          file: 'vendor-gratitude-card.html',
         },
         {
           name: EmailTemplateType.RSVP_INVITATION,
@@ -117,6 +138,47 @@ export class EmailNotificationService {
     };
 
     await this.sendPasswordResetEmail(to, templateData);
+  }
+
+  async sendSuperAdminCreatedEmail(
+    to: string,
+    name: string,
+    resetLink: string,
+    dashboardUrl: string,
+  ): Promise<void> {
+    const supportEmail = 'hello.knotly@gmail.com';
+
+    const templateData: SuperAdminOnboardingData = {
+      name,
+      buttonUrl: resetLink,
+      dashboardUrl,
+      supportEmail,
+    };
+
+    const html = this.renderTemplate(
+      EmailTemplateType.SUPER_ADMIN_ONBOARDING,
+      templateData,
+    );
+    const text = `Hello ${name}!
+
+Welcome to the Knotly Super Admin team. Use the link below to set your password and activate your account.
+
+${resetLink}
+
+The link expires in 7 days. If you weren't expecting this invitation, let us know at ${supportEmail}.
+
+Once you're set up, visit your dashboard at ${dashboardUrl} to get started.
+
+Best regards,
+The Knotly Team`;
+
+    await this.sendEmail(
+      to,
+      'Knotly Super Admin Access - Set Up Your Account',
+      text,
+      html,
+      EmailTemplateType.SUPER_ADMIN_ONBOARDING,
+    );
   }
 
   async sendWelcomeEmail(
@@ -815,6 +877,337 @@ Website: https://knotly.app`;
       EmailTemplateType.CALENDAR_ACCESS_REQUEST,
       weddingId,
     );
+  }
+
+  async broadcastGuestGratitude(weddingId: number): Promise<void> {
+    // Fetch wedding data
+    const wedding = await this.prisma.wedding.findUnique({
+      where: { id: weddingId },
+      include: {
+        gratitudeCard: true,
+        guests: true,
+      },
+    });
+
+    if (!wedding) {
+      throw new NotFoundException(`Wedding with ID ${weddingId} not found`);
+    }
+
+    if (!wedding.gratitudeCard) {
+      throw new NotFoundException(
+        `Wedding with ID ${weddingId} does not have a gratitudeCard`,
+      );
+    }
+
+    const primaryGuests: Guest[] = wedding.guests.filter(
+      (guest) => guest.email && guest.email.trim() !== '' && guest.attendance,
+    );
+
+    // Process each guest
+    for (const guest of primaryGuests) {
+      try {
+        await this.sendGuestGratitudeEmail(
+          guest.email,
+          guest.name,
+          wedding.gratitudeCard.signOffName,
+          wedding.gratitudeCard.guestCardMessage,
+          wedding.gratitudeCard.guestCardPhotoURL,
+          wedding.date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          }),
+          weddingId,
+        );
+      } catch (error) {
+        console.error(
+          `Failed to send gratitude email to guest ${guest.name} (${guest.id}): ${error.message}`,
+        );
+      }
+    }
+  }
+
+  async sendGuestGratitudeEmail(
+    to: string,
+    name: string,
+    signOff: string,
+    message: string,
+    photoUrl: string,
+    weddingDate: string,
+    weddingId?: number,
+  ): Promise<void> {
+    const templateData: GuestGratitudeCardData = {
+      guestName: name,
+      signOff,
+      message,
+      photoUrl,
+      weddingDate,
+    };
+
+    const html = this.renderTemplate(
+      EmailTemplateType.GUEST_GRATITUDE_CARD,
+      templateData,
+    );
+    const text = this.generateGuestGratitudePlainText(templateData);
+
+    await this.sendEmail(
+      to,
+      `A Heartfelt Thank You!`,
+      text,
+      html,
+      EmailTemplateType.GUEST_GRATITUDE_CARD,
+      weddingId,
+    );
+  }
+
+  private generateGuestGratitudePlainText(
+    templateData: GuestGratitudeCardData,
+  ): string {
+    return `Dear ${templateData.guestName},
+
+    Having you with us on our wedding day meant the world. We wanted to share this small note to express our heartfelt thanks.
+
+    ${templateData.message}
+
+    Cheers,
+    ${templateData.signOff}
+
+    ${templateData.weddingDate}
+
+    ---
+    Knotly - Your Perfect Wedding, Perfectly Planned
+    Website: https://knotly.app`;
+  }
+
+  async broadcastCollaboratorGratitude(weddingId: number): Promise<void> {
+    // Fetch wedding data
+    const wedding = await this.prisma.wedding.findUnique({
+      where: { id: weddingId },
+      include: {
+        mainCouple: true,
+        admins: {
+          include: {
+            user: true,
+          },
+        },
+        gratitudeCard: true,
+      },
+    });
+
+    if (!wedding) {
+      throw new NotFoundException(`Wedding with ID ${weddingId} not found`);
+    }
+
+    if (!wedding.gratitudeCard) {
+      throw new NotFoundException(
+        `Wedding with ID ${weddingId} does not have a gratitudeCard`,
+      );
+    }
+
+    const mainCoupleIds = new Set(
+      wedding.mainCouple.map((user) => user.userId),
+    );
+
+    const collaborators = wedding.admins.filter(
+      (admin) => !mainCoupleIds.has(admin.userId),
+    );
+
+    // Process each guest
+    for (const collaborator of collaborators) {
+      try {
+        await this.sendCollaboratorGratitudeEmail(
+          collaborator.user.email,
+          collaborator.user.name,
+          wedding.gratitudeCard.signOffName,
+          wedding.gratitudeCard.collaboratorCardMessage,
+          wedding.gratitudeCard.collaboratorCardPhotoURL,
+          wedding.date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          }),
+          weddingId,
+        );
+      } catch (error) {
+        console.error(
+          `Failed to send gratitude email to collaborator ${collaborator.user.name} (${collaborator.user.id}): ${error.message}`,
+        );
+      }
+    }
+  }
+
+  async sendCollaboratorGratitudeEmail(
+    to: string,
+    name: string,
+    signOff: string,
+    message: string,
+    photoUrl: string,
+    weddingDate: string,
+    weddingId?: number,
+  ): Promise<void> {
+    const templateData: CollaboratorGratitudeCardData = {
+      collaboratorName: name,
+      signOff,
+      message,
+      photoUrl,
+      weddingDate,
+    };
+
+    const html = this.renderTemplate(
+      EmailTemplateType.COLLABORATOR_GRATITUDE_CARD,
+      templateData,
+    );
+    const text = this.generateCollaboratorGratitudePlainText(templateData);
+
+    await this.sendEmail(
+      to,
+      `A Special Thank You!`,
+      text,
+      html,
+      EmailTemplateType.COLLABORATOR_GRATITUDE_CARD,
+      weddingId,
+    );
+  }
+
+  private generateCollaboratorGratitudePlainText(
+    templateData: CollaboratorGratitudeCardData,
+  ): string {
+    return `Dear ${templateData.collaboratorName},
+
+    We couldn't have done it without you. Thank you for being such an essential part of our wedding journey. We wanted to share this note of appreciation.
+
+    Thank you!
+
+    ------------------------------
+
+    ${templateData.message}
+
+    Love you,
+    ${templateData.signOff}
+
+    ${templateData.weddingDate}
+
+    ---
+    Knotly - Your Perfect Wedding, Perfectly Planned
+    Website: https://knotly.app`;
+  }
+
+  async broadcastVendorGratitude(weddingId: number): Promise<void> {
+    // Fetch wedding data
+    const wedding = await this.prisma.wedding.findUnique({
+      where: { id: weddingId },
+      include: {
+        gratitudeCard: true,
+      },
+    });
+
+    if (!wedding) {
+      throw new NotFoundException(`Wedding with ID ${weddingId} not found`);
+    }
+
+    if (!wedding.gratitudeCard) {
+      throw new NotFoundException(
+        `Wedding with ID ${weddingId} does not have a gratitudeCard`,
+      );
+    }
+
+    // filter for vendor
+    const vendors = await this.prisma.vendor.findMany({
+      where: {
+        listings: {
+          some: {
+            orders: {
+              some: {
+                order: {
+                  weddingId: weddingId,
+                  orderStatus: OrderStatus.COMPLETED,
+                },
+              },
+            },
+          },
+        },
+      },
+      include: {
+        user: true,
+      },
+    });
+
+    // Process each guest
+    for (const vendor of vendors) {
+      try {
+        await this.sendVendorGratitudeEmail(
+          vendor.user.email,
+          vendor.user.name,
+          wedding.gratitudeCard.signOffName,
+          wedding.gratitudeCard.vendorCardMessage,
+          wedding.date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          }),
+          weddingId,
+        );
+      } catch (error) {
+        console.error(
+          `Failed to send gratitude email to vendor ${vendor.user.name} (${vendor.userId}): ${error.message}`,
+        );
+      }
+    }
+  }
+
+  async sendVendorGratitudeEmail(
+    to: string,
+    name: string,
+    signOff: string,
+    message: string,
+    weddingDate: string,
+    weddingId?: number,
+  ): Promise<void> {
+    const templateData: VendorGratitudeCardData = {
+      vendorName: name,
+      signOff,
+      message,
+      weddingDate,
+    };
+
+    const html = this.renderTemplate(
+      EmailTemplateType.VENDOR_GRATITUDE_CARD,
+      templateData,
+    );
+    const text = this.generateVendorGratitudePlainText(templateData);
+
+    await this.sendEmail(
+      to,
+      `A Heartfelt Thank You!`,
+      text,
+      html,
+      EmailTemplateType.VENDOR_GRATITUDE_CARD,
+      weddingId,
+    );
+  }
+
+  private generateVendorGratitudePlainText(
+    templateData: VendorGratitudeCardData,
+  ): string {
+    return `Dear ${templateData.vendorName},
+
+    Our wedding day was perfect, and you were a huge part of that. We wanted to send a special thank you for your incredible work.
+    
+    Thank you!
+    For being our vendor
+
+    ------------------------------
+
+    ${templateData.message}
+
+    With much gratitude,
+    ${templateData.signOff}
+
+    ${templateData.weddingDate}
+
+    ---
+    Knotly - Your Perfect Wedding, Perfectly Planned
+    Website: https://knotly.app`;
   }
 
   async sendEmail(

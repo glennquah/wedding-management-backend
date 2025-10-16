@@ -22,6 +22,13 @@ export interface CreateAccountData {
   resetPasswordUrl: string;
 }
 
+export interface SuperAdminOnboardingData {
+  name: string;
+  buttonUrl: string;
+  dashboardUrl: string;
+  supportEmail: string;
+}
+
 export interface CollaboratorAddedData {
   name: string;
   weddingName: string;
@@ -85,11 +92,35 @@ export interface RsvpInvitationData {
   rsvpUrl: string;
 }
 
+export interface GuestGratitudeCardData {
+  guestName: string;
+  signOff: string;
+  message: string;
+  photoUrl: string;
+  weddingDate: string;
+}
+
+export interface CollaboratorGratitudeCardData {
+  collaboratorName: string;
+  signOff: string;
+  message: string;
+  photoUrl: string;
+  weddingDate: string;
+}
+
+export interface VendorGratitudeCardData {
+  vendorName: string;
+  signOff: string;
+  message: string;
+  weddingDate: string;
+}
+
 export type EmailTemplateData =
   | PasswordResetData
   | WelcomeEmailData
   | VerifyEmailData
   | CreateAccountData
+  | SuperAdminOnboardingData
   | CollaboratorAddedData
   | CalendarAccessRequestData
   | SuccessfulBookingData
@@ -97,4 +128,7 @@ export type EmailTemplateData =
   | AdminStatusData
   | VendorSuspensionData
   | AdminSuspensionData
+  | GuestGratitudeCardData
+  | CollaboratorGratitudeCardData
+  | VendorGratitudeCardData
   | RsvpInvitationData;

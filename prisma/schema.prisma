@@ -87,6 +87,7 @@ enum EmailTemplateType {
   WELCOME
   VERIFY_EMAIL
   CREATE_ACCOUNT
+  SUPER_ADMIN_ONBOARDING
   VENDOR_STATUS
   VENDOR_SUSPENSION
   ADMIN_SUSPENSION
@@ -94,6 +95,9 @@ enum EmailTemplateType {
   CALENDAR_ACCESS_REQUEST
   RSVP_INVITATION
   CUSTOM
+  GUEST_GRATITUDE_CARD
+  COLLABORATOR_GRATITUDE_CARD
+  VENDOR_GRATITUDE_CARD
 }
 
 enum CalendarAccessStatus {
@@ -246,6 +250,7 @@ model Wedding {
   dateOptimizerPreferredDays String[]           @default([])
   dateOptimizerLastResults Json?
   checklist           Checklist?
+  gratitudeCard       GratitudeCard?
 }
 
 model Microsite {
@@ -260,6 +265,19 @@ model Microsite {
   password       String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+
+  weddingId Int     @unique
+  wedding   Wedding @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+}
+
+model GratitudeCard {
+  id                      Int     @id @default(autoincrement())
+  signOffName             String
+  guestCardMessage        String?
+  collaboratorCardMessage String?
+  vendorCardMessage       String?
+  guestCardPhotoURL          String?
+  collaboratorCardPhotoURL   String?
 
   weddingId Int     @unique
   wedding   Wedding @relation(fields: [weddingId], references: [id], onDelete: Cascade)

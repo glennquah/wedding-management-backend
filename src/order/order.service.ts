@@ -9,6 +9,7 @@ import { PaymentStatus } from '../common/payment-status.enum';
 import { PaymentService } from '../payment/payment.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { OrderListingDetailResponseDto } from './dto/order-listing-detail-response.dto';
 import { OrderResponseDto } from './dto/order-response.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 
@@ -186,6 +187,109 @@ export class OrderService {
       },
       orderBy: { createdAt: 'desc' },
     });
+  }
+
+  async findSuccessfulOrdersByWedding(weddingId: number): Promise<Order[]> {
+    const wedding = await this.prisma.wedding.findUnique({
+      where: { id: weddingId },
+    });
+
+    if (!wedding) {
+      throw new NotFoundException(`Wedding with ID ${weddingId} not found`);
+    }
+
+    return this.prisma.order.findMany({
+      where: {
+        weddingId,
+        orderStatus: {
+          in: [OrderStatus.PAID, OrderStatus.COMPLETED],
+        },
+      },
+      include: {
+        listings: {
+          include: {
+            listing: true,
+          },
+        },
+        payments: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async getOrderListingDetailsByWedding(
+    weddingId: number,
+  ): Promise<OrderListingDetailResponseDto[]> {
+    const wedding = await this.prisma.wedding.findUnique({
+      where: { id: weddingId },
+    });
+
+    if (!wedding) {
+      throw new NotFoundException(`Wedding with ID ${weddingId} not found`);
+    }
+
+    // Get all orders for this wedding with their listings
+    const orders = await this.prisma.order.findMany({
+      where: { weddingId },
+      include: {
+        listings: {
+          include: {
+            listing: {
+              include: {
+                vendor: {
+                  include: {
+                    user: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      orderBy: { purchaseDate: 'desc' },
+    });
+
+    // Flatten the order listings into a single array
+    const listingDetails: OrderListingDetailResponseDto[] = [];
+
+    for (const order of orders) {
+      for (const orderListing of order.listings) {
+        // Skip cancelled orders
+        if (orderListing.bookingStatus === OrderStatus.CANCELLED) {
+          continue;
+        }
+
+        const listing = orderListing.listing;
+        const bookedSlots = orderListing.bookedSlots as any[];
+        const slotsCount = bookedSlots ? bookedSlots.length : 1;
+        const amount = listing.price * slotsCount;
+
+        // Extract date from the first booked slot
+        let date = order.purchaseDate.toISOString().split('T')[0]; // Default to purchase date
+        if (bookedSlots && bookedSlots.length > 0) {
+          const firstSlot = bookedSlots[0];
+          // Try to get date from the date field, or extract from startTime
+          if (firstSlot.date) {
+            date = firstSlot.date;
+          } else if (firstSlot.startTime) {
+            date = new Date(firstSlot.startTime).toISOString().split('T')[0];
+          }
+        }
+
+        listingDetails.push({
+          orderId: order.id,
+          listingId: listing.id,
+          listingName: listing.listingName,
+          date: date,
+          status: orderListing.bookingStatus as OrderStatus,
+          amount: amount,
+          currency: order.currency,
+          vendorName: listing.vendor.user.name,
+        });
+      }
+    }
+
+    return listingDetails;
   }
 
   async findByVendor(vendorId: number): Promise<Order[]> {
@@ -368,14 +472,14 @@ export class OrderService {
       );
     }
 
-    // Don't allow removing listings from an order that's already been paid
-    const hasSuccessfulPayment = order.payments.some(
-      (p) => p.paymentStatus === PaymentStatus.SUCCEEDED,
-    );
-
-    if (hasSuccessfulPayment) {
+    // Don't allow removing a listing that's already been paid
+    if (
+      orderListing.bookingStatus === OrderStatus.PAID ||
+      orderListing.bookingStatus === OrderStatus.CONFIRMED ||
+      orderListing.bookingStatus === OrderStatus.COMPLETED
+    ) {
       throw new BadRequestException(
-        'Cannot remove listing from an order that has a successful payment',
+        `Cannot remove listing that has status: ${orderListing.bookingStatus}. Only PENDING or CANCELLED listings can be removed.`,
       );
     }
 

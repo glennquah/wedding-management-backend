@@ -1,3 +1,4 @@
+import { faker } from '@faker-js/faker';
 import {
   PrismaClient,
   UserRole,
@@ -6,7 +7,6 @@ import {
   WeddingStyle,
   WeddingType,
 } from '@prisma/client';
-import { faker } from '@faker-js/faker';
 
 export async function seedRecommendationVendors(
   prisma: PrismaClient,
@@ -17,9 +17,6 @@ export async function seedRecommendationVendors(
 
   console.log('✅ Seeding 200 recommendation vendors with realistic distribution...');
 
-  // Get all enum values
-  const services = Object.values(WeddingService);
-  const styles = Object.values(WeddingStyle);
   const weddingTypes = Object.values(WeddingType);
 
   // Weighted distributions for realistic vendor data
