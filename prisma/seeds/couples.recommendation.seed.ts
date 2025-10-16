@@ -91,6 +91,8 @@ export async function seedRecommendationCouples(
     }
   }
 
-  console.log('✅ Created 1000 couples (2000 admins) distributed over 12 months and associated with weddings');
+  console.log(
+    '✅ Created 1000 couples (2000 admins) distributed over 12 months and associated with weddings',
+  );
   return coupleUsers;
 }

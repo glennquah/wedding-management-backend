@@ -52,7 +52,6 @@ export async function seedCouples(
   const numberOfMonths = 9;
   const couplesPerMonth = Math.ceil(couples.length / numberOfMonths);
 
-  const coupleUsers = [];
   for (let i = 0; i < couples.length; i++) {
     const couple = couples[i];
     const mainWeddingId =
@@ -137,5 +136,7 @@ export async function seedCouples(
       }
     }
   }
-  console.log(`✅ Created ${couples.length} couples distributed over ${numberOfMonths} months and associated with weddings`);
+  console.log(
+    `✅ Created ${couples.length} couples distributed over ${numberOfMonths} months and associated with weddings`,
+  );
 }

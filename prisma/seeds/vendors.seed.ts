@@ -277,5 +277,7 @@ export async function seedVendors(
     });
   }
 
-  console.log(`✅ Created ${vendorData.length} vendors distributed over ${numberOfMonths} months`);
+  console.log(
+    `✅ Created ${vendorData.length} vendors distributed over ${numberOfMonths} months`,
+  );
 }
