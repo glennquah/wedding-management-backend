@@ -1,5 +1,11 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
-import { IsOptional, IsEnum, IsArray, ValidateNested } from 'class-validator';
+import {
+  IsOptional,
+  IsEnum,
+  IsArray,
+  ValidateNested,
+  IsBoolean,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { CreateChecklistDto } from './create-checklist.dto';
 import { CreateChecklistItemDto } from './create-checklist-item.dto';
@@ -43,4 +49,15 @@ export class UpdateChecklistDto extends PartialType(CreateChecklistDto) {
   @ValidateNested({ each: true })
   @Type(() => CreateChecklistItemDto)
   items?: CreateChecklistItemDto[];
+
+  @ApiProperty({
+    description:
+      'Whether to append chat messages to existing history (true) or replace all chat history (false). Defaults to false.',
+    required: false,
+    default: false,
+    example: true,
+  })
+  @IsOptional()
+  @IsBoolean()
+  appendChatHistory?: boolean;
 }

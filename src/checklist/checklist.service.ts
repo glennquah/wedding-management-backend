@@ -201,6 +201,23 @@ export class ChecklistService {
             })),
           },
         }),
+        ...(dto.chatHistory &&
+          dto.chatHistory.length > 0 && {
+            chatHistory: dto.appendChatHistory
+              ? {
+                  create: dto.chatHistory.map((message) => ({
+                    role: message.role,
+                    content: message.content,
+                  })),
+                }
+              : {
+                  deleteMany: {},
+                  create: dto.chatHistory.map((message) => ({
+                    role: message.role,
+                    content: message.content,
+                  })),
+                },
+          }),
       },
       include: {
         items: true,
@@ -247,6 +264,23 @@ export class ChecklistService {
             })),
           },
         }),
+        ...(dto.chatHistory &&
+          dto.chatHistory.length > 0 && {
+            chatHistory: dto.appendChatHistory
+              ? {
+                  create: dto.chatHistory.map((message) => ({
+                    role: message.role,
+                    content: message.content,
+                  })),
+                }
+              : {
+                  deleteMany: {},
+                  create: dto.chatHistory.map((message) => ({
+                    role: message.role,
+                    content: message.content,
+                  })),
+                },
+          }),
       },
       include: {
         items: true,

@@ -139,9 +139,9 @@ export class ChecklistController {
   @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({
     summary:
-      'Update checklist by wedding ID - for updating items and stage progression',
+      'Update checklist by wedding ID - for updating items, stage progression, and chat history',
     description:
-      'Updates checklist items and current stage. Used for saving state on Next Category clicks.',
+      'Updates checklist items, current stage, and chat history. Set appendChatHistory=true to add new messages, or false to replace entire chat history. Used for saving state on Next Category clicks and chat updates.',
   })
   @ApiParam({ name: 'weddingId', description: 'Wedding ID' })
   @ApiResponse({
@@ -167,7 +167,11 @@ export class ChecklistController {
 
   @Put(':id')
   @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
-  @ApiOperation({ summary: 'Update checklist' })
+  @ApiOperation({
+    summary: 'Update checklist by ID',
+    description:
+      'Updates checklist items, current stage, and chat history. Set appendChatHistory=true to add new messages, or false to replace entire chat history.',
+  })
   @ApiParam({ name: 'id', description: 'Checklist ID' })
   @ApiResponse({
     status: 200,
