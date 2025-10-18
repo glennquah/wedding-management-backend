@@ -212,33 +212,34 @@ model NotificationDetails {
 }
 
 model Wedding {
-  id                       Int                  @id @default(autoincrement())
-  mainCouple               Admin[]              @relation("MainCouple")
-  name                     String
-  date                     DateTime?
-  location                 String?
-  guests                   Guest[]
-  admins                   Admin[]              @relation("AdminWeddings")
-  keyAttendeeIds           Int[]                @default([])
-  createdAt                DateTime             @default(now())
-  updatedAt                DateTime             @updatedAt
-  allocatedBudget     Float
-  currentSpending     Float                @default(0)
-  weddingType              WeddingType
-  budgetBucket             BudgetBucket
-  guestCountBucket         GuestCountBucket
-  preferredStyle           WeddingStyle
-  preferredServices        WeddingService[]
-  orders                   Order[]
-  notificationDetails      NotificationDetails?
-  SeatingArrangement       SeatingArrangement?
+  id                         Int                  @id @default(autoincrement())
+  mainCouple                 Admin[]              @relation("MainCouple")
+  name                       String
+  date                       DateTime?
+  location                   String?
+  guests                     Guest[]
+  admins                     Admin[]              @relation("AdminWeddings")
+  keyAttendeeIds             Int[]                @default([])
+  createdAt                  DateTime             @default(now())
+  updatedAt                  DateTime             @updatedAt
+  allocatedBudget            Float
+  currentSpending            Float                @default(0)
+  weddingType                WeddingType
+  budgetBucket               BudgetBucket
+  guestCountBucket           GuestCountBucket
+  preferredStyle             WeddingStyle
+  preferredServices          WeddingService[]
+  orders                     Order[]
+  notificationDetails        NotificationDetails?
+  SeatingArrangement         SeatingArrangement?
   microsite                  Microsite?
-  album               Album?
-  dateOptimizerEarliestDate String?
-  dateOptimizerLatestDate  String?
-  dateOptimizerPreferredDays String[]           @default([])
-  dateOptimizerLastResults Json?
-  gratitudeCard       GratitudeCard?
+  album                      Album?
+  dateOptimizerEarliestDate  String?
+  dateOptimizerLatestDate    String?
+  dateOptimizerPreferredDays String[]             @default([])
+  dateOptimizerLastResults   Json?
+  gratitudeCard              GratitudeCard?
+  guestbook                  Guestbook?
 }
 
 model Microsite {
@@ -259,13 +260,13 @@ model Microsite {
 }
 
 model GratitudeCard {
-  id                      Int     @id @default(autoincrement())
-  signOffName             String
-  guestCardMessage        String?
-  collaboratorCardMessage String?
-  vendorCardMessage       String?
-  guestCardPhotoURL          String?
-  collaboratorCardPhotoURL   String?
+  id                       Int     @id @default(autoincrement())
+  signOffName              String
+  guestCardMessage         String?
+  collaboratorCardMessage  String?
+  vendorCardMessage        String?
+  guestCardPhotoURL        String?
+  collaboratorCardPhotoURL String?
 
   weddingId Int     @unique
   wedding   Wedding @relation(fields: [weddingId], references: [id], onDelete: Cascade)
@@ -283,23 +284,31 @@ model Album {
   wedding   Wedding @relation(fields: [weddingId], references: [id], onDelete: Cascade)
 }
 
+model Guestbook {
+  id         Int    @id @default(autoincrement())
+  guestNotes Json[]
+
+  weddingId Int     @unique
+  wedding   Wedding @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+}
+
 model Guest {
-  id                       Int                        @id @default(autoincrement())
+  id                       Int                       @id @default(autoincrement())
   email                    String
   name                     String
   allergies                String?
   group                    String?
-  confirmationStatus       ConfirmationStatus         @default(PENDING)
-  attendance         Boolean            @default(false)
-  checkInTime        DateTime?
+  confirmationStatus       ConfirmationStatus        @default(PENDING)
+  attendance               Boolean                   @default(false)
+  checkInTime              DateTime?
   weddingId                Int
-  wedding                  Wedding                    @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+  wedding                  Wedding                   @relation(fields: [weddingId], references: [id], onDelete: Cascade)
   primaryGuestId           Int?
-  primaryGuest             Guest?                     @relation("AccompanyingGuests", fields: [primaryGuestId], references: [id])
-  accompanyingGuests       Guest[]                    @relation("AccompanyingGuests")
+  primaryGuest             Guest?                    @relation("AccompanyingGuests", fields: [primaryGuestId], references: [id])
+  accompanyingGuests       Guest[]                   @relation("AccompanyingGuests")
   googleCalendarConnection GoogleCalendarConnection?
-  createdAt                DateTime                   @default(now())
-  updatedAt                DateTime                   @updatedAt
+  createdAt                DateTime                  @default(now())
+  updatedAt                DateTime                  @updatedAt
 }
 
 model Listing {
