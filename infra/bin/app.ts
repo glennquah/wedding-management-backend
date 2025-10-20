@@ -2,7 +2,7 @@
 import * as dotenv from 'dotenv';
 import * as path from 'path';
 import * as cdk from 'aws-cdk-lib';
-import { CdkStack } from '../lib/cdk-stack';
+import { CdkStack } from '../lib/cdk-stack-vpcless';
 
 dotenv.config({ path: path.resolve(__dirname, '../../.env.prod') });
 
