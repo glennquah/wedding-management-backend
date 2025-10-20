@@ -33,7 +33,7 @@ jobs:
         run: npx prisma generate
 
       - name: Build Nest with webpack
-        run: npx nest build --webpack
+        run: NODE_OPTIONS=--max-old-space-size=4096 npx nest build --webpack
 
       - name: Deploy CDK
         env:
