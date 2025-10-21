@@ -175,15 +175,19 @@ export class VendorController {
 
   @Put(':id/accept')
   @Roles(UserRole.SUPERADMIN)
-  @ApiOperation({ summary: 'Accept vendor onboarding and create Stripe Connect account' })
+  @ApiOperation({
+    summary: 'Accept vendor onboarding and create Stripe Connect account',
+  })
   @ApiResponse({
     status: 200,
-    description: 'The vendor has been marked as onboarded and Stripe account created.',
+    description:
+      'The vendor has been marked as onboarded and Stripe account created.',
   })
   @ApiResponse({ status: 404, description: 'Vendor not found.' })
-  async onboardVendor(
-    @Param('id', ParseIntPipe) id: number,
-  ): Promise<{ vendor: VendorResponseDto; stripeAccount: StripeConnectAccountResponseDto }> {
+  async onboardVendor(@Param('id', ParseIntPipe) id: number): Promise<{
+    vendor: VendorResponseDto;
+    stripeAccount: StripeConnectAccountResponseDto;
+  }> {
     return this.service.acceptVendorWithStripe(id, this.paymentService);
   }
 
@@ -245,7 +249,10 @@ export class VendorController {
     status: 200,
     description: 'New Stripe account onboarding link generated.',
   })
-  @ApiResponse({ status: 404, description: 'Vendor or Stripe account not found.' })
+  @ApiResponse({
+    status: 404,
+    description: 'Vendor or Stripe account not found.',
+  })
   async generateStripeOnboardingLink(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<StripeConnectAccountResponseDto> {
@@ -285,7 +292,10 @@ export class VendorController {
     status: 200,
     description: 'Stripe account status synced.',
   })
-  @ApiResponse({ status: 404, description: 'Vendor or Stripe account not found.' })
+  @ApiResponse({
+    status: 404,
+    description: 'Vendor or Stripe account not found.',
+  })
   async syncVendorStripeStatus(@Param('id', ParseIntPipe) id: number) {
     await this.paymentService.syncVendorStripeStatus(id);
     return { message: 'Stripe account status synced successfully' };

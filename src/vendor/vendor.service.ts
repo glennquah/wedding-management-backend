@@ -289,7 +289,10 @@ export class VendorService {
   async acceptVendorWithStripe(
     userId: number,
     paymentService: any,
-  ): Promise<{ vendor: VendorResponseDto; stripeAccount: StripeConnectAccountResponseDto }> {
+  ): Promise<{
+    vendor: VendorResponseDto;
+    stripeAccount: StripeConnectAccountResponseDto;
+  }> {
     // Get vendor details first
     const vendor = await this.findById(userId);
 
