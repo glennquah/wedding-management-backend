@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Guest, OrderStatus } from '@prisma/client';
-import { EmailTemplateType } from '@prisma/client';
+import { EmailTemplateType, Guest, OrderStatus } from '@prisma/client';
 import * as sgMail from '@sendgrid/mail';
 import * as fs from 'fs';
 import * as Handlebars from 'handlebars';
@@ -15,9 +14,9 @@ import { GenerateAiEmailTemplateDto } from './dto/generate-ai-email-template.dto
 import { SendBulkEmailDto } from './dto/send-bulk-email.dto';
 import {
   AdminSuspensionData,
-  CollaboratorGratitudeCardData,
   CalendarAccessRequestData,
   CollaboratorAddedData,
+  CollaboratorGratitudeCardData,
   CreateAccountData,
   EmailTemplateData,
   GuestGratitudeCardData,
