@@ -250,6 +250,10 @@ export async function seedVendors(
             capacity: vendor.capacity,
             onboardingStatus: vendor.onboardingStatus,
             isSuspended: vendor.isSuspended,
+            stripeAccountOnboardingComplete: true,
+            stripeChargesEnabled: true,
+            stripePayoutsEnabled: true,
+            stripeDetailsSubmitted: true,
             notificationDetails: {
               create: {},
             },

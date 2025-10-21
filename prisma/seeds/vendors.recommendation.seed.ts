@@ -133,6 +133,10 @@ export async function seedRecommendationVendors(
             capacity,
             onboardingStatus,
             isSuspended,
+            stripeAccountOnboardingComplete: true,
+            stripeChargesEnabled: true,
+            stripePayoutsEnabled: true,
+            stripeDetailsSubmitted: true,
             notificationDetails: {
               create: {},
             },
