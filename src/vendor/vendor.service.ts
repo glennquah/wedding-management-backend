@@ -17,6 +17,7 @@ import { UserService } from '../user/user.service';
 import { CreateVendorDto } from './dto/create-vendor.dto';
 import { UpdateVendorDto } from './dto/update-vendor.dto';
 import { VendorResponseDto } from './dto/vendor-response.dto';
+import { StripeConnectAccountResponseDto } from './dto/stripe-connect.dto';
 
 @Injectable()
 export class VendorService {
@@ -265,5 +266,66 @@ export class VendorService {
       vendors.map((vendor) => this.create(vendor)), // returns VendorResponseDto
     );
     return createdVendors;
+  }
+
+  async getStripeAccountInfo(userId: number) {
+    const vendor = await this.prisma.vendor.findUnique({
+      where: { userId },
+    });
+
+    if (!vendor) {
+      throw new NotFoundException(`Vendor with userId ${userId} not found`);
+    }
+
+    return {
+      stripeConnectAccountId: vendor.stripeConnectAccountId,
+      stripeAccountOnboardingComplete: vendor.stripeAccountOnboardingComplete,
+      stripeChargesEnabled: vendor.stripeChargesEnabled,
+      stripePayoutsEnabled: vendor.stripePayoutsEnabled,
+      stripeDetailsSubmitted: vendor.stripeDetailsSubmitted,
+    };
+  }
+
+  async acceptVendorWithStripe(
+    userId: number,
+    paymentService: any,
+  ): Promise<{
+    vendor: VendorResponseDto;
+    stripeAccount: StripeConnectAccountResponseDto;
+  }> {
+    // Get vendor details first
+    const vendor = await this.findById(userId);
+
+    // Update onboarding status to ONBOARDED
+    const updatedVendor = await this.update(userId, {
+      onboardingStatus: VendorOnboardingStatus.ONBOARDED,
+    });
+
+    // Create Stripe Connect account or generate new onboarding link
+    const stripeAccountInfo = await this.getStripeAccountInfo(userId);
+    let stripeAccount: StripeConnectAccountResponseDto;
+
+    if (!stripeAccountInfo.stripeConnectAccountId) {
+      // Create new Stripe Connect account
+      stripeAccount = await paymentService.createConnectAccount(
+        vendor.email,
+        userId,
+      );
+    } else {
+      // Generate new onboarding link for existing account
+      const accountLink = await paymentService.createAccountLink(
+        stripeAccountInfo.stripeConnectAccountId,
+      );
+      stripeAccount = {
+        accountId: stripeAccountInfo.stripeConnectAccountId,
+        accountLinkUrl: accountLink.url,
+        expiresAt: new Date(accountLink.expires_at * 1000).toISOString(),
+      };
+    }
+
+    return {
+      vendor: updatedVendor,
+      stripeAccount,
+    };
   }
 }
