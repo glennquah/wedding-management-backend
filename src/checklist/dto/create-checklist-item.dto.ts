@@ -14,18 +14,18 @@ export class CreateChecklistItemDto {
   @IsString()
   category: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'Number of months before wedding to complete this item',
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsInt()
   monthsBeforeWedding?: number;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'Whether the item is completed',
     default: false,
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsBoolean()

@@ -7,6 +7,7 @@ import {
   IsString,
   IsEnum,
   IsNotEmpty,
+  IsDateString,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { CreateChecklistItemDto } from './create-checklist-item.dto';
@@ -28,6 +29,15 @@ export class CreateChatMessageDto {
   @IsString()
   @IsNotEmpty()
   content: string;
+
+  @ApiProperty({
+    description: 'Timestamp when the message was created',
+    example: '2024-10-21T12:00:00.000Z',
+    required: false,
+  })
+  @IsDateString()
+  @IsOptional()
+  createdAt?: string;
 }
 
 export class CreateChecklistDto {

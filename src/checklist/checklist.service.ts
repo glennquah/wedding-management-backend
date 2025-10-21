@@ -70,6 +70,9 @@ export class ChecklistService {
               create: dto.chatHistory.map((message) => ({
                 role: message.role,
                 content: message.content,
+                ...(message.createdAt && {
+                  createdAt: new Date(message.createdAt),
+                }),
               })),
             },
           }),
@@ -208,6 +211,9 @@ export class ChecklistService {
                   create: dto.chatHistory.map((message) => ({
                     role: message.role,
                     content: message.content,
+                    ...(message.createdAt && {
+                      createdAt: new Date(message.createdAt),
+                    }),
                   })),
                 }
               : {
@@ -215,6 +221,9 @@ export class ChecklistService {
                   create: dto.chatHistory.map((message) => ({
                     role: message.role,
                     content: message.content,
+                    ...(message.createdAt && {
+                      createdAt: new Date(message.createdAt),
+                    }),
                   })),
                 },
           }),

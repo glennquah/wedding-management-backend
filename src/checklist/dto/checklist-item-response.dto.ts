@@ -13,9 +13,9 @@ export class ChecklistItemResponseDto {
   @ApiProperty({ description: 'Category of the checklist item' })
   category: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'Number of months before wedding to complete this item',
-    nullable: true
+    nullable: true,
   })
   monthsBeforeWedding: number | null;
 
