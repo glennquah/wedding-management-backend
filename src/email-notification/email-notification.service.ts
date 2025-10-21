@@ -1220,15 +1220,20 @@ Website: https://knotly.app`;
   }
 
   async sendVendorBookingConfirmationEmail(
-    vendorEmail: string,
-    vendorName: string,
+    coupleEmail: string,
     coupleName: string,
+    vendorName: string,
     listingName: string,
     weddingDate: string,
     amount: string,
     orderId: number,
-    vendorId?: number,
+    weddingId?: number,
   ): Promise<void> {
+    const baseUrl = process.env.FRONTEND_URL || 'https://knotly.app';
+    const dashboardUrl = weddingId
+      ? `${baseUrl}/wedding/${weddingId}/orders`
+      : baseUrl;
+
     const templateData: VendorBookingConfirmationData = {
       vendorName,
       coupleName,
@@ -1236,7 +1241,7 @@ Website: https://knotly.app`;
       weddingDate,
       amount,
       orderId,
-      dashboardUrl: process.env.FRONTEND_URL || 'https://knotly.app',
+      dashboardUrl,
     };
 
     const html = this.renderTemplate(
@@ -1246,26 +1251,26 @@ Website: https://knotly.app`;
     const text = this.generateVendorBookingConfirmationPlainText(templateData);
 
     await this.sendEmail(
-      vendorEmail,
+      coupleEmail,
       'Booking Confirmed - Knotly',
       text,
       html,
       EmailTemplateType.VENDOR_BOOKING_CONFIRMATION,
-      undefined,
-      vendorId,
+      weddingId,
     );
   }
 
   private generateVendorBookingConfirmationPlainText(
     templateData: VendorBookingConfirmationData,
   ): string {
-    return `Hello ${templateData.vendorName}!
+    return `Hello ${templateData.coupleName}!
 
-    You have successfully confirmed a booking for ${templateData.coupleName}.
+    Great news! ${templateData.vendorName} has confirmed your booking request.
+    You're one step closer to making your dream wedding a reality!
 
     Booking Details:
-    - Couple: ${templateData.coupleName}
-    - Listing: ${templateData.listingName}
+    - Vendor: ${templateData.vendorName}
+    - Service: ${templateData.listingName}
     - Wedding Date: ${templateData.weddingDate}
     - Booking Amount: ${templateData.amount}
     - Order ID: #${templateData.orderId}
@@ -1273,8 +1278,8 @@ Website: https://knotly.app`;
 
     Next Steps:
     • Review the booking details in your dashboard
-    • Coordinate with the couple to finalize arrangements
-    • Prepare for the wedding event
+    • Coordinate with your vendor to finalize arrangements
+    • Keep track of your wedding timeline and tasks
 
     View in Dashboard: ${templateData.dashboardUrl}
 
@@ -1284,15 +1289,20 @@ Website: https://knotly.app`;
   }
 
   async sendVendorBookingRejectionEmail(
-    vendorEmail: string,
-    vendorName: string,
+    coupleEmail: string,
     coupleName: string,
+    vendorName: string,
     listingName: string,
     weddingDate: string,
     amount: string,
     orderId: number,
-    vendorId?: number,
+    weddingId?: number,
   ): Promise<void> {
+    const baseUrl = process.env.FRONTEND_URL || 'https://knotly.app';
+    const dashboardUrl = weddingId
+      ? `${baseUrl}/wedding/${weddingId}/orders`
+      : baseUrl;
+
     const templateData: VendorBookingRejectionData = {
       vendorName,
       coupleName,
@@ -1300,7 +1310,7 @@ Website: https://knotly.app`;
       weddingDate,
       amount,
       orderId,
-      dashboardUrl: process.env.FRONTEND_URL || 'https://knotly.app',
+      dashboardUrl,
     };
 
     const html = this.renderTemplate(
@@ -1310,39 +1320,40 @@ Website: https://knotly.app`;
     const text = this.generateVendorBookingRejectionPlainText(templateData);
 
     await this.sendEmail(
-      vendorEmail,
-      'Booking Rejected - Knotly',
+      coupleEmail,
+      'Booking Request Declined - Knotly',
       text,
       html,
       EmailTemplateType.VENDOR_BOOKING_REJECTION,
-      undefined,
-      vendorId,
+      weddingId,
     );
   }
 
   private generateVendorBookingRejectionPlainText(
     templateData: VendorBookingRejectionData,
   ): string {
-    return `Hello ${templateData.vendorName}!
+    return `Hello ${templateData.coupleName}!
 
-    You have rejected a booking request from ${templateData.coupleName}.
-    The couple has been notified, and a refund has been processed automatically.
+    We regret to inform you that ${templateData.vendorName} was unable to accept your booking request.
+    A full refund has been processed automatically and will be returned to your payment method.
 
     Booking Details:
-    - Couple: ${templateData.coupleName}
-    - Listing: ${templateData.listingName}
+    - Vendor: ${templateData.vendorName}
+    - Service: ${templateData.listingName}
     - Wedding Date: ${templateData.weddingDate}
     - Refunded Amount: ${templateData.amount}
     - Order ID: #${templateData.orderId}
-    - Status: REJECTED
+    - Status: DECLINED
 
-    What Happens Next:
-    • The couple has been notified about the rejection
-    • The refund will appear in their account within 5-10 business days
-    • The booking slots are now available for other bookings
-    • This booking record will remain in your history for reference
+    What's Next:
+    • Browse our marketplace to find alternative vendors
+    • Your refund will appear within 5-10 business days
+    • You can book other services for your wedding
+    • Contact support if you have any questions about the refund
 
-    View Dashboard: ${templateData.dashboardUrl}
+    We understand this may be disappointing, but we're here to help you find the perfect vendor for your special day.
+
+    Find Other Vendors: ${templateData.dashboardUrl}
 
     ---
     Knotly - Your Perfect Wedding, Perfectly Planned

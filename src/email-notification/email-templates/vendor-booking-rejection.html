@@ -238,38 +238,30 @@
 
       <!-- Main Content -->
       <div class="content">
-        <div class="greeting">⚠️ You Rejected a Booking</div>
+        <div class="greeting">❌ Booking Request Declined</div>
 
         <div class="message">
-          Hello <strong>{{vendorName}}</strong>,
+          Hello <strong>{{coupleName}}</strong>,
         </div>
 
         <div class="message">
-          You have rejected a booking request from <strong>{{coupleName}}</strong>.
-          The couple has been notified, and a refund has been processed automatically.
-        </div>
-
-        <div style="text-align: center;">
-          <span class="status-badge">REJECTED</span>
+          We regret to inform you that <strong>{{vendorName}}</strong> was unable to accept your booking request.
+          A full refund has been processed automatically and will be returned to your payment method.
         </div>
 
         <div class="booking-details">
           <h3>📋 Booking Details</h3>
           <div class="detail-row">
-            <span class="detail-label">Couple:</span>
-            <span class="detail-value">{{coupleName}}</span>
+            <span class="detail-label">Vendor:</span>
+            <span class="detail-value">{{vendorName}}</span>
           </div>
           <div class="detail-row">
-            <span class="detail-label">Listing:</span>
+            <span class="detail-label">Service:</span>
             <span class="detail-value">{{listingName}}</span>
           </div>
           <div class="detail-row">
             <span class="detail-label">Wedding Date:</span>
             <span class="detail-value">{{weddingDate}}</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Refunded Amount:</span>
-            <span class="detail-value">{{amount}}</span>
           </div>
           <div class="detail-row">
             <span class="detail-label">Order ID:</span>
@@ -278,27 +270,27 @@
         </div>
 
         <div class="refund-notice">
-          <strong>💰 Refund Processed:</strong> The full payment has been automatically refunded to the couple. The time slots have been returned to your availability calendar.
+          <strong>💰 Refund Processed:</strong> The full payment has been automatically refunded. You should see the refund in your account within 5-10 business days.
         </div>
 
         <div class="cta-container">
-          <a href="{{dashboardUrl}}" class="cta-button">View Dashboard</a>
+          <a href="{{dashboardUrl}}" class="cta-button">Find Other Vendors</a>
         </div>
 
         <div class="divider"></div>
 
         <div class="message">
-          <strong>What Happens Next:</strong>
+          <strong>What's Next:</strong>
           <ul style="margin-top: 10px; padding-left: 20px;">
-            <li>The couple has been notified about the rejection</li>
-            <li>The refund will appear in their account within 5-10 business days</li>
-            <li>The booking slots are now available for other bookings</li>
-            <li>This booking record will remain in your history for reference</li>
+            <li>Browse our marketplace to find alternative vendors</li>
+            <li>Your refund will appear within 5-10 business days</li>
+            <li>You can book other services for your wedding</li>
+            <li>Contact support if you have any questions about the refund</li>
           </ul>
         </div>
 
         <div class="message">
-          If you have any questions or need assistance, please contact our support team at hello.knotly@gmail.com.
+          We understand this may be disappointing, but we're here to help you find the perfect vendor for your special day. If you need assistance, please contact our support team at hello.knotly@gmail.com.
         </div>
       </div>
 
