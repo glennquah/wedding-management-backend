@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { seedAlbums } from './seeds/albums.seed';
 import { seedCalendarConnections } from './seeds/calendar-connections.seed';
 import { seedCouples } from './seeds/couples.seed';
 import { seedEmailHistory } from './seeds/email-history.seed';
@@ -25,6 +26,7 @@ async function main() {
     await prisma.order.deleteMany();
     await prisma.listing.deleteMany();
     await prisma.microsite.deleteMany();
+    await prisma.album.deleteMany();
     await prisma.googleCalendarConnection.deleteMany();
     await prisma.guest.deleteMany();
     await prisma.wedding.deleteMany();
@@ -45,6 +47,9 @@ async function main() {
 
   // 4. Seed microsites (depends on weddings)
   await seedMicrosites(prisma, weddings);
+
+  // 4.5. Seed albums (depends on weddings)
+  await seedAlbums(prisma, weddings);
 
   // 5. Seed couples (depends on weddings and hashedPassword)
   await seedCouples(prisma, weddings, hashedPassword);
@@ -80,6 +85,7 @@ async function main() {
   console.log('- 20 Vendor users');
   console.log('- 5 Weddings');
   console.log('- 1 Microsite');
+  console.log('- 1 Album');
   console.log('- 25 Notification Details (5 for weddings, 20 for vendors)');
   console.log(
     '- 127 Email Templates (2 SuperAdmin + 125 for notification details)',

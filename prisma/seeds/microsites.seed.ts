@@ -19,7 +19,7 @@ export async function seedMicrosites(
   await prisma.microsite.create({
     data: {
       templateNumber: 1,
-      slug: 'seeded-microsite',
+      slug: 'tom-and-jerry-wedding',
       coupleName: 'Tom & Jerry',
       heroImages: [MICROSITE_IMAGE_URL],
       imageGallery: [MICROSITE_IMAGE_URL],
@@ -53,7 +53,7 @@ export async function seedMicrosites(
           a: 'Complimentary parking is available at Marina Bay Grand Ballroom.',
         },
       ],
-      password: 'celebrate',
+      password: 'password',
       wedding: {
         connect: { id: mainWedding.id },
       },
