@@ -12,8 +12,8 @@ export async function seedWeddings(prisma: PrismaClient) {
 
   const weddingThemes = [
     {
-      name: "Ryan & Ranae's Enchanted Garden Wedding",
-      date: new Date('2025-12-15T14:00:00.000Z'),
+      name: "Tom & Jerry's Enchanted Garden Wedding",
+      date: new Date('2024-12-15T14:00:00.000Z'),
       location: 'Marina Bay Grand Ballroom',
       weddingType: WeddingType.WESTERN,
       budgetBucket: BudgetBucket.LUXURY,
