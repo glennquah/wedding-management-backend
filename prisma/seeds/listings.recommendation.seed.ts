@@ -7,7 +7,13 @@ export async function seedRecommendationListings(prisma: PrismaClient) {
 
   console.log('✅ Seeding recommendation listings (3 per vendor)...');
 
+  // Fetch ONLY recommendation vendors (user IDs 10000+)
   const vendors = await prisma.vendor.findMany({
+    where: {
+      userId: {
+        gte: 10000,
+      },
+    },
     include: { user: true },
   });
 

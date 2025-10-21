@@ -27,8 +27,13 @@ export async function seedRecommendationOrders(prisma: PrismaClient) {
     [GuestCountBucket.LARGE]: { min: 150, max: 1000 },
   };
 
-  // Fetch all weddings with their preferences
+  // Fetch ONLY recommendation weddings (IDs 20000+)
   const weddings = await prisma.wedding.findMany({
+    where: {
+      id: {
+        gte: 20000,
+      },
+    },
     select: {
       id: true,
       date: true,
@@ -40,8 +45,15 @@ export async function seedRecommendationOrders(prisma: PrismaClient) {
     },
   });
 
-  // Fetch all listings with vendor info
+  // Fetch ONLY listings from recommendation vendors (vendor IDs 10000+)
   const listings = await prisma.listing.findMany({
+    where: {
+      vendor: {
+        userId: {
+          gte: 10000,
+        },
+      },
+    },
     include: {
       vendor: {
         select: {

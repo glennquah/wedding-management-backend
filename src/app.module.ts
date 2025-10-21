@@ -24,6 +24,7 @@ import { VendorRecommendationModule } from './vendor-recommendation/vendor-recom
 import { VendorModule } from './vendor/vendor.module';
 import { WeddingModule } from './wedding/wedding.module';
 import { GratitudeCardModule } from './gratitude-card/gratitude-card.module';
+import { GuestbookModule } from './guestbook/guestbook.module';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { GratitudeCardModule } from './gratitude-card/gratitude-card.module';
     VendorRecommendationModule,
     GratitudeCardModule,
     CalendarModule,
+    GuestbookModule,
   ],
   controllers: [AppController],
   providers: [AppService],

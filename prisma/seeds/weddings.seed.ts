@@ -29,7 +29,7 @@ export async function seedWeddings(prisma: PrismaClient) {
     },
     {
       name: "Marcus & Sarah's Traditional Chinese Tea Ceremony",
-      date: new Date('2024-11-08T10:00:00.000Z'),
+      date: new Date('2025-11-08T10:00:00.000Z'),
       location: 'Heritage Temple Hall',
       weddingType: WeddingType.CHINESE,
       budgetBucket: BudgetBucket.MEDIUM,
@@ -44,7 +44,7 @@ export async function seedWeddings(prisma: PrismaClient) {
     },
     {
       name: "Amir & Siti's Malay Cultural Celebration",
-      date: new Date('2024-10-20T16:00:00.000Z'),
+      date: new Date('2025-10-20T16:00:00.000Z'),
       location: 'Garden Paradise Resort',
       weddingType: WeddingType.MALAY,
       budgetBucket: BudgetBucket.MEDIUM,
@@ -59,7 +59,7 @@ export async function seedWeddings(prisma: PrismaClient) {
     },
     {
       name: "Raj & Priya's Grand Indian Wedding",
-      date: new Date('2025-01-25T12:00:00.000Z'),
+      date: new Date('2026-01-25T12:00:00.000Z'),
       location: 'Heritage Temple Hall',
       weddingType: WeddingType.INDIAN,
       budgetBucket: BudgetBucket.MEDIUM,
@@ -74,7 +74,7 @@ export async function seedWeddings(prisma: PrismaClient) {
     },
     {
       name: "David & Emma's Modern Beach Wedding",
-      date: new Date('2024-09-30T17:00:00.000Z'),
+      date: new Date('2025-09-30T17:00:00.000Z'),
       location: 'Garden Paradise Resort',
       weddingType: WeddingType.WESTERN,
       budgetBucket: BudgetBucket.MEDIUM,

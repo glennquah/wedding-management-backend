@@ -12,6 +12,13 @@ import { seedUsers } from './seeds/users.seed';
 import { seedVendors } from './seeds/vendors.seed';
 import { seedWeddings } from './seeds/weddings.seed';
 
+// Recommendation system seeds
+import { seedRecommendationCouples } from './seeds/couples.recommendation.seed';
+import { seedRecommendationListings } from './seeds/listings.recommendation.seed';
+import { seedRecommendationOrders } from './seeds/orders.recommendation.seed';
+import { seedRecommendationVendors } from './seeds/vendors.recommendation.seed';
+import { seedRecommendationWeddings } from './seeds/weddings.recommendation.seed';
+
 const prisma = new PrismaClient();
 
 async function main() {
@@ -75,11 +82,38 @@ async function main() {
   // 12. Seed Google Calendar connections (depends on weddings, couples, and guests)
   await seedCalendarConnections(prisma);
 
+  console.log('\n========================================');
+  console.log('✅ Regular seed data completed!');
+  console.log('========================================');
+
+  // ============================================
+  // PART 2: RECOMMENDATION SYSTEM DATA
+  // ============================================
+  console.log('\n========================================');
+  console.log('Seeding recommendation system data...');
+  console.log('========================================\n');
+
+  // 11. Seed recommendation weddings (1000 weddings with fixed IDs 20000+)
+  const recommendationWeddings = await seedRecommendationWeddings(prisma);
+
+  // 12. Seed recommendation couples (1000 couples / 2000 admins)
+  await seedRecommendationCouples(prisma, recommendationWeddings, hashedPassword);
+
+  // 13. Seed recommendation vendors (200 vendors with fixed IDs 10000+)
+  await seedRecommendationVendors(prisma, hashedPassword);
+
+  // 14. Seed recommendation listings (depends on recommendation vendors)
+  await seedRecommendationListings(prisma);
+
+  // 15. Seed recommendation orders (connects recommendation weddings to recommendation vendors only)
+  await seedRecommendationOrders(prisma);
+
   // Print final summary
   console.log('\n========================================');
   console.log('✅ Database seeded successfully!');
   console.log('========================================');
   console.log('Summary:');
+  console.log('\n📊 REGULAR DATA:');
   console.log('- 1 Super Admin');
   console.log('- 10 Admin users (5 couples)');
   console.log('- 20 Vendor users');
@@ -110,8 +144,19 @@ async function main() {
   console.log(`\n✨ DATE OPTIMIZER TEST DATA (All Weddings):`);
   console.log(`- All main couples have mock calendar connections`);
   console.log(`- 5 key attendees added per wedding`);
+
+  console.log('\n🤖 RECOMMENDATION SYSTEM DATA:');
+  console.log('- 1000 Weddings (IDs 20000-20999)');
+  console.log('- 2000 Admin users (1000 couples)');
+  console.log('- 200 Vendor users (IDs 10000-10199)');
+  console.log('- 400+ Listings (2 per recommendation vendor)');
+  console.log('- 1000 Orders (1 per recommendation wedding)');
+  console.log('- Orders connect recommendation weddings → recommendation vendors ONLY');
+  console.log('- Realistic matching based on budget, wedding type, style, and capacity');
+
   console.log(`\n📧 Test Login Credentials:`);
-  console.log(`  Email: couple@wedding.com`);
+  console.log(`  Regular: couple@wedding.com`);
+  console.log(`  Recommendation: couple0_person1@recommendation.com`);
   console.log(`  Password: password123`);
 }
 
