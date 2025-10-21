@@ -10,6 +10,10 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CheckoutSessionResponseDto } from './dto/checkout-session-response.dto';
 import { CreateCheckoutSessionDto } from './dto/create-checkout-session.dto';
 import { PaymentResponseDto } from './dto/payment-response.dto';
+import {
+  StripeConnectAccountResponseDto,
+  StripeAccountStatusDto,
+} from '../vendor/dto/stripe-connect.dto';
 
 @Injectable()
 export class PaymentService {
@@ -239,6 +243,9 @@ export class PaymentService {
             event.data.object as Stripe.Checkout.Session,
           );
           break;
+        case 'account.updated':
+          await this.handleAccountUpdated(event.data.object as Stripe.Account);
+          break;
         default:
           console.log(`Unhandled event type: ${event.type}`);
       }
@@ -358,6 +365,165 @@ export class PaymentService {
       console.log(
         `Cleaned up expired order ${payment.orderId} and restored availability for ${payment.order.listings.length} listings`,
       );
+    }
+  }
+
+  async createConnectAccount(
+    email: string,
+    vendorId: number,
+  ): Promise<StripeConnectAccountResponseDto> {
+    try {
+      // Create the Stripe Connect Express account
+      const account = await this.stripe.accounts.create({
+        type: 'express',
+        email: email,
+        country: 'SG', // Singapore
+        capabilities: {
+          card_payments: { requested: true },
+          transfers: { requested: true },
+        },
+        business_type: 'individual', // Can be 'individual' or 'company'
+        metadata: {
+          vendorId: vendorId.toString(),
+        },
+      });
+
+      // Generate onboarding link
+      const accountLink = await this.createAccountLink(account.id);
+
+      // Update vendor with Stripe account ID
+      await this.prisma.vendor.update({
+        where: { userId: vendorId },
+        data: {
+          stripeConnectAccountId: account.id,
+        },
+      });
+
+      console.log(
+        `Created Stripe Connect account ${account.id} for vendor ${vendorId}`,
+      );
+
+      return {
+        accountId: account.id,
+        accountLinkUrl: accountLink.url,
+        expiresAt: new Date(accountLink.expires_at * 1000).toISOString(),
+      };
+    } catch (error) {
+      console.error('Error creating Stripe Connect account:', error);
+      throw new InternalServerErrorException(
+        'Failed to create Stripe Connect account',
+      );
+    }
+  }
+
+  async createAccountLink(accountId: string): Promise<Stripe.AccountLink> {
+    try {
+      const baseUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+
+      const accountLink = await this.stripe.accountLinks.create({
+        account: accountId,
+        refresh_url: `${baseUrl}/vendor/stripe-connect/refresh`,
+        return_url: `${baseUrl}/vendor/stripe-connect/complete`,
+        type: 'account_onboarding',
+      });
+
+      return accountLink;
+    } catch (error) {
+      console.error('Error creating account link:', error);
+      throw new InternalServerErrorException('Failed to create account link');
+    }
+  }
+
+  async getAccountStatus(accountId: string): Promise<StripeAccountStatusDto> {
+    try {
+      const account = await this.stripe.accounts.retrieve(accountId);
+
+      return {
+        accountId: account.id,
+        chargesEnabled: account.charges_enabled,
+        payoutsEnabled: account.payouts_enabled,
+        detailsSubmitted: account.details_submitted,
+        onboardingComplete:
+          account.charges_enabled &&
+          account.payouts_enabled &&
+          account.details_submitted,
+        requirements: account.requirements
+          ? {
+              currently_due: account.requirements.currently_due || [],
+              eventually_due: account.requirements.eventually_due || [],
+              past_due: account.requirements.past_due || [],
+            }
+          : undefined,
+      };
+    } catch (error) {
+      console.error('Error retrieving account status:', error);
+      throw new InternalServerErrorException(
+        'Failed to retrieve account status',
+      );
+    }
+  }
+
+  async syncVendorStripeStatus(vendorId: number): Promise<void> {
+    try {
+      const vendor = await this.prisma.vendor.findUnique({
+        where: { userId: vendorId },
+      });
+
+      if (!vendor?.stripeConnectAccountId) {
+        throw new BadRequestException('Vendor does not have a Stripe account');
+      }
+
+      const accountStatus = await this.getAccountStatus(
+        vendor.stripeConnectAccountId,
+      );
+
+      // Update vendor with latest Stripe status
+      await this.prisma.vendor.update({
+        where: { userId: vendorId },
+        data: {
+          stripeChargesEnabled: accountStatus.chargesEnabled,
+          stripePayoutsEnabled: accountStatus.payoutsEnabled,
+          stripeDetailsSubmitted: accountStatus.detailsSubmitted,
+          stripeAccountOnboardingComplete: accountStatus.onboardingComplete,
+        },
+      });
+
+      console.log(`Synced Stripe status for vendor ${vendorId}`);
+    } catch (error) {
+      console.error('Error syncing vendor Stripe status:', error);
+      throw new InternalServerErrorException(
+        'Failed to sync vendor Stripe status',
+      );
+    }
+  }
+
+  private async handleAccountUpdated(account: Stripe.Account) {
+    try {
+      const vendorId = account.metadata?.vendorId;
+      if (!vendorId) {
+        console.log(
+          `Account ${account.id} has no vendorId metadata, skipping update`,
+        );
+        return;
+      }
+
+      // Update vendor with latest account status
+      await this.prisma.vendor.update({
+        where: { userId: parseInt(vendorId) },
+        data: {
+          stripeChargesEnabled: account.charges_enabled,
+          stripePayoutsEnabled: account.payouts_enabled,
+          stripeDetailsSubmitted: account.details_submitted,
+          stripeAccountOnboardingComplete:
+            account.charges_enabled &&
+            account.payouts_enabled &&
+            account.details_submitted,
+        },
+      });
+
+      console.log(`Updated Stripe account status for vendor ${vendorId}`);
+    } catch (error) {
+      console.error('Error handling account update:', error);
     }
   }
 }

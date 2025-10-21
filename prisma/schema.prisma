@@ -171,6 +171,13 @@ model Vendor {
   listings            Listing[]
   onboardingStatus    VendorOnboardingStatus @default(PENDING)
   notificationDetails NotificationDetails?
+
+  // Stripe Connect fields
+  stripeConnectAccountId String?  @unique
+  stripeAccountOnboardingComplete Boolean @default(false)
+  stripeChargesEnabled Boolean @default(false)
+  stripePayoutsEnabled Boolean @default(false)
+  stripeDetailsSubmitted Boolean @default(false)
 }
 
 model EmailTemplate {

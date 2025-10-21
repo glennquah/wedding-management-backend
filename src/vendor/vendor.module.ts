@@ -3,11 +3,12 @@ import { JwtModule } from '@nestjs/jwt';
 import { EmailNotificationModule } from 'src/email-notification/email-notification.module';
 import { UserModule } from '../user/user.module';
 import { UserService } from '../user/user.service';
+import { PaymentModule } from '../payment/payment.module';
 import { VendorController } from './vendor.controller';
 import { VendorService } from './vendor.service';
 
 @Module({
-  imports: [UserModule, JwtModule, EmailNotificationModule],
+  imports: [UserModule, JwtModule, EmailNotificationModule, PaymentModule],
   controllers: [VendorController],
   providers: [VendorService, UserService],
   exports: [VendorService],
