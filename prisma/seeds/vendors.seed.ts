@@ -231,13 +231,31 @@ export async function seedVendors(
     },
   ];
 
-  for (const vendor of vendorData) {
+  // Create vendors over a 9-month period to show growth over time
+  const numberOfMonths = 9;
+  const vendorsPerMonth = Math.ceil(vendorData.length / numberOfMonths);
+
+  for (let i = 0; i < vendorData.length; i++) {
+    const vendor = vendorData[i];
+
+    // Calculate which month this vendor should be created in (older to newer)
+    const monthIndex = Math.floor(i / vendorsPerMonth);
+    const monthsAgo = numberOfMonths - 1 - monthIndex;
+
+    // Generate a date within that month
+    const createdDate = new Date();
+    createdDate.setMonth(createdDate.getMonth() - monthsAgo);
+    createdDate.setDate(Math.floor(Math.random() * 28) + 1); // Random day in month
+    createdDate.setHours(Math.floor(Math.random() * 24));
+    createdDate.setMinutes(Math.floor(Math.random() * 60));
+
     await prisma.user.create({
       data: {
         name: vendor.name,
         email: vendor.email,
         password: hashedPassword,
         role: UserRole.VENDOR,
+        createdAt: createdDate,
         vendor: {
           create: {
             vendorWebsite: `https://${vendor.name.toLowerCase().replace(/\s+/g, '-')}.com`,
@@ -263,5 +281,7 @@ export async function seedVendors(
     });
   }
 
-  console.log('✅ Created 20 vendors');
+  console.log(
+    `✅ Created ${vendorData.length} vendors distributed over ${numberOfMonths} months`,
+  );
 }

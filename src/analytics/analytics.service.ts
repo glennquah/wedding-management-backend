@@ -4,6 +4,32 @@ import { ConfirmationStatus } from '../common/confirmation-status.enum';
 import { OrderStatus } from '../common/order-status.enum';
 import { RevenuePeriod } from '../common/revenue-period.enum';
 import { PrismaService } from '../prisma/prisma.service';
+import { AdminBasicStatsResponseDto } from './dto/admin-basic-stats-response.dto';
+import {
+  AdminBookingsOverTimeResponseDto,
+  BookingDataPoint,
+} from './dto/admin-bookings-over-time-response.dto';
+import {
+  AdminRevenueByCategoryResponseDto,
+  CategoryRevenueData,
+} from './dto/admin-revenue-by-category-response.dto';
+import { AdminRevenueResponseDto } from './dto/admin-revenue-response.dto';
+import {
+  AdminTopListingsResponseDto,
+  TopListingData,
+} from './dto/admin-top-listings-response.dto';
+import {
+  AdminTopVendorsResponseDto,
+  TopVendorData,
+} from './dto/admin-top-vendors-response.dto';
+import {
+  AdminUserGrowthResponseDto,
+  UserGrowthDataPoint,
+} from './dto/admin-user-growth-response.dto';
+import {
+  AdminWeddingDatesHeatmapResponseDto,
+  WeddingDateData,
+} from './dto/admin-wedding-dates-heatmap-response.dto';
 import { GuestCountResponseDto } from './dto/guest-count-response.dto';
 import {
   RevenueDataPoint,
@@ -528,6 +554,567 @@ export class AnalyticsService {
       confirmedBookings,
       completedBookings,
       cancelledBookings,
+    };
+  }
+
+  // ========== SUPER ADMIN ANALYTICS ==========
+
+  async getAdminBasicStats(): Promise<AdminBasicStatsResponseDto> {
+    // Get total vendors
+    const totalVendors = await this.prisma.vendor.count();
+
+    // Get total couples (admins)
+    const totalCouples = await this.prisma.admin.count();
+
+    // Get total weddings
+    const totalWeddings = await this.prisma.wedding.count();
+
+    // Get total microsites
+    const totalMicrosites = await this.prisma.microsite.count();
+
+    // Get total guests served
+    const totalGuestsServed = await this.prisma.guest.count();
+
+    return {
+      totalVendors,
+      totalCouples,
+      totalWeddings,
+      totalMicrosites,
+      totalGuestsServed,
+    };
+  }
+
+  async getAdminRevenue(): Promise<AdminRevenueResponseDto> {
+    // Get all orders with PAID or COMPLETED status (not cancelled)
+    const orders = await this.prisma.order.findMany({
+      where: {
+        orderStatus: {
+          in: [OrderStatus.PAID, OrderStatus.COMPLETED],
+        },
+      },
+      include: {
+        wedding: true,
+      },
+    });
+
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfYear = new Date(now.getFullYear(), 0, 1);
+
+    let mtd = 0;
+    let ytd = 0;
+    let allTime = 0;
+
+    orders.forEach((order) => {
+      const revenue = order.totalAmount;
+
+      allTime += revenue;
+
+      if (order.purchaseDate >= startOfYear) {
+        ytd += revenue;
+      }
+
+      if (order.purchaseDate >= startOfMonth) {
+        mtd += revenue;
+      }
+    });
+
+    // Calculate average order value
+    const totalOrders = orders.length;
+    const averageOrderValue = totalOrders > 0 ? allTime / totalOrders : 0;
+
+    // Calculate commission earned (10% of total revenue)
+    const commissionEarned = allTime * 0.1;
+
+    return {
+      mtd: Math.round(mtd * 100) / 100,
+      ytd: Math.round(ytd * 100) / 100,
+      allTime: Math.round(allTime * 100) / 100,
+      averageOrderValue: Math.round(averageOrderValue * 100) / 100,
+      commissionEarned: Math.round(commissionEarned * 100) / 100,
+      currency: 'SGD',
+    };
+  }
+
+  async getAdminRevenueOverTime(
+    period: RevenuePeriod = RevenuePeriod.MONTHLY,
+  ): Promise<RevenueOverTimeResponseDto> {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfYear = new Date(now.getFullYear(), 0, 1);
+
+    const whereClause: Prisma.OrderWhereInput = {
+      orderStatus: {
+        in: [OrderStatus.PAID, OrderStatus.COMPLETED],
+      },
+    };
+
+    // Add date filter based on period
+    if (period === RevenuePeriod.MONTHLY) {
+      whereClause.purchaseDate = {
+        gte: startOfMonth,
+      };
+    } else if (period === RevenuePeriod.YEARLY) {
+      whereClause.purchaseDate = {
+        gte: startOfYear,
+      };
+    }
+    // For ALL, no date filter is applied
+
+    const orders = await this.prisma.order.findMany({
+      where: whereClause,
+      orderBy: {
+        purchaseDate: 'asc',
+      },
+    });
+
+    // Group by the specified period
+    const periodMap = new Map<string, { revenue: number; count: number }>();
+
+    orders.forEach((order) => {
+      let periodKey: string;
+
+      if (period === RevenuePeriod.MONTHLY) {
+        periodKey = order.purchaseDate.toISOString().substring(0, 10);
+      } else if (period === RevenuePeriod.YEARLY) {
+        periodKey = order.purchaseDate.toISOString().substring(0, 7);
+      } else {
+        periodKey = order.purchaseDate.toISOString().substring(0, 7);
+      }
+
+      const revenue = order.totalAmount;
+
+      if (!periodMap.has(periodKey)) {
+        periodMap.set(periodKey, { revenue: 0, count: 0 });
+      }
+
+      const periodData = periodMap.get(periodKey)!;
+      periodData.revenue += revenue;
+      periodData.count += 1;
+    });
+
+    // Convert map to array and sort chronologically
+    const data: RevenueDataPoint[] = Array.from(periodMap.entries())
+      .map(([periodKey, periodData]) => ({
+        period: periodKey,
+        revenue: Math.round(periodData.revenue * 100) / 100,
+        orderCount: periodData.count,
+        isPredictedValue: false,
+      }))
+      .sort((a, b) => a.period.localeCompare(b.period));
+
+    // Generate predictions for the next 3 months only for YEARLY or ALL periods
+    let allData = data;
+    if (period === RevenuePeriod.YEARLY || period === RevenuePeriod.ALL) {
+      const predictions = this.generateRevenuePredictions(data, 3);
+      allData = [...data, ...predictions];
+    }
+
+    return {
+      data: allData,
+      periodType: period,
+      currency: 'SGD',
+    };
+  }
+
+  async getAdminRevenueByCategory(): Promise<AdminRevenueByCategoryResponseDto> {
+    // Get all listings with their orders and vendor info
+    const listings = await this.prisma.listing.findMany({
+      include: {
+        vendor: {
+          include: {
+            user: true,
+          },
+        },
+        orders: {
+          where: {
+            order: {
+              orderStatus: {
+                in: [OrderStatus.PAID, OrderStatus.COMPLETED],
+              },
+            },
+          },
+          include: {
+            order: true,
+          },
+        },
+      },
+    });
+
+    // Group by service category
+    const categoryMap = new Map<
+      string,
+      { revenue: number; bookingCount: number }
+    >();
+    let totalRevenue = 0;
+
+    listings.forEach((listing) => {
+      const category = listing.vendor.serviceOffered || 'UNCATEGORIZED';
+      const bookingCount = listing.orders.length;
+      const revenue = listing.orders.reduce(
+        (_sum, _ol) => _sum + listing.price,
+        0,
+      );
+
+      if (!categoryMap.has(category)) {
+        categoryMap.set(category, { revenue: 0, bookingCount: 0 });
+      }
+
+      const categoryData = categoryMap.get(category)!;
+      categoryData.revenue += revenue;
+      categoryData.bookingCount += bookingCount;
+      totalRevenue += revenue;
+    });
+
+    // Convert to array and calculate percentages
+    const categories: CategoryRevenueData[] = Array.from(categoryMap.entries())
+      .map(([category, data]) => ({
+        category,
+        revenue: Math.round(data.revenue * 100) / 100,
+        bookingCount: data.bookingCount,
+        percentageOfTotal:
+          totalRevenue > 0
+            ? Math.round((data.revenue / totalRevenue) * 10000) / 100
+            : 0,
+      }))
+      .sort((a, b) => b.revenue - a.revenue);
+
+    return {
+      categories,
+      totalRevenue: Math.round(totalRevenue * 100) / 100,
+      currency: 'SGD',
+    };
+  }
+
+  async getAdminTopVendors(
+    limit: number = 10,
+  ): Promise<AdminTopVendorsResponseDto> {
+    // Get all vendors with their listings and orders
+    const vendors = await this.prisma.vendor.findMany({
+      include: {
+        user: true,
+        listings: {
+          include: {
+            orders: {
+              where: {
+                order: {
+                  orderStatus: {
+                    in: [OrderStatus.PAID, OrderStatus.COMPLETED],
+                  },
+                },
+              },
+              include: {
+                order: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    // Calculate revenue and booking count for each vendor
+    const vendorData: TopVendorData[] = vendors
+      .map((vendor) => {
+        let totalRevenue = 0;
+        let totalBookings = 0;
+
+        vendor.listings.forEach((listing) => {
+          totalBookings += listing.orders.length;
+          totalRevenue += listing.orders.reduce(
+            (_sum, _ol) => _sum + listing.price,
+            0,
+          );
+        });
+
+        return {
+          vendorId: vendor.userId,
+          vendorName: vendor.user.name,
+          serviceOffered: vendor.serviceOffered || undefined,
+          revenue: Math.round(totalRevenue * 100) / 100,
+          bookingCount: totalBookings,
+          rating: vendor.rating || undefined,
+        };
+      })
+      .filter((vendor) => vendor.bookingCount > 0)
+      .sort((a, b) => b.revenue - a.revenue)
+      .slice(0, limit);
+
+    return {
+      topVendors: vendorData,
+      currency: 'SGD',
+    };
+  }
+
+  async getAdminTopListings(
+    limit: number = 10,
+  ): Promise<AdminTopListingsResponseDto> {
+    // Get all listings with their orders and vendor info
+    const listings = await this.prisma.listing.findMany({
+      include: {
+        vendor: {
+          include: {
+            user: true,
+          },
+        },
+        orders: {
+          where: {
+            order: {
+              orderStatus: {
+                in: [OrderStatus.PAID, OrderStatus.COMPLETED],
+              },
+            },
+          },
+          include: {
+            order: true,
+          },
+        },
+      },
+    });
+
+    // Calculate revenue and booking count for each listing
+    const listingData: TopListingData[] = listings
+      .map((listing) => {
+        const bookingCount = listing.orders.length;
+        const revenue = listing.orders.reduce(
+          (_sum, _ol) => _sum + listing.price,
+          0,
+        );
+
+        return {
+          listingId: listing.id,
+          listingName: listing.listingName,
+          vendorId: listing.vendorId,
+          vendorName: listing.vendor.user.name,
+          serviceOffered: listing.vendor.serviceOffered || undefined,
+          revenue: Math.round(revenue * 100) / 100,
+          bookingCount,
+          price: listing.price,
+        };
+      })
+      .filter((listing) => listing.bookingCount > 0)
+      .sort((a, b) => b.revenue - a.revenue)
+      .slice(0, limit);
+
+    return {
+      topListings: listingData,
+      currency: 'SGD',
+    };
+  }
+
+  async getAdminBookingsOverTime(
+    period: RevenuePeriod = RevenuePeriod.MONTHLY,
+  ): Promise<AdminBookingsOverTimeResponseDto> {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfYear = new Date(now.getFullYear(), 0, 1);
+
+    const whereClause: Prisma.OrderWhereInput = {
+      orderStatus: {
+        in: [OrderStatus.PAID, OrderStatus.COMPLETED],
+      },
+    };
+
+    // Add date filter based on period
+    if (period === RevenuePeriod.MONTHLY) {
+      whereClause.purchaseDate = {
+        gte: startOfMonth,
+      };
+    } else if (period === RevenuePeriod.YEARLY) {
+      whereClause.purchaseDate = {
+        gte: startOfYear,
+      };
+    }
+    // For ALL, no date filter is applied
+
+    const orders = await this.prisma.order.findMany({
+      where: whereClause,
+      orderBy: {
+        purchaseDate: 'asc',
+      },
+    });
+
+    // Group by the specified period
+    const periodMap = new Map<
+      string,
+      { bookingCount: number; revenue: number }
+    >();
+
+    orders.forEach((order) => {
+      let periodKey: string;
+
+      if (period === RevenuePeriod.MONTHLY) {
+        periodKey = order.purchaseDate.toISOString().substring(0, 10);
+      } else if (period === RevenuePeriod.YEARLY) {
+        periodKey = order.purchaseDate.toISOString().substring(0, 7);
+      } else {
+        periodKey = order.purchaseDate.toISOString().substring(0, 7);
+      }
+
+      if (!periodMap.has(periodKey)) {
+        periodMap.set(periodKey, { bookingCount: 0, revenue: 0 });
+      }
+
+      const periodData = periodMap.get(periodKey)!;
+      periodData.bookingCount += 1;
+      periodData.revenue += order.totalAmount;
+    });
+
+    // Convert map to array and sort chronologically
+    const data: BookingDataPoint[] = Array.from(periodMap.entries())
+      .map(([periodKey, periodData]) => ({
+        period: periodKey,
+        bookingCount: periodData.bookingCount,
+        revenue: Math.round(periodData.revenue * 100) / 100,
+      }))
+      .sort((a, b) => a.period.localeCompare(b.period));
+
+    return {
+      data,
+      periodType: period,
+      currency: 'SGD',
+    };
+  }
+
+  async getAdminWeddingDatesHeatmap(): Promise<AdminWeddingDatesHeatmapResponseDto> {
+    // Get all weddings with dates
+    const weddings = await this.prisma.wedding.findMany({
+      where: {
+        date: {
+          not: null,
+        },
+      },
+      select: {
+        date: true,
+      },
+    });
+
+    // Group by date
+    const dateMap = new Map<string, number>();
+
+    weddings.forEach((wedding) => {
+      if (wedding.date) {
+        const dateKey = wedding.date.toISOString().substring(0, 10);
+        dateMap.set(dateKey, (dateMap.get(dateKey) || 0) + 1);
+      }
+    });
+
+    // Convert to array and sort by date
+    const data: WeddingDateData[] = Array.from(dateMap.entries())
+      .map(([date, count]) => ({
+        date,
+        count,
+      }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+
+    return {
+      data,
+      totalWeddings: weddings.length,
+    };
+  }
+
+  async getAdminUserGrowth(
+    period: RevenuePeriod = RevenuePeriod.MONTHLY,
+  ): Promise<AdminUserGrowthResponseDto> {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfYear = new Date(now.getFullYear(), 0, 1);
+
+    // Get all vendors and admins with their creation dates
+    const vendors = await this.prisma.vendor.findMany({
+      select: {
+        onboardedDate: true,
+      },
+      orderBy: {
+        onboardedDate: 'asc',
+      },
+    });
+
+    const admins = await this.prisma.admin.findMany({
+      select: {
+        onboardedDate: true,
+      },
+      orderBy: {
+        onboardedDate: 'asc',
+      },
+    });
+
+    // Combine and group by period
+    const periodMap = new Map<
+      string,
+      { vendorSignups: number; coupleSignups: number }
+    >();
+
+    // Process vendors
+    vendors.forEach((vendor) => {
+      let periodKey: string;
+      const date = vendor.onboardedDate;
+
+      // Apply date filter based on period
+      if (period === RevenuePeriod.MONTHLY && date < startOfMonth) return;
+      if (period === RevenuePeriod.YEARLY && date < startOfYear) return;
+
+      if (period === RevenuePeriod.MONTHLY) {
+        periodKey = date.toISOString().substring(0, 10);
+      } else {
+        periodKey = date.toISOString().substring(0, 7);
+      }
+
+      if (!periodMap.has(periodKey)) {
+        periodMap.set(periodKey, { vendorSignups: 0, coupleSignups: 0 });
+      }
+
+      periodMap.get(periodKey)!.vendorSignups += 1;
+    });
+
+    // Process admins
+    admins.forEach((admin) => {
+      let periodKey: string;
+      const date = admin.onboardedDate;
+
+      // Apply date filter based on period
+      if (period === RevenuePeriod.MONTHLY && date < startOfMonth) return;
+      if (period === RevenuePeriod.YEARLY && date < startOfYear) return;
+
+      if (period === RevenuePeriod.MONTHLY) {
+        periodKey = date.toISOString().substring(0, 10);
+      } else {
+        periodKey = date.toISOString().substring(0, 7);
+      }
+
+      if (!periodMap.has(periodKey)) {
+        periodMap.set(periodKey, { vendorSignups: 0, coupleSignups: 0 });
+      }
+
+      periodMap.get(periodKey)!.coupleSignups += 1;
+    });
+
+    // Convert to array and calculate cumulative totals
+    const sortedEntries = Array.from(periodMap.entries()).sort((a, b) =>
+      a[0].localeCompare(b[0]),
+    );
+
+    let cumulativeTotal = 0;
+    const data: UserGrowthDataPoint[] = sortedEntries.map(
+      ([periodKey, periodData]) => {
+        const totalSignups =
+          periodData.vendorSignups + periodData.coupleSignups;
+        cumulativeTotal += totalSignups;
+
+        return {
+          period: periodKey,
+          vendorSignups: periodData.vendorSignups,
+          coupleSignups: periodData.coupleSignups,
+          totalSignups,
+          cumulativeTotal,
+        };
+      },
+    );
+
+    return {
+      data,
+      periodType: period,
+      totalVendors: vendors.length,
+      totalCouples: admins.length,
     };
   }
 }
