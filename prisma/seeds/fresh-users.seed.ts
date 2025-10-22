@@ -58,7 +58,9 @@ export async function seedFreshUsers(
   });
 
   console.log(`✅ Created test admin: ${testAdminUser.email}`);
-  console.log(`✅ Created test wedding: ${testWedding.name} (ID: ${testWedding.id})`);
+  console.log(
+    `✅ Created test wedding: ${testWedding.name} (ID: ${testWedding.id})`,
+  );
 
   // Create test vendor WITHOUT Stripe details
   const testVendorUser = await prisma.user.create({
@@ -92,7 +94,9 @@ export async function seedFreshUsers(
     },
   });
 
-  console.log(`✅ Created test vendor: ${testVendorUser.email} (without Stripe)`);
+  console.log(
+    `✅ Created test vendor: ${testVendorUser.email} (without Stripe)`,
+  );
 
   console.log('\n✅ Fresh test users created successfully!');
   console.log('Test credentials:');
