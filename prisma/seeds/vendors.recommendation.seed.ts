@@ -292,6 +292,10 @@ export async function seedRecommendationVendors(
             onboardingStatus,
             isSuspended,
             onboardedDate: createdDate,
+            stripeAccountOnboardingComplete: true,
+            stripeChargesEnabled: true,
+            stripePayoutsEnabled: true,
+            stripeDetailsSubmitted: true,
             notificationDetails: {
               create: {},
             },

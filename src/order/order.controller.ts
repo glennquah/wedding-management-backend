@@ -263,4 +263,64 @@ export class OrderController {
     );
     return this.orderService.toOrderResponseDto(order);
   }
+
+  @Post(':orderId/listings/:listingId/vendor-complete')
+  @Roles(UserRole.VENDOR)
+  @ApiOperation({
+    summary: 'Vendor marks a specific listing in an order as completed',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'The listing has been successfully marked as completed.',
+    type: OrderResponseDto,
+  })
+  @ApiResponse({ status: 404, description: 'Order or listing not found.' })
+  @ApiResponse({
+    status: 400,
+    description:
+      'Listing cannot be completed or booking dates have not passed.',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Vendor does not own this listing.',
+  })
+  async vendorCompleteListing(
+    @Param('orderId', ParseIntPipe) orderId: number,
+    @Param('listingId', ParseIntPipe) listingId: number,
+    @Request() req: Request & { user: JwtPayload },
+  ): Promise<OrderResponseDto> {
+    const order = await this.orderService.vendorCompleteListing(
+      orderId,
+      listingId,
+      req.user.sub,
+    );
+    return this.orderService.toOrderResponseDto(order);
+  }
+
+  @Post(':orderId/listings/:listingId/superadmin-complete')
+  @Roles(UserRole.SUPERADMIN)
+  @ApiOperation({
+    summary: 'Superadmin marks a specific listing in an order as completed',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'The listing has been successfully marked as completed.',
+    type: OrderResponseDto,
+  })
+  @ApiResponse({ status: 404, description: 'Order or listing not found.' })
+  @ApiResponse({
+    status: 400,
+    description:
+      'Listing cannot be completed or booking dates have not passed.',
+  })
+  async superadminCompleteListing(
+    @Param('orderId', ParseIntPipe) orderId: number,
+    @Param('listingId', ParseIntPipe) listingId: number,
+  ): Promise<OrderResponseDto> {
+    const order = await this.orderService.superadminCompleteListing(
+      orderId,
+      listingId,
+    );
+    return this.orderService.toOrderResponseDto(order);
+  }
 }
