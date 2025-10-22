@@ -25,10 +25,21 @@ async function bootstrap() {
       'http://localhost:3000',
       'http://localhost:3001',
       'https://knotly.app',
+      'https://www.knotly.app',
       'https://core.knotly.app',
+      'https://www.core.knotly.app',
     ],
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
     credentials: true,
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'Cookie',
+      'stripe-signature',
+    ],
+    exposedHeaders: ['Set-Cookie'],
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
   });
 
   const config = new DocumentBuilder()
