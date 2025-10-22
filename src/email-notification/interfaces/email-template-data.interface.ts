@@ -115,6 +115,26 @@ export interface VendorGratitudeCardData {
   weddingDate: string;
 }
 
+export interface VendorBookingConfirmationData {
+  vendorName: string;
+  coupleName: string;
+  listingName: string;
+  weddingDate: string;
+  amount: string;
+  orderId: number;
+  dashboardUrl: string;
+}
+
+export interface VendorBookingRejectionData {
+  vendorName: string;
+  coupleName: string;
+  listingName: string;
+  weddingDate: string;
+  amount: string;
+  orderId: number;
+  dashboardUrl: string;
+}
+
 export type EmailTemplateData =
   | PasswordResetData
   | WelcomeEmailData
@@ -131,4 +151,6 @@ export type EmailTemplateData =
   | GuestGratitudeCardData
   | CollaboratorGratitudeCardData
   | VendorGratitudeCardData
-  | RsvpInvitationData;
+  | RsvpInvitationData
+  | VendorBookingConfirmationData
+  | VendorBookingRejectionData;

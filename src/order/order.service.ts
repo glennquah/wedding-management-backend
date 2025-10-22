@@ -6,6 +6,7 @@ import {
 import { Order } from '@prisma/client';
 import { OrderStatus } from '../common/order-status.enum';
 import { PaymentStatus } from '../common/payment-status.enum';
+import { EmailNotificationService } from '../email-notification/email-notification.service';
 import { PaymentService } from '../payment/payment.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -18,6 +19,7 @@ export class OrderService {
   constructor(
     private prisma: PrismaService,
     private paymentService: PaymentService,
+    private emailService: EmailNotificationService,
   ) {}
 
   async create(dto: CreateOrderDto): Promise<Order> {
@@ -585,6 +587,53 @@ export class OrderService {
       data: { bookingStatus: OrderStatus.CONFIRMED },
     });
 
+    // Send confirmation email to couple
+    const vendor = await this.prisma.vendor.findUnique({
+      where: { userId: vendorId },
+      include: { user: true },
+    });
+
+    if (vendor) {
+      const wedding = await this.prisma.wedding.findUnique({
+        where: { id: order.weddingId },
+        include: { mainCouple: { include: { user: true } } },
+      });
+
+      if (wedding && wedding.mainCouple.length > 0) {
+        const coupleName = wedding.mainCouple
+          .map((couple) => couple.user.name)
+          .join(' & ');
+        const bookedSlots = Array.isArray(orderListing.bookedSlots)
+          ? orderListing.bookedSlots
+          : [];
+        const slotsCount = bookedSlots.length > 0 ? bookedSlots.length : 1;
+        const listingPrice = orderListing.listing?.price || 0;
+        const totalAmount = listingPrice * slotsCount;
+
+        const amount = `${order.currency} ${totalAmount.toFixed(2)}`;
+        const weddingDate = wedding.date
+          ? wedding.date.toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })
+          : 'TBD';
+
+        for (const _couple of wedding.mainCouple) {
+          await this.emailService.sendVendorBookingConfirmationEmail(
+            _couple.user.email,
+            coupleName,
+            vendor.user.name,
+            orderListing.listing.listingName,
+            weddingDate,
+            amount,
+            orderId,
+            order.weddingId,
+          );
+        }
+      }
+    }
+
     // Return updated order
     return this.findOne(orderId);
   }
@@ -637,18 +686,19 @@ export class OrderService {
       (p) => p.paymentStatus === PaymentStatus.SUCCEEDED,
     );
 
+    // Restore booked slots back to listing availabilities
+    const listing = orderListing.listing;
+    const bookedSlots = Array.isArray(orderListing.bookedSlots)
+      ? orderListing.bookedSlots
+      : [];
+
     if (hasSuccessfulPayment) {
       // Process partial refund through payment service
-      const bookedSlots = orderListing.bookedSlots as any[];
-      const slotsCount = bookedSlots ? bookedSlots.length : 1;
+      const slotsCount = bookedSlots.length > 0 ? bookedSlots.length : 1;
       const refundAmount = orderListing.listing.price * slotsCount;
 
       await this.paymentService.refundPartialPayment(orderId, refundAmount);
     }
-
-    // Restore booked slots back to listing availabilities
-    const listing = orderListing.listing;
-    const bookedSlots = orderListing.bookedSlots as any[];
 
     const availableSlots = (listing.availabilities as any) || [];
     // Add the rejected order's slots back to available slots
@@ -664,6 +714,52 @@ export class OrderService {
       where: { orderId_listingId: { orderId, listingId } },
       data: { bookingStatus: OrderStatus.CANCELLED },
     });
+
+    // Send rejection email to couple
+    const vendor = await this.prisma.vendor.findUnique({
+      where: { userId: vendorId },
+      include: { user: true },
+    });
+
+    if (vendor) {
+      const wedding = await this.prisma.wedding.findUnique({
+        where: { id: order.weddingId },
+        include: { mainCouple: { include: { user: true } } },
+      });
+
+      if (wedding && wedding.mainCouple.length > 0) {
+        const coupleName = wedding.mainCouple
+          .map((couple) => couple.user.name)
+          .join(' & ');
+        const bookedSlots = Array.isArray(orderListing.bookedSlots)
+          ? orderListing.bookedSlots
+          : [];
+        const slotsCount = bookedSlots.length > 0 ? bookedSlots.length : 1;
+        const listingPrice = orderListing.listing?.price || 0;
+        const totalAmount = listingPrice * slotsCount;
+        const amount = `${order.currency} ${totalAmount.toFixed(2)}`;
+        const weddingDate = wedding.date
+          ? wedding.date.toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })
+          : 'TBD';
+
+        for (const _couple of wedding.mainCouple) {
+          await this.emailService.sendVendorBookingRejectionEmail(
+            _couple.user.email,
+            coupleName,
+            vendor.user.name,
+            orderListing.listing.listingName,
+            weddingDate,
+            amount,
+            orderId,
+            order.weddingId,
+          );
+        }
+      }
+    }
 
     // Return updated order
     return this.findOne(orderId);

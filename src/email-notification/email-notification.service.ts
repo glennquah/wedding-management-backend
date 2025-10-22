@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Guest, OrderStatus } from '@prisma/client';
-import { EmailTemplateType } from '@prisma/client';
+import { EmailTemplateType, Guest, OrderStatus } from '@prisma/client';
 import * as sgMail from '@sendgrid/mail';
 import * as fs from 'fs';
 import * as Handlebars from 'handlebars';
@@ -15,15 +14,17 @@ import { GenerateAiEmailTemplateDto } from './dto/generate-ai-email-template.dto
 import { SendBulkEmailDto } from './dto/send-bulk-email.dto';
 import {
   AdminSuspensionData,
-  CollaboratorGratitudeCardData,
   CalendarAccessRequestData,
   CollaboratorAddedData,
+  CollaboratorGratitudeCardData,
   CreateAccountData,
   EmailTemplateData,
   GuestGratitudeCardData,
   PasswordResetData,
   RsvpInvitationData,
   SuperAdminOnboardingData,
+  VendorBookingConfirmationData,
+  VendorBookingRejectionData,
   VendorGratitudeCardData,
   VendorStatusData,
   VendorSuspensionData,
@@ -102,6 +103,14 @@ export class EmailNotificationService {
         {
           name: EmailTemplateType.CALENDAR_ACCESS_REQUEST,
           file: 'calendar-access-request.html',
+        },
+        {
+          name: EmailTemplateType.VENDOR_BOOKING_CONFIRMATION,
+          file: 'vendor-booking-confirmation.html',
+        },
+        {
+          name: EmailTemplateType.VENDOR_BOOKING_REJECTION,
+          file: 'vendor-booking-rejection.html',
         },
       ];
 
@@ -1192,7 +1201,7 @@ Website: https://knotly.app`;
     return `Dear ${templateData.vendorName},
 
     Our wedding day was perfect, and you were a huge part of that. We wanted to send a special thank you for your incredible work.
-    
+
     Thank you!
     For being our vendor
 
@@ -1204,6 +1213,147 @@ Website: https://knotly.app`;
     ${templateData.signOff}
 
     ${templateData.weddingDate}
+
+    ---
+    Knotly - Your Perfect Wedding, Perfectly Planned
+    Website: https://knotly.app`;
+  }
+
+  async sendVendorBookingConfirmationEmail(
+    coupleEmail: string,
+    coupleName: string,
+    vendorName: string,
+    listingName: string,
+    weddingDate: string,
+    amount: string,
+    orderId: number,
+    weddingId?: number,
+  ): Promise<void> {
+    const baseUrl = process.env.FRONTEND_URL || 'https://knotly.app';
+    const dashboardUrl = weddingId
+      ? `${baseUrl}/wedding/${weddingId}/orders`
+      : baseUrl;
+
+    const templateData: VendorBookingConfirmationData = {
+      vendorName,
+      coupleName,
+      listingName,
+      weddingDate,
+      amount,
+      orderId,
+      dashboardUrl,
+    };
+
+    const html = this.renderTemplate(
+      EmailTemplateType.VENDOR_BOOKING_CONFIRMATION,
+      templateData,
+    );
+    const text = this.generateVendorBookingConfirmationPlainText(templateData);
+
+    await this.sendEmail(
+      coupleEmail,
+      'Booking Confirmed - Knotly',
+      text,
+      html,
+      EmailTemplateType.VENDOR_BOOKING_CONFIRMATION,
+      weddingId,
+    );
+  }
+
+  private generateVendorBookingConfirmationPlainText(
+    templateData: VendorBookingConfirmationData,
+  ): string {
+    return `Hello ${templateData.coupleName}!
+
+    Great news! ${templateData.vendorName} has confirmed your booking request.
+    You're one step closer to making your dream wedding a reality!
+
+    Booking Details:
+    - Vendor: ${templateData.vendorName}
+    - Service: ${templateData.listingName}
+    - Wedding Date: ${templateData.weddingDate}
+    - Booking Amount: ${templateData.amount}
+    - Order ID: #${templateData.orderId}
+    - Status: CONFIRMED
+
+    Next Steps:
+    • Review the booking details in your dashboard
+    • Coordinate with your vendor to finalize arrangements
+    • Keep track of your wedding timeline and tasks
+
+    View in Dashboard: ${templateData.dashboardUrl}
+
+    ---
+    Knotly - Your Perfect Wedding, Perfectly Planned
+    Website: https://knotly.app`;
+  }
+
+  async sendVendorBookingRejectionEmail(
+    coupleEmail: string,
+    coupleName: string,
+    vendorName: string,
+    listingName: string,
+    weddingDate: string,
+    amount: string,
+    orderId: number,
+    weddingId?: number,
+  ): Promise<void> {
+    const baseUrl = process.env.FRONTEND_URL || 'https://knotly.app';
+    const dashboardUrl = weddingId
+      ? `${baseUrl}/wedding/${weddingId}/orders`
+      : baseUrl;
+
+    const templateData: VendorBookingRejectionData = {
+      vendorName,
+      coupleName,
+      listingName,
+      weddingDate,
+      amount,
+      orderId,
+      dashboardUrl,
+    };
+
+    const html = this.renderTemplate(
+      EmailTemplateType.VENDOR_BOOKING_REJECTION,
+      templateData,
+    );
+    const text = this.generateVendorBookingRejectionPlainText(templateData);
+
+    await this.sendEmail(
+      coupleEmail,
+      'Booking Request Declined - Knotly',
+      text,
+      html,
+      EmailTemplateType.VENDOR_BOOKING_REJECTION,
+      weddingId,
+    );
+  }
+
+  private generateVendorBookingRejectionPlainText(
+    templateData: VendorBookingRejectionData,
+  ): string {
+    return `Hello ${templateData.coupleName}!
+
+    We regret to inform you that ${templateData.vendorName} was unable to accept your booking request.
+    A full refund has been processed automatically and will be returned to your payment method.
+
+    Booking Details:
+    - Vendor: ${templateData.vendorName}
+    - Service: ${templateData.listingName}
+    - Wedding Date: ${templateData.weddingDate}
+    - Refunded Amount: ${templateData.amount}
+    - Order ID: #${templateData.orderId}
+    - Status: DECLINED
+
+    What's Next:
+    • Browse our marketplace to find alternative vendors
+    • Your refund will appear within 5-10 business days
+    • You can book other services for your wedding
+    • Contact support if you have any questions about the refund
+
+    We understand this may be disappointing, but we're here to help you find the perfect vendor for your special day.
+
+    Find Other Vendors: ${templateData.dashboardUrl}
 
     ---
     Knotly - Your Perfect Wedding, Perfectly Planned
