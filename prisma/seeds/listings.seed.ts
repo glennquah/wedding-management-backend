@@ -8,28 +8,28 @@ export async function seedListings(prisma: PrismaClient) {
   });
 
   const listingsData = [
-    // Venue listings - vendor@wedding.com with multiple product offerings
+    // Venue listings - vendor@wedding.com with balanced pricing (2 listings)
     {
       vendorEmail: 'vendor@wedding.com',
       listings: [
         {
-          listingName: 'Grand Ballroom - Platinum Package',
-          price: 18000,
+          listingName: 'Grand Ballroom Package',
+          price: 8500,
           availabilities: [
             {
-              startTime: '2025-12-15T08:00:00Z',
-              endTime: '2025-12-15T17:00:00Z',
-              date: '2025-12-15',
+              startTime: '2024-12-15T08:00:00Z',
+              endTime: '2024-12-15T17:00:00Z',
+              date: '2024-12-15',
             },
             {
-              startTime: '2026-01-25T08:00:00Z',
-              endTime: '2026-01-25T17:00:00Z',
-              date: '2026-01-25',
+              startTime: '2025-01-25T08:00:00Z',
+              endTime: '2025-01-25T17:00:00Z',
+              date: '2025-01-25',
             },
             {
-              startTime: '2026-02-14T08:00:00Z',
-              endTime: '2026-02-14T17:00:00Z',
-              date: '2026-02-14',
+              startTime: '2025-02-14T08:00:00Z',
+              endTime: '2025-02-14T17:00:00Z',
+              date: '2025-02-14',
             },
           ],
           imageUrls: [
@@ -37,222 +37,32 @@ export async function seedListings(prisma: PrismaClient) {
             'https://res.cloudinary.com/dnyxxyolp/image/upload/v1759302892/flowers_i5p5iq.jpg',
           ],
           remarks:
-            'All-inclusive: Premium lighting, sound, decor, bridal suite, and champagne reception',
+            'Elegant ballroom with premium lighting, sound system, and decoration',
         },
         {
-          listingName: 'Grand Ballroom - Premium Package',
-          price: 15000,
-          availabilities: [
-            {
-              startTime: '2025-11-08T08:00:00Z',
-              endTime: '2025-11-08T17:00:00Z',
-              date: '2025-11-08',
-            },
-            {
-              startTime: '2025-12-20T08:00:00Z',
-              endTime: '2025-12-20T17:00:00Z',
-              date: '2025-12-20',
-            },
-            {
-              startTime: '2026-03-15T08:00:00Z',
-              endTime: '2026-03-15T17:00:00Z',
-              date: '2026-03-15',
-            },
-          ],
-          imageUrls: [
-            'https://res.cloudinary.com/dnyxxyolp/image/upload/v1759302508/ballroom_1_vrgb7s.jpg',
-          ],
-          remarks:
-            'Includes premium lighting, sound system, and elegant decoration',
-        },
-        {
-          listingName: 'Grand Ballroom - Standard Package',
-          price: 12000,
-          availabilities: [
-            {
-              startTime: '2025-10-20T08:00:00Z',
-              endTime: '2025-10-20T17:00:00Z',
-              date: '2025-10-20',
-            },
-            {
-              startTime: '2026-09-30T08:00:00Z',
-              endTime: '2026-09-30T17:00:00Z',
-              date: '2026-09-30',
-            },
-            {
-              startTime: '2026-04-12T08:00:00Z',
-              endTime: '2026-04-12T17:00:00Z',
-              date: '2026-04-12',
-            },
-          ],
-          imageUrls: [
-            'https://res.cloudinary.com/dnyxxyolp/image/upload/v1759302416/ballroom_2_hx5bzf.jpg',
-          ],
-          remarks: 'Basic venue rental with standard amenities',
-        },
-        {
-          listingName: 'Grand Ballroom - Economy Package',
-          price: 9000,
-          availabilities: [
-            {
-              startTime: '2026-09-15T08:00:00Z',
-              endTime: '2026-09-15T17:00:00Z',
-              date: '2026-09-15',
-            },
-            {
-              startTime: '2025-11-10T08:00:00Z',
-              endTime: '2025-11-10T17:00:00Z',
-              date: '2025-11-10',
-            },
-            {
-              startTime: '2026-05-20T08:00:00Z',
-              endTime: '2026-05-20T17:00:00Z',
-              date: '2026-05-20',
-            },
-          ],
-          imageUrls: [
-            'https://res.cloudinary.com/dnyxxyolp/image/upload/v1759302416/ballroom_2_hx5bzf.jpg',
-          ],
-          remarks: 'Budget-friendly option with essential venue features',
-        },
-        {
-          listingName: 'Waterfront Terrace - Premium',
-          price: 13500,
-          availabilities: [
-            {
-              startTime: '2025-11-15T08:00:00Z',
-              endTime: '2025-11-15T17:00:00Z',
-              date: '2025-11-15',
-            },
-            {
-              startTime: '2026-01-10T08:00:00Z',
-              endTime: '2026-01-10T17:00:00Z',
-              date: '2026-01-10',
-            },
-            {
-              startTime: '2026-06-25T08:00:00Z',
-              endTime: '2026-06-25T17:00:00Z',
-              date: '2026-06-25',
-            },
-          ],
-          imageUrls: [
-            'https://res.cloudinary.com/dnyxxyolp/image/upload/v1759302508/ballroom_1_vrgb7s.jpg',
-          ],
-          remarks: 'Stunning waterfront views with outdoor ceremony space',
-        },
-        {
-          listingName: 'Waterfront Terrace - Standard',
-          price: 10500,
-          availabilities: [
-            {
-              startTime: '2025-11-05T08:00:00Z',
-              endTime: '2025-11-05T17:00:00Z',
-              date: '2025-11-05',
-            },
-            {
-              startTime: '2025-11-22T08:00:00Z',
-              endTime: '2025-11-22T17:00:00Z',
-              date: '2025-11-22',
-            },
-            {
-              startTime: '2026-07-15T08:00:00Z',
-              endTime: '2026-07-15T17:00:00Z',
-              date: '2026-07-15',
-            },
-          ],
-          imageUrls: [
-            'https://res.cloudinary.com/dnyxxyolp/image/upload/v1759302561/garden_qtylu6.jpg',
-          ],
-          remarks: 'Scenic outdoor venue with covered pavilion option',
-        },
-        {
-          listingName: 'Intimate Garden Chapel',
+          listingName: 'Waterfront Terrace Wedding',
           price: 7500,
           availabilities: [
             {
-              startTime: '2026-09-20T08:00:00Z',
-              endTime: '2026-09-20T17:00:00Z',
-              date: '2026-09-20',
+              startTime: '2024-11-15T08:00:00Z',
+              endTime: '2024-11-15T17:00:00Z',
+              date: '2024-11-15',
             },
             {
-              startTime: '2025-12-05T08:00:00Z',
-              endTime: '2025-12-05T17:00:00Z',
-              date: '2025-12-05',
+              startTime: '2025-01-10T08:00:00Z',
+              endTime: '2025-01-10T17:00:00Z',
+              date: '2025-01-10',
             },
             {
-              startTime: '2026-08-08T08:00:00Z',
-              endTime: '2026-08-08T17:00:00Z',
-              date: '2026-08-08',
+              startTime: '2025-06-25T08:00:00Z',
+              endTime: '2025-06-25T17:00:00Z',
+              date: '2025-06-25',
             },
           ],
           imageUrls: [
             'https://res.cloudinary.com/dnyxxyolp/image/upload/v1759302561/garden_qtylu6.jpg',
           ],
-          remarks: 'Perfect for smaller ceremonies up to 100 guests',
-        },
-        {
-          listingName: 'Rooftop Sky Lounge - Premium',
-          price: 16500,
-          availabilities: [
-            {
-              startTime: '2025-11-30T08:00:00Z',
-              endTime: '2025-11-30T17:00:00Z',
-              date: '2025-11-30',
-            },
-            {
-              startTime: '2026-02-20T08:00:00Z',
-              endTime: '2026-02-20T17:00:00Z',
-              date: '2026-02-20',
-            },
-          ],
-          imageUrls: [
-            'https://res.cloudinary.com/dnyxxyolp/image/upload/v1759302508/ballroom_1_vrgb7s.jpg',
-          ],
-          remarks: 'Panoramic city skyline views with modern luxury setting',
-        },
-        {
-          listingName: 'Cocktail Reception Package',
-          price: 5500,
-          availabilities: [
-            {
-              startTime: '2025-10-15T08:00:00Z',
-              endTime: '2025-10-15T17:00:00Z',
-              date: '2025-10-15',
-            },
-            {
-              startTime: '2025-11-25T08:00:00Z',
-              endTime: '2025-11-25T17:00:00Z',
-              date: '2025-11-25',
-            },
-            {
-              startTime: '2026-09-10T08:00:00Z',
-              endTime: '2026-09-10T17:00:00Z',
-              date: '2026-09-10',
-            },
-          ],
-          imageUrls: [
-            'https://res.cloudinary.com/dnyxxyolp/image/upload/v1759302416/ballroom_2_hx5bzf.jpg',
-          ],
-          remarks: 'Standing reception with bar and lounge seating',
-        },
-        {
-          listingName: 'Weekend Premium Add-on',
-          price: 3000,
-          availabilities: [
-            {
-              startTime: '2025-12-15T08:00:00Z',
-              endTime: '2025-12-15T17:00:00Z',
-              date: '2025-12-15',
-            },
-            {
-              startTime: '2026-01-25T08:00:00Z',
-              endTime: '2026-01-25T17:00:00Z',
-              date: '2026-01-25',
-            },
-          ],
-          imageUrls: [],
-          remarks:
-            'Extended hours, premium bar setup, and VIP bridal suite access',
+          remarks: 'Stunning waterfront views with outdoor ceremony space',
         },
       ],
     },
@@ -264,14 +74,14 @@ export async function seedListings(prisma: PrismaClient) {
           price: 8000,
           availabilities: [
             {
-              startTime: '2026-09-30T08:00:00Z',
-              endTime: '2026-09-30T17:00:00Z',
-              date: '2026-09-30',
+              startTime: '2024-09-30T08:00:00Z',
+              endTime: '2024-09-30T17:00:00Z',
+              date: '2024-09-30',
             },
             {
-              startTime: '2025-10-20T08:00:00Z',
-              endTime: '2025-10-20T17:00:00Z',
-              date: '2025-10-20',
+              startTime: '2024-10-20T08:00:00Z',
+              endTime: '2024-10-20T17:00:00Z',
+              date: '2024-10-20',
             },
           ],
           imageUrls: [
@@ -284,14 +94,14 @@ export async function seedListings(prisma: PrismaClient) {
           price: 10000,
           availabilities: [
             {
-              startTime: '2025-12-15T08:00:00Z',
-              endTime: '2025-12-15T17:00:00Z',
-              date: '2025-12-15',
+              startTime: '2024-12-15T08:00:00Z',
+              endTime: '2024-12-15T17:00:00Z',
+              date: '2024-12-15',
             },
             {
-              startTime: '2026-01-25T08:00:00Z',
-              endTime: '2026-01-25T17:00:00Z',
-              date: '2026-01-25',
+              startTime: '2025-01-25T08:00:00Z',
+              endTime: '2025-01-25T17:00:00Z',
+              date: '2025-01-25',
             },
           ],
           imageUrls: [
@@ -309,20 +119,40 @@ export async function seedListings(prisma: PrismaClient) {
           price: 6000,
           availabilities: [
             {
-              startTime: '2025-11-08T08:00:00Z',
-              endTime: '2025-11-08T17:00:00Z',
-              date: '2025-11-08',
+              startTime: '2024-11-08T08:00:00Z',
+              endTime: '2024-11-08T17:00:00Z',
+              date: '2024-11-08',
             },
             {
-              startTime: '2026-01-25T08:00:00Z',
-              endTime: '2026-01-25T17:00:00Z',
-              date: '2026-01-25',
+              startTime: '2025-01-25T08:00:00Z',
+              endTime: '2025-01-25T17:00:00Z',
+              date: '2025-01-25',
             },
           ],
           imageUrls: [
             'https://res.cloudinary.com/dnyxxyolp/image/upload/v1759303164/temple_k1qe4z.jpg',
           ],
           remarks: 'Authentic traditional setting for cultural ceremonies',
+        },
+        {
+          listingName: 'Heritage Hall - Reception Package',
+          price: 7200,
+          availabilities: [
+            {
+              startTime: '2024-12-15T08:00:00Z',
+              endTime: '2024-12-15T17:00:00Z',
+              date: '2024-12-15',
+            },
+            {
+              startTime: '2025-02-20T08:00:00Z',
+              endTime: '2025-02-20T17:00:00Z',
+              date: '2025-02-20',
+            },
+          ],
+          imageUrls: [
+            'https://res.cloudinary.com/dnyxxyolp/image/upload/v1759303164/temple_k1qe4z.jpg',
+          ],
+          remarks: 'Traditional banquet hall for receptions',
         },
       ],
     },
@@ -335,19 +165,19 @@ export async function seedListings(prisma: PrismaClient) {
           price: 120,
           availabilities: [
             {
-              startTime: '2025-12-15T08:00:00Z',
-              endTime: '2025-12-15T17:00:00Z',
-              date: '2025-12-15',
+              startTime: '2024-12-15T08:00:00Z',
+              endTime: '2024-12-15T17:00:00Z',
+              date: '2024-12-15',
             },
             {
-              startTime: '2025-11-08T08:00:00Z',
-              endTime: '2025-11-08T17:00:00Z',
-              date: '2025-11-08',
+              startTime: '2024-11-08T08:00:00Z',
+              endTime: '2024-11-08T17:00:00Z',
+              date: '2024-11-08',
             },
             {
-              startTime: '2026-01-25T08:00:00Z',
-              endTime: '2026-01-25T17:00:00Z',
-              date: '2026-01-25',
+              startTime: '2025-01-25T08:00:00Z',
+              endTime: '2025-01-25T17:00:00Z',
+              date: '2025-01-25',
             },
           ],
           imageUrls: [
@@ -360,14 +190,14 @@ export async function seedListings(prisma: PrismaClient) {
           price: 80,
           availabilities: [
             {
-              startTime: '2026-09-30T08:00:00Z',
-              endTime: '2026-09-30T17:00:00Z',
-              date: '2026-09-30',
+              startTime: '2024-09-30T08:00:00Z',
+              endTime: '2024-09-30T17:00:00Z',
+              date: '2024-09-30',
             },
             {
-              startTime: '2025-10-20T08:00:00Z',
-              endTime: '2025-10-20T17:00:00Z',
-              date: '2025-10-20',
+              startTime: '2024-10-20T08:00:00Z',
+              endTime: '2024-10-20T17:00:00Z',
+              date: '2024-10-20',
             },
           ],
           imageUrls: [
@@ -385,20 +215,40 @@ export async function seedListings(prisma: PrismaClient) {
           price: 100,
           availabilities: [
             {
-              startTime: '2025-11-08T08:00:00Z',
-              endTime: '2025-11-08T17:00:00Z',
-              date: '2025-11-08',
+              startTime: '2024-11-08T08:00:00Z',
+              endTime: '2024-11-08T17:00:00Z',
+              date: '2024-11-08',
             },
             {
-              startTime: '2026-01-25T08:00:00Z',
-              endTime: '2026-01-25T17:00:00Z',
-              date: '2026-01-25',
+              startTime: '2025-01-25T08:00:00Z',
+              endTime: '2025-01-25T17:00:00Z',
+              date: '2025-01-25',
             },
           ],
           imageUrls: [
             'https://res.cloudinary.com/dnyxxyolp/image/upload/v1759302684/chinese_lxil0v.jpg',
           ],
           remarks: 'Per person pricing for authentic Chinese cuisine',
+        },
+        {
+          listingName: 'Traditional Tea Ceremony Package',
+          price: 85,
+          availabilities: [
+            {
+              startTime: '2024-09-30T08:00:00Z',
+              endTime: '2024-09-30T17:00:00Z',
+              date: '2024-09-30',
+            },
+            {
+              startTime: '2024-12-15T08:00:00Z',
+              endTime: '2024-12-15T17:00:00Z',
+              date: '2024-12-15',
+            },
+          ],
+          imageUrls: [
+            'https://res.cloudinary.com/dnyxxyolp/image/upload/v1759302684/chinese_lxil0v.jpg',
+          ],
+          remarks: 'Per person pricing for traditional tea ceremony',
         },
       ],
     },
@@ -411,19 +261,19 @@ export async function seedListings(prisma: PrismaClient) {
           price: 3500,
           availabilities: [
             {
-              startTime: '2025-12-15T08:00:00Z',
-              endTime: '2025-12-15T17:00:00Z',
-              date: '2025-12-15',
+              startTime: '2024-12-15T08:00:00Z',
+              endTime: '2024-12-15T17:00:00Z',
+              date: '2024-12-15',
             },
             {
-              startTime: '2025-11-08T08:00:00Z',
-              endTime: '2025-11-08T17:00:00Z',
-              date: '2025-11-08',
+              startTime: '2024-11-08T08:00:00Z',
+              endTime: '2024-11-08T17:00:00Z',
+              date: '2024-11-08',
             },
             {
-              startTime: '2026-01-25T08:00:00Z',
-              endTime: '2026-01-25T17:00:00Z',
-              date: '2026-01-25',
+              startTime: '2025-01-25T08:00:00Z',
+              endTime: '2025-01-25T17:00:00Z',
+              date: '2025-01-25',
             },
           ],
           imageUrls: [
@@ -436,14 +286,14 @@ export async function seedListings(prisma: PrismaClient) {
           price: 800,
           availabilities: [
             {
-              startTime: '2026-09-30T08:00:00Z',
-              endTime: '2026-09-30T17:00:00Z',
-              date: '2026-09-30',
+              startTime: '2024-09-30T08:00:00Z',
+              endTime: '2024-09-30T17:00:00Z',
+              date: '2024-09-30',
             },
             {
-              startTime: '2025-10-20T08:00:00Z',
-              endTime: '2025-10-20T17:00:00Z',
-              date: '2025-10-20',
+              startTime: '2024-10-20T08:00:00Z',
+              endTime: '2024-10-20T17:00:00Z',
+              date: '2024-10-20',
             },
           ],
           imageUrls: [
@@ -461,20 +311,40 @@ export async function seedListings(prisma: PrismaClient) {
           price: 2800,
           availabilities: [
             {
-              startTime: '2026-09-30T08:00:00Z',
-              endTime: '2026-09-30T17:00:00Z',
-              date: '2026-09-30',
+              startTime: '2024-09-30T08:00:00Z',
+              endTime: '2024-09-30T17:00:00Z',
+              date: '2024-09-30',
             },
             {
-              startTime: '2025-10-20T08:00:00Z',
-              endTime: '2025-10-20T17:00:00Z',
-              date: '2025-10-20',
+              startTime: '2024-10-20T08:00:00Z',
+              endTime: '2024-10-20T17:00:00Z',
+              date: '2024-10-20',
             },
           ],
           imageUrls: [
             'https://res.cloudinary.com/dnyxxyolp/image/upload/v1759303156/candid_geijp4.jpg',
           ],
           remarks: 'Natural storytelling photography style',
+        },
+        {
+          listingName: 'Pre-Wedding Shoot',
+          price: 1200,
+          availabilities: [
+            {
+              startTime: '2024-11-08T08:00:00Z',
+              endTime: '2024-11-08T17:00:00Z',
+              date: '2024-11-08',
+            },
+            {
+              startTime: '2025-01-25T08:00:00Z',
+              endTime: '2025-01-25T17:00:00Z',
+              date: '2025-01-25',
+            },
+          ],
+          imageUrls: [
+            'https://res.cloudinary.com/dnyxxyolp/image/upload/v1759303156/candid_geijp4.jpg',
+          ],
+          remarks: 'Outdoor pre-wedding photography session',
         },
       ],
     },
@@ -487,14 +357,14 @@ export async function seedListings(prisma: PrismaClient) {
           price: 4500,
           availabilities: [
             {
-              startTime: '2025-12-15T08:00:00Z',
-              endTime: '2025-12-15T17:00:00Z',
-              date: '2025-12-15',
+              startTime: '2024-12-15T08:00:00Z',
+              endTime: '2024-12-15T17:00:00Z',
+              date: '2024-12-15',
             },
             {
-              startTime: '2026-01-25T08:00:00Z',
-              endTime: '2026-01-25T17:00:00Z',
-              date: '2026-01-25',
+              startTime: '2025-01-25T08:00:00Z',
+              endTime: '2025-01-25T17:00:00Z',
+              date: '2025-01-25',
             },
           ],
           imageUrls: [
@@ -507,40 +377,20 @@ export async function seedListings(prisma: PrismaClient) {
           price: 1500,
           availabilities: [
             {
-              startTime: '2025-11-08T08:00:00Z',
-              endTime: '2025-11-08T17:00:00Z',
-              date: '2025-11-08',
+              startTime: '2024-11-08T08:00:00Z',
+              endTime: '2024-11-08T17:00:00Z',
+              date: '2024-11-08',
             },
             {
-              startTime: '2026-09-30T08:00:00Z',
-              endTime: '2026-09-30T17:00:00Z',
-              date: '2026-09-30',
+              startTime: '2024-09-30T08:00:00Z',
+              endTime: '2024-09-30T17:00:00Z',
+              date: '2024-09-30',
             },
           ],
           imageUrls: [
             'https://res.cloudinary.com/dnyxxyolp/image/upload/v1759302888/premium_flowers_ys61y0.jpg',
           ],
           remarks: 'Bridal bouquet with matching table centerpieces',
-        },
-        {
-          listingName: 'Statement Flower Archway',
-          price: 2800,
-          availabilities: [
-            {
-              startTime: '2025-10-20T08:00:00Z',
-              endTime: '2025-10-20T17:00:00Z',
-              date: '2025-10-20',
-            },
-            {
-              startTime: '2026-01-25T08:00:00Z',
-              endTime: '2026-01-25T17:00:00Z',
-              date: '2026-01-25',
-            },
-          ],
-          imageUrls: [
-            'https://res.cloudinary.com/dnyxxyolp/image/upload/v1759302892/flowers_i5p5iq.jpg',
-          ],
-          remarks: 'Large floral archway perfect for ceremony backdrop',
         },
       ],
     },
@@ -552,14 +402,14 @@ export async function seedListings(prisma: PrismaClient) {
           price: 3200,
           availabilities: [
             {
-              startTime: '2025-11-08T08:00:00Z',
-              endTime: '2025-11-08T17:00:00Z',
-              date: '2025-11-08',
+              startTime: '2024-11-08T08:00:00Z',
+              endTime: '2024-11-08T17:00:00Z',
+              date: '2024-11-08',
             },
             {
-              startTime: '2025-12-15T08:00:00Z',
-              endTime: '2025-12-15T17:00:00Z',
-              date: '2025-12-15',
+              startTime: '2024-12-15T08:00:00Z',
+              endTime: '2024-12-15T17:00:00Z',
+              date: '2024-12-15',
             },
           ],
           imageUrls: [
@@ -572,14 +422,14 @@ export async function seedListings(prisma: PrismaClient) {
           price: 1800,
           availabilities: [
             {
-              startTime: '2026-09-30T08:00:00Z',
-              endTime: '2026-09-30T17:00:00Z',
-              date: '2026-09-30',
+              startTime: '2024-09-30T08:00:00Z',
+              endTime: '2024-09-30T17:00:00Z',
+              date: '2024-09-30',
             },
             {
-              startTime: '2025-10-20T08:00:00Z',
-              endTime: '2025-10-20T17:00:00Z',
-              date: '2025-10-20',
+              startTime: '2024-10-20T08:00:00Z',
+              endTime: '2024-10-20T17:00:00Z',
+              date: '2024-10-20',
             },
           ],
           imageUrls: [
@@ -597,14 +447,14 @@ export async function seedListings(prisma: PrismaClient) {
           price: 3800,
           availabilities: [
             {
-              startTime: '2025-11-08T08:00:00Z',
-              endTime: '2025-11-08T17:00:00Z',
-              date: '2025-11-08',
+              startTime: '2024-11-08T08:00:00Z',
+              endTime: '2024-11-08T17:00:00Z',
+              date: '2024-11-08',
             },
             {
-              startTime: '2026-01-25T08:00:00Z',
-              endTime: '2026-01-25T17:00:00Z',
-              date: '2026-01-25',
+              startTime: '2025-01-25T08:00:00Z',
+              endTime: '2025-01-25T17:00:00Z',
+              date: '2025-01-25',
             },
           ],
           imageUrls: [
@@ -617,14 +467,14 @@ export async function seedListings(prisma: PrismaClient) {
           price: 2200,
           availabilities: [
             {
-              startTime: '2026-09-30T08:00:00Z',
-              endTime: '2026-09-30T17:00:00Z',
-              date: '2026-09-30',
+              startTime: '2024-09-30T08:00:00Z',
+              endTime: '2024-09-30T17:00:00Z',
+              date: '2024-09-30',
             },
             {
-              startTime: '2025-12-15T08:00:00Z',
-              endTime: '2025-12-15T17:00:00Z',
-              date: '2025-12-15',
+              startTime: '2024-12-15T08:00:00Z',
+              endTime: '2024-12-15T17:00:00Z',
+              date: '2024-12-15',
             },
           ],
           imageUrls: [
@@ -643,14 +493,14 @@ export async function seedListings(prisma: PrismaClient) {
           price: 5500,
           availabilities: [
             {
-              startTime: '2025-12-15T08:00:00Z',
-              endTime: '2025-12-15T17:00:00Z',
-              date: '2025-12-15',
+              startTime: '2024-12-15T08:00:00Z',
+              endTime: '2024-12-15T17:00:00Z',
+              date: '2024-12-15',
             },
             {
-              startTime: '2026-01-25T08:00:00Z',
-              endTime: '2026-01-25T17:00:00Z',
-              date: '2026-01-25',
+              startTime: '2025-01-25T08:00:00Z',
+              endTime: '2025-01-25T17:00:00Z',
+              date: '2025-01-25',
             },
           ],
           imageUrls: [],
@@ -661,36 +511,18 @@ export async function seedListings(prisma: PrismaClient) {
           price: 2200,
           availabilities: [
             {
-              startTime: '2026-09-30T08:00:00Z',
-              endTime: '2026-09-30T17:00:00Z',
-              date: '2026-09-30',
+              startTime: '2024-09-30T08:00:00Z',
+              endTime: '2024-09-30T17:00:00Z',
+              date: '2024-09-30',
             },
             {
-              startTime: '2025-11-08T08:00:00Z',
-              endTime: '2025-11-08T17:00:00Z',
-              date: '2025-11-08',
+              startTime: '2024-11-08T08:00:00Z',
+              endTime: '2024-11-08T17:00:00Z',
+              date: '2024-11-08',
             },
           ],
           imageUrls: [],
           remarks: 'Elegant string quartet for intimate ceremonies',
-        },
-        {
-          listingName: 'Live Jazz Band',
-          price: 3200,
-          availabilities: [
-            {
-              startTime: '2025-10-20T08:00:00Z',
-              endTime: '2025-10-20T17:00:00Z',
-              date: '2025-10-20',
-            },
-            {
-              startTime: '2025-12-15T08:00:00Z',
-              endTime: '2025-12-15T17:00:00Z',
-              date: '2025-12-15',
-            },
-          ],
-          imageUrls: [],
-          remarks: 'Jazz ensemble for cocktail hour and reception',
         },
       ],
     },
@@ -702,14 +534,14 @@ export async function seedListings(prisma: PrismaClient) {
           price: 2800,
           availabilities: [
             {
-              startTime: '2025-11-08T08:00:00Z',
-              endTime: '2025-11-08T17:00:00Z',
-              date: '2025-11-08',
+              startTime: '2024-11-08T08:00:00Z',
+              endTime: '2024-11-08T17:00:00Z',
+              date: '2024-11-08',
             },
             {
-              startTime: '2026-01-25T08:00:00Z',
-              endTime: '2026-01-25T17:00:00Z',
-              date: '2026-01-25',
+              startTime: '2025-01-25T08:00:00Z',
+              endTime: '2025-01-25T17:00:00Z',
+              date: '2025-01-25',
             },
           ],
           imageUrls: [],
@@ -720,14 +552,14 @@ export async function seedListings(prisma: PrismaClient) {
           price: 1800,
           availabilities: [
             {
-              startTime: '2026-09-30T08:00:00Z',
-              endTime: '2026-09-30T17:00:00Z',
-              date: '2026-09-30',
+              startTime: '2024-09-30T08:00:00Z',
+              endTime: '2024-09-30T17:00:00Z',
+              date: '2024-09-30',
             },
             {
-              startTime: '2025-12-15T08:00:00Z',
-              endTime: '2025-12-15T17:00:00Z',
-              date: '2025-12-15',
+              startTime: '2024-12-15T08:00:00Z',
+              endTime: '2024-12-15T17:00:00Z',
+              date: '2024-12-15',
             },
           ],
           imageUrls: [],
@@ -744,14 +576,14 @@ export async function seedListings(prisma: PrismaClient) {
           price: 6500,
           availabilities: [
             {
-              startTime: '2025-12-15T08:00:00Z',
-              endTime: '2025-12-15T17:00:00Z',
-              date: '2025-12-15',
+              startTime: '2024-12-15T08:00:00Z',
+              endTime: '2024-12-15T17:00:00Z',
+              date: '2024-12-15',
             },
             {
-              startTime: '2026-01-25T08:00:00Z',
-              endTime: '2026-01-25T17:00:00Z',
-              date: '2026-01-25',
+              startTime: '2025-01-25T08:00:00Z',
+              endTime: '2025-01-25T17:00:00Z',
+              date: '2025-01-25',
             },
           ],
           imageUrls: [],
@@ -762,36 +594,18 @@ export async function seedListings(prisma: PrismaClient) {
           price: 2500,
           availabilities: [
             {
-              startTime: '2026-09-30T08:00:00Z',
-              endTime: '2026-09-30T17:00:00Z',
-              date: '2026-09-30',
+              startTime: '2024-09-30T08:00:00Z',
+              endTime: '2024-09-30T17:00:00Z',
+              date: '2024-09-30',
             },
             {
-              startTime: '2025-11-08T08:00:00Z',
-              endTime: '2025-11-08T17:00:00Z',
-              date: '2025-11-08',
+              startTime: '2024-11-08T08:00:00Z',
+              endTime: '2024-11-08T17:00:00Z',
+              date: '2024-11-08',
             },
           ],
           imageUrls: [],
           remarks: 'Designer gown rental with alterations',
-        },
-        {
-          listingName: 'Groom Tuxedo Package',
-          price: 1200,
-          availabilities: [
-            {
-              startTime: '2025-10-20T08:00:00Z',
-              endTime: '2025-10-20T17:00:00Z',
-              date: '2025-10-20',
-            },
-            {
-              startTime: '2025-12-15T08:00:00Z',
-              endTime: '2025-12-15T17:00:00Z',
-              date: '2025-12-15',
-            },
-          ],
-          imageUrls: [],
-          remarks: 'Complete tuxedo package with accessories',
         },
       ],
     },
@@ -803,14 +617,14 @@ export async function seedListings(prisma: PrismaClient) {
           price: 3200,
           availabilities: [
             {
-              startTime: '2025-11-08T08:00:00Z',
-              endTime: '2025-11-08T17:00:00Z',
-              date: '2025-11-08',
+              startTime: '2024-11-08T08:00:00Z',
+              endTime: '2024-11-08T17:00:00Z',
+              date: '2024-11-08',
             },
             {
-              startTime: '2026-01-25T08:00:00Z',
-              endTime: '2026-01-25T17:00:00Z',
-              date: '2026-01-25',
+              startTime: '2025-01-25T08:00:00Z',
+              endTime: '2025-01-25T17:00:00Z',
+              date: '2025-01-25',
             },
           ],
           imageUrls: [],
@@ -821,14 +635,14 @@ export async function seedListings(prisma: PrismaClient) {
           price: 2800,
           availabilities: [
             {
-              startTime: '2026-09-30T08:00:00Z',
-              endTime: '2026-09-30T17:00:00Z',
-              date: '2026-09-30',
+              startTime: '2024-09-30T08:00:00Z',
+              endTime: '2024-09-30T17:00:00Z',
+              date: '2024-09-30',
             },
             {
-              startTime: '2025-12-15T08:00:00Z',
-              endTime: '2025-12-15T17:00:00Z',
-              date: '2025-12-15',
+              startTime: '2024-12-15T08:00:00Z',
+              endTime: '2024-12-15T17:00:00Z',
+              date: '2024-12-15',
             },
           ],
           imageUrls: [],
@@ -845,14 +659,14 @@ export async function seedListings(prisma: PrismaClient) {
           price: 1500,
           availabilities: [
             {
-              startTime: '2025-12-15T08:00:00Z',
-              endTime: '2025-12-15T17:00:00Z',
-              date: '2025-12-15',
+              startTime: '2024-12-15T08:00:00Z',
+              endTime: '2024-12-15T17:00:00Z',
+              date: '2024-12-15',
             },
             {
-              startTime: '2026-01-25T08:00:00Z',
-              endTime: '2026-01-25T17:00:00Z',
-              date: '2026-01-25',
+              startTime: '2025-01-25T08:00:00Z',
+              endTime: '2025-01-25T17:00:00Z',
+              date: '2025-01-25',
             },
           ],
           imageUrls: [],
@@ -863,36 +677,18 @@ export async function seedListings(prisma: PrismaClient) {
           price: 600,
           availabilities: [
             {
-              startTime: '2026-09-30T08:00:00Z',
-              endTime: '2026-09-30T17:00:00Z',
-              date: '2026-09-30',
+              startTime: '2024-09-30T08:00:00Z',
+              endTime: '2024-09-30T17:00:00Z',
+              date: '2024-09-30',
             },
             {
-              startTime: '2025-11-08T08:00:00Z',
-              endTime: '2025-11-08T17:00:00Z',
-              date: '2025-11-08',
+              startTime: '2024-11-08T08:00:00Z',
+              endTime: '2024-11-08T17:00:00Z',
+              date: '2024-11-08',
             },
           ],
           imageUrls: [],
           remarks: 'Makeup service for bridesmaids (price per person)',
-        },
-        {
-          listingName: 'Trial Makeup Session',
-          price: 300,
-          availabilities: [
-            {
-              startTime: '2025-10-20T08:00:00Z',
-              endTime: '2025-10-20T17:00:00Z',
-              date: '2025-10-20',
-            },
-            {
-              startTime: '2025-12-15T08:00:00Z',
-              endTime: '2025-12-15T17:00:00Z',
-              date: '2025-12-15',
-            },
-          ],
-          imageUrls: [],
-          remarks: 'Pre-wedding makeup trial',
         },
       ],
     },
@@ -904,14 +700,14 @@ export async function seedListings(prisma: PrismaClient) {
           price: 1200,
           availabilities: [
             {
-              startTime: '2025-11-08T08:00:00Z',
-              endTime: '2025-11-08T17:00:00Z',
-              date: '2025-11-08',
+              startTime: '2024-11-08T08:00:00Z',
+              endTime: '2024-11-08T17:00:00Z',
+              date: '2024-11-08',
             },
             {
-              startTime: '2026-01-25T08:00:00Z',
-              endTime: '2026-01-25T17:00:00Z',
-              date: '2026-01-25',
+              startTime: '2025-01-25T08:00:00Z',
+              endTime: '2025-01-25T17:00:00Z',
+              date: '2025-01-25',
             },
           ],
           imageUrls: [],
@@ -922,14 +718,14 @@ export async function seedListings(prisma: PrismaClient) {
           price: 400,
           availabilities: [
             {
-              startTime: '2026-09-30T08:00:00Z',
-              endTime: '2026-09-30T17:00:00Z',
-              date: '2026-09-30',
+              startTime: '2024-09-30T08:00:00Z',
+              endTime: '2024-09-30T17:00:00Z',
+              date: '2024-09-30',
             },
             {
-              startTime: '2025-12-15T08:00:00Z',
-              endTime: '2025-12-15T17:00:00Z',
-              date: '2025-12-15',
+              startTime: '2024-12-15T08:00:00Z',
+              endTime: '2024-12-15T17:00:00Z',
+              date: '2024-12-15',
             },
           ],
           imageUrls: [],
@@ -946,14 +742,14 @@ export async function seedListings(prisma: PrismaClient) {
           price: 2500,
           availabilities: [
             {
-              startTime: '2025-12-15T08:00:00Z',
-              endTime: '2025-12-15T17:00:00Z',
-              date: '2025-12-15',
+              startTime: '2024-12-15T08:00:00Z',
+              endTime: '2024-12-15T17:00:00Z',
+              date: '2024-12-15',
             },
             {
-              startTime: '2026-01-25T08:00:00Z',
-              endTime: '2026-01-25T17:00:00Z',
-              date: '2026-01-25',
+              startTime: '2025-01-25T08:00:00Z',
+              endTime: '2025-01-25T17:00:00Z',
+              date: '2025-01-25',
             },
           ],
           imageUrls: [],
@@ -964,36 +760,18 @@ export async function seedListings(prisma: PrismaClient) {
           price: 1800,
           availabilities: [
             {
-              startTime: '2026-09-30T08:00:00Z',
-              endTime: '2026-09-30T17:00:00Z',
-              date: '2026-09-30',
+              startTime: '2024-09-30T08:00:00Z',
+              endTime: '2024-09-30T17:00:00Z',
+              date: '2024-09-30',
             },
             {
-              startTime: '2025-11-08T08:00:00Z',
-              endTime: '2025-11-08T17:00:00Z',
-              date: '2025-11-08',
+              startTime: '2024-11-08T08:00:00Z',
+              endTime: '2024-11-08T17:00:00Z',
+              date: '2024-11-08',
             },
           ],
           imageUrls: [],
           remarks: 'Classic vintage car for memorable photos',
-        },
-        {
-          listingName: 'Guest Shuttle Service',
-          price: 1200,
-          availabilities: [
-            {
-              startTime: '2025-10-20T08:00:00Z',
-              endTime: '2025-10-20T17:00:00Z',
-              date: '2025-10-20',
-            },
-            {
-              startTime: '2025-12-15T08:00:00Z',
-              endTime: '2025-12-15T17:00:00Z',
-              date: '2025-12-15',
-            },
-          ],
-          imageUrls: [],
-          remarks: 'Shuttle bus service for wedding guests',
         },
       ],
     },

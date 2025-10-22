@@ -48,12 +48,27 @@ export async function seedCouples(
     },
   ];
 
-  const coupleUsers = [];
-  for (const couple of couples) {
+  // Create couples over a 9-month period to show growth over time
+  const numberOfMonths = 9;
+  const couplesPerMonth = Math.ceil(couples.length / numberOfMonths);
+
+  for (let i = 0; i < couples.length; i++) {
+    const couple = couples[i];
     const mainWeddingId =
       couple.weddingIndex !== undefined
         ? weddings[couple.weddingIndex].id
         : null;
+
+    // Calculate which month this couple should be created in (older to newer)
+    const monthIndex = Math.floor(i / couplesPerMonth);
+    const monthsAgo = numberOfMonths - 1 - monthIndex;
+
+    // Generate a date within that month
+    const createdDate = new Date();
+    createdDate.setMonth(createdDate.getMonth() - monthsAgo);
+    createdDate.setDate(Math.floor(Math.random() * 28) + 1); // Random day in month
+    createdDate.setHours(Math.floor(Math.random() * 24));
+    createdDate.setMinutes(Math.floor(Math.random() * 60));
 
     const [user1, user2] = await Promise.all([
       prisma.user.create({
@@ -62,6 +77,7 @@ export async function seedCouples(
           email: couple.email1,
           password: hashedPassword,
           role: UserRole.ADMIN,
+          createdAt: createdDate,
           admin: {
             create: {
               isSuspended: couple.isSuspended || false,
@@ -76,6 +92,7 @@ export async function seedCouples(
           email: couple.email2,
           password: hashedPassword,
           role: UserRole.ADMIN,
+          createdAt: createdDate,
           admin: {
             create: {
               isSuspended: couple.isSuspended || false,
@@ -119,5 +136,7 @@ export async function seedCouples(
       }
     }
   }
-  console.log('✅ Created couples and associated with weddings');
+  console.log(
+    `✅ Created ${couples.length} couples distributed over ${numberOfMonths} months and associated with weddings`,
+  );
 }

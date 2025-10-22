@@ -21,12 +21,28 @@ export async function seedRecommendationListings(prisma: PrismaClient) {
   const packageNames = {
     VENUE: ['Premium Package', 'Standard Package', 'Deluxe Package'],
     CATERING: ['5-Course Dinner', 'Buffet Package', 'Cocktail Reception'],
-    PHOTOGRAPHY: ['Full Day Coverage', 'Half Day Coverage', 'Engagement Session'],
-    DECORATION: ['Complete Decor Package', 'Floral Arrangements', 'Centerpieces & Accents'],
+    PHOTOGRAPHY: [
+      'Full Day Coverage',
+      'Half Day Coverage',
+      'Engagement Session',
+    ],
+    DECORATION: [
+      'Complete Decor Package',
+      'Floral Arrangements',
+      'Centerpieces & Accents',
+    ],
     MUSIC: ['Full Band', 'DJ Service', 'Live Musicians'],
     ATTIRE: ['Bridal Package', 'Groom Package', 'Complete Wedding Attire'],
-    MAKEUP: ['Bridal Makeup & Hair', 'Bridal Party Package', 'Touch-up Service'],
-    TRANSPORTATION: ['Luxury Car Service', 'Limousine Package', 'Vintage Car Rental'],
+    MAKEUP: [
+      'Bridal Makeup & Hair',
+      'Bridal Party Package',
+      'Touch-up Service',
+    ],
+    TRANSPORTATION: [
+      'Luxury Car Service',
+      'Limousine Package',
+      'Vintage Car Rental',
+    ],
   };
 
   // Price ranges based on service type (in SGD)
@@ -72,7 +88,8 @@ export async function seedRecommendationListings(prisma: PrismaClient) {
     if (!serviceOffered) continue;
 
     for (let i = 0; i < 3; i++) {
-      const packageName = packageNames[serviceOffered][i % packageNames[serviceOffered].length];
+      const packageName =
+        packageNames[serviceOffered][i % packageNames[serviceOffered].length];
       const priceRange = priceRanges[serviceOffered];
       const price = faker.number.float({
         min: priceRange.min,
@@ -87,7 +104,7 @@ export async function seedRecommendationListings(prisma: PrismaClient) {
           availabilities: generateAvailabilities(),
           remarks: faker.company.catchPhrase(),
           vendorId: vendor.userId,
-          imageUrls: [], 
+          imageUrls: [],
         },
       });
 
@@ -102,8 +119,12 @@ export async function seedRecommendationListings(prisma: PrismaClient) {
   }
 
   console.log(`✅ Created ${createdListings.length} listings`);
-  console.log(`   - Average ${(createdListings.length / vendors.length).toFixed(1)} listings per vendor`);
-  console.log(`   - Availabilities: 2024-2025 (after historical wedding dates)`);
+  console.log(
+    `   - Average ${(createdListings.length / vendors.length).toFixed(1)} listings per vendor`,
+  );
+  console.log(
+    `   - Availabilities: 2024-2025 (after historical wedding dates)`,
+  );
 
   return createdListings;
 }
