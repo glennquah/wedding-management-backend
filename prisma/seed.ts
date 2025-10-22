@@ -19,6 +19,9 @@ import { seedRecommendationOrders } from './seeds/orders.recommendation.seed';
 import { seedRecommendationVendors } from './seeds/vendors.recommendation.seed';
 import { seedRecommendationWeddings } from './seeds/weddings.recommendation.seed';
 
+// Fresh test users seed
+import { seedFreshUsers } from './seeds/fresh-users.seed';
+
 const prisma = new PrismaClient();
 
 async function main() {
@@ -41,7 +44,12 @@ async function main() {
     await prisma.admin.deleteMany();
     await prisma.superAdmin.deleteMany();
     await prisma.user.deleteMany();
-    console.log('✅ Existing data cleared');
+
+    // Reset the User ID sequence to avoid conflicts with fixed IDs
+    await prisma.$executeRawUnsafe(`ALTER SEQUENCE "User_id_seq" RESTART WITH 1;`);
+    await prisma.$executeRawUnsafe(`ALTER SEQUENCE "Wedding_id_seq" RESTART WITH 1;`);
+
+    console.log('✅ Existing data cleared and sequences reset');
   } catch (error: unknown) {
     console.log('Error in seeding: ', error);
   }
@@ -108,6 +116,20 @@ async function main() {
   // 15. Seed recommendation orders (connects recommendation weddings to recommendation vendors only)
   await seedRecommendationOrders(prisma);
 
+  console.log('\n========================================');
+  console.log('✅ Recommendation system data completed!');
+  console.log('========================================');
+
+  // ============================================
+  // PART 3: FRESH TEST USERS
+  // ============================================
+  console.log('\n========================================');
+  console.log('Seeding fresh test users for development...');
+  console.log('========================================\n');
+
+  // 16. Seed fresh test users (1 admin with wedding, 1 vendor without Stripe)
+  await seedFreshUsers(prisma, hashedPassword);
+
   // Print final summary
   console.log('\n========================================');
   console.log('✅ Database seeded successfully!');
@@ -154,7 +176,14 @@ async function main() {
   console.log('- Orders connect recommendation weddings → recommendation vendors ONLY');
   console.log('- Realistic matching based on budget, wedding type, style, and capacity');
 
+  console.log('\n🧪 FRESH TEST USERS:');
+  console.log('- 1 Test Admin with wedding');
+  console.log('- 1 Test Vendor WITHOUT Stripe (for testing onboarding)');
+
   console.log(`\n📧 Test Login Credentials:`);
+  console.log(`  Super Admin: superadmin@wedding.com`);
+  console.log(`  Test Admin: testadmin@wedding.com`);
+  console.log(`  Test Vendor (no Stripe): testvendor@wedding.com`);
   console.log(`  Regular: couple@wedding.com`);
   console.log(`  Recommendation: couple0_person1@recommendation.com`);
   console.log(`  Password: password123`);

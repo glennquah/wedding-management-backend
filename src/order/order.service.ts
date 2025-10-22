@@ -669,6 +669,162 @@ export class OrderService {
     return this.findOne(orderId);
   }
 
+  async vendorCompleteListing(
+    orderId: number,
+    listingId: number,
+    vendorId: number,
+  ): Promise<Order> {
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+      include: {
+        listings: {
+          include: {
+            listing: true,
+          },
+        },
+        payments: true,
+      },
+    });
+
+    if (!order) {
+      throw new NotFoundException(`Order with ID ${orderId} not found`);
+    }
+
+    // Find the specific OrderListing
+    const orderListing = order.listings.find(
+      (ol) => ol.listingId === listingId,
+    );
+    if (!orderListing) {
+      throw new NotFoundException(
+        `Listing with ID ${listingId} not found in order ${orderId}`,
+      );
+    }
+
+    // Verify the vendor owns this listing
+    if (orderListing.listing.vendorId !== vendorId) {
+      throw new BadRequestException('You can only complete your own listings');
+    }
+
+    // Validate listing status - can only complete CONFIRMED bookings
+    if (orderListing.bookingStatus !== OrderStatus.CONFIRMED) {
+      throw new BadRequestException(
+        `Listing must be in CONFIRMED status to be completed. Current status: ${orderListing.bookingStatus}`,
+      );
+    }
+
+    // Validate that ALL booking dates have passed
+    const bookedSlots = orderListing.bookedSlots as any[];
+    if (bookedSlots && bookedSlots.length > 0) {
+      const now = new Date();
+      now.setHours(0, 0, 0, 0); // Start of today
+
+      for (const slot of bookedSlots) {
+        let slotDate: Date | null = null;
+
+        if (slot.date) {
+          slotDate = new Date(slot.date);
+        } else if (slot.endTime) {
+          slotDate = new Date(slot.endTime);
+        } else if (slot.startTime) {
+          slotDate = new Date(slot.startTime);
+        }
+
+        if (slotDate) {
+          slotDate.setHours(0, 0, 0, 0);
+          if (slotDate >= now) {
+            throw new BadRequestException(
+              `Cannot complete listing before all booking dates have passed. A booking is scheduled for: ${slotDate.toISOString().split('T')[0]}`,
+            );
+          }
+        }
+      }
+    }
+
+    // Update OrderListing status to COMPLETED
+    await this.prisma.orderListing.update({
+      where: { orderId_listingId: { orderId, listingId } },
+      data: { bookingStatus: OrderStatus.COMPLETED },
+    });
+
+    // Return updated order
+    return this.findOne(orderId);
+  }
+
+  async superadminCompleteListing(
+    orderId: number,
+    listingId: number,
+  ): Promise<Order> {
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+      include: {
+        listings: {
+          include: {
+            listing: true,
+          },
+        },
+        payments: true,
+      },
+    });
+
+    if (!order) {
+      throw new NotFoundException(`Order with ID ${orderId} not found`);
+    }
+
+    // Find the specific OrderListing
+    const orderListing = order.listings.find(
+      (ol) => ol.listingId === listingId,
+    );
+    if (!orderListing) {
+      throw new NotFoundException(
+        `Listing with ID ${listingId} not found in order ${orderId}`,
+      );
+    }
+
+    // Validate listing status - can only complete CONFIRMED bookings
+    if (orderListing.bookingStatus !== OrderStatus.CONFIRMED) {
+      throw new BadRequestException(
+        `Listing must be in CONFIRMED status to be completed. Current status: ${orderListing.bookingStatus}`,
+      );
+    }
+
+    // Validate that ALL booking dates have passed
+    const bookedSlots = orderListing.bookedSlots as any[];
+    if (bookedSlots && bookedSlots.length > 0) {
+      const now = new Date();
+      now.setHours(0, 0, 0, 0); // Start of today
+
+      for (const slot of bookedSlots) {
+        let slotDate: Date | null = null;
+
+        if (slot.date) {
+          slotDate = new Date(slot.date);
+        } else if (slot.endTime) {
+          slotDate = new Date(slot.endTime);
+        } else if (slot.startTime) {
+          slotDate = new Date(slot.startTime);
+        }
+
+        if (slotDate) {
+          slotDate.setHours(0, 0, 0, 0);
+          if (slotDate >= now) {
+            throw new BadRequestException(
+              `Cannot complete listing before all booking dates have passed. A booking is scheduled for: ${slotDate.toISOString().split('T')[0]}`,
+            );
+          }
+        }
+      }
+    }
+
+    // Update OrderListing status to COMPLETED
+    await this.prisma.orderListing.update({
+      where: { orderId_listingId: { orderId, listingId } },
+      data: { bookingStatus: OrderStatus.COMPLETED },
+    });
+
+    // Return updated order
+    return this.findOne(orderId);
+  }
+
   toOrderResponseDto(order: any): OrderResponseDto {
     return {
       id: order.id,
