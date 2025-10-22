@@ -45,7 +45,7 @@ export async function seedOrders(prisma: PrismaClient) {
   };
 
   // Generate date within a specific month (past)
-  const generateDateInMonth = (monthsAgo: number) => {
+  const _generateDateInMonth = (monthsAgo: number) => {
     const daysAgo = Math.floor(Math.random() * 28) + 1; // 1-28 days
     const date = new Date();
     date.setMonth(date.getMonth() - monthsAgo);
@@ -206,7 +206,9 @@ export async function seedOrders(prisma: PrismaClient) {
         for (const listing of selectedListings) {
           const listingAvailabilities = listing.availabilities as any[];
           const selectedAvailability =
-            listingAvailabilities[Math.floor(Math.random() * listingAvailabilities.length)];
+            listingAvailabilities[
+              Math.floor(Math.random() * listingAvailabilities.length)
+            ];
 
           await prisma.orderListing.create({
             data: {
