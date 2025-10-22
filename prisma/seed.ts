@@ -46,8 +46,12 @@ async function main() {
     await prisma.user.deleteMany();
 
     // Reset the User ID sequence to avoid conflicts with fixed IDs
-    await prisma.$executeRawUnsafe(`ALTER SEQUENCE "User_id_seq" RESTART WITH 1;`);
-    await prisma.$executeRawUnsafe(`ALTER SEQUENCE "Wedding_id_seq" RESTART WITH 1;`);
+    await prisma.$executeRawUnsafe(
+      `ALTER SEQUENCE "User_id_seq" RESTART WITH 1;`,
+    );
+    await prisma.$executeRawUnsafe(
+      `ALTER SEQUENCE "Wedding_id_seq" RESTART WITH 1;`,
+    );
 
     console.log('✅ Existing data cleared and sequences reset');
   } catch (error: unknown) {
