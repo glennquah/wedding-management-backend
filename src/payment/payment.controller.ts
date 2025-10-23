@@ -10,10 +10,11 @@ import {
   Post,
   RawBodyRequest,
   Req,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -33,6 +34,7 @@ import {
 } from './dto/vendor-payout-response.dto';
 import { PaymentService } from './payment.service';
 import { ScheduledPayoutService } from './scheduled-payout.service';
+import { InvoiceGeneratorService } from './invoice-generator.service';
 
 @ApiTags('payments')
 @Controller('payments')
@@ -40,6 +42,7 @@ export class PaymentController {
   constructor(
     private readonly paymentService: PaymentService,
     private readonly scheduledPayoutService: ScheduledPayoutService,
+    private readonly invoiceGeneratorService: InvoiceGeneratorService,
   ) {}
 
   @UseGuards(JwtGuard)
@@ -182,5 +185,29 @@ export class PaymentController {
   async triggerScheduledPayouts(): Promise<{ message: string }> {
     await this.scheduledPayoutService.triggerManualPayout();
     return { message: 'Scheduled payouts triggered successfully' };
+  }
+
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(UserRole.VENDOR, UserRole.ADMIN, UserRole.SUPERADMIN)
+  @Get('vendor-payouts/:payoutId/invoice')
+  @ApiOperation({ summary: 'Download payout invoice/payslip as PDF' })
+  @ApiResponse({
+    status: 200,
+    description: 'Invoice PDF downloaded successfully.',
+  })
+  @ApiResponse({ status: 404, description: 'Payout not found.' })
+  async downloadPayoutInvoice(
+    @Param('payoutId', ParseIntPipe) payoutId: number,
+    @Res() res: Response,
+  ): Promise<void> {
+    const { buffer, filename } = await this.invoiceGeneratorService.generatePayoutInvoice(payoutId);
+
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename="${filename}"`,
+      'Content-Length': buffer.length,
+    });
+
+    res.end(buffer);
   }
 }
