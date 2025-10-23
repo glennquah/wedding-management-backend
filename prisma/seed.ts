@@ -1,10 +1,12 @@
 import { PrismaClient } from '@prisma/client';
+import { seedAlbums } from './seeds/albums.seed';
 import { seedCalendarConnections } from './seeds/calendar-connections.seed';
 import { seedCouples } from './seeds/couples.seed';
 import { seedEmailHistory } from './seeds/email-history.seed';
 import { seedEmailTemplates } from './seeds/email-templates.seed';
 import { seedGuests } from './seeds/guests.seed';
 import { seedListings } from './seeds/listings.seed';
+import { seedMicrosites } from './seeds/microsites.seed';
 import { seedOrders } from './seeds/orders.seed';
 import { seedUsers } from './seeds/users.seed';
 import { seedVendors } from './seeds/vendors.seed';
@@ -16,6 +18,9 @@ import { seedRecommendationListings } from './seeds/listings.recommendation.seed
 import { seedRecommendationOrders } from './seeds/orders.recommendation.seed';
 import { seedRecommendationVendors } from './seeds/vendors.recommendation.seed';
 import { seedRecommendationWeddings } from './seeds/weddings.recommendation.seed';
+
+// Fresh test users seed
+import { seedFreshUsers } from './seeds/fresh-users.seed';
 
 const prisma = new PrismaClient();
 
@@ -30,6 +35,8 @@ async function main() {
     await prisma.payment.deleteMany();
     await prisma.order.deleteMany();
     await prisma.listing.deleteMany();
+    await prisma.microsite.deleteMany();
+    await prisma.album.deleteMany();
     await prisma.googleCalendarConnection.deleteMany();
     await prisma.guest.deleteMany();
     await prisma.wedding.deleteMany();
@@ -37,7 +44,16 @@ async function main() {
     await prisma.admin.deleteMany();
     await prisma.superAdmin.deleteMany();
     await prisma.user.deleteMany();
-    console.log('✅ Existing data cleared');
+
+    // Reset the User ID sequence to avoid conflicts with fixed IDs
+    await prisma.$executeRawUnsafe(
+      `ALTER SEQUENCE "User_id_seq" RESTART WITH 1;`,
+    );
+    await prisma.$executeRawUnsafe(
+      `ALTER SEQUENCE "Wedding_id_seq" RESTART WITH 1;`,
+    );
+
+    console.log('✅ Existing data cleared and sequences reset');
   } catch (error: unknown) {
     console.log('Error in seeding: ', error);
   }
@@ -48,28 +64,34 @@ async function main() {
   // 3. Seed weddings
   const weddings = await seedWeddings(prisma);
 
-  // 4. Seed couples (depends on weddings and hashedPassword)
+  // 4. Seed microsites (depends on weddings)
+  await seedMicrosites(prisma, weddings);
+
+  // 4.5. Seed albums (depends on weddings)
+  await seedAlbums(prisma, weddings);
+
+  // 5. Seed couples (depends on weddings and hashedPassword)
   await seedCouples(prisma, weddings, hashedPassword);
 
-  // 5. Seed vendors (depends on hashedPassword)
+  // 6. Seed vendors (depends on hashedPassword)
   await seedVendors(prisma, hashedPassword);
 
-  // 6. Seed email templates (depends on notification details from weddings and vendors)
+  // 7. Seed email templates (depends on notification details from weddings and vendors)
   await seedEmailTemplates(prisma);
 
-  // 7. Seed email history (depends on email templates and notification details)
+  // 8. Seed email history (depends on email templates and notification details)
   await seedEmailHistory(prisma);
 
-  // 8. Seed listings (depends on vendors)
+  // 9. Seed listings (depends on vendors)
   await seedListings(prisma);
 
-  // 9. Seed orders (depends on weddings and listings)
+  // 10. Seed orders (depends on weddings and listings)
   await seedOrders(prisma);
 
-  // 10. Seed guests (depends on weddings)
+  // 11. Seed guests (depends on weddings)
   await seedGuests(prisma);
 
-  // 10. Seed Google Calendar connections (depends on weddings, couples, and guests)
+  // 12. Seed Google Calendar connections (depends on weddings, couples, and guests)
   await seedCalendarConnections(prisma);
 
   console.log('\n========================================');
@@ -87,9 +109,13 @@ async function main() {
   const recommendationWeddings = await seedRecommendationWeddings(prisma);
 
   // 12. Seed recommendation couples (1000 couples / 2000 admins)
-  await seedRecommendationCouples(prisma, recommendationWeddings, hashedPassword);
+  await seedRecommendationCouples(
+    prisma,
+    recommendationWeddings,
+    hashedPassword,
+  );
 
-  // 13. Seed recommendation vendors (200 vendors with fixed IDs 10000+)
+  // 13. Seed recommendation vendors (200 vendors)
   await seedRecommendationVendors(prisma, hashedPassword);
 
   // 14. Seed recommendation listings (depends on recommendation vendors)
@@ -97,6 +123,20 @@ async function main() {
 
   // 15. Seed recommendation orders (connects recommendation weddings to recommendation vendors only)
   await seedRecommendationOrders(prisma);
+
+  console.log('\n========================================');
+  console.log('✅ Recommendation system data completed!');
+  console.log('========================================');
+
+  // ============================================
+  // PART 3: FRESH TEST USERS
+  // ============================================
+  console.log('\n========================================');
+  console.log('Seeding fresh test users for development...');
+  console.log('========================================\n');
+
+  // 16. Seed fresh test users (1 admin with wedding, 1 vendor without Stripe)
+  await seedFreshUsers(prisma, hashedPassword);
 
   // Print final summary
   console.log('\n========================================');
@@ -108,6 +148,8 @@ async function main() {
   console.log('- 10 Admin users (5 couples)');
   console.log('- 20 Vendor users');
   console.log('- 5 Weddings');
+  console.log('- 1 Microsite');
+  console.log('- 1 Album');
   console.log('- 25 Notification Details (5 for weddings, 20 for vendors)');
   console.log(
     '- 127 Email Templates (2 SuperAdmin + 125 for notification details)',
@@ -136,13 +178,24 @@ async function main() {
   console.log('\n🤖 RECOMMENDATION SYSTEM DATA:');
   console.log('- 1000 Weddings (IDs 20000-20999)');
   console.log('- 2000 Admin users (1000 couples)');
-  console.log('- 200 Vendor users (IDs 10000-10199)');
+  console.log('- 200 Vendor users');
   console.log('- 400+ Listings (2 per recommendation vendor)');
   console.log('- 1000 Orders (1 per recommendation wedding)');
-  console.log('- Orders connect recommendation weddings → recommendation vendors ONLY');
-  console.log('- Realistic matching based on budget, wedding type, style, and capacity');
+  console.log(
+    '- Orders connect recommendation weddings → recommendation vendors ONLY',
+  );
+  console.log(
+    '- Realistic matching based on budget, wedding type, style, and capacity',
+  );
+
+  console.log('\n🧪 FRESH TEST USERS:');
+  console.log('- 1 Test Admin with wedding');
+  console.log('- 1 Test Vendor WITHOUT Stripe (for testing onboarding)');
 
   console.log(`\n📧 Test Login Credentials:`);
+  console.log(`  Super Admin: superadmin@wedding.com`);
+  console.log(`  Test Admin: testadmin@wedding.com`);
+  console.log(`  Test Vendor (no Stripe): testvendor@wedding.com`);
   console.log(`  Regular: couple@wedding.com`);
   console.log(`  Recommendation: couple0_person1@recommendation.com`);
   console.log(`  Password: password123`);
