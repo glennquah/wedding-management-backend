@@ -200,9 +200,8 @@ export class AlbumService {
 
     this.logger.log(`Album ${albumId} has ${faceCount} faces detected`);
 
-    // Only cluster if we have at least 2 faces
-    // This prevents clustering with too few data points
-    if (faceCount >= 2) {
+    // Only cluster if we have at least 1 face
+    if (faceCount >= 1) {
       this.logger.log(`Triggering face clustering for album ${albumId}`);
       await this.photoService.clusterAlbumFaces(albumId);
     }
