@@ -14,6 +14,17 @@ import {
   StripeConnectAccountResponseDto,
   StripeAccountStatusDto,
 } from '../vendor/dto/stripe-connect.dto';
+import {
+  VendorEarningResponseDto,
+  VendorEarningsSummaryDto,
+} from './dto/vendor-earning-response.dto';
+import {
+  VendorPayoutResponseDto,
+  CreatePayoutDto,
+  BatchPayoutDto,
+  BatchPayoutResultDto,
+  PayoutResultDto,
+} from './dto/vendor-payout-response.dto';
 
 @Injectable()
 export class PaymentService {
@@ -263,7 +274,11 @@ export class PaymentService {
       include: {
         order: {
           include: {
-            listings: true,
+            listings: {
+              include: {
+                listing: true,
+              },
+            },
           },
         },
       },
@@ -302,6 +317,7 @@ export class PaymentService {
       }
 
       // Update OrderListing statuses to PAID only for the paid listings
+      // AND create vendor earnings records
       for (const orderListing of payment.order.listings) {
         console.log(
           `Checking listing ${orderListing.listingId} against listingIdsToPay:`,
@@ -320,6 +336,41 @@ export class PaymentService {
             },
             data: { bookingStatus: OrderStatus.PAID },
           });
+
+          // Calculate vendor earnings with 5% platform fee
+          const bookedSlots = orderListing.bookedSlots as any[];
+          const quantity = bookedSlots ? bookedSlots.length : 1;
+          const grossAmount = orderListing.listing.price * quantity;
+          const platformFeePercentage = 0.05; // 5%
+          const platformFee = grossAmount * platformFeePercentage;
+          const netAmount = grossAmount - platformFee;
+
+          // Get vendor ID from listing
+          const listing = await this.prisma.listing.findUnique({
+            where: { id: orderListing.listingId },
+            select: { vendorId: true },
+          });
+
+          if (listing?.vendorId) {
+            // Create vendor earning record
+            await this.prisma.vendorEarning.create({
+              data: {
+                vendorId: listing.vendorId,
+                orderListingId: `${payment.orderId}-${orderListing.listingId}`,
+                orderId: payment.orderId,
+                listingId: orderListing.listingId,
+                grossAmount,
+                platformFee,
+                netAmount,
+                currency: payment.currency,
+                isPaidOut: false,
+              },
+            });
+
+            console.log(
+              `Created vendor earning for vendor ${listing.vendorId}: gross=${grossAmount}, platformFee=${platformFee}, net=${netAmount}`,
+            );
+          }
         } else {
           console.log(`Skipping listing ${orderListing.listingId}`);
         }
@@ -525,5 +576,241 @@ export class PaymentService {
     } catch (error) {
       console.error('Error handling account update:', error);
     }
+  }
+
+  async getVendorEarnings(vendorId: number): Promise<VendorEarningResponseDto[]> {
+    return this.prisma.vendorEarning.findMany({
+      where: { vendorId },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async getVendorEarningsSummary(vendorId: number): Promise<VendorEarningsSummaryDto> {
+    const earnings = await this.prisma.vendorEarning.findMany({
+      where: { vendorId },
+    });
+
+    const totalGrossAmount = earnings.reduce((sum, e) => sum + e.grossAmount, 0);
+    const totalPlatformFee = earnings.reduce((sum, e) => sum + e.platformFee, 0);
+    const totalNetAmount = earnings.reduce((sum, e) => sum + e.netAmount, 0);
+
+    const paidOutEarnings = earnings.filter((e) => e.isPaidOut);
+    const pendingEarnings = earnings.filter((e) => !e.isPaidOut);
+
+    const paidOutAmount = paidOutEarnings.reduce((sum, e) => sum + e.netAmount, 0);
+    const pendingAmount = pendingEarnings.reduce((sum, e) => sum + e.netAmount, 0);
+
+    return {
+      vendorId,
+      totalGrossAmount,
+      totalPlatformFee,
+      totalNetAmount,
+      paidOutAmount,
+      pendingAmount,
+      currency: earnings[0]?.currency || 'SGD',
+      totalBookings: earnings.length,
+      paidBookings: paidOutEarnings.length,
+      pendingBookings: pendingEarnings.length,
+    };
+  }
+
+  async getVendorPayouts(vendorId: number): Promise<VendorPayoutResponseDto[]> {
+    return this.prisma.vendorPayout.findMany({
+      where: { vendorId },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async createVendorPayout(dto: CreatePayoutDto): Promise<VendorPayoutResponseDto> {
+    const { vendorId, periodStart, periodEnd } = dto;
+
+    // Get vendor with Stripe account info
+    const vendor = await this.prisma.vendor.findUnique({
+      where: { userId: vendorId },
+    });
+
+    if (!vendor) {
+      throw new BadRequestException('Vendor not found');
+    }
+
+    if (!vendor.stripeConnectAccountId) {
+      throw new BadRequestException('Vendor does not have a Stripe Connect account');
+    }
+
+    if (!vendor.stripePayoutsEnabled) {
+      throw new BadRequestException(
+        'Vendor Stripe account is not ready for payouts. Please ensure KYC is completed.',
+      );
+    }
+
+    // Determine period
+    const lastPayout = await this.prisma.vendorPayout.findFirst({
+      where: { vendorId },
+      orderBy: { periodEnd: 'desc' },
+    });
+
+    const start = periodStart || lastPayout?.periodEnd || new Date(0);
+    const end = periodEnd || new Date();
+
+    // Get unpaid earnings within the period
+    const unpaidEarnings = await this.prisma.vendorEarning.findMany({
+      where: {
+        vendorId,
+        isPaidOut: false,
+        createdAt: {
+          gte: start,
+          lte: end,
+        },
+      },
+    });
+
+    if (unpaidEarnings.length === 0) {
+      throw new BadRequestException('No unpaid earnings found for this period');
+    }
+
+    // Calculate total payout amount
+    const totalAmount = unpaidEarnings.reduce((sum, e) => sum + e.netAmount, 0);
+    const currency = unpaidEarnings[0].currency;
+
+    try {
+      // Create Stripe Transfer to vendor's Connect account
+      const transfer = await this.stripe.transfers.create({
+        amount: Math.round(totalAmount * 100), // Convert to cents
+        currency: currency.toLowerCase(),
+        destination: vendor.stripeConnectAccountId,
+        description: `Payout for period ${start.toISOString()} to ${end.toISOString()}`,
+        metadata: {
+          vendorId: vendorId.toString(),
+          earningsCount: unpaidEarnings.length.toString(),
+          periodStart: start.toISOString(),
+          periodEnd: end.toISOString(),
+        },
+      });
+
+      // Create payout record
+      const payout = await this.prisma.vendorPayout.create({
+        data: {
+          vendorId,
+          stripeTransferId: transfer.id,
+          amount: totalAmount,
+          currency,
+          status: 'paid',
+          earningsCount: unpaidEarnings.length,
+          periodStart: start,
+          periodEnd: end,
+        },
+      });
+
+      // Mark earnings as paid out
+      await this.prisma.vendorEarning.updateMany({
+        where: {
+          id: { in: unpaidEarnings.map((e) => e.id) },
+        },
+        data: {
+          isPaidOut: true,
+          payoutId: payout.id,
+        },
+      });
+
+      console.log(
+        `Created payout ${payout.id} for vendor ${vendorId}: ${totalAmount} ${currency}`,
+      );
+
+      return payout;
+    } catch (error) {
+      console.error('Error creating vendor payout:', error);
+      throw new InternalServerErrorException(
+        `Failed to create payout: ${error.message}`,
+      );
+    }
+  }
+
+  async createBatchPayouts(dto: BatchPayoutDto): Promise<BatchPayoutResultDto> {
+    const {
+      vendorIds,
+      periodStart,
+      periodEnd,
+      minimumPayoutAmount = 10,
+    } = dto;
+
+    // Get vendors to pay out
+    let vendorsQuery: any = {
+      stripeConnectAccountId: { not: null },
+      stripePayoutsEnabled: true,
+    };
+
+    if (vendorIds && vendorIds.length > 0) {
+      vendorsQuery.userId = { in: vendorIds };
+    }
+
+    const vendors = await this.prisma.vendor.findMany({
+      where: vendorsQuery,
+    });
+
+    const results: PayoutResultDto[] = [];
+    let totalAmountPaidOut = 0;
+    let successfulPayouts = 0;
+    let failedPayouts = 0;
+
+    for (const vendor of vendors) {
+      try {
+        // Check if vendor has enough unpaid earnings
+        const unpaidEarnings = await this.prisma.vendorEarning.findMany({
+          where: {
+            vendorId: vendor.userId,
+            isPaidOut: false,
+            ...(periodStart && { createdAt: { gte: periodStart } }),
+            ...(periodEnd && { createdAt: { lte: periodEnd } }),
+          },
+        });
+
+        const totalUnpaid = unpaidEarnings.reduce(
+          (sum, e) => sum + e.netAmount,
+          0,
+        );
+
+        if (totalUnpaid < minimumPayoutAmount) {
+          results.push({
+            success: false,
+            vendorId: vendor.userId,
+            error: `Unpaid amount (${totalUnpaid}) is below minimum (${minimumPayoutAmount})`,
+          });
+          failedPayouts++;
+          continue;
+        }
+
+        // Create payout
+        const payout = await this.createVendorPayout({
+          vendorId: vendor.userId,
+          periodStart,
+          periodEnd,
+        });
+
+        results.push({
+          success: true,
+          vendorId: vendor.userId,
+          payout,
+        });
+
+        totalAmountPaidOut += payout.amount;
+        successfulPayouts++;
+      } catch (error) {
+        results.push({
+          success: false,
+          vendorId: vendor.userId,
+          error: error.message,
+        });
+        failedPayouts++;
+      }
+    }
+
+    return {
+      totalVendors: vendors.length,
+      successfulPayouts,
+      failedPayouts,
+      results,
+      totalAmountPaidOut,
+      currency: 'SGD',
+    };
   }
 }

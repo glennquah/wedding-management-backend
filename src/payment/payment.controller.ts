@@ -6,17 +6,31 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  ParseIntPipe,
   Post,
   RawBodyRequest,
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import { JwtGuard } from '../auth/guards/jwt.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { UserRole } from '../common/user-role.enum';
 import { CreateCheckoutSessionDto } from './dto/create-checkout-session.dto';
 import { CheckoutSessionResponseDto } from './dto/checkout-session-response.dto';
 import { PaymentResponseDto } from './dto/payment-response.dto';
+import {
+  VendorEarningResponseDto,
+  VendorEarningsSummaryDto,
+} from './dto/vendor-earning-response.dto';
+import {
+  VendorPayoutResponseDto,
+  CreatePayoutDto,
+  BatchPayoutDto,
+  BatchPayoutResultDto,
+} from './dto/vendor-payout-response.dto';
 import { PaymentService } from './payment.service';
 
 @ApiTags('payments')
@@ -68,5 +82,90 @@ export class PaymentController {
     @Req() req: RawBodyRequest<Request>,
   ) {
     return this.paymentService.handleWebhook(signature, req.rawBody!);
+  }
+
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(UserRole.VENDOR, UserRole.ADMIN, UserRole.SUPERADMIN)
+  @Get('vendor-earnings/:vendorId')
+  @ApiOperation({ summary: 'Get vendor earnings history' })
+  @ApiResponse({
+    status: 200,
+    description: 'Vendor earnings retrieved successfully.',
+    type: [VendorEarningResponseDto],
+  })
+  async getVendorEarnings(
+    @Param('vendorId', ParseIntPipe) vendorId: number,
+  ): Promise<VendorEarningResponseDto[]> {
+    return this.paymentService.getVendorEarnings(vendorId);
+  }
+
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(UserRole.VENDOR, UserRole.ADMIN, UserRole.SUPERADMIN)
+  @Get('vendor-earnings/:vendorId/summary')
+  @ApiOperation({ summary: 'Get vendor earnings summary' })
+  @ApiResponse({
+    status: 200,
+    description: 'Vendor earnings summary retrieved successfully.',
+    type: VendorEarningsSummaryDto,
+  })
+  async getVendorEarningsSummary(
+    @Param('vendorId', ParseIntPipe) vendorId: number,
+  ): Promise<VendorEarningsSummaryDto> {
+    return this.paymentService.getVendorEarningsSummary(vendorId);
+  }
+
+  // ===============================
+  // Vendor Payout Endpoints
+  // ===============================
+
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(UserRole.VENDOR, UserRole.ADMIN, UserRole.SUPERADMIN)
+  @Get('vendor-payouts/:vendorId')
+  @ApiOperation({ summary: 'Get vendor payout history' })
+  @ApiResponse({
+    status: 200,
+    description: 'Vendor payouts retrieved successfully.',
+    type: [VendorPayoutResponseDto],
+  })
+  async getVendorPayouts(
+    @Param('vendorId', ParseIntPipe) vendorId: number,
+  ): Promise<VendorPayoutResponseDto[]> {
+    return this.paymentService.getVendorPayouts(vendorId);
+  }
+
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(UserRole.SUPERADMIN)
+  @Post('vendor-payouts/create')
+  @ApiOperation({ summary: 'Create a payout for a specific vendor (Admin only)' })
+  @ApiResponse({
+    status: 201,
+    description: 'Payout created successfully.',
+    type: VendorPayoutResponseDto,
+  })
+  @ApiResponse({ status: 400, description: 'Bad request.' })
+  @ApiBody({ type: CreatePayoutDto })
+  async createVendorPayout(
+    @Body() createPayoutDto: CreatePayoutDto,
+  ): Promise<VendorPayoutResponseDto> {
+    return this.paymentService.createVendorPayout(createPayoutDto);
+  }
+
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(UserRole.SUPERADMIN)
+  @Post('vendor-payouts/batch')
+  @ApiOperation({
+    summary: 'Create batch payouts for multiple vendors (Admin only)',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Batch payouts processed.',
+    type: BatchPayoutResultDto,
+  })
+  @ApiResponse({ status: 400, description: 'Bad request.' })
+  @ApiBody({ type: BatchPayoutDto })
+  async createBatchPayouts(
+    @Body() batchPayoutDto: BatchPayoutDto,
+  ): Promise<BatchPayoutResultDto> {
+    return this.paymentService.createBatchPayouts(batchPayoutDto);
   }
 }
