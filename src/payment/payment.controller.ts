@@ -32,11 +32,15 @@ import {
   BatchPayoutResultDto,
 } from './dto/vendor-payout-response.dto';
 import { PaymentService } from './payment.service';
+import { ScheduledPayoutService } from './scheduled-payout.service';
 
 @ApiTags('payments')
 @Controller('payments')
 export class PaymentController {
-  constructor(private readonly paymentService: PaymentService) {}
+  constructor(
+    private readonly paymentService: PaymentService,
+    private readonly scheduledPayoutService: ScheduledPayoutService,
+  ) {}
 
   @UseGuards(JwtGuard)
   @Post('create-checkout-session')
@@ -114,10 +118,6 @@ export class PaymentController {
     return this.paymentService.getVendorEarningsSummary(vendorId);
   }
 
-  // ===============================
-  // Vendor Payout Endpoints
-  // ===============================
-
   @UseGuards(JwtGuard, RolesGuard)
   @Roles(UserRole.VENDOR, UserRole.ADMIN, UserRole.SUPERADMIN)
   @Get('vendor-payouts/:vendorId')
@@ -136,7 +136,7 @@ export class PaymentController {
   @UseGuards(JwtGuard, RolesGuard)
   @Roles(UserRole.SUPERADMIN)
   @Post('vendor-payouts/create')
-  @ApiOperation({ summary: 'Create a payout for a specific vendor (Admin only)' })
+  @ApiOperation({ summary: 'Create a payout for a specific vendor (Super Admin only)' })
   @ApiResponse({
     status: 201,
     description: 'Payout created successfully.',
@@ -154,7 +154,7 @@ export class PaymentController {
   @Roles(UserRole.SUPERADMIN)
   @Post('vendor-payouts/batch')
   @ApiOperation({
-    summary: 'Create batch payouts for multiple vendors (Admin only)',
+    summary: 'Create batch payouts for multiple vendors (Super Admin only)',
   })
   @ApiResponse({
     status: 201,
@@ -167,5 +167,20 @@ export class PaymentController {
     @Body() batchPayoutDto: BatchPayoutDto,
   ): Promise<BatchPayoutResultDto> {
     return this.paymentService.createBatchPayouts(batchPayoutDto);
+  }
+
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(UserRole.SUPERADMIN)
+  @Post('vendor-payouts/trigger-scheduled')
+  @ApiOperation({
+    summary: 'Manually trigger scheduled payouts (Testing/Admin only)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Scheduled payouts triggered successfully.',
+  })
+  async triggerScheduledPayouts(): Promise<{ message: string }> {
+    await this.scheduledPayoutService.triggerManualPayout();
+    return { message: 'Scheduled payouts triggered successfully' };
   }
 }

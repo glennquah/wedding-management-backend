@@ -842,6 +842,47 @@ export class OrderService {
       data: { bookingStatus: OrderStatus.COMPLETED },
     });
 
+    // Create vendor earning record now that service is completed
+    const quantity = bookedSlots ? bookedSlots.length : 1;
+    const grossAmount = orderListing.listing.price * quantity;
+    const platformFeePercentage = 0.10; // 10% commission on full listed price
+    const platformFee = grossAmount * platformFeePercentage;
+    const netAmount = grossAmount - platformFee;
+
+    // Check if vendor earning already exists (to avoid duplicates)
+    const existingEarning = await this.prisma.vendorEarning.findUnique({
+      where: {
+        orderId_listingId: {
+          orderId: orderId,
+          listingId: listingId,
+        },
+      },
+    });
+
+    if (!existingEarning) {
+      await this.prisma.vendorEarning.create({
+        data: {
+          vendorId: orderListing.listing.vendorId,
+          orderListingId: `${orderId}-${listingId}`,
+          orderId: orderId,
+          listingId: listingId,
+          grossAmount,
+          platformFee,
+          netAmount,
+          currency: order.currency,
+          isPaidOut: false,
+        },
+      });
+
+      console.log(
+        `Created vendor earning for vendor ${orderListing.listing.vendorId}: gross=${grossAmount}, platformFee=${platformFee}, net=${netAmount}`,
+      );
+    } else {
+      console.log(
+        `Vendor earning already exists for order ${orderId} listing ${listingId}, skipping creation`,
+      );
+    }
+
     // Return updated order
     return this.findOne(orderId);
   }
@@ -916,6 +957,47 @@ export class OrderService {
       where: { orderId_listingId: { orderId, listingId } },
       data: { bookingStatus: OrderStatus.COMPLETED },
     });
+
+    // Create vendor earning record now that service is completed
+    const quantity = bookedSlots ? bookedSlots.length : 1;
+    const grossAmount = orderListing.listing.price * quantity;
+    const platformFeePercentage = 0.10; // 10% commission on full listed price
+    const platformFee = grossAmount * platformFeePercentage;
+    const netAmount = grossAmount - platformFee;
+
+    // Check if vendor earning already exists (to avoid duplicates)
+    const existingEarning = await this.prisma.vendorEarning.findUnique({
+      where: {
+        orderId_listingId: {
+          orderId: orderId,
+          listingId: listingId,
+        },
+      },
+    });
+
+    if (!existingEarning) {
+      await this.prisma.vendorEarning.create({
+        data: {
+          vendorId: orderListing.listing.vendorId,
+          orderListingId: `${orderId}-${listingId}`,
+          orderId: orderId,
+          listingId: listingId,
+          grossAmount,
+          platformFee,
+          netAmount,
+          currency: order.currency,
+          isPaidOut: false,
+        },
+      });
+
+      console.log(
+        `Created vendor earning for vendor ${orderListing.listing.vendorId}: gross=${grossAmount}, platformFee=${platformFee}, net=${netAmount}`,
+      );
+    } else {
+      console.log(
+        `Vendor earning already exists for order ${orderId} listing ${listingId}, skipping creation`,
+      );
+    }
 
     // Return updated order
     return this.findOne(orderId);

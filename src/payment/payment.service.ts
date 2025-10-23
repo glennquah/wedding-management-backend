@@ -336,41 +336,6 @@ export class PaymentService {
             },
             data: { bookingStatus: OrderStatus.PAID },
           });
-
-          // Calculate vendor earnings with 5% platform fee
-          const bookedSlots = orderListing.bookedSlots as any[];
-          const quantity = bookedSlots ? bookedSlots.length : 1;
-          const grossAmount = orderListing.listing.price * quantity;
-          const platformFeePercentage = 0.05; // 5%
-          const platformFee = grossAmount * platformFeePercentage;
-          const netAmount = grossAmount - platformFee;
-
-          // Get vendor ID from listing
-          const listing = await this.prisma.listing.findUnique({
-            where: { id: orderListing.listingId },
-            select: { vendorId: true },
-          });
-
-          if (listing?.vendorId) {
-            // Create vendor earning record
-            await this.prisma.vendorEarning.create({
-              data: {
-                vendorId: listing.vendorId,
-                orderListingId: `${payment.orderId}-${orderListing.listingId}`,
-                orderId: payment.orderId,
-                listingId: orderListing.listingId,
-                grossAmount,
-                platformFee,
-                netAmount,
-                currency: payment.currency,
-                isPaidOut: false,
-              },
-            });
-
-            console.log(
-              `Created vendor earning for vendor ${listing.vendorId}: gross=${grossAmount}, platformFee=${platformFee}, net=${netAmount}`,
-            );
-          }
         } else {
           console.log(`Skipping listing ${orderListing.listingId}`);
         }
