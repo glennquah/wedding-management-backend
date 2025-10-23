@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import * as PDFDocument from 'pdfkit';
 import { PrismaService } from '../prisma/prisma.service';
+import * as path from 'path';
 
 interface PayoutInvoiceData {
   payoutId: number;
@@ -106,8 +107,12 @@ export class InvoiceGeneratorService {
 
       // Logo
       try {
-        const path = require('path');
-        const logoPath = path.join(process.cwd(), 'public', 'images', 'logo.png');
+        const logoPath = path.join(
+          process.cwd(),
+          'public',
+          'images',
+          'logo.png',
+        );
         doc.image(logoPath, 250, 30, { width: 100 });
         doc.moveDown(2);
       } catch (error) {
@@ -207,17 +212,35 @@ export class InvoiceGeneratorService {
             col2X,
             yPosition,
           )
-          .text(`${data.currency} ${earning.grossAmount.toFixed(2)}`, col3X, yPosition)
-          .text(`${data.currency} ${earning.platformFee.toFixed(2)}`, col4X, yPosition)
-          .text(`${data.currency} ${earning.netAmount.toFixed(2)}`, col5X, yPosition);
+          .text(
+            `${data.currency} ${earning.grossAmount.toFixed(2)}`,
+            col3X,
+            yPosition,
+          )
+          .text(
+            `${data.currency} ${earning.platformFee.toFixed(2)}`,
+            col4X,
+            yPosition,
+          )
+          .text(
+            `${data.currency} ${earning.netAmount.toFixed(2)}`,
+            col5X,
+            yPosition,
+          );
 
         yPosition += 20;
       }
 
       // Totals
       doc.moveDown(2);
-      const totalGross = data.earnings.reduce((sum, e) => sum + e.grossAmount, 0);
-      const totalFees = data.earnings.reduce((sum, e) => sum + e.platformFee, 0);
+      const totalGross = data.earnings.reduce(
+        (sum, e) => sum + e.grossAmount,
+        0,
+      );
+      const totalFees = data.earnings.reduce(
+        (sum, e) => sum + e.platformFee,
+        0,
+      );
 
       doc
         .moveTo(col1X, yPosition + 10)
@@ -240,10 +263,9 @@ export class InvoiceGeneratorService {
         .fontSize(14)
         .font('Helvetica-Bold')
         .fillColor('#2563eb')
-        .text(
-          `TOTAL PAYOUT: ${data.currency} ${data.amount.toFixed(2)}`,
-          { align: 'center' },
-        );
+        .text(`TOTAL PAYOUT: ${data.currency} ${data.amount.toFixed(2)}`, {
+          align: 'center',
+        });
 
       // Footer
       doc

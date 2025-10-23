@@ -139,7 +139,9 @@ export class PaymentController {
   @UseGuards(JwtGuard, RolesGuard)
   @Roles(UserRole.SUPERADMIN)
   @Post('vendor-payouts/create')
-  @ApiOperation({ summary: 'Create a payout for a specific vendor (Super Admin only)' })
+  @ApiOperation({
+    summary: 'Create a payout for a specific vendor (Super Admin only)',
+  })
   @ApiResponse({
     status: 201,
     description: 'Payout created successfully.',
@@ -200,7 +202,8 @@ export class PaymentController {
     @Param('payoutId', ParseIntPipe) payoutId: number,
     @Res() res: Response,
   ): Promise<void> {
-    const { buffer, filename } = await this.invoiceGeneratorService.generatePayoutInvoice(payoutId);
+    const { buffer, filename } =
+      await this.invoiceGeneratorService.generatePayoutInvoice(payoutId);
 
     res.set({
       'Content-Type': 'application/pdf',

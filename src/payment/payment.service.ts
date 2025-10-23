@@ -543,27 +543,43 @@ export class PaymentService {
     }
   }
 
-  async getVendorEarnings(vendorId: number): Promise<VendorEarningResponseDto[]> {
+  async getVendorEarnings(
+    vendorId: number,
+  ): Promise<VendorEarningResponseDto[]> {
     return this.prisma.vendorEarning.findMany({
       where: { vendorId },
       orderBy: { createdAt: 'desc' },
     });
   }
 
-  async getVendorEarningsSummary(vendorId: number): Promise<VendorEarningsSummaryDto> {
+  async getVendorEarningsSummary(
+    vendorId: number,
+  ): Promise<VendorEarningsSummaryDto> {
     const earnings = await this.prisma.vendorEarning.findMany({
       where: { vendorId },
     });
 
-    const totalGrossAmount = earnings.reduce((sum, e) => sum + e.grossAmount, 0);
-    const totalPlatformFee = earnings.reduce((sum, e) => sum + e.platformFee, 0);
+    const totalGrossAmount = earnings.reduce(
+      (sum, e) => sum + e.grossAmount,
+      0,
+    );
+    const totalPlatformFee = earnings.reduce(
+      (sum, e) => sum + e.platformFee,
+      0,
+    );
     const totalNetAmount = earnings.reduce((sum, e) => sum + e.netAmount, 0);
 
     const paidOutEarnings = earnings.filter((e) => e.isPaidOut);
     const pendingEarnings = earnings.filter((e) => !e.isPaidOut);
 
-    const paidOutAmount = paidOutEarnings.reduce((sum, e) => sum + e.netAmount, 0);
-    const pendingAmount = pendingEarnings.reduce((sum, e) => sum + e.netAmount, 0);
+    const paidOutAmount = paidOutEarnings.reduce(
+      (sum, e) => sum + e.netAmount,
+      0,
+    );
+    const pendingAmount = pendingEarnings.reduce(
+      (sum, e) => sum + e.netAmount,
+      0,
+    );
 
     return {
       vendorId,
@@ -586,7 +602,9 @@ export class PaymentService {
     });
   }
 
-  async createVendorPayout(dto: CreatePayoutDto): Promise<VendorPayoutResponseDto> {
+  async createVendorPayout(
+    dto: CreatePayoutDto,
+  ): Promise<VendorPayoutResponseDto> {
     const { vendorId, periodStart, periodEnd } = dto;
 
     // Get vendor with Stripe account info
@@ -599,7 +617,9 @@ export class PaymentService {
     }
 
     if (!vendor.stripeConnectAccountId) {
-      throw new BadRequestException('Vendor does not have a Stripe Connect account');
+      throw new BadRequestException(
+        'Vendor does not have a Stripe Connect account',
+      );
     }
 
     if (!vendor.stripePayoutsEnabled) {
@@ -691,15 +711,10 @@ export class PaymentService {
   }
 
   async createBatchPayouts(dto: BatchPayoutDto): Promise<BatchPayoutResultDto> {
-    const {
-      vendorIds,
-      periodStart,
-      periodEnd,
-      minimumPayoutAmount = 10,
-    } = dto;
+    const { vendorIds, periodStart, periodEnd, minimumPayoutAmount = 10 } = dto;
 
     // Get vendors to pay out
-    let vendorsQuery: any = {
+    const vendorsQuery: any = {
       stripeConnectAccountId: { not: null },
       stripePayoutsEnabled: true,
     };

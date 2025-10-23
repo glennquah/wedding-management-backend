@@ -845,7 +845,7 @@ export class OrderService {
     // Create vendor earning record now that service is completed
     const quantity = bookedSlots ? bookedSlots.length : 1;
     const grossAmount = orderListing.listing.price * quantity;
-    const platformFeePercentage = 0.10; // 10% commission on full listed price
+    const platformFeePercentage = 0.1; // 10% commission on full listed price
     const platformFee = grossAmount * platformFeePercentage;
     const netAmount = grossAmount - platformFee;
 
@@ -961,7 +961,7 @@ export class OrderService {
     // Create vendor earning record now that service is completed
     const quantity = bookedSlots ? bookedSlots.length : 1;
     const grossAmount = orderListing.listing.price * quantity;
-    const platformFeePercentage = 0.10; // 10% commission on full listed price
+    const platformFeePercentage = 0.1; // 10% commission on full listed price
     const platformFee = grossAmount * platformFeePercentage;
     const netAmount = grossAmount - platformFee;
 
