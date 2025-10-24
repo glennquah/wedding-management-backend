@@ -100,6 +100,13 @@ export class WishlistService {
       throw new BadRequestException('This item is already reserved');
     }
 
+    // Validate that reservedByName is provided when reserving
+    if (dto.isReserved && !dto.reservedByName) {
+      throw new BadRequestException(
+        'reservedByName is required when reserving an item',
+      );
+    }
+
     const item = await this.prisma.wishlistItem.update({
       where: { id },
       data: {
