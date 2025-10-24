@@ -9,6 +9,7 @@ import {
   Put,
   Patch,
   UseGuards,
+  HttpCode,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -124,18 +125,18 @@ export class WishlistController {
   }
 
   @Delete(':id')
+  @HttpCode(204)
   @UseGuards(JwtGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Delete a wishlist item' })
   @ApiResponse({
-    status: 200,
+    status: 204,
     description: 'Wishlist item deleted successfully',
-    type: WishlistItemResponseDto,
   })
   @ApiResponse({ status: 404, description: 'Wishlist item not found.' })
   async delete(
     @Param('id', ParseIntPipe) id: number,
-  ): Promise<WishlistItemResponseDto> {
-    return this.wishlistService.delete(id);
+  ): Promise<void> {
+    await this.wishlistService.delete(id);
   }
 }

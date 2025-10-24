@@ -118,15 +118,13 @@ export class WishlistService {
     return this.toWishlistItemResponseDto(item);
   }
 
-  async delete(id: number): Promise<WishlistItemResponseDto> {
+  async delete(id: number): Promise<void> {
     // Verify item exists
     await this.findOne(id);
 
-    const item = await this.prisma.wishlistItem.delete({
+    await this.prisma.wishlistItem.delete({
       where: { id },
     });
-
-    return this.toWishlistItemResponseDto(item);
   }
 
   async hasWishlistItems(weddingId: number): Promise<boolean> {
