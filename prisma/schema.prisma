@@ -498,6 +498,47 @@ model Payment {
   @@index([paymentStatus])
 }
 
+model VendorEarning {
+  id             Int      @id @default(autoincrement())
+  vendorId       Int
+  orderListingId String  
+  orderId        Int
+  listingId      Int
+  grossAmount    Float    
+  platformFee    Float    
+  netAmount      Float    
+  currency       String   @default("SGD")
+  isPaidOut      Boolean  @default(false)
+  payoutId       Int?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([vendorId])
+  @@index([isPaidOut])
+  @@index([payoutId])
+  @@unique([orderId, listingId])
+}
+
+model VendorPayout {
+  id                   Int      @id @default(autoincrement())
+  vendorId             Int
+  stripeTransferId     String   @unique
+  amount               Float   
+  currency             String   @default("SGD")
+  status               String   
+  earningsCount        Int     
+  periodStart          DateTime 
+  periodEnd            DateTime 
+  stripePayoutId       String? 
+  failureReason        String?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  @@index([vendorId])
+  @@index([status])
+  @@index([stripeTransferId])
+}
+
 model SeatingArrangement {
   id              Int      @id @default(autoincrement())
   weddingId       Int      @unique

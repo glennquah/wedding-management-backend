@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 import { AdminModule } from './admin/admin.module';
 import { AiServiceModule } from './ai-service/ai-service.module';
 import { AlbumModule } from './album/album.module';
@@ -29,12 +30,13 @@ import { GuestbookModule } from './guestbook/guestbook.module';
 @Module({
   imports: [
     PrismaModule,
+    ConfigModule.forRoot(),
+    ScheduleModule.forRoot(),
     UserModule,
     MicrositeModule,
     VendorModule,
     AdminModule,
     SuperAdminModule,
-    ConfigModule.forRoot(),
     AuthModule,
     GuestModule,
     WeddingModule,
