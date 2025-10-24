@@ -277,12 +277,13 @@ model Microsite {
 }
 
 model WishlistItem {
-  id         Int      @id @default(autoincrement())
-  title      String
-  itemUrl    String
-  isReserved Boolean  @default(false)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id             Int      @id @default(autoincrement())
+  title          String
+  itemUrl        String
+  isReserved     Boolean  @default(false)
+  reservedByName String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   weddingId Int
   wedding   Wedding @relation(fields: [weddingId], references: [id], onDelete: Cascade)

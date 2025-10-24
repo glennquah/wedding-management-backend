@@ -25,19 +25,19 @@ export async function seedMicrosites(
       imageGallery: [MICROSITE_IMAGE_URL],
       schedule: [
         {
-          time: '1:30 PM',
+          time: '13:30',
           title: 'Guest Arrival & Welcome Drinks',
           description:
             'Arrive early for refreshing spritzers and a personalised welcome.',
         },
         {
-          time: '2:00 PM',
+          time: '14:00',
           title: 'Garden Ceremony',
           description:
             'Celebrate with us as we exchange vows in the enchanted garden.',
         },
         {
-          time: '4:00 PM',
+          time: '16:00',
           title: 'Dinner & Dancing',
           description:
             'Enjoy a curated menu and live band in the Marina Bay Grand Ballroom.',

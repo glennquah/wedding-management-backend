@@ -22,24 +22,21 @@ export class WishlistService {
       title: item.title,
       itemUrl: item.itemUrl,
       isReserved: item.isReserved,
+      reservedByName: item.reservedByName,
       weddingId: item.weddingId,
       createdAt: item.createdAt,
       updatedAt: item.updatedAt,
     };
   }
 
-  async create(
-    dto: CreateWishlistItemDto,
-  ): Promise<WishlistItemResponseDto> {
+  async create(dto: CreateWishlistItemDto): Promise<WishlistItemResponseDto> {
     // Verify wedding exists
     const wedding = await this.prisma.wedding.findUnique({
       where: { id: dto.weddingId },
     });
 
     if (!wedding) {
-      throw new NotFoundException(
-        `Wedding with ID ${dto.weddingId} not found`,
-      );
+      throw new NotFoundException(`Wedding with ID ${dto.weddingId} not found`);
     }
 
     const item = await this.prisma.wishlistItem.create({
@@ -105,7 +102,10 @@ export class WishlistService {
 
     const item = await this.prisma.wishlistItem.update({
       where: { id },
-      data: { isReserved: dto.isReserved },
+      data: {
+        isReserved: dto.isReserved,
+        reservedByName: dto.isReserved ? dto.reservedByName : null,
+      },
     });
 
     return this.toWishlistItemResponseDto(item);

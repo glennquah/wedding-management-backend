@@ -13,6 +13,12 @@ export class WishlistItemResponseDto {
   @ApiProperty({ description: 'Whether the item is reserved' })
   isReserved: boolean;
 
+  @ApiProperty({
+    description: 'Name of the person who reserved the item',
+    required: false,
+  })
+  reservedByName?: string;
+
   @ApiProperty({ description: 'Wedding ID' })
   weddingId: number;
 
