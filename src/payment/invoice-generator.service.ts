@@ -277,7 +277,7 @@ export class InvoiceGeneratorService {
           'This is an automated payout statement. Funds have been transferred to your connected Stripe account.',
           { align: 'center' },
         )
-        .text('For any questions, please contact support@weddingplatform.com', {
+        .text('For any questions, please contact support@knotly.com', {
           align: 'center',
         });
 

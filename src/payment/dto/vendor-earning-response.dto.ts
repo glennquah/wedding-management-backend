@@ -45,7 +45,7 @@ export class VendorEarningsSummaryDto {
   @ApiProperty({ description: 'Total earnings before platform fee' })
   totalGrossAmount: number;
 
-  @ApiProperty({ description: 'Total 5% platform commission' })
+  @ApiProperty({ description: 'Total 10% platform commission' })
   totalPlatformFee: number;
 
   @ApiProperty({ description: 'Total amount vendor will receive' })
