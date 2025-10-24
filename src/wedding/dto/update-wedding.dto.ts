@@ -89,10 +89,10 @@ export class UpdateWeddingDto {
   allocatedBudget?: number;
 
   @ApiProperty({
-    description: 'PayNow QR code link for the wedding',
+    description: 'PayLah QR code link for the wedding',
     required: false,
   })
   @IsOptional()
   @IsString()
-  paynowQR?: string;
+  payLahQR?: string;
 }

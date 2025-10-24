@@ -12,8 +12,8 @@ export class WeddingPublicResponseDto {
   @ApiProperty({ description: 'Wedding name' })
   name: string;
 
-  @ApiProperty({ description: 'PayNow QR code URL' })
-  paynowQR: string;
+  @ApiProperty({ description: 'PayLah QR code URL' })
+  payLahQR: string;
 
   @ApiProperty({
     description: 'List of guests with minimal info',

@@ -69,8 +69,8 @@ export class WeddingResponseDto {
   })
   preferredServices: WeddingService[];
 
-  @ApiProperty({ description: 'PayNow QR code link', required: false })
-  paynowQR?: string;
+  @ApiProperty({ description: 'PayLah QR code link', required: false })
+  payLahQR?: string;
 
   @ApiProperty({ description: 'Creation timestamp' })
   createdAt: string;

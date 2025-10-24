@@ -88,7 +88,7 @@ export class WeddingController {
   })
   @ApiResponse({
     status: 404,
-    description: 'Wedding not found or PayNow QR not available.',
+    description: 'Wedding not found or PayLah QR not available.',
   })
   async findPublic(
     @Param('id', ParseIntPipe) id: number,
