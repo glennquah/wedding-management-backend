@@ -134,9 +134,7 @@ export class WishlistController {
     description: 'Wishlist item deleted successfully',
   })
   @ApiResponse({ status: 404, description: 'Wishlist item not found.' })
-  async delete(
-    @Param('id', ParseIntPipe) id: number,
-  ): Promise<void> {
+  async delete(@Param('id', ParseIntPipe) id: number): Promise<void> {
     await this.wishlistService.delete(id);
   }
 }
