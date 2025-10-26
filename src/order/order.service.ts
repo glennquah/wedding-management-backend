@@ -6,6 +6,7 @@ import {
 import { Order } from '@prisma/client';
 import { OrderStatus } from '../common/order-status.enum';
 import { PaymentStatus } from '../common/payment-status.enum';
+import { EmailNotificationService } from '../email-notification/email-notification.service';
 import { PaymentService } from '../payment/payment.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -18,6 +19,7 @@ export class OrderService {
   constructor(
     private prisma: PrismaService,
     private paymentService: PaymentService,
+    private emailService: EmailNotificationService,
   ) {}
 
   async create(dto: CreateOrderDto): Promise<Order> {
@@ -585,6 +587,53 @@ export class OrderService {
       data: { bookingStatus: OrderStatus.CONFIRMED },
     });
 
+    // Send confirmation email to couple
+    const vendor = await this.prisma.vendor.findUnique({
+      where: { userId: vendorId },
+      include: { user: true },
+    });
+
+    if (vendor) {
+      const wedding = await this.prisma.wedding.findUnique({
+        where: { id: order.weddingId },
+        include: { mainCouple: { include: { user: true } } },
+      });
+
+      if (wedding && wedding.mainCouple.length > 0) {
+        const coupleName = wedding.mainCouple
+          .map((couple) => couple.user.name)
+          .join(' & ');
+        const bookedSlots = Array.isArray(orderListing.bookedSlots)
+          ? orderListing.bookedSlots
+          : [];
+        const slotsCount = bookedSlots.length > 0 ? bookedSlots.length : 1;
+        const listingPrice = orderListing.listing?.price || 0;
+        const totalAmount = listingPrice * slotsCount;
+
+        const amount = `${order.currency} ${totalAmount.toFixed(2)}`;
+        const weddingDate = wedding.date
+          ? wedding.date.toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })
+          : 'TBD';
+
+        for (const _couple of wedding.mainCouple) {
+          await this.emailService.sendVendorBookingConfirmationEmail(
+            _couple.user.email,
+            coupleName,
+            vendor.user.name,
+            orderListing.listing.listingName,
+            weddingDate,
+            amount,
+            orderId,
+            order.weddingId,
+          );
+        }
+      }
+    }
+
     // Return updated order
     return this.findOne(orderId);
   }
@@ -637,18 +686,19 @@ export class OrderService {
       (p) => p.paymentStatus === PaymentStatus.SUCCEEDED,
     );
 
+    // Restore booked slots back to listing availabilities
+    const listing = orderListing.listing;
+    const bookedSlots = Array.isArray(orderListing.bookedSlots)
+      ? orderListing.bookedSlots
+      : [];
+
     if (hasSuccessfulPayment) {
       // Process partial refund through payment service
-      const bookedSlots = orderListing.bookedSlots as any[];
-      const slotsCount = bookedSlots ? bookedSlots.length : 1;
+      const slotsCount = bookedSlots.length > 0 ? bookedSlots.length : 1;
       const refundAmount = orderListing.listing.price * slotsCount;
 
       await this.paymentService.refundPartialPayment(orderId, refundAmount);
     }
-
-    // Restore booked slots back to listing availabilities
-    const listing = orderListing.listing;
-    const bookedSlots = orderListing.bookedSlots as any[];
 
     const availableSlots = (listing.availabilities as any) || [];
     // Add the rejected order's slots back to available slots
@@ -664,6 +714,290 @@ export class OrderService {
       where: { orderId_listingId: { orderId, listingId } },
       data: { bookingStatus: OrderStatus.CANCELLED },
     });
+
+    // Send rejection email to couple
+    const vendor = await this.prisma.vendor.findUnique({
+      where: { userId: vendorId },
+      include: { user: true },
+    });
+
+    if (vendor) {
+      const wedding = await this.prisma.wedding.findUnique({
+        where: { id: order.weddingId },
+        include: { mainCouple: { include: { user: true } } },
+      });
+
+      if (wedding && wedding.mainCouple.length > 0) {
+        const coupleName = wedding.mainCouple
+          .map((couple) => couple.user.name)
+          .join(' & ');
+        const bookedSlots = Array.isArray(orderListing.bookedSlots)
+          ? orderListing.bookedSlots
+          : [];
+        const slotsCount = bookedSlots.length > 0 ? bookedSlots.length : 1;
+        const listingPrice = orderListing.listing?.price || 0;
+        const totalAmount = listingPrice * slotsCount;
+        const amount = `${order.currency} ${totalAmount.toFixed(2)}`;
+        const weddingDate = wedding.date
+          ? wedding.date.toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })
+          : 'TBD';
+
+        for (const _couple of wedding.mainCouple) {
+          await this.emailService.sendVendorBookingRejectionEmail(
+            _couple.user.email,
+            coupleName,
+            vendor.user.name,
+            orderListing.listing.listingName,
+            weddingDate,
+            amount,
+            orderId,
+            order.weddingId,
+          );
+        }
+      }
+    }
+
+    // Return updated order
+    return this.findOne(orderId);
+  }
+
+  async vendorCompleteListing(
+    orderId: number,
+    listingId: number,
+    vendorId: number,
+  ): Promise<Order> {
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+      include: {
+        listings: {
+          include: {
+            listing: true,
+          },
+        },
+        payments: true,
+      },
+    });
+
+    if (!order) {
+      throw new NotFoundException(`Order with ID ${orderId} not found`);
+    }
+
+    // Find the specific OrderListing
+    const orderListing = order.listings.find(
+      (ol) => ol.listingId === listingId,
+    );
+    if (!orderListing) {
+      throw new NotFoundException(
+        `Listing with ID ${listingId} not found in order ${orderId}`,
+      );
+    }
+
+    // Verify the vendor owns this listing
+    if (orderListing.listing.vendorId !== vendorId) {
+      throw new BadRequestException('You can only complete your own listings');
+    }
+
+    // Validate listing status - can only complete CONFIRMED bookings
+    if (orderListing.bookingStatus !== OrderStatus.CONFIRMED) {
+      throw new BadRequestException(
+        `Listing must be in CONFIRMED status to be completed. Current status: ${orderListing.bookingStatus}`,
+      );
+    }
+
+    // Validate that ALL booking dates have passed
+    const bookedSlots = orderListing.bookedSlots as any[];
+    if (bookedSlots && bookedSlots.length > 0) {
+      const now = new Date();
+      now.setHours(0, 0, 0, 0); // Start of today
+
+      for (const slot of bookedSlots) {
+        let slotDate: Date | null = null;
+
+        if (slot.date) {
+          slotDate = new Date(slot.date);
+        } else if (slot.endTime) {
+          slotDate = new Date(slot.endTime);
+        } else if (slot.startTime) {
+          slotDate = new Date(slot.startTime);
+        }
+
+        if (slotDate) {
+          slotDate.setHours(0, 0, 0, 0);
+          if (slotDate >= now) {
+            throw new BadRequestException(
+              `Cannot complete listing before all booking dates have passed. A booking is scheduled for: ${slotDate.toISOString().split('T')[0]}`,
+            );
+          }
+        }
+      }
+    }
+
+    // Update OrderListing status to COMPLETED
+    await this.prisma.orderListing.update({
+      where: { orderId_listingId: { orderId, listingId } },
+      data: { bookingStatus: OrderStatus.COMPLETED },
+    });
+
+    // Create vendor earning record now that service is completed
+    const quantity = bookedSlots ? bookedSlots.length : 1;
+    const grossAmount = orderListing.listing.price * quantity;
+    const platformFeePercentage = 0.1; // 10% commission on full listed price
+    const platformFee = grossAmount * platformFeePercentage;
+    const netAmount = grossAmount - platformFee;
+
+    // Check if vendor earning already exists (to avoid duplicates)
+    const existingEarning = await this.prisma.vendorEarning.findUnique({
+      where: {
+        orderId_listingId: {
+          orderId: orderId,
+          listingId: listingId,
+        },
+      },
+    });
+
+    if (!existingEarning) {
+      await this.prisma.vendorEarning.create({
+        data: {
+          vendorId: orderListing.listing.vendorId,
+          orderListingId: `${orderId}-${listingId}`,
+          orderId: orderId,
+          listingId: listingId,
+          grossAmount,
+          platformFee,
+          netAmount,
+          currency: order.currency,
+          isPaidOut: false,
+        },
+      });
+
+      console.log(
+        `Created vendor earning for vendor ${orderListing.listing.vendorId}: gross=${grossAmount}, platformFee=${platformFee}, net=${netAmount}`,
+      );
+    } else {
+      console.log(
+        `Vendor earning already exists for order ${orderId} listing ${listingId}, skipping creation`,
+      );
+    }
+
+    // Return updated order
+    return this.findOne(orderId);
+  }
+
+  async superadminCompleteListing(
+    orderId: number,
+    listingId: number,
+  ): Promise<Order> {
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+      include: {
+        listings: {
+          include: {
+            listing: true,
+          },
+        },
+        payments: true,
+      },
+    });
+
+    if (!order) {
+      throw new NotFoundException(`Order with ID ${orderId} not found`);
+    }
+
+    // Find the specific OrderListing
+    const orderListing = order.listings.find(
+      (ol) => ol.listingId === listingId,
+    );
+    if (!orderListing) {
+      throw new NotFoundException(
+        `Listing with ID ${listingId} not found in order ${orderId}`,
+      );
+    }
+
+    // Validate listing status - can only complete CONFIRMED bookings
+    if (orderListing.bookingStatus !== OrderStatus.CONFIRMED) {
+      throw new BadRequestException(
+        `Listing must be in CONFIRMED status to be completed. Current status: ${orderListing.bookingStatus}`,
+      );
+    }
+
+    // Validate that ALL booking dates have passed
+    const bookedSlots = orderListing.bookedSlots as any[];
+    if (bookedSlots && bookedSlots.length > 0) {
+      const now = new Date();
+      now.setHours(0, 0, 0, 0); // Start of today
+
+      for (const slot of bookedSlots) {
+        let slotDate: Date | null = null;
+
+        if (slot.date) {
+          slotDate = new Date(slot.date);
+        } else if (slot.endTime) {
+          slotDate = new Date(slot.endTime);
+        } else if (slot.startTime) {
+          slotDate = new Date(slot.startTime);
+        }
+
+        if (slotDate) {
+          slotDate.setHours(0, 0, 0, 0);
+          if (slotDate >= now) {
+            throw new BadRequestException(
+              `Cannot complete listing before all booking dates have passed. A booking is scheduled for: ${slotDate.toISOString().split('T')[0]}`,
+            );
+          }
+        }
+      }
+    }
+
+    // Update OrderListing status to COMPLETED
+    await this.prisma.orderListing.update({
+      where: { orderId_listingId: { orderId, listingId } },
+      data: { bookingStatus: OrderStatus.COMPLETED },
+    });
+
+    // Create vendor earning record now that service is completed
+    const quantity = bookedSlots ? bookedSlots.length : 1;
+    const grossAmount = orderListing.listing.price * quantity;
+    const platformFeePercentage = 0.1; // 10% commission on full listed price
+    const platformFee = grossAmount * platformFeePercentage;
+    const netAmount = grossAmount - platformFee;
+
+    // Check if vendor earning already exists (to avoid duplicates)
+    const existingEarning = await this.prisma.vendorEarning.findUnique({
+      where: {
+        orderId_listingId: {
+          orderId: orderId,
+          listingId: listingId,
+        },
+      },
+    });
+
+    if (!existingEarning) {
+      await this.prisma.vendorEarning.create({
+        data: {
+          vendorId: orderListing.listing.vendorId,
+          orderListingId: `${orderId}-${listingId}`,
+          orderId: orderId,
+          listingId: listingId,
+          grossAmount,
+          platformFee,
+          netAmount,
+          currency: order.currency,
+          isPaidOut: false,
+        },
+      });
+
+      console.log(
+        `Created vendor earning for vendor ${orderListing.listing.vendorId}: gross=${grossAmount}, platformFee=${platformFee}, net=${netAmount}`,
+      );
+    } else {
+      console.log(
+        `Vendor earning already exists for order ${orderId} listing ${listingId}, skipping creation`,
+      );
+    }
 
     // Return updated order
     return this.findOne(orderId);

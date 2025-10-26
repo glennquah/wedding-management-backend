@@ -10,6 +10,21 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CheckoutSessionResponseDto } from './dto/checkout-session-response.dto';
 import { CreateCheckoutSessionDto } from './dto/create-checkout-session.dto';
 import { PaymentResponseDto } from './dto/payment-response.dto';
+import {
+  StripeConnectAccountResponseDto,
+  StripeAccountStatusDto,
+} from '../vendor/dto/stripe-connect.dto';
+import {
+  VendorEarningResponseDto,
+  VendorEarningsSummaryDto,
+} from './dto/vendor-earning-response.dto';
+import {
+  VendorPayoutResponseDto,
+  CreatePayoutDto,
+  BatchPayoutDto,
+  BatchPayoutResultDto,
+  PayoutResultDto,
+} from './dto/vendor-payout-response.dto';
 
 @Injectable()
 export class PaymentService {
@@ -239,6 +254,9 @@ export class PaymentService {
             event.data.object as Stripe.Checkout.Session,
           );
           break;
+        case 'account.updated':
+          await this.handleAccountUpdated(event.data.object as Stripe.Account);
+          break;
         default:
           console.log(`Unhandled event type: ${event.type}`);
       }
@@ -256,7 +274,11 @@ export class PaymentService {
       include: {
         order: {
           include: {
-            listings: true,
+            listings: {
+              include: {
+                listing: true,
+              },
+            },
           },
         },
       },
@@ -295,6 +317,7 @@ export class PaymentService {
       }
 
       // Update OrderListing statuses to PAID only for the paid listings
+      // AND create vendor earnings records
       for (const orderListing of payment.order.listings) {
         console.log(
           `Checking listing ${orderListing.listingId} against listingIdsToPay:`,
@@ -359,5 +382,415 @@ export class PaymentService {
         `Cleaned up expired order ${payment.orderId} and restored availability for ${payment.order.listings.length} listings`,
       );
     }
+  }
+
+  async createConnectAccount(
+    email: string,
+    vendorId: number,
+  ): Promise<StripeConnectAccountResponseDto> {
+    try {
+      // Create the Stripe Connect Express account
+      const account = await this.stripe.accounts.create({
+        type: 'express',
+        email: email,
+        country: 'SG', // Singapore
+        capabilities: {
+          card_payments: { requested: true },
+          transfers: { requested: true },
+        },
+        business_type: 'individual', // Can be 'individual' or 'company'
+        metadata: {
+          vendorId: vendorId.toString(),
+        },
+      });
+
+      // Generate onboarding link
+      const accountLink = await this.createAccountLink(account.id);
+
+      // Update vendor with Stripe account ID
+      await this.prisma.vendor.update({
+        where: { userId: vendorId },
+        data: {
+          stripeConnectAccountId: account.id,
+        },
+      });
+
+      console.log(
+        `Created Stripe Connect account ${account.id} for vendor ${vendorId}`,
+      );
+
+      return {
+        accountId: account.id,
+        accountLinkUrl: accountLink.url,
+        expiresAt: new Date(accountLink.expires_at * 1000).toISOString(),
+      };
+    } catch (error) {
+      console.error('Error creating Stripe Connect account:', error);
+      throw new InternalServerErrorException(
+        'Failed to create Stripe Connect account',
+      );
+    }
+  }
+
+  async createAccountLink(accountId: string): Promise<Stripe.AccountLink> {
+    try {
+      const baseUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+
+      const accountLink = await this.stripe.accountLinks.create({
+        account: accountId,
+        refresh_url: `${baseUrl}/vendor/stripe-connect/refresh`,
+        return_url: `${baseUrl}/vendor/stripe-connect/complete`,
+        type: 'account_onboarding',
+      });
+
+      return accountLink;
+    } catch (error) {
+      console.error('Error creating account link:', error);
+      throw new InternalServerErrorException('Failed to create account link');
+    }
+  }
+
+  async getAccountStatus(accountId: string): Promise<StripeAccountStatusDto> {
+    try {
+      const account = await this.stripe.accounts.retrieve(accountId);
+
+      return {
+        accountId: account.id,
+        chargesEnabled: account.charges_enabled,
+        payoutsEnabled: account.payouts_enabled,
+        detailsSubmitted: account.details_submitted,
+        onboardingComplete:
+          account.charges_enabled &&
+          account.payouts_enabled &&
+          account.details_submitted,
+        requirements: account.requirements
+          ? {
+              currently_due: account.requirements.currently_due || [],
+              eventually_due: account.requirements.eventually_due || [],
+              past_due: account.requirements.past_due || [],
+            }
+          : undefined,
+      };
+    } catch (error) {
+      console.error('Error retrieving account status:', error);
+      throw new InternalServerErrorException(
+        'Failed to retrieve account status',
+      );
+    }
+  }
+
+  async syncVendorStripeStatus(vendorId: number): Promise<void> {
+    try {
+      const vendor = await this.prisma.vendor.findUnique({
+        where: { userId: vendorId },
+      });
+
+      if (!vendor?.stripeConnectAccountId) {
+        throw new BadRequestException('Vendor does not have a Stripe account');
+      }
+
+      const accountStatus = await this.getAccountStatus(
+        vendor.stripeConnectAccountId,
+      );
+
+      // Update vendor with latest Stripe status
+      await this.prisma.vendor.update({
+        where: { userId: vendorId },
+        data: {
+          stripeChargesEnabled: accountStatus.chargesEnabled,
+          stripePayoutsEnabled: accountStatus.payoutsEnabled,
+          stripeDetailsSubmitted: accountStatus.detailsSubmitted,
+          stripeAccountOnboardingComplete: accountStatus.onboardingComplete,
+        },
+      });
+
+      console.log(`Synced Stripe status for vendor ${vendorId}`);
+    } catch (error) {
+      console.error('Error syncing vendor Stripe status:', error);
+      throw new InternalServerErrorException(
+        'Failed to sync vendor Stripe status',
+      );
+    }
+  }
+
+  private async handleAccountUpdated(account: Stripe.Account) {
+    try {
+      const vendorId = account.metadata?.vendorId;
+      if (!vendorId) {
+        console.log(
+          `Account ${account.id} has no vendorId metadata, skipping update`,
+        );
+        return;
+      }
+
+      // Update vendor with latest account status
+      await this.prisma.vendor.update({
+        where: { userId: parseInt(vendorId) },
+        data: {
+          stripeChargesEnabled: account.charges_enabled,
+          stripePayoutsEnabled: account.payouts_enabled,
+          stripeDetailsSubmitted: account.details_submitted,
+          stripeAccountOnboardingComplete:
+            account.charges_enabled &&
+            account.payouts_enabled &&
+            account.details_submitted,
+        },
+      });
+
+      console.log(`Updated Stripe account status for vendor ${vendorId}`);
+    } catch (error) {
+      console.error('Error handling account update:', error);
+    }
+  }
+
+  async getVendorEarnings(
+    vendorId: number,
+  ): Promise<VendorEarningResponseDto[]> {
+    return this.prisma.vendorEarning.findMany({
+      where: { vendorId },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async getVendorEarningsSummary(
+    vendorId: number,
+  ): Promise<VendorEarningsSummaryDto> {
+    const earnings = await this.prisma.vendorEarning.findMany({
+      where: { vendorId },
+    });
+
+    const totalGrossAmount = earnings.reduce(
+      (sum, e) => sum + e.grossAmount,
+      0,
+    );
+    const totalPlatformFee = earnings.reduce(
+      (sum, e) => sum + e.platformFee,
+      0,
+    );
+    const totalNetAmount = earnings.reduce((sum, e) => sum + e.netAmount, 0);
+
+    const paidOutEarnings = earnings.filter((e) => e.isPaidOut);
+    const pendingEarnings = earnings.filter((e) => !e.isPaidOut);
+
+    const paidOutAmount = paidOutEarnings.reduce(
+      (sum, e) => sum + e.netAmount,
+      0,
+    );
+    const pendingAmount = pendingEarnings.reduce(
+      (sum, e) => sum + e.netAmount,
+      0,
+    );
+
+    return {
+      vendorId,
+      totalGrossAmount,
+      totalPlatformFee,
+      totalNetAmount,
+      paidOutAmount,
+      pendingAmount,
+      currency: earnings[0]?.currency || 'SGD',
+      totalBookings: earnings.length,
+      paidBookings: paidOutEarnings.length,
+      pendingBookings: pendingEarnings.length,
+    };
+  }
+
+  async getVendorPayouts(vendorId: number): Promise<VendorPayoutResponseDto[]> {
+    return this.prisma.vendorPayout.findMany({
+      where: { vendorId },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async createVendorPayout(
+    dto: CreatePayoutDto,
+  ): Promise<VendorPayoutResponseDto> {
+    const { vendorId, periodStart, periodEnd } = dto;
+
+    // Get vendor with Stripe account info
+    const vendor = await this.prisma.vendor.findUnique({
+      where: { userId: vendorId },
+    });
+
+    if (!vendor) {
+      throw new BadRequestException('Vendor not found');
+    }
+
+    if (!vendor.stripeConnectAccountId) {
+      throw new BadRequestException(
+        'Vendor does not have a Stripe Connect account',
+      );
+    }
+
+    if (!vendor.stripePayoutsEnabled) {
+      throw new BadRequestException(
+        'Vendor Stripe account is not ready for payouts. Please ensure KYC is completed.',
+      );
+    }
+
+    // Determine period
+    const lastPayout = await this.prisma.vendorPayout.findFirst({
+      where: { vendorId },
+      orderBy: { periodEnd: 'desc' },
+    });
+
+    const start = periodStart || lastPayout?.periodEnd || new Date(0);
+    const end = periodEnd || new Date();
+
+    // Get unpaid earnings within the period
+    const unpaidEarnings = await this.prisma.vendorEarning.findMany({
+      where: {
+        vendorId,
+        isPaidOut: false,
+        createdAt: {
+          gte: start,
+          lte: end,
+        },
+      },
+    });
+
+    if (unpaidEarnings.length === 0) {
+      throw new BadRequestException('No unpaid earnings found for this period');
+    }
+
+    // Calculate total payout amount
+    const totalAmount = unpaidEarnings.reduce((sum, e) => sum + e.netAmount, 0);
+    const currency = unpaidEarnings[0].currency;
+
+    try {
+      // Create Stripe Transfer to vendor's Connect account
+      const transfer = await this.stripe.transfers.create({
+        amount: Math.round(totalAmount * 100), // Convert to cents
+        currency: currency.toLowerCase(),
+        destination: vendor.stripeConnectAccountId,
+        description: `Payout for period ${start.toISOString()} to ${end.toISOString()}`,
+        metadata: {
+          vendorId: vendorId.toString(),
+          earningsCount: unpaidEarnings.length.toString(),
+          periodStart: start.toISOString(),
+          periodEnd: end.toISOString(),
+        },
+      });
+
+      // Create payout record
+      const payout = await this.prisma.vendorPayout.create({
+        data: {
+          vendorId,
+          stripeTransferId: transfer.id,
+          amount: totalAmount,
+          currency,
+          status: 'paid',
+          earningsCount: unpaidEarnings.length,
+          periodStart: start,
+          periodEnd: end,
+        },
+      });
+
+      // Mark earnings as paid out
+      await this.prisma.vendorEarning.updateMany({
+        where: {
+          id: { in: unpaidEarnings.map((e) => e.id) },
+        },
+        data: {
+          isPaidOut: true,
+          payoutId: payout.id,
+        },
+      });
+
+      console.log(
+        `Created payout ${payout.id} for vendor ${vendorId}: ${totalAmount} ${currency}`,
+      );
+
+      return payout;
+    } catch (error) {
+      console.error('Error creating vendor payout:', error);
+      throw new InternalServerErrorException(
+        `Failed to create payout: ${error.message}`,
+      );
+    }
+  }
+
+  async createBatchPayouts(dto: BatchPayoutDto): Promise<BatchPayoutResultDto> {
+    const { vendorIds, periodStart, periodEnd, minimumPayoutAmount = 10 } = dto;
+
+    // Get vendors to pay out
+    const vendorsQuery: any = {
+      stripeConnectAccountId: { not: null },
+      stripePayoutsEnabled: true,
+    };
+
+    if (vendorIds && vendorIds.length > 0) {
+      vendorsQuery.userId = { in: vendorIds };
+    }
+
+    const vendors = await this.prisma.vendor.findMany({
+      where: vendorsQuery,
+    });
+
+    const results: PayoutResultDto[] = [];
+    let totalAmountPaidOut = 0;
+    let successfulPayouts = 0;
+    let failedPayouts = 0;
+
+    for (const vendor of vendors) {
+      try {
+        // Check if vendor has enough unpaid earnings
+        const unpaidEarnings = await this.prisma.vendorEarning.findMany({
+          where: {
+            vendorId: vendor.userId,
+            isPaidOut: false,
+            ...(periodStart && { createdAt: { gte: periodStart } }),
+            ...(periodEnd && { createdAt: { lte: periodEnd } }),
+          },
+        });
+
+        const totalUnpaid = unpaidEarnings.reduce(
+          (sum, e) => sum + e.netAmount,
+          0,
+        );
+
+        if (totalUnpaid < minimumPayoutAmount) {
+          results.push({
+            success: false,
+            vendorId: vendor.userId,
+            error: `Unpaid amount (${totalUnpaid}) is below minimum (${minimumPayoutAmount})`,
+          });
+          failedPayouts++;
+          continue;
+        }
+
+        // Create payout
+        const payout = await this.createVendorPayout({
+          vendorId: vendor.userId,
+          periodStart,
+          periodEnd,
+        });
+
+        results.push({
+          success: true,
+          vendorId: vendor.userId,
+          payout,
+        });
+
+        totalAmountPaidOut += payout.amount;
+        successfulPayouts++;
+      } catch (error) {
+        results.push({
+          success: false,
+          vendorId: vendor.userId,
+          error: error.message,
+        });
+        failedPayouts++;
+      }
+    }
+
+    return {
+      totalVendors: vendors.length,
+      successfulPayouts,
+      failedPayouts,
+      results,
+      totalAmountPaidOut,
+      currency: 'SGD',
+    };
   }
 }

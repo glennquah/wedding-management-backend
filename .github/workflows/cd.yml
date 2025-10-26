@@ -33,7 +33,7 @@ jobs:
         run: npx prisma generate
 
       - name: Build Nest with webpack
-        run: npx nest build --webpack
+        run: NODE_OPTIONS=--max-old-space-size=4096 npx nest build --webpack
 
       - name: Deploy CDK
         env:
@@ -51,6 +51,9 @@ jobs:
           STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
           FASTAPI_URL: ${{ secrets.FASTAPI_URL }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          GOOGLE_REDIRECT_URI: ${{ secrets.GOOGLE_REDIRECT_URI }}
         run: |
           cd infra
           npx cdk deploy --require-approval never

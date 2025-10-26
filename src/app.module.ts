@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 import { AdminModule } from './admin/admin.module';
 import { AiServiceModule } from './ai-service/ai-service.module';
 import { AlbumModule } from './album/album.module';
@@ -26,16 +27,18 @@ import { VendorModule } from './vendor/vendor.module';
 import { WeddingModule } from './wedding/wedding.module';
 import { GratitudeCardModule } from './gratitude-card/gratitude-card.module';
 import { GuestbookModule } from './guestbook/guestbook.module';
+import { WishlistModule } from './wishlist/wishlist.module';
 
 @Module({
   imports: [
     PrismaModule,
+    ConfigModule.forRoot(),
+    ScheduleModule.forRoot(),
     UserModule,
     MicrositeModule,
     VendorModule,
     AdminModule,
     SuperAdminModule,
-    ConfigModule.forRoot(),
     AuthModule,
     GuestModule,
     WeddingModule,
@@ -54,6 +57,7 @@ import { GuestbookModule } from './guestbook/guestbook.module';
     GratitudeCardModule,
     CalendarModule,
     GuestbookModule,
+    WishlistModule,
   ],
   controllers: [AppController],
   providers: [AppService],
