@@ -55,7 +55,7 @@ export class ChecklistController {
     status: 409,
     description: 'Checklist already exists for this wedding',
   })
-  async create(
+  async createChecklist(
     @Body() createChecklistDto: CreateChecklistDto,
   ): Promise<ChecklistResponseDto> {
     return this.checklistService.create(createChecklistDto);
@@ -201,7 +201,7 @@ export class ChecklistController {
     return this.checklistService.remove(id);
   }
 
-  @Post(':id/items')
+  @Post('items/:id')
   @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Add a new item to checklist' })
   @ApiParam({ name: 'id', description: 'Checklist ID' })
