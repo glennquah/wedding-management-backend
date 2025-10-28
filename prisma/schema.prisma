@@ -256,11 +256,13 @@ model Wedding {
   guestCountBucket           GuestCountBucket
   preferredStyle             WeddingStyle
   preferredServices          WeddingService[]
+  payLahQR                   String?
   orders                     Order[]
   notificationDetails        NotificationDetails?
   SeatingArrangement         SeatingArrangement?
   microsite                    Microsite?
   album                      Album?
+  cashGifts                  CashGift[]
   dateOptimizerEarliestDate  String?
   dateOptimizerLatestDate    String?
   dateOptimizerPreferredDays String[]             @default([])
@@ -428,6 +430,7 @@ model Guest {
   primaryGuest             Guest?                    @relation("AccompanyingGuests", fields: [primaryGuestId], references: [id])
   accompanyingGuests       Guest[]                   @relation("AccompanyingGuests")
   googleCalendarConnection GoogleCalendarConnection?
+  cashGifts                CashGift[]
   createdAt                DateTime                  @default(now())
   updatedAt                DateTime                  @updatedAt
 }
@@ -610,6 +613,20 @@ model ChecklistItem {
   checklist           Checklist @relation(fields: [checklistId], references: [id], onDelete: Cascade)
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
+}
+
+model CashGift {
+  id        Int      @id @default(autoincrement())
+  guestId   Int
+  guest     Guest    @relation(fields: [guestId], references: [id], onDelete: Cascade)
+  amount    Float
+  weddingId Int
+  wedding   Wedding  @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([weddingId])
+  @@index([guestId])
 }
 
 model TokenBlacklist {
