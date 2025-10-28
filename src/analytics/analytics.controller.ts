@@ -3,6 +3,7 @@ import {
   Get,
   Param,
   ParseIntPipe,
+  Post,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -26,6 +27,7 @@ import { SpendingResponseDto } from './dto/spending-response.dto';
 import { VendorBookingsResponseDto } from './dto/vendor-bookings-response.dto';
 import { VendorRevenueResponseDto } from './dto/vendor-revenue-response.dto';
 import { VendorTopProductsResponseDto } from './dto/vendor-top-products-response.dto';
+import { WeddingWrappedResponseDto } from './dto/wedding-wrapped-response.dto';
 
 @ApiTags('analytics')
 @Controller('analytics')
@@ -363,5 +365,47 @@ export class AnalyticsController {
     @Query('period') period: RevenuePeriod = RevenuePeriod.MONTHLY,
   ): Promise<AdminUserGrowthResponseDto> {
     return this.analyticsService.getAdminUserGrowth(period);
+  }
+
+  @Post('wedding-wrapped/:weddingId')
+  @ApiOperation({
+    summary: 'Generate Wedding Wrapped analytics',
+    description:
+      'Generates and saves a comprehensive Wedding Wrapped snapshot with all analytics including guest insights, gift statistics, planning journey metrics, and emotional touch data. This endpoint can be called multiple times to regenerate/update the snapshot.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Wedding Wrapped generated successfully',
+    type: WeddingWrappedResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Wedding not found',
+  })
+  async generateWeddingWrapped(
+    @Param('weddingId', ParseIntPipe) weddingId: number,
+  ): Promise<WeddingWrappedResponseDto> {
+    return this.analyticsService.generateWeddingWrapped(weddingId);
+  }
+
+  @Get('wedding-wrapped/:weddingId')
+  @ApiOperation({
+    summary: 'Get Wedding Wrapped analytics',
+    description:
+      'Retrieves the saved Wedding Wrapped analytics snapshot for a wedding. Returns comprehensive statistics about the wedding including guest insights, gifts, spending, and more.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Wedding Wrapped retrieved successfully',
+    type: WeddingWrappedResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Wedding Wrapped not found - please generate it first',
+  })
+  async getWeddingWrapped(
+    @Param('weddingId', ParseIntPipe) weddingId: number,
+  ): Promise<WeddingWrappedResponseDto> {
+    return this.analyticsService.getWeddingWrapped(weddingId);
   }
 }

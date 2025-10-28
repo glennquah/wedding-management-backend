@@ -592,3 +592,49 @@ model TokenBlacklist {
   @@index([token])
   @@index([expiresAt])
 }
+
+model WeddingWrapped {
+  id        Int      @id @default(autoincrement())
+  weddingId Int      @unique
+
+  // Guest Insights
+  totalInvited        Int
+  totalConfirmed      Int
+  totalAttended       Int
+  firstGuestName      String?
+  firstGuestTime      DateTime?
+  fastestRsvpName     String?
+  fastestRsvpDuration Int?      // in hours
+  peakTime            DateTime?
+  peakGuestCount      Int?
+  squadBreakdown      Json      // {group: string, count: number}[]
+
+  // Gift & Support Insights
+  mostWantedItem      String?
+  mostWantedItemCount Int?
+  topContributorName  String?
+  topContribution     Float?
+  wishlistCompletion  Float     // percentage
+  totalGiftValue      Float
+
+  // Planning Journey
+  planningDays        Int
+  topVendorCategory   WeddingService?
+  topVendorAmount     Float?
+  budgetUtilization   Float     // percentage
+  totalSpent          Float
+  allocatedBudget     Float
+
+  // Emotional Touch
+  totalWellWishes     Int
+  totalPhotos         Int
+  totalFacesDetected  Int
+  totalPeopleClusters Int
+
+  // Additional metadata
+  generatedAt DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([weddingId])
+}
