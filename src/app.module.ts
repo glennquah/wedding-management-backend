@@ -11,6 +11,7 @@ import { AuthModule } from './auth/auth.module';
 import { CartModule } from './cart/cart.module';
 import { CalendarModule } from './calendar/calendar.module';
 import { EmailNotificationModule } from './email-notification/email-notification.module';
+import { CashGiftModule } from './cash-gift/cash-gift.module';
 import { GuestModule } from './guest/guest.module';
 import { ListingModule } from './listing/listing.module';
 import { MicrositeModule } from './microsite/microsite.module';
@@ -39,6 +40,7 @@ import { WishlistModule } from './wishlist/wishlist.module';
     AdminModule,
     SuperAdminModule,
     AuthModule,
+    CashGiftModule,
     GuestModule,
     WeddingModule,
     SeatingArrangementModule,

@@ -103,6 +103,7 @@ export class WeddingService {
       updateData.preferredServices = dto.preferredServices;
     if (dto.allocatedBudget !== undefined)
       updateData.allocatedBudget = dto.allocatedBudget;
+    if (dto.payLahQR !== undefined) updateData.payLahQR = dto.payLahQR;
 
     return this.prisma.wedding.update({
       where: { id },
@@ -169,6 +170,7 @@ export class WeddingService {
       guestCountBucket: wedding.guestCountBucket as GuestCountBucket,
       preferredStyle: wedding.preferredStyle as WeddingStyle,
       preferredServices: wedding.preferredServices as WeddingServiceEnum[],
+      payLahQR: wedding.payLahQR,
       createdAt: wedding.createdAt.toISOString(),
       updatedAt: wedding.updatedAt.toISOString(),
       allocatedBudget: wedding.allocatedBudget,
@@ -387,5 +389,39 @@ export class WeddingService {
         },
       },
     });
+  }
+
+  async findPublicById(id: number): Promise<{
+    name: string;
+    payLahQR: string;
+    guests: { id: number; name: string }[];
+  }> {
+    const wedding = await this.prisma.wedding.findUnique({
+      where: { id },
+      include: {
+        guests: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
+
+    if (!wedding) {
+      throw new NotFoundException(`Wedding with ID ${id} not found`);
+    }
+
+    if (!wedding.payLahQR) {
+      throw new NotFoundException(
+        `Wedding with ID ${id} does not have a PayLah QR code`,
+      );
+    }
+
+    return {
+      name: wedding.name,
+      payLahQR: wedding.payLahQR,
+      guests: wedding.guests,
+    };
   }
 }
