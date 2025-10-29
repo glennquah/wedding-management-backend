@@ -28,8 +28,8 @@ export async function seedWeddings(prisma: PrismaClient) {
       allocatedBudget: 100000,
     },
     {
-      name: "Marcus & Sarah's Traditional Chinese Tea Ceremony",
-      date: new Date('2025-11-08T10:00:00.000Z'),
+      name: "Glenn & Sarah's Traditional Chinese Tea Ceremony",
+      date: new Date('2024-06-15T10:00:00.000Z'),
       location: 'Heritage Temple Hall',
       weddingType: WeddingType.CHINESE,
       budgetBucket: BudgetBucket.MEDIUM,
