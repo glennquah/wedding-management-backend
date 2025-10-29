@@ -29,6 +29,7 @@ import { UpdateChecklistItemDto } from './dto/update-checklist-item.dto';
 import { ChecklistResponseDto } from './dto/checklist-response.dto';
 import { ChecklistItemResponseDto } from './dto/checklist-item-response.dto';
 import { ChatMessageResponseDto } from './dto/chat-message-response.dto';
+import { ChecklistStatsResponseDto } from './dto/checklist-stats-response.dto';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -338,38 +339,14 @@ export class ChecklistController {
   @ApiResponse({
     status: 200,
     description: 'Completion statistics retrieved successfully',
-    schema: {
-      type: 'object',
-      properties: {
-        total: { type: 'number', description: 'Total number of items' },
-        completed: { type: 'number', description: 'Number of completed items' },
-        percentage: { type: 'number', description: 'Completion percentage' },
-        byCategory: {
-          type: 'object',
-          additionalProperties: {
-            type: 'object',
-            properties: {
-              total: { type: 'number' },
-              completed: { type: 'number' },
-              percentage: { type: 'number' },
-            },
-          },
-        },
-      },
-    },
+    type: ChecklistStatsResponseDto,
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'Checklist not found' })
-  async getCompletionStats(@Param('id', ParseIntPipe) id: number): Promise<{
-    total: number;
-    completed: number;
-    percentage: number;
-    byCategory: Record<
-      string,
-      { total: number; completed: number; percentage: number }
-    >;
-  }> {
+  async getCompletionStats(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<ChecklistStatsResponseDto> {
     return this.checklistService.getCompletionStats(id);
   }
 }

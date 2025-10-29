@@ -17,6 +17,7 @@ import { UpdateChecklistItemDto } from './dto/update-checklist-item.dto';
 import { ChecklistResponseDto } from './dto/checklist-response.dto';
 import { ChecklistItemResponseDto } from './dto/checklist-item-response.dto';
 import { ChatMessageResponseDto } from './dto/chat-message-response.dto';
+import { ChecklistStatsResponseDto } from './dto/checklist-stats-response.dto';
 
 type ChecklistWithItems = Checklist & {
   items: ChecklistItem[];
@@ -485,15 +486,9 @@ export class ChecklistService {
   /**
    * Get completion statistics for a checklist
    */
-  async getCompletionStats(checklistId: number): Promise<{
-    total: number;
-    completed: number;
-    percentage: number;
-    byCategory: Record<
-      string,
-      { total: number; completed: number; percentage: number }
-    >;
-  }> {
+  async getCompletionStats(
+    checklistId: number,
+  ): Promise<ChecklistStatsResponseDto> {
     const checklist = await this.prisma.checklist.findUnique({
       where: { id: checklistId },
       include: { items: true },
