@@ -3,7 +3,8 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Order, OrderListing } from '@prisma/client';
+import { DatingPartnerCommission, Order, OrderListing } from '@prisma/client';
+import { InvoiceGeneratorService } from 'src/payment/invoice-generator.service';
 import { OrderStatus } from '../common/order-status.enum';
 import { PaymentStatus } from '../common/payment-status.enum';
 import { EmailNotificationService } from '../email-notification/email-notification.service';
@@ -20,7 +21,42 @@ export class OrderService {
     private prisma: PrismaService,
     private paymentService: PaymentService,
     private emailService: EmailNotificationService,
+    private invoiceGeneratorService: InvoiceGeneratorService,
   ) {}
+
+  private sendCommissionInvoice(commissionLog: DatingPartnerCommission) {
+    (async () => {
+      try {
+        const partnerEmail = process.env.PARTNER_CONTACT_EMAIL;
+
+        if (!partnerEmail) {
+          console.error(
+            `PARTNER_CONTACT_EMAIL not set. Cannot send invoice for ${commissionLog.id}.`,
+          );
+          return;
+        }
+
+        const { buffer, filename } =
+          await this.invoiceGeneratorService.generateDatingPartnerCommissionInvoice(
+            commissionLog,
+          );
+
+        await this.emailService.sendDatingPlatformPayoutEmail(
+          partnerEmail,
+          commissionLog,
+          buffer,
+          filename,
+        );
+
+        console.log(`Commission invoice email sent for ${commissionLog.id}`);
+      } catch (emailError) {
+        console.error(
+          `Failed to send commission invoice for ${commissionLog.id}.`,
+          emailError.stack,
+        );
+      }
+    })();
+  }
 
   private async createAndPayDatingCommission(
     order: Order,
@@ -80,16 +116,19 @@ export class OrderService {
           order.currency,
         );
 
-        await this.prisma.datingPartnerCommission.update({
-          where: { id: newCommissionLog.id },
-          data: {
-            status: 'succeeded',
-            stripeTransferId: transfer.id,
-          },
-        });
+        const updatedCommissionLog =
+          await this.prisma.datingPartnerCommission.update({
+            where: { id: newCommissionLog.id },
+            data: {
+              status: 'succeeded',
+              stripeTransferId: transfer.id,
+            },
+          });
         console.log(
           `Instant commission payout ${newCommissionLog.id} succeeded: ${transfer.id}`,
         );
+
+        this.sendCommissionInvoice(updatedCommissionLog);
       } catch (paymentError) {
         await this.prisma.datingPartnerCommission.update({
           where: { id: newCommissionLog.id },

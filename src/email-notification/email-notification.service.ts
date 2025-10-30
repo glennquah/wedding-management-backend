@@ -1,5 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { EmailTemplateType, Guest, OrderStatus } from '@prisma/client';
+import {
+  DatingPartnerCommission,
+  EmailTemplateType,
+  Guest,
+  OrderStatus,
+} from '@prisma/client';
 import * as sgMail from '@sendgrid/mail';
 import * as fs from 'fs';
 import * as Handlebars from 'handlebars';
@@ -18,6 +23,7 @@ import {
   CollaboratorAddedData,
   CollaboratorGratitudeCardData,
   CreateAccountData,
+  DatingPlatformPayoutData,
   EmailTemplateData,
   GuestGratitudeCardData,
   PasswordResetData,
@@ -116,6 +122,14 @@ export class EmailNotificationService {
         {
           name: EmailTemplateType.REGISTER_DATING_USER,
           file: 'create-dating-user-account.html',
+        },
+        {
+          name: EmailTemplateType.REGISTER_DATING_USER,
+          file: 'create-dating-user-account.html',
+        },
+        {
+          name: EmailTemplateType.DATING_PLATFORM_PAYOUT,
+          file: 'dating-platform-payout.html',
         },
       ];
 
@@ -1434,6 +1448,81 @@ Website: https://knotly.app`;
     Website: https://knotly.app`;
   }
 
+  async sendDatingPlatformPayoutEmail(
+    to: string,
+    data: DatingPartnerCommission,
+    pdfBuffer: Buffer,
+    filename: string,
+  ): Promise<void> {
+    const templateData: DatingPlatformPayoutData = {
+      partnerName: process.env.PARTNER_CONTACT_NAME,
+      commissionId: data.id,
+      payoutDate: data.updatedAt.toLocaleDateString(),
+      stripeTransferId: data.stripeTransferId,
+      currency: data.currency,
+      commissionRatePercent: (data.commissionRate * 100).toFixed(1),
+      commissionAmount: data.commissionAmount.toFixed(2),
+    };
+
+    const html = this.renderTemplate(
+      EmailTemplateType.DATING_PLATFORM_PAYOUT,
+      templateData,
+    );
+    const text = this.generateDatingPlatformPayoutPlainText(
+      templateData,
+      process.env.PARTNER_CONTACT_NAME,
+    );
+
+    // Create pdf attachment object
+    const attachment = {
+      content: pdfBuffer.toString('base64'),
+      filename: filename,
+      type: 'application/pdf',
+      disposition: 'attachment',
+    };
+
+    await this.sendEmail(
+      to,
+      `Your Commission Payout from Knotly (ID: ${data.stripeTransferId})`,
+      text,
+      html,
+      EmailTemplateType.DATING_PLATFORM_PAYOUT,
+      undefined,
+      undefined,
+      [attachment],
+    );
+  }
+
+  private generateDatingPlatformPayoutPlainText(
+    templateData: DatingPlatformPayoutData,
+    partnerName: string,
+  ): string {
+    const greeting = `Hello ${partnerName}!`;
+    const message1 = `You have received a new commission payout. This payment has been successfully transferred to your connected Stripe account.`;
+    const message2 = `A full, itemized commission statement (PDF) is attached to this email for your records.`;
+    const footerNote = `Thank you for your partnership! If you have any questions about this payout, please contact us at support@knotly.app.`;
+
+    return `
+    ${greeting}
+    ${message1}
+
+    ---
+    Commission Details:
+    Commission ID: #${templateData.commissionId}
+    Payout Date: ${templateData.payoutDate}
+    Stripe Transfer ID: ${templateData.stripeTransferId}
+    Commission Rate: ${templateData.commissionRatePercent}%
+    Commission Earned: ${templateData.currency} ${templateData.commissionAmount} 
+    ---
+
+    ${message2}
+    ${footerNote}
+
+    ---
+    Knotly - Your Perfect Wedding, Perfectly Planned
+    Website: https://knotly.app`;
+  }
+
   async sendEmail(
     to: string,
     subject: string,
@@ -1442,8 +1531,9 @@ Website: https://knotly.app`;
     type: EmailTemplateType,
     weddingId?: number,
     vendorId?: number,
+    attachments?: any[],
   ): Promise<void> {
-    const msg = {
+    const msg: any = {
       to,
       from: {
         email: 'hello.knotly@gmail.com',
@@ -1453,6 +1543,10 @@ Website: https://knotly.app`;
       text,
       html,
     };
+
+    if (attachments && attachments.length > 0) {
+      msg.attachments = attachments;
+    }
 
     try {
       await sgMail.send(msg);

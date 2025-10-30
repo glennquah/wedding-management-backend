@@ -140,6 +140,16 @@ export interface VendorBookingRejectionData {
   dashboardUrl: string;
 }
 
+export interface DatingPlatformPayoutData {
+  partnerName: string;
+  commissionId: number;
+  payoutDate: string;
+  stripeTransferId: string;
+  commissionRatePercent: string;
+  commissionAmount: string;
+  currency: string;
+}
+
 export type EmailTemplateData =
   | PasswordResetData
   | WelcomeEmailData
@@ -159,4 +169,5 @@ export type EmailTemplateData =
   | RsvpInvitationData
   | VendorBookingConfirmationData
   | VendorBookingRejectionData
-  | RegisterDatingUserData;
+  | RegisterDatingUserData
+  | DatingPlatformPayoutData;
