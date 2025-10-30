@@ -572,6 +572,30 @@ model VendorPayout {
   @@index([stripeTransferId])
 }
 
+model DatingPartnerCommission {
+  id               Int      @id @default(autoincrement())
+  adminId          Int      // The referred user
+  orderId          Int
+  listingId        Int
+  grossAmount      Float
+  commissionRate   Float
+  commissionAmount Float
+  currency         String   @default("SGD")
+  
+  status           String   @default("pending") // "pending", "succeeded", "failed"
+  
+  stripeTransferId String?  @unique
+  failureReason    String?
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@unique([orderId, listingId]) 
+  
+  @@index([adminId])
+  @@index([status])
+}
+
 model SeatingArrangement {
   id              Int      @id @default(autoincrement())
   weddingId       Int      @unique
