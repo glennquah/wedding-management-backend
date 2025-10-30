@@ -22,6 +22,11 @@ export interface CreateAccountData {
   resetPasswordUrl: string;
 }
 
+export interface RegisterDatingUserData {
+  name: string;
+  resetPasswordUrl: string;
+}
+
 export interface SuperAdminOnboardingData {
   name: string;
   buttonUrl: string;
@@ -153,4 +158,5 @@ export type EmailTemplateData =
   | VendorGratitudeCardData
   | RsvpInvitationData
   | VendorBookingConfirmationData
-  | VendorBookingRejectionData;
+  | VendorBookingRejectionData
+  | RegisterDatingUserData;

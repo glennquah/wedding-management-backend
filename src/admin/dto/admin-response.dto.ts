@@ -11,6 +11,13 @@ export class AdminResponseDto extends UserResponseDto {
   isSuspended?: boolean;
 
   @ApiProperty({
+    description: 'Is the admin registered from dating app platform?',
+    required: false,
+    default: false,
+  })
+  isDatingPartnerRegistered?: boolean;
+
+  @ApiProperty({
     description: 'Date when the admin was onboarded',
     required: true,
   })

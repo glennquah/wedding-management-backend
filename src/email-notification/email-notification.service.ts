@@ -21,6 +21,7 @@ import {
   EmailTemplateData,
   GuestGratitudeCardData,
   PasswordResetData,
+  RegisterDatingUserData,
   RsvpInvitationData,
   SuperAdminOnboardingData,
   VendorBookingConfirmationData,
@@ -111,6 +112,10 @@ export class EmailNotificationService {
         {
           name: EmailTemplateType.VENDOR_BOOKING_REJECTION,
           file: 'vendor-booking-rejection.html',
+        },
+        {
+          name: EmailTemplateType.REGISTER_DATING_USER,
+          file: 'create-dating-user-account.html',
         },
       ];
 
@@ -216,6 +221,19 @@ The Knotly Team`;
     };
 
     await this.sendVerifyEmailTemplateType(to, templateData, weddingId);
+  }
+
+  async sendRegisterDatingUserEmail(
+    to: string,
+    resetPasswordUrl: string,
+    name: string,
+  ): Promise<void> {
+    const templateData: RegisterDatingUserData = {
+      name,
+      resetPasswordUrl,
+    };
+
+    await this.sendRegisterDatingUserTemplate(to, templateData);
   }
 
   async sendCreateAccountEmail(
@@ -398,6 +416,62 @@ The Knotly Team`;
 
     If you don't want to join this wedding planning team, you can safely ignore this email. This link will expire in 7 days.
 
+    ---
+    Knotly - Your Perfect Wedding, Perfectly Planned
+    Website: https://knotly.app`;
+  }
+
+  async sendRegisterDatingUserTemplate(
+    to: string,
+    templateData: RegisterDatingUserData,
+  ): Promise<void> {
+    const html = this.renderTemplate(
+      EmailTemplateType.REGISTER_DATING_USER,
+      templateData,
+    );
+    const text = this.generateRegisterDatingUserPlainText(templateData);
+
+    await this.sendEmail(
+      to,
+      "Welcome to Knotly! Let's Start Your Wedding Journey",
+      text,
+      html,
+      EmailTemplateType.REGISTER_DATING_USER,
+    );
+  }
+
+  private generateRegisterDatingUserPlainText(
+    templateData: RegisterDatingUserData,
+  ): string {
+    const greeting = `Hello ${templateData.name}!`;
+
+    const bannerTitle = `Your Wedding Journey Starts Now!`;
+    const bannerSubtitle = `Welcome to Knotly, from our partners at Ai Stead Mai.`;
+
+    const message1 = `We're thrilled to have you! As a partner of Ai Stead Mai, we're here to help you take the next exciting step: planning your perfect wedding.`;
+
+    const message2 = `An account has been created for you on Knotly, your all-in-one platform for finding vendors, managing your guest list, tracking budgets, and bringing your dream day to life.`;
+
+    const action = `To get started, click the button below to set the password for your new account. Once you're in, you can start planning!`;
+
+    const ctaLink = `Set Your Password: ${templateData.resetPasswordUrl}`;
+
+    const footerNote = `If you did not request this, you can safely ignore this email. This secure link will expire in 7 days.`;
+
+    return `${bannerTitle}
+  ${bannerSubtitle}
+  
+  ${greeting}
+  
+  ${message1}
+  
+  ${message2}
+  
+  ${action}
+  
+  ${ctaLink}
+  
+  ${footerNote}
     ---
     Knotly - Your Perfect Wedding, Perfectly Planned
     Website: https://knotly.app`;

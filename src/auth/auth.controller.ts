@@ -24,6 +24,7 @@ import { CreateVendorDto } from 'src/vendor/dto/create-vendor.dto';
 import { AdminService } from 'src/admin/admin.service';
 import { SuperAdminService } from 'src/super-admin/super-admin.service';
 import { VendorService } from 'src/vendor/vendor.service';
+import { RegisterDatingUserDto } from 'src/admin/dto/register-dating-user.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -60,6 +61,25 @@ export class AuthController {
   @ApiResponse({ status: 400, description: 'Bad request.' })
   async registerAdmin(@Body() dto: CreateAdminDto): Promise<AdminResponseDto> {
     const admin = await this.adminService.create(dto);
+    return admin;
+  }
+
+  @Post('register/dating-user')
+  @ApiOperation({ summary: 'Register dating platform user onto knotly.' })
+  @ApiResponse({
+    status: 201,
+    description: 'Dating platform user has been successfully invited.',
+    type: AdminResponseDto,
+  })
+  @ApiResponse({ status: 400, description: 'Bad request.' })
+  @ApiResponse({
+    status: 409,
+    description: 'Conflict. This user is already registered on Knotly.',
+  })
+  async registerDatingUser(
+    @Body() dto: RegisterDatingUserDto,
+  ): Promise<AdminResponseDto> {
+    const admin = await this.adminService.registerDatingUser(dto);
     return admin;
   }
 
