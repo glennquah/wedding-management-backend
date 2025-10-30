@@ -29,6 +29,7 @@ import { WeddingModule } from './wedding/wedding.module';
 import { GratitudeCardModule } from './gratitude-card/gratitude-card.module';
 import { GuestbookModule } from './guestbook/guestbook.module';
 import { WishlistModule } from './wishlist/wishlist.module';
+import { ReviewModule } from './review/review.module';
 
 @Module({
   imports: [
@@ -60,6 +61,7 @@ import { WishlistModule } from './wishlist/wishlist.module';
     CalendarModule,
     GuestbookModule,
     WishlistModule,
+    ReviewModule,
   ],
   controllers: [AppController],
   providers: [AppService],
