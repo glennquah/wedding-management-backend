@@ -8,6 +8,7 @@ import { AnalyticsModule } from './analytics/analytics.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
+import { ChecklistModule } from './checklist/checklist.module';
 import { CartModule } from './cart/cart.module';
 import { CalendarModule } from './calendar/calendar.module';
 import { EmailNotificationModule } from './email-notification/email-notification.module';
@@ -50,6 +51,7 @@ import { WishlistModule } from './wishlist/wishlist.module';
     OrderModule,
     PaymentModule,
     CartModule,
+    ChecklistModule,
     AlbumModule,
     AiServiceModule,
     AnalyticsModule,
