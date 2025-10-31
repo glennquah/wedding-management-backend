@@ -3,6 +3,7 @@ import {
   ApiExcludeEndpoint,
   ApiOperation,
   ApiResponse,
+  ApiSecurity,
   ApiTags,
 } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
@@ -25,6 +26,7 @@ import { AdminService } from 'src/admin/admin.service';
 import { SuperAdminService } from 'src/super-admin/super-admin.service';
 import { VendorService } from 'src/vendor/vendor.service';
 import { RegisterDatingUserDto } from 'src/admin/dto/register-dating-user.dto';
+import { DatingPartnerApiKeyGuard } from './guards/dating-partner.guard';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -65,6 +67,8 @@ export class AuthController {
   }
 
   @Post('register/dating-user')
+  @ApiSecurity('apiKey')
+  @UseGuards(DatingPartnerApiKeyGuard)
   @ApiOperation({ summary: 'Register dating platform user onto knotly.' })
   @ApiResponse({
     status: 201,
