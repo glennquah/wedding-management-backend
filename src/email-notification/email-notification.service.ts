@@ -124,10 +124,6 @@ export class EmailNotificationService {
           file: 'create-dating-user-account.html',
         },
         {
-          name: EmailTemplateType.REGISTER_DATING_USER,
-          file: 'create-dating-user-account.html',
-        },
-        {
           name: EmailTemplateType.DATING_PLATFORM_PAYOUT,
           file: 'dating-platform-payout.html',
         },
