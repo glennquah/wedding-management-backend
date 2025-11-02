@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Listing, WeddingStyle, WeddingType } from '@prisma/client';
 import { WeddingService } from 'src/common/wedding-service.enum';
 import { VendorService } from 'src/vendor/vendor.service';
