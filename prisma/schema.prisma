@@ -109,6 +109,17 @@ enum CalendarAccessStatus {
   CONNECTED
 }
 
+enum ChatbotStage {
+  GETTING_STARTED
+  INITIAL_PLANNING
+  CREATING_THE_FOUNDATION
+  DETAILED_PLANNING
+  DURING_THE_WEDDING
+  AFTER_THE_WEDDING
+  ADDITIONAL_DETAILS
+  CHECKLIST_GENERATED
+}
+
 enum ProcessingStatus {
   PENDING
   PROCESSING
@@ -140,6 +151,7 @@ model Admin {
   mainWeddingId            Int?
   cart                     Cart?
   googleCalendarConnection GoogleCalendarConnection?
+  reviews                  Review[]
 }
 
 model GoogleCalendarConnection {
@@ -178,6 +190,7 @@ model Vendor {
   weddingTypes        WeddingType[]
   capacity            Int?
   listings            Listing[]
+  reviews             Review[]
   onboardingStatus    VendorOnboardingStatus @default(PENDING)
   notificationDetails NotificationDetails?
 
@@ -249,13 +262,14 @@ model Wedding {
   orders                     Order[]
   notificationDetails        NotificationDetails?
   SeatingArrangement         SeatingArrangement?
-  microsite                  Microsite?
+  microsite                    Microsite?
   album                      Album?
   cashGifts                  CashGift[]
   dateOptimizerEarliestDate  String?
   dateOptimizerLatestDate    String?
   dateOptimizerPreferredDays String[]             @default([])
   dateOptimizerLastResults   Json?
+  checklist           Checklist?
   gratitudeCard              GratitudeCard?
   guestbook                  Guestbook?
   wishlistItems              WishlistItem[]
@@ -470,10 +484,35 @@ model OrderListing {
   bookingStatus OrderStatus @default(PENDING)
   order         Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
   listing       Listing     @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  review        Review?
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 
   @@id([orderId, listingId])
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  rating    Int      // 1-5 stars
+  comment   String?  // Optional comment
+
+  // Relations
+  orderId   Int
+  listingId Int
+  orderListing OrderListing @relation(fields: [orderId, listingId], references: [orderId, listingId], onDelete: Cascade)
+
+  vendorId  Int
+  vendor    Vendor   @relation(fields: [vendorId], references: [userId], onDelete: Cascade)
+
+  adminId   Int
+  admin     Admin    @relation(fields: [adminId], references: [userId], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([orderId, listingId])
+  @@index([vendorId])
+  @@index([adminId])
 }
 
 model Cart {
@@ -567,6 +606,40 @@ model SeatingArrangement {
   tablesPerRow    Int?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+}
+
+model ChatMessage {
+  id          String    @id @default(uuid())
+  role        String    // 'assistant' or 'user'
+  content     String
+  checklistId Int
+  checklist   Checklist @relation(fields: [checklistId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Checklist {
+  id           Int             @id @default(autoincrement())
+  weddingId    Int             @unique
+  wedding      Wedding         @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+  items        ChecklistItem[]
+  chatHistory  ChatMessage[]
+  currentStage ChatbotStage    @default(GETTING_STARTED)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+}
+
+model ChecklistItem {
+  id                  Int       @id @default(autoincrement())
+  title               String
+  description         String
+  category            String
+  monthsBeforeWedding Int?
+  completed           Boolean   @default(false)
+  checklistId         Int
+  checklist           Checklist @relation(fields: [checklistId], references: [id], onDelete: Cascade)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 }
 
 model CashGift {

@@ -8,6 +8,7 @@ import { AnalyticsModule } from './analytics/analytics.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
+import { ChecklistModule } from './checklist/checklist.module';
 import { CartModule } from './cart/cart.module';
 import { CalendarModule } from './calendar/calendar.module';
 import { EmailNotificationModule } from './email-notification/email-notification.module';
@@ -28,6 +29,7 @@ import { WeddingModule } from './wedding/wedding.module';
 import { GratitudeCardModule } from './gratitude-card/gratitude-card.module';
 import { GuestbookModule } from './guestbook/guestbook.module';
 import { WishlistModule } from './wishlist/wishlist.module';
+import { ReviewModule } from './review/review.module';
 
 @Module({
   imports: [
@@ -50,6 +52,7 @@ import { WishlistModule } from './wishlist/wishlist.module';
     OrderModule,
     PaymentModule,
     CartModule,
+    ChecklistModule,
     AlbumModule,
     AiServiceModule,
     AnalyticsModule,
@@ -58,6 +61,7 @@ import { WishlistModule } from './wishlist/wishlist.module';
     CalendarModule,
     GuestbookModule,
     WishlistModule,
+    ReviewModule,
   ],
   controllers: [AppController],
   providers: [AppService],
