@@ -154,6 +154,7 @@ model Admin {
   mainWeddingId             Int?
   cart                      Cart?
   googleCalendarConnection  GoogleCalendarConnection?
+  reviews                  Review[]
 }
 
 model GoogleCalendarConnection {
@@ -192,6 +193,7 @@ model Vendor {
   weddingTypes        WeddingType[]
   capacity            Int?
   listings            Listing[]
+  reviews             Review[]
   onboardingStatus    VendorOnboardingStatus @default(PENDING)
   notificationDetails NotificationDetails?
 
@@ -485,10 +487,35 @@ model OrderListing {
   bookingStatus OrderStatus @default(PENDING)
   order         Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
   listing       Listing     @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  review        Review?
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 
   @@id([orderId, listingId])
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  rating    Int      // 1-5 stars
+  comment   String?  // Optional comment
+
+  // Relations
+  orderId   Int
+  listingId Int
+  orderListing OrderListing @relation(fields: [orderId, listingId], references: [orderId, listingId], onDelete: Cascade)
+
+  vendorId  Int
+  vendor    Vendor   @relation(fields: [vendorId], references: [userId], onDelete: Cascade)
+
+  adminId   Int
+  admin     Admin    @relation(fields: [adminId], references: [userId], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([orderId, listingId])
+  @@index([vendorId])
+  @@index([adminId])
 }
 
 model Cart {
