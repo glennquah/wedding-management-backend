@@ -100,6 +100,8 @@ enum EmailTemplateType {
   VENDOR_GRATITUDE_CARD
   VENDOR_BOOKING_REJECTION
   VENDOR_BOOKING_CONFIRMATION
+  REGISTER_DATING_USER
+  DATING_PLATFORM_PAYOUT
 }
 
 enum CalendarAccessStatus {
@@ -142,15 +144,16 @@ model User {
 }
 
 model Admin {
-  userId                   Int                       @id
-  user                     User                      @relation(fields: [userId], references: [id])
-  isSuspended              Boolean                   @default(false)
-  onboardedDate            DateTime                  @default(now())
-  weddings                 Wedding[]                 @relation("AdminWeddings")
-  mainWedding              Wedding?                  @relation("MainCouple", fields: [mainWeddingId], references: [id])
-  mainWeddingId            Int?
-  cart                     Cart?
-  googleCalendarConnection GoogleCalendarConnection?
+  userId                    Int                       @id
+  user                      User                      @relation(fields: [userId], references: [id])
+  isSuspended               Boolean                   @default(false)
+  isDatingPartnerRegistered Boolean                   @default(false)
+  onboardedDate             DateTime                  @default(now())
+  weddings                  Wedding[]                 @relation("AdminWeddings")
+  mainWedding               Wedding?                  @relation("MainCouple", fields: [mainWeddingId], references: [id])
+  mainWeddingId             Int?
+  cart                      Cart?
+  googleCalendarConnection  GoogleCalendarConnection?
   reviews                  Review[]
 }
 
@@ -195,11 +198,11 @@ model Vendor {
   notificationDetails NotificationDetails?
 
   // Stripe Connect fields
-  stripeConnectAccountId String?  @unique
+  stripeConnectAccountId          String? @unique
   stripeAccountOnboardingComplete Boolean @default(false)
-  stripeChargesEnabled Boolean @default(false)
-  stripePayoutsEnabled Boolean @default(false)
-  stripeDetailsSubmitted Boolean @default(false)
+  stripeChargesEnabled            Boolean @default(false)
+  stripePayoutsEnabled            Boolean @default(false)
+  stripeDetailsSubmitted          Boolean @default(false)
 }
 
 model EmailTemplate {
@@ -262,14 +265,14 @@ model Wedding {
   orders                     Order[]
   notificationDetails        NotificationDetails?
   SeatingArrangement         SeatingArrangement?
-  microsite                    Microsite?
+  microsite                  Microsite?
   album                      Album?
   cashGifts                  CashGift[]
   dateOptimizerEarliestDate  String?
   dateOptimizerLatestDate    String?
   dateOptimizerPreferredDays String[]             @default([])
   dateOptimizerLastResults   Json?
-  checklist           Checklist?
+  checklist                  Checklist?
   gratitudeCard              GratitudeCard?
   guestbook                  Guestbook?
   wishlistItems              WishlistItem[]
@@ -326,11 +329,11 @@ model Album {
   inviteCardMessage String
   landingMessage    String
   albumURL          String?
-  photos            String[]  // Legacy field, kept for backward compatibility
+  photos            String[] // Legacy field, kept for backward compatibility
 
   // New relations for enhanced photo management
-  photoEntities     Photo[]
-  personClusters    PersonCluster[]
+  photoEntities  Photo[]
+  personClusters PersonCluster[]
 
   weddingId Int     @unique
   wedding   Wedding @relation(fields: [weddingId], references: [id], onDelete: Cascade)
@@ -345,24 +348,24 @@ model Guestbook {
 }
 
 model Photo {
-  id        Int      @id @default(autoincrement())
-  url       String
-  albumId   Int
-  album     Album    @relation(fields: [albumId], references: [id], onDelete: Cascade)
+  id      Int    @id @default(autoincrement())
+  url     String
+  albumId Int
+  album   Album  @relation(fields: [albumId], references: [id], onDelete: Cascade)
 
   // Processing metadata
   processingStatus ProcessingStatus @default(PENDING)
   processedAt      DateTime?
 
   // Quality metrics
-  isBlurry         Boolean?
-  blurScore        Float?     // 0-1000+, higher = sharper (Laplacian variance)
+  isBlurry  Boolean?
+  blurScore Float? // 0-1000+, higher = sharper (Laplacian variance)
 
   // Relations
-  faces            PhotoFace[]
+  faces PhotoFace[]
 
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([albumId])
   @@index([processingStatus])
@@ -370,19 +373,19 @@ model Photo {
 }
 
 model PhotoFace {
-  id       Int    @id @default(autoincrement())
-  photoId  Int
-  photo    Photo  @relation(fields: [photoId], references: [id], onDelete: Cascade)
+  id      Int   @id @default(autoincrement())
+  photoId Int
+  photo   Photo @relation(fields: [photoId], references: [id], onDelete: Cascade)
 
   // Face encoding (128-dimensional vector stored as JSON array)
   // Generated by face_recognition library using dlib's ResNet model
   encoding Json
 
   // Bounding box coordinates (normalized 0-1 relative to image dimensions)
-  x        Float
-  y        Float
-  width    Float
-  height   Float
+  x      Float
+  y      Float
+  width  Float
+  height Float
 
   // Cluster assignment (null if unclustered or outlier)
   personClusterId Int?
@@ -395,12 +398,12 @@ model PhotoFace {
 }
 
 model PersonCluster {
-  id        Int         @id @default(autoincrement())
-  albumId   Int
-  album     Album       @relation(fields: [albumId], references: [id], onDelete: Cascade)
+  id      Int   @id @default(autoincrement())
+  albumId Int
+  album   Album @relation(fields: [albumId], references: [id], onDelete: Cascade)
 
   // Optional label (can be set manually by user, e.g., "Bride", "Groom", "Guest 1")
-  label     String?
+  label String?
 
   // Representative face encoding (centroid of all faces in cluster)
   representativeEncoding Json
@@ -409,7 +412,7 @@ model PersonCluster {
   thumbnailUrl String?
 
   // Relations
-  faces     PhotoFace[]
+  faces PhotoFace[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -559,42 +562,66 @@ model Payment {
 model VendorEarning {
   id             Int      @id @default(autoincrement())
   vendorId       Int
-  orderListingId String  
+  orderListingId String
   orderId        Int
   listingId      Int
-  grossAmount    Float    
-  platformFee    Float    
-  netAmount      Float    
+  grossAmount    Float
+  platformFee    Float
+  netAmount      Float
   currency       String   @default("SGD")
   isPaidOut      Boolean  @default(false)
   payoutId       Int?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
+  @@unique([orderId, listingId])
   @@index([vendorId])
   @@index([isPaidOut])
   @@index([payoutId])
-  @@unique([orderId, listingId])
 }
 
 model VendorPayout {
-  id                   Int      @id @default(autoincrement())
-  vendorId             Int
-  stripeTransferId     String   @unique
-  amount               Float   
-  currency             String   @default("SGD")
-  status               String   
-  earningsCount        Int     
-  periodStart          DateTime 
-  periodEnd            DateTime 
-  stripePayoutId       String? 
-  failureReason        String?
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
+  id               Int      @id @default(autoincrement())
+  vendorId         Int
+  stripeTransferId String   @unique
+  amount           Float
+  currency         String   @default("SGD")
+  status           String
+  earningsCount    Int
+  periodStart      DateTime
+  periodEnd        DateTime
+  stripePayoutId   String?
+  failureReason    String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
   @@index([vendorId])
   @@index([status])
   @@index([stripeTransferId])
+}
+
+model DatingPartnerCommission {
+  id               Int      @id @default(autoincrement())
+  adminId          Int      // The referred user
+  orderId          Int
+  listingId        Int
+  grossAmount      Float
+  commissionRate   Float
+  commissionAmount Float
+  currency         String   @default("SGD")
+  
+  status           String   @default("pending") // "pending", "succeeded", "failed"
+  
+  stripeTransferId String?  @unique
+  failureReason    String?
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@unique([orderId, listingId]) 
+  
+  @@index([adminId])
+  @@index([status])
 }
 
 model SeatingArrangement {
@@ -610,7 +637,7 @@ model SeatingArrangement {
 
 model ChatMessage {
   id          String    @id @default(uuid())
-  role        String    // 'assistant' or 'user'
+  role        String // 'assistant' or 'user'
   content     String
   checklistId Int
   checklist   Checklist @relation(fields: [checklistId], references: [id], onDelete: Cascade)

@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import * as PDFDocument from 'pdfkit';
 import { PrismaService } from '../prisma/prisma.service';
 import * as path from 'path';
+import { DatingPartnerCommission } from '@prisma/client';
 
 interface PayoutInvoiceData {
   payoutId: number;
@@ -22,6 +23,22 @@ interface PayoutInvoiceData {
     netAmount: number;
     completedDate: Date;
   }[];
+}
+
+interface PartnerInvoiceData {
+  commissionId: number;
+  partnerName: string;
+  amount: number;
+  currency: string;
+  payoutDate: Date;
+  stripeTransferId: string;
+  earning: {
+    orderId: number;
+    listingName: string;
+    grossAmount: number;
+    commissionRate: number;
+    commissionAmount: number;
+  };
 }
 
 @Injectable()
@@ -275,6 +292,179 @@ export class InvoiceGeneratorService {
         .font('Helvetica')
         .text(
           'This is an automated payout statement. Funds have been transferred to your connected Stripe account.',
+          { align: 'center' },
+        )
+        .text('For any questions, please contact support@knotly.com', {
+          align: 'center',
+        });
+
+      doc.end();
+    });
+  }
+
+  async generateDatingPartnerCommissionInvoice(
+    commissionLog: DatingPartnerCommission,
+  ): Promise<{ buffer: Buffer; filename: string }> {
+    const listing = await this.prisma.listing.findUnique({
+      where: { id: commissionLog.listingId },
+      select: { listingName: true },
+    });
+
+    const partnerName = process.env.PARTNER_CONTACT_NAME || 'Ai Stead Mai';
+
+    const invoiceData: PartnerInvoiceData = {
+      commissionId: commissionLog.id,
+      partnerName: partnerName,
+      amount: commissionLog.commissionAmount,
+      currency: commissionLog.currency,
+      payoutDate: commissionLog.updatedAt,
+      stripeTransferId: commissionLog.stripeTransferId!,
+      earning: {
+        orderId: commissionLog.orderId,
+        listingName: listing?.listingName || 'N/A',
+        grossAmount: commissionLog.grossAmount,
+        commissionRate: commissionLog.commissionRate,
+        commissionAmount: commissionLog.commissionAmount,
+      },
+    };
+
+    const buffer = await this.createDatingPartnerPDF(invoiceData);
+    const filename = `commission-${commissionLog.id}-${Date.now()}.pdf`;
+
+    return { buffer, filename };
+  }
+
+  private async createDatingPartnerPDF(
+    data: PartnerInvoiceData,
+  ): Promise<Buffer> {
+    return new Promise((resolve, reject) => {
+      const doc = new PDFDocument({ margin: 50 });
+      const chunks: Buffer[] = [];
+
+      doc.on('data', (chunk) => chunks.push(chunk));
+      doc.on('end', () => resolve(Buffer.concat(chunks)));
+      doc.on('error', reject);
+
+      // Logo
+      try {
+        const logoPath = path.join(
+          process.cwd(),
+          'public',
+          'images',
+          'logo.png',
+        );
+        doc.image(logoPath, 250, 30, { width: 100 });
+        doc.moveDown(2);
+      } catch (error) {
+        console.log('Logo not found, continuing without logo:', error.message);
+      }
+
+      // Header
+      doc
+        .fontSize(20)
+        .font('Helvetica-Bold')
+        .text('COMMISSION STATEMENT', { align: 'center' })
+        .moveDown();
+
+      // Company Info
+      doc
+        .fontSize(10)
+        .font('Helvetica')
+        .text('Knotly Pte Ltd', { align: 'center' })
+        .text('Payment Processing', { align: 'center' })
+        .moveDown(2);
+
+      // Partner Info
+      doc
+        .fontSize(12)
+        .font('Helvetica-Bold')
+        .text('PARTNER INFORMATION')
+        .moveDown(0.5);
+      doc
+        .fontSize(10)
+        .font('Helvetica')
+        .text(`Partner Name: ${data.partnerName}`)
+        .moveDown();
+
+      // Payout Details
+      doc
+        .fontSize(12)
+        .font('Helvetica-Bold')
+        .text('COMMISSION DETAILS')
+        .moveDown(0.5);
+      doc
+        .fontSize(10)
+        .font('Helvetica')
+        .text(`Payout Date: ${data.payoutDate.toLocaleDateString()}`)
+        .text(`Stripe Transfer ID: ${data.stripeTransferId}`)
+        .moveDown(2);
+
+      // Earnings Table Header
+      doc.fontSize(12).font('Helvetica-Bold').text('COMMISSION BREAKDOWN');
+      doc.moveDown(0.5);
+
+      const tableTop = doc.y;
+      const col1X = 50;
+      const col2X = 120;
+      const col3X = 250;
+      const col4X = 350;
+      const col5X = 450;
+
+      // Table Headers
+      doc
+        .fontSize(9)
+        .font('Helvetica-Bold')
+        .text('Order ID', col1X, tableTop)
+        .text('Service', col2X, tableTop)
+        .text('Gross Sale', col3X, tableTop)
+        .text('Comm. Rate', col4X, tableTop)
+        .text('Commission', col5X, tableTop);
+
+      doc
+        .moveTo(col1X, tableTop + 15)
+        .lineTo(545, tableTop + 15)
+        .stroke();
+
+      // Table Row (Single Entry)
+      const yPosition = tableTop + 25;
+      doc.fontSize(8).font('Helvetica');
+      const e = data.earning;
+
+      doc
+        .text(`#${e.orderId}`, col1X, yPosition)
+        .text(
+          e.listingName.length > 20
+            ? e.listingName.substring(0, 20) + '...'
+            : e.listingName,
+          col2X,
+          yPosition,
+        )
+        .text(`${data.currency} ${e.grossAmount.toFixed(2)}`, col3X, yPosition)
+        .text(`${(e.commissionRate * 100).toFixed(1)}%`, col4X, yPosition)
+        .text(
+          `${data.currency} ${e.commissionAmount.toFixed(2)}`,
+          col5X,
+          yPosition,
+        );
+
+      // Summary Box
+      doc.moveDown(4);
+      doc
+        .fontSize(14)
+        .font('Helvetica-Bold')
+        .fillColor('#2563eb')
+        .text(`TOTAL PAYOUT: ${data.currency} ${data.amount.toFixed(2)}`, {
+          align: 'center',
+        });
+
+      // Footer
+      doc
+        .moveDown(3)
+        .fontSize(8)
+        .fillColor('#666666')
+        .font('Helvetica')
+        .text(
+          'This is an automated commission statement. Funds have been transferred.',
           { align: 'center' },
         )
         .text('For any questions, please contact support@knotly.com', {

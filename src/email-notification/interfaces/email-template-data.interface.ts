@@ -22,6 +22,11 @@ export interface CreateAccountData {
   resetPasswordUrl: string;
 }
 
+export interface RegisterDatingUserData {
+  name: string;
+  resetPasswordUrl: string;
+}
+
 export interface SuperAdminOnboardingData {
   name: string;
   buttonUrl: string;
@@ -135,6 +140,16 @@ export interface VendorBookingRejectionData {
   dashboardUrl: string;
 }
 
+export interface DatingPlatformPayoutData {
+  partnerName: string;
+  commissionId: number;
+  payoutDate: string;
+  stripeTransferId: string;
+  commissionRatePercent: string;
+  commissionAmount: string;
+  currency: string;
+}
+
 export type EmailTemplateData =
   | PasswordResetData
   | WelcomeEmailData
@@ -153,4 +168,6 @@ export type EmailTemplateData =
   | VendorGratitudeCardData
   | RsvpInvitationData
   | VendorBookingConfirmationData
-  | VendorBookingRejectionData;
+  | VendorBookingRejectionData
+  | RegisterDatingUserData
+  | DatingPlatformPayoutData;
