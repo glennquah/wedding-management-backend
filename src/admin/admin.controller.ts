@@ -133,6 +133,15 @@ export class AdminController {
       preferredServices: wedding.preferredServices as WeddingService[],
       createdAt: wedding.createdAt.toISOString(),
       updatedAt: wedding.updatedAt.toISOString(),
+      mainCouple: (wedding as any).mainCouple?.map((admin: any) => ({
+        id: admin.user.id,
+        name: admin.user.name,
+        email: admin.user.email,
+        role: admin.user.role,
+        isSuspended: admin.isSuspended,
+        onboardedDate: admin.onboardedDate,
+        weddings: [],
+      })) || [],
     }));
   }
 
