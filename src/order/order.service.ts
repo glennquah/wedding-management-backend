@@ -3,7 +3,8 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Order } from '@prisma/client';
+import { DatingPartnerCommission, Order, OrderListing } from '@prisma/client';
+import { InvoiceGeneratorService } from 'src/payment/invoice-generator.service';
 import { OrderStatus } from '../common/order-status.enum';
 import { PaymentStatus } from '../common/payment-status.enum';
 import { EmailNotificationService } from '../email-notification/email-notification.service';
@@ -20,7 +21,134 @@ export class OrderService {
     private prisma: PrismaService,
     private paymentService: PaymentService,
     private emailService: EmailNotificationService,
+    private invoiceGeneratorService: InvoiceGeneratorService,
   ) {}
+
+  private sendCommissionInvoice(commissionLog: DatingPartnerCommission) {
+    (async () => {
+      try {
+        const partnerEmail = process.env.PARTNER_CONTACT_EMAIL;
+
+        if (!partnerEmail) {
+          console.error(
+            `PARTNER_CONTACT_EMAIL not set. Cannot send invoice for ${commissionLog.id}.`,
+          );
+          return;
+        }
+
+        const { buffer, filename } =
+          await this.invoiceGeneratorService.generateDatingPartnerCommissionInvoice(
+            commissionLog,
+          );
+
+        await this.emailService.sendDatingPlatformPayoutEmail(
+          partnerEmail,
+          commissionLog,
+          buffer,
+          filename,
+        );
+
+        console.log(`Commission invoice email sent for ${commissionLog.id}`);
+      } catch (emailError) {
+        console.error(
+          `Failed to send commission invoice for ${commissionLog.id}.`,
+          emailError.stack,
+        );
+      }
+    })();
+  }
+
+  private async createAndPayDatingCommission(
+    order: Order,
+    orderListing: OrderListing,
+    grossAmount: number,
+  ): Promise<void> {
+    try {
+      const existingCommission =
+        await this.prisma.datingPartnerCommission.findUnique({
+          where: {
+            orderId_listingId: {
+              orderId: order.id,
+              listingId: orderListing.listingId,
+            },
+          },
+        });
+      if (existingCommission) {
+        console.log(
+          `Dating commission for Order ${order.id} already processed. Skipping.`,
+        );
+        return;
+      }
+
+      // 2. Find the referred admin
+      const wedding = await this.prisma.wedding.findUnique({
+        where: { id: order.weddingId },
+        include: { mainCouple: true },
+      });
+      const referredAdmin = wedding?.mainCouple.find(
+        (admin) => admin.isDatingPartnerRegistered === true,
+      );
+
+      if (!referredAdmin) return;
+
+      const commissionRate = parseFloat(process.env.PARTNER_COMMISSION_RATE);
+      const commissionAmount = grossAmount * commissionRate;
+      if (commissionAmount <= 0) return;
+
+      const newCommissionLog = await this.prisma.datingPartnerCommission.create(
+        {
+          data: {
+            adminId: referredAdmin.userId,
+            orderId: order.id,
+            listingId: orderListing.listingId,
+            grossAmount: grossAmount,
+            commissionRate: commissionRate,
+            commissionAmount: commissionAmount,
+            currency: order.currency,
+            status: 'pending',
+          },
+        },
+      );
+
+      try {
+        const transfer = await this.paymentService.createDatingPartnerPayout(
+          commissionAmount,
+          order.currency,
+        );
+
+        const updatedCommissionLog =
+          await this.prisma.datingPartnerCommission.update({
+            where: { id: newCommissionLog.id },
+            data: {
+              status: 'succeeded',
+              stripeTransferId: transfer.id,
+            },
+          });
+        console.log(
+          `Instant commission payout ${newCommissionLog.id} succeeded: ${transfer.id}`,
+        );
+
+        this.sendCommissionInvoice(updatedCommissionLog);
+      } catch (paymentError) {
+        await this.prisma.datingPartnerCommission.update({
+          where: { id: newCommissionLog.id },
+          data: {
+            status: 'failed',
+            failureReason: paymentError.message,
+          },
+        });
+        console.error(
+          `Instant commission payout ${newCommissionLog.id} failed.`,
+          paymentError.stack,
+        );
+      }
+    } catch (error) {
+      console.error(
+        `Critical error in commission setup for Order ${order.id}.`,
+        error.stack,
+      );
+    }
+  }
 
   async create(dto: CreateOrderDto): Promise<Order> {
     // Verify wedding exists
@@ -883,6 +1011,9 @@ export class OrderService {
       );
     }
 
+    // Payout commission to partner if admin is partnerRegistered
+    await this.createAndPayDatingCommission(order, orderListing, grossAmount);
+
     // Return updated order
     return this.findOne(orderId);
   }
@@ -998,6 +1129,8 @@ export class OrderService {
         `Vendor earning already exists for order ${orderId} listing ${listingId}, skipping creation`,
       );
     }
+
+    await this.createAndPayDatingCommission(order, orderListing, grossAmount);
 
     // Return updated order
     return this.findOne(orderId);
