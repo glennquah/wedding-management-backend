@@ -1189,9 +1189,7 @@ export class AnalyticsService {
     // First guest to arrive
     const guestsWithCheckIn = allGuests
       .filter((g) => g.checkInTime)
-      .sort(
-        (a, b) => a.checkInTime!.getTime() - b.checkInTime!.getTime(),
-      );
+      .sort((a, b) => a.checkInTime!.getTime() - b.checkInTime!.getTime());
     const firstGuest = guestsWithCheckIn[0];
 
     // Fastest RSVP (confirmed guests with creation time)
@@ -1204,7 +1202,9 @@ export class AnalyticsService {
       const guestsWithDuration = confirmedGuests
         .map((g) => ({
           guest: g,
-          duration: Math.abs(g.updatedAt.getTime() - g.createdAt.getTime()) / (1000 * 60 * 60), // hours
+          duration:
+            Math.abs(g.updatedAt.getTime() - g.createdAt.getTime()) /
+            (1000 * 60 * 60), // hours
         }))
         .sort((a, b) => a.duration - b.duration);
 
@@ -1274,14 +1274,16 @@ export class AnalyticsService {
     let mostWantedItem = null;
     let mostWantedItemCount = null;
     if (itemTitleMap.size > 0) {
-      const sorted = Array.from(itemTitleMap.entries()).sort((a, b) => b[1] - a[1]);
+      const sorted = Array.from(itemTitleMap.entries()).sort(
+        (a, b) => b[1] - a[1],
+      );
       mostWantedItem = sorted[0][0];
       mostWantedItemCount = sorted[0][1];
     }
 
     // Top cash gift contributor
     const allCashGifts = allGuests.flatMap((g) =>
-      g.cashGifts.map((cg) => ({ ...cg, guestName: g.name }))
+      g.cashGifts.map((cg) => ({ ...cg, guestName: g.name })),
     );
     const sortedCashGifts = allCashGifts.sort((a, b) => b.amount - a.amount);
     const topContributor = sortedCashGifts[0];
@@ -1289,10 +1291,11 @@ export class AnalyticsService {
 
     // Wishlist completion
     const totalWishlistItems = wishlistItems.length;
-    const reservedItems = wishlistItems.filter((item) => item.isReserved).length;
-    const wishlistCompletion = totalWishlistItems > 0
-      ? (reservedItems / totalWishlistItems) * 100
-      : 0;
+    const reservedItems = wishlistItems.filter(
+      (item) => item.isReserved,
+    ).length;
+    const wishlistCompletion =
+      totalWishlistItems > 0 ? (reservedItems / totalWishlistItems) * 100 : 0;
 
     const giftSupportInsights: GiftSupportInsights = {
       mostWantedItem,
@@ -1305,8 +1308,13 @@ export class AnalyticsService {
 
     // === PLANNING JOURNEY INSIGHTS ===
     const planningDays = wedding.date
-      ? Math.floor((wedding.date.getTime() - wedding.createdAt.getTime()) / (1000 * 60 * 60 * 24))
-      : Math.floor((Date.now() - wedding.createdAt.getTime()) / (1000 * 60 * 60 * 24));
+      ? Math.floor(
+          (wedding.date.getTime() - wedding.createdAt.getTime()) /
+            (1000 * 60 * 60 * 24),
+        )
+      : Math.floor(
+          (Date.now() - wedding.createdAt.getTime()) / (1000 * 60 * 60 * 24),
+        );
 
     // Top vendor category by spending
     const categorySpending = new Map<string, number>();
@@ -1327,16 +1335,17 @@ export class AnalyticsService {
     let topVendorCategory = null;
     let topVendorAmount = null;
     if (categorySpending.size > 0) {
-      const sorted = Array.from(categorySpending.entries()).sort((a, b) => b[1] - a[1]);
+      const sorted = Array.from(categorySpending.entries()).sort(
+        (a, b) => b[1] - a[1],
+      );
       topVendorCategory = sorted[0][0] as any;
       topVendorAmount = sorted[0][1];
     }
 
     const totalSpent = wedding.currentSpending;
     const allocatedBudget = wedding.allocatedBudget;
-    const budgetUtilization = allocatedBudget > 0
-      ? (totalSpent / allocatedBudget) * 100
-      : 0;
+    const budgetUtilization =
+      allocatedBudget > 0 ? (totalSpent / allocatedBudget) * 100 : 0;
 
     const planningJourneyInsights: PlanningJourneyInsights = {
       planningDays,
@@ -1352,10 +1361,11 @@ export class AnalyticsService {
     const totalWellWishes = guestbookNotes.length;
 
     const totalPhotos = wedding.album?.photoEntities.length || 0;
-    const totalFacesDetected = wedding.album?.photoEntities.reduce(
-      (sum, photo) => sum + photo.faces.length,
-      0,
-    ) || 0;
+    const totalFacesDetected =
+      wedding.album?.photoEntities.reduce(
+        (sum, photo) => sum + photo.faces.length,
+        0,
+      ) || 0;
     const totalPeopleClusters = wedding.album?.personClusters.length || 0;
 
     const emotionalTouchInsights: EmotionalTouchInsights = {
