@@ -129,10 +129,15 @@ export class VendorInfoDto {
   email: string;
 }
 
-export class AllVendorsPayoutResponseDto extends VendorPayoutResponseDto {
+export class VendorDetailsDto {
   @ApiProperty()
-  vendor: {
-    userId: number;
-    user: VendorInfoDto;
-  };
+  userId: number;
+
+  @ApiProperty({ type: VendorInfoDto })
+  user: VendorInfoDto;
+}
+
+export class AllVendorsPayoutResponseDto extends VendorPayoutResponseDto {
+  @ApiProperty({ type: VendorDetailsDto })
+  vendor: VendorDetailsDto;
 }

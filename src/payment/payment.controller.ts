@@ -27,11 +27,11 @@ import {
   VendorEarningsSummaryDto,
 } from './dto/vendor-earning-response.dto';
 import {
+  AllVendorsPayoutResponseDto,
   BatchPayoutDto,
   BatchPayoutResultDto,
   CreatePayoutDto,
   VendorPayoutResponseDto,
-  AllVendorsPayoutResponseDto,
 } from './dto/vendor-payout-response.dto';
 import { InvoiceGeneratorService } from './invoice-generator.service';
 import { PaymentService } from './payment.service';
@@ -192,7 +192,7 @@ export class PaymentController {
 
   @UseGuards(JwtGuard, RolesGuard)
   @Roles(UserRole.SUPERADMIN)
-  @Get('vendor-payouts/all')
+  @Get('vendor-payouts')
   @ApiOperation({
     summary: 'Get all vendors payout history (Super Admin only)',
   })
