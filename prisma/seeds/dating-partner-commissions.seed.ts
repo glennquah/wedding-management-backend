@@ -35,7 +35,9 @@ export async function seedDatingPartnerCommissions(prisma: PrismaClient) {
   });
 
   if (admins.length === 0) {
-    console.log('⚠️  No dating partner admins found. Skipping commission seeding.');
+    console.log(
+      '⚠️  No dating partner admins found. Skipping commission seeding.',
+    );
     return;
   }
 
@@ -137,7 +139,7 @@ export async function seedDatingPartnerCommissions(prisma: PrismaClient) {
       // Skip if duplicate (orderId, listingId) combination - will retry
       if (attempts % 10 === 0) {
         console.log(
-          `⚠️  Attempt ${attempts}: ${totalCommissions}/${targetCommissions} commissions created so far`,
+          `⚠️  Attempt ${attempts}: ${totalCommissions}/${targetCommissions} commissions created so far ${error}`,
         );
       }
     }
