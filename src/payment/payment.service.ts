@@ -13,6 +13,7 @@ import {
 } from '../vendor/dto/stripe-connect.dto';
 import { CheckoutSessionResponseDto } from './dto/checkout-session-response.dto';
 import { CreateCheckoutSessionDto } from './dto/create-checkout-session.dto';
+import { AllDatingPartnerCommissionResponseDto } from './dto/dating-partner-commission-response.dto';
 import { PaymentResponseDto } from './dto/payment-response.dto';
 import {
   VendorEarningResponseDto,
@@ -847,5 +848,38 @@ export class PaymentService {
     );
 
     return payoutsWithVendorInfo;
+  }
+
+  async getAllDatingPartnerPayout(): Promise<
+    AllDatingPartnerCommissionResponseDto[]
+  > {
+    const commissions = await this.prisma.datingPartnerCommission.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
+
+    // Fetch admin information for each commission
+    const commissionsWithAdminInfo = await Promise.all(
+      commissions.map(async (commission) => {
+        const admin = await this.prisma.admin.findUnique({
+          where: { userId: commission.adminId },
+          select: {
+            userId: true,
+            user: {
+              select: {
+                name: true,
+                email: true,
+              },
+            },
+          },
+        });
+
+        return {
+          ...commission,
+          admin,
+        } as AllDatingPartnerCommissionResponseDto;
+      }),
+    );
+
+    return commissionsWithAdminInfo;
   }
 }

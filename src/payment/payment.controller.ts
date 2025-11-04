@@ -21,6 +21,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { UserRole } from '../common/user-role.enum';
 import { CheckoutSessionResponseDto } from './dto/checkout-session-response.dto';
 import { CreateCheckoutSessionDto } from './dto/create-checkout-session.dto';
+import { AllDatingPartnerCommissionResponseDto } from './dto/dating-partner-commission-response.dto';
 import { PaymentResponseDto } from './dto/payment-response.dto';
 import {
   VendorEarningResponseDto,
@@ -203,6 +204,23 @@ export class PaymentController {
   })
   async getAllVendorsPayout(): Promise<AllVendorsPayoutResponseDto[]> {
     return this.paymentService.getAllVendorsPayout();
+  }
+
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(UserRole.SUPERADMIN)
+  @Get('dating-partner-commissions')
+  @ApiOperation({
+    summary: 'Get all dating partner commission payouts (Super Admin only)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'All dating partner commissions retrieved successfully.',
+    type: [AllDatingPartnerCommissionResponseDto],
+  })
+  async getAllDatingPartnerPayout(): Promise<
+    AllDatingPartnerCommissionResponseDto[]
+  > {
+    return this.paymentService.getAllDatingPartnerPayout();
   }
 
   @UseGuards(JwtGuard, RolesGuard)
