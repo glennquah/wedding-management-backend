@@ -16,6 +16,8 @@ export async function seedCouples(
       email2: 'ranae.lim@email.com',
       weddingIndex: 0,
       weddings: [1, 2, 3],
+      isDatingPartner1: true,
+      isDatingPartner2: true,
     },
     {
       name1: 'Glenn Quah',
@@ -23,6 +25,7 @@ export async function seedCouples(
       name2: 'Sarah Wong',
       email2: 'sarah.wong@email.com',
       weddings: [1, 2, 3],
+      isDatingPartner1: true,
     },
     {
       name1: 'Amir Rahman',
@@ -30,6 +33,7 @@ export async function seedCouples(
       name2: 'Siti Abdullah',
       email2: 'siti.abdullah@email.com',
       weddingIndex: 2,
+      isDatingPartner2: true,
     },
     {
       name1: 'Raj Kumar',
@@ -37,6 +41,7 @@ export async function seedCouples(
       name2: 'Priya Sharma',
       email2: 'priya.sharma@email.com',
       weddingIndex: 3,
+      isDatingPartner1: true,
     },
     {
       name1: 'David Lee',
@@ -82,6 +87,7 @@ export async function seedCouples(
             create: {
               isSuspended: couple.isSuspended || false,
               mainWeddingId: mainWeddingId,
+              isDatingPartnerRegistered: couple.isDatingPartner1 || false,
             },
           },
         },
@@ -97,6 +103,7 @@ export async function seedCouples(
             create: {
               isSuspended: couple.isSuspended || false,
               mainWeddingId: mainWeddingId,
+              isDatingPartnerRegistered: couple.isDatingPartner2 || false,
             },
           },
         },
