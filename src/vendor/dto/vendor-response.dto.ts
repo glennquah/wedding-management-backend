@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { VendorOnboardingStatus } from 'src/common/vendor-onboarding-status.enum';
+import { ListingResponseDto } from 'src/listing/dto/listing-response.dto';
 import { WeddingService } from '../../common/wedding-service.enum';
 import { WeddingStyle } from '../../common/wedding-style.enum';
 import { WeddingType } from '../../common/wedding-type.enum';
@@ -80,4 +81,11 @@ export class VendorResponseDto extends UserResponseDto {
     default: false,
   })
   isSuspended?: boolean;
+
+  @ApiProperty({
+    description: 'List of product/service listings from the vendor',
+    type: [ListingResponseDto],
+    required: false,
+  })
+  listings: ListingResponseDto[];
 }

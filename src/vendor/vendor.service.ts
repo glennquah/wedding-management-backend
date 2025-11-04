@@ -4,7 +4,7 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { User, Vendor } from '@prisma/client';
+import { Listing, User, Vendor } from '@prisma/client';
 import { compare, hash } from 'bcryptjs';
 import { UserRole } from 'src/common/user-role.enum';
 import { VendorOnboardingStatus } from 'src/common/vendor-onboarding-status.enum';
@@ -18,6 +18,8 @@ import { CreateVendorDto } from './dto/create-vendor.dto';
 import { UpdateVendorDto } from './dto/update-vendor.dto';
 import { VendorResponseDto } from './dto/vendor-response.dto';
 import { StripeConnectAccountResponseDto } from './dto/stripe-connect.dto';
+import { ListingResponseDto } from 'src/listing/dto/listing-response.dto';
+import { AvailabilitySlotDto } from 'src/listing/dto/create-listing.dto';
 
 @Injectable()
 export class VendorService {
@@ -28,7 +30,7 @@ export class VendorService {
   ) {}
 
   private toVendorResponseDto(
-    vendor: Vendor & { user: User },
+    vendor: Vendor & { user: User; listings?: Listing[] },
   ): VendorResponseDto {
     const userResponse = this.userService.toUserResponseDto(vendor.user);
     return {
@@ -44,6 +46,26 @@ export class VendorService {
       capacity: vendor.capacity,
       onboardingStatus: vendor.onboardingStatus as VendorOnboardingStatus,
       isSuspended: vendor.isSuspended,
+
+      listings: vendor.listings
+        ? vendor.listings.map(
+            (l): ListingResponseDto => ({
+              id: l.id,
+              listingName: l.listingName,
+              price: l.price,
+
+              availabilities:
+                l.availabilities as unknown as AvailabilitySlotDto[],
+
+              remarks: l.remarks,
+              imageUrls: l.imageUrls,
+              vendorId: l.vendorId,
+
+              createdAt: l.createdAt.toISOString(),
+              updatedAt: l.updatedAt.toISOString(),
+            }),
+          )
+        : [],
     };
   }
 
@@ -116,7 +138,7 @@ export class VendorService {
 
   async findAll(): Promise<VendorResponseDto[]> {
     const vendors = await this.prisma.vendor.findMany({
-      include: { user: true },
+      include: { user: true, listings: true },
       orderBy: { onboardedDate: 'desc' },
     });
 
