@@ -224,6 +224,39 @@ export class PaymentController {
   }
 
   @UseGuards(JwtGuard, RolesGuard)
+  @Roles(UserRole.SUPERADMIN)
+  @Get('dating-partner-commissions/:commissionId/invoice')
+  @ApiOperation({
+    summary:
+      'Download dating partner commission invoice/payslip as PDF (Super Admin only)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Commission invoice PDF downloaded successfully.',
+  })
+  @ApiResponse({ status: 404, description: 'Commission not found.' })
+  async downloadDatingPartnerCommissionInvoice(
+    @Param('commissionId', ParseIntPipe) commissionId: number,
+    @Res() res: Response,
+  ): Promise<void> {
+    const commission =
+      await this.paymentService.getDatingPartnerCommission(commissionId);
+
+    const { buffer, filename } =
+      await this.invoiceGeneratorService.generateDatingPartnerCommissionInvoice(
+        commission,
+      );
+
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename="${filename}"`,
+      'Content-Length': buffer.length,
+    });
+
+    res.end(buffer);
+  }
+
+  @UseGuards(JwtGuard, RolesGuard)
   @Roles(UserRole.VENDOR, UserRole.ADMIN, UserRole.SUPERADMIN)
   @Get('vendor-payouts/:payoutId/invoice')
   @ApiOperation({ summary: 'Download payout invoice/payslip as PDF' })

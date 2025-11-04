@@ -882,4 +882,16 @@ export class PaymentService {
 
     return commissionsWithAdminInfo;
   }
+
+  async getDatingPartnerCommission(commissionId: number) {
+    const commission = await this.prisma.datingPartnerCommission.findUnique({
+      where: { id: commissionId },
+    });
+
+    if (!commission) {
+      throw new BadRequestException('Dating partner commission not found');
+    }
+
+    return commission;
+  }
 }
