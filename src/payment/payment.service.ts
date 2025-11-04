@@ -822,8 +822,6 @@ export class PaymentService {
       orderBy: { createdAt: 'desc' },
     });
 
-    console.log('Fetched payouts:', payouts.length);
-
     // Fetch vendor information for each payout
     const payoutsWithVendorInfo = await Promise.all(
       payouts.map(async (payout) => {
