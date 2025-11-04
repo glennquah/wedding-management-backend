@@ -15,26 +15,27 @@ import {
 } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Request, Response } from 'express';
+import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
-import { Roles } from '../auth/decorators/roles.decorator';
 import { UserRole } from '../common/user-role.enum';
-import { CreateCheckoutSessionDto } from './dto/create-checkout-session.dto';
 import { CheckoutSessionResponseDto } from './dto/checkout-session-response.dto';
+import { CreateCheckoutSessionDto } from './dto/create-checkout-session.dto';
 import { PaymentResponseDto } from './dto/payment-response.dto';
 import {
   VendorEarningResponseDto,
   VendorEarningsSummaryDto,
 } from './dto/vendor-earning-response.dto';
 import {
-  VendorPayoutResponseDto,
-  CreatePayoutDto,
   BatchPayoutDto,
   BatchPayoutResultDto,
+  CreatePayoutDto,
+  VendorPayoutResponseDto,
+  AllVendorsPayoutResponseDto,
 } from './dto/vendor-payout-response.dto';
+import { InvoiceGeneratorService } from './invoice-generator.service';
 import { PaymentService } from './payment.service';
 import { ScheduledPayoutService } from './scheduled-payout.service';
-import { InvoiceGeneratorService } from './invoice-generator.service';
 
 @ApiTags('payments')
 @Controller('payments')
@@ -187,6 +188,21 @@ export class PaymentController {
   async triggerScheduledPayouts(): Promise<{ message: string }> {
     await this.scheduledPayoutService.triggerManualPayout();
     return { message: 'Scheduled payouts triggered successfully' };
+  }
+
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(UserRole.SUPERADMIN)
+  @Get('vendor-payouts/all')
+  @ApiOperation({
+    summary: 'Get all vendors payout history (Super Admin only)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'All vendors payouts retrieved successfully.',
+    type: [AllVendorsPayoutResponseDto],
+  })
+  async getAllVendorsPayout(): Promise<AllVendorsPayoutResponseDto[]> {
+    return this.paymentService.getAllVendorsPayout();
   }
 
   @UseGuards(JwtGuard, RolesGuard)
