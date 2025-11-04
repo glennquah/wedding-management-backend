@@ -752,7 +752,9 @@ export async function seedListings(prisma: PrismaClient) {
               date: '2025-01-25',
             },
           ],
-          imageUrls: [],
+          imageUrls: [
+            'https://res.cloudinary.com/dnyxxyolp/image/upload/v1762247043/limo_i5vnro.jpg',
+          ],
           remarks: 'Premium limousine for bridal transport',
         },
         {
@@ -770,7 +772,9 @@ export async function seedListings(prisma: PrismaClient) {
               date: '2024-11-08',
             },
           ],
-          imageUrls: [],
+          imageUrls: [
+            'https://res.cloudinary.com/dnyxxyolp/image/upload/v1762247043/vintage-car_rxcm0x.webp',
+          ],
           remarks: 'Classic vintage car for memorable photos',
         },
       ],
