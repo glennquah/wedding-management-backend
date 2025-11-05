@@ -199,6 +199,7 @@ export async function seedOrders(prisma: PrismaClient) {
             orderStatus,
             remark: `Order for vendor ${vendor.userId} - Month ${numberOfMonths - monthIndex}`,
             purchaseDate: purchaseDate,
+            createdAt: purchaseDate, // Set createdAt to match purchaseDate for realistic data
           },
         });
 
@@ -216,6 +217,7 @@ export async function seedOrders(prisma: PrismaClient) {
               listingId: listing.id,
               bookedSlots: [selectedAvailability],
               bookingStatus: orderStatus, // Match the order status
+              createdAt: purchaseDate, // Set createdAt to match order purchaseDate
             },
           });
         }
@@ -341,6 +343,7 @@ export async function seedOrders(prisma: PrismaClient) {
             orderStatus,
             remark: `Upcoming order for vendor ${vendor.userId} - ${monthsAhead} months ahead`,
             purchaseDate: finalPurchaseDate,
+            createdAt: finalPurchaseDate, // Set createdAt to match purchaseDate
           },
         });
 
@@ -362,6 +365,7 @@ export async function seedOrders(prisma: PrismaClient) {
               listingId: listing.id,
               bookedSlots: [futureSlot],
               bookingStatus: orderStatus,
+              createdAt: finalPurchaseDate, // Set createdAt to match order purchaseDate
             },
           });
         }

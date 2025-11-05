@@ -15,26 +15,28 @@ import {
 } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Request, Response } from 'express';
+import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
-import { Roles } from '../auth/decorators/roles.decorator';
 import { UserRole } from '../common/user-role.enum';
-import { CreateCheckoutSessionDto } from './dto/create-checkout-session.dto';
 import { CheckoutSessionResponseDto } from './dto/checkout-session-response.dto';
+import { CreateCheckoutSessionDto } from './dto/create-checkout-session.dto';
+import { AllDatingPartnerCommissionResponseDto } from './dto/dating-partner-commission-response.dto';
 import { PaymentResponseDto } from './dto/payment-response.dto';
 import {
   VendorEarningResponseDto,
   VendorEarningsSummaryDto,
 } from './dto/vendor-earning-response.dto';
 import {
-  VendorPayoutResponseDto,
-  CreatePayoutDto,
+  AllVendorsPayoutResponseDto,
   BatchPayoutDto,
   BatchPayoutResultDto,
+  CreatePayoutDto,
+  VendorPayoutResponseDto,
 } from './dto/vendor-payout-response.dto';
+import { InvoiceGeneratorService } from './invoice-generator.service';
 import { PaymentService } from './payment.service';
 import { ScheduledPayoutService } from './scheduled-payout.service';
-import { InvoiceGeneratorService } from './invoice-generator.service';
 
 @ApiTags('payments')
 @Controller('payments')
@@ -187,6 +189,71 @@ export class PaymentController {
   async triggerScheduledPayouts(): Promise<{ message: string }> {
     await this.scheduledPayoutService.triggerManualPayout();
     return { message: 'Scheduled payouts triggered successfully' };
+  }
+
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(UserRole.SUPERADMIN)
+  @Get('vendor-payouts')
+  @ApiOperation({
+    summary: 'Get all vendors payout history (Super Admin only)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'All vendors payouts retrieved successfully.',
+    type: [AllVendorsPayoutResponseDto],
+  })
+  async getAllVendorsPayout(): Promise<AllVendorsPayoutResponseDto[]> {
+    return this.paymentService.getAllVendorsPayout();
+  }
+
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(UserRole.SUPERADMIN)
+  @Get('dating-partner-commissions')
+  @ApiOperation({
+    summary: 'Get all dating partner commission payouts (Super Admin only)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'All dating partner commissions retrieved successfully.',
+    type: [AllDatingPartnerCommissionResponseDto],
+  })
+  async getAllDatingPartnerPayout(): Promise<
+    AllDatingPartnerCommissionResponseDto[]
+  > {
+    return this.paymentService.getAllDatingPartnerPayout();
+  }
+
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(UserRole.SUPERADMIN)
+  @Get('dating-partner-commissions/:commissionId/invoice')
+  @ApiOperation({
+    summary:
+      'Download dating partner commission invoice/payslip as PDF (Super Admin only)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Commission invoice PDF downloaded successfully.',
+  })
+  @ApiResponse({ status: 404, description: 'Commission not found.' })
+  async downloadDatingPartnerCommissionInvoice(
+    @Param('commissionId', ParseIntPipe) commissionId: number,
+    @Res() res: Response,
+  ): Promise<void> {
+    const commission =
+      await this.paymentService.getDatingPartnerCommission(commissionId);
+
+    const { buffer, filename } =
+      await this.invoiceGeneratorService.generateDatingPartnerCommissionInvoice(
+        commission,
+      );
+
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename="${filename}"`,
+      'Content-Length': buffer.length,
+    });
+
+    res.end(buffer);
   }
 
   @UseGuards(JwtGuard, RolesGuard)
