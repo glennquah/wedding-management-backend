@@ -140,7 +140,8 @@ export async function seedPayouts(prisma: PrismaClient) {
 
         for (const orderListing of completedOrderListings) {
           const grossAmount = orderListing.listing.price;
-          const platformFee = Math.round(grossAmount * platformFeeRate * 100) / 100;
+          const platformFee =
+            Math.round(grossAmount * platformFeeRate * 100) / 100;
           const netAmount = Math.round((grossAmount - platformFee) * 100) / 100;
 
           try {
