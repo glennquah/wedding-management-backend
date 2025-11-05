@@ -13,19 +13,19 @@ export async function seedDatingPartnerCommissions(prisma: PrismaClient) {
     },
   });
 
-  // Get all paid orders with their listings
-  const paidOrders = await prisma.order.findMany({
+  // Get all completed orders with their listings
+  const completedOrders = await prisma.order.findMany({
     where: {
       listings: {
         some: {
-          bookingStatus: 'PAID',
+          bookingStatus: 'COMPLETED',
         },
       },
     },
     include: {
       listings: {
         where: {
-          bookingStatus: 'PAID',
+          bookingStatus: 'COMPLETED',
         },
         include: {
           listing: true,
@@ -41,8 +41,8 @@ export async function seedDatingPartnerCommissions(prisma: PrismaClient) {
     return;
   }
 
-  if (paidOrders.length === 0) {
-    console.log('⚠️  No paid orders found. Skipping commission seeding.');
+  if (completedOrders.length === 0) {
+    console.log('⚠️  No completed orders found. Skipping commission seeding.');
     return;
   }
 
@@ -65,9 +65,9 @@ export async function seedDatingPartnerCommissions(prisma: PrismaClient) {
     return 'failed';
   };
 
-  // Commission rate (typically 5-15%)
+  // Commission rate (0.1%)
   const getCommissionRate = (): number => {
-    return (5 + Math.random() * 10) / 100; // 5-15%
+    return 0.001; // 0.1%
   };
 
   // Create commissions by randomly assigning admins to paid orders
@@ -81,9 +81,9 @@ export async function seedDatingPartnerCommissions(prisma: PrismaClient) {
     // Pick a random admin (dating partner)
     const randomAdmin = admins[Math.floor(Math.random() * admins.length)];
 
-    // Pick a random paid order
+    // Pick a random completed order
     const randomOrder =
-      paidOrders[Math.floor(Math.random() * paidOrders.length)];
+      completedOrders[Math.floor(Math.random() * completedOrders.length)];
 
     // Pick a random listing from the order
     const randomOrderListing =

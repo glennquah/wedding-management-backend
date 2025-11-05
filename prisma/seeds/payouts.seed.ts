@@ -17,9 +17,9 @@ export async function seedPayouts(prisma: PrismaClient) {
 
   let totalPayouts = 0;
 
-  // Configuration: Generate payouts for the past 6 months
-  const numberOfMonths = 6;
-  const payoutsPerVendorPerMonth = [2, 3]; // Each vendor gets 2-3 payouts per month
+  // Configuration: Generate payouts for the past 9 months (matching order history)
+  const numberOfMonths = 9;
+  // Create ONE payout per month per vendor (monthly payout cycle)
 
   // Payout statuses with realistic distribution
   const payoutStatuses = {
@@ -50,29 +50,45 @@ export async function seedPayouts(prisma: PrismaClient) {
   for (const vendor of vendors) {
     let vendorPayoutCount = 0;
 
-    // Generate payouts for each month (oldest to newest)
-    for (let monthIndex = numberOfMonths - 1; monthIndex >= 0; monthIndex--) {
-      // Random number of payouts this month (2-3)
-      const payoutsThisMonth =
-        payoutsPerVendorPerMonth[0] +
-        Math.floor(
-          Math.random() *
-            (payoutsPerVendorPerMonth[1] - payoutsPerVendorPerMonth[0] + 1),
-        );
+    // Generate payouts for each month (oldest to newest, skip current month)
+    for (let monthIndex = numberOfMonths - 1; monthIndex >= 1; monthIndex--) {
+      // Create ONE payout per month
+      // Generate payout period covering the entire month
+      const periodEnd = generateDateInMonth(monthIndex);
+      periodEnd.setDate(28); // End of month (safe value)
+      const periodStart = new Date(periodEnd);
+      periodStart.setDate(1); // Start of month
 
-      for (let payoutIndex = 0; payoutIndex < payoutsThisMonth; payoutIndex++) {
-        // Generate payout period (typically 7-14 days)
-        const periodDays = 7 + Math.floor(Math.random() * 8); // 7-14 days
-        const periodEnd = generateDateInMonth(monthIndex);
-        const periodStart = new Date(periodEnd);
-        periodStart.setDate(periodStart.getDate() - periodDays);
+      // Check for completed orders FIRST before creating payout
+      // Get all listings owned by this vendor
+      const vendorListings = await prisma.listing.findMany({
+        where: { vendorId: vendor.userId },
+        select: { id: true, price: true },
+      });
 
-        // Generate payout amount (realistic range: $500 - $5000)
-        const amount = Math.round((500 + Math.random() * 4500) * 100) / 100;
+      if (vendorListings.length > 0) {
+        // Get paid or completed order listings for this vendor's listings within the period
+        const completedOrderListings = await prisma.orderListing.findMany({
+          where: {
+            listingId: { in: vendorListings.map((l) => l.id) },
+            bookingStatus: { in: ['PAID', 'COMPLETED'] },
+            createdAt: {
+              gte: periodStart,
+              lte: periodEnd,
+            },
+          },
+          include: {
+            order: true,
+            listing: true,
+          },
+        });
 
-        // Earnings count (number of orders included in this payout)
-        const earningsCount = Math.floor(Math.random() * 8) + 3; // 3-10 orders
+        if (completedOrderListings.length === 0) {
+          // Skip creating payout if no completed orders in this period
+          continue;
+        }
 
+        // Now create the payout since we have orders
         // Determine status
         const status = getPayoutStatus();
 
@@ -98,12 +114,15 @@ export async function seedPayouts(prisma: PrismaClient) {
             ? failureReasons[Math.floor(Math.random() * failureReasons.length)]
             : null;
 
+        // Calculate earnings count from actual orders
+        const earningsCount = completedOrderListings.length;
+
         // Create the payout
-        await prisma.vendorPayout.create({
+        const payout = await prisma.vendorPayout.create({
           data: {
             vendorId: vendor.userId,
             stripeTransferId,
-            amount,
+            amount: 0, // Will be updated after calculating earnings
             currency: 'SGD',
             status,
             earningsCount,
@@ -113,6 +132,49 @@ export async function seedPayouts(prisma: PrismaClient) {
             failureReason,
             createdAt: periodEnd, // Payout created at end of period
           },
+        });
+
+        // Create earnings from completed order listings
+        let totalEarnings = 0;
+        const platformFeeRate = 0.1; // 10% platform fee
+
+        for (const orderListing of completedOrderListings) {
+          const grossAmount = orderListing.listing.price;
+          const platformFee = Math.round(grossAmount * platformFeeRate * 100) / 100;
+          const netAmount = Math.round((grossAmount - platformFee) * 100) / 100;
+
+          try {
+            // Create a unique orderListingId string from orderId and listingId
+            const orderListingId = `${orderListing.orderId}-${orderListing.listingId}`;
+
+            await prisma.vendorEarning.create({
+              data: {
+                vendorId: vendor.userId,
+                orderListingId,
+                orderId: orderListing.orderId,
+                listingId: orderListing.listingId,
+                grossAmount,
+                platformFee,
+                netAmount,
+                currency: 'SGD',
+                isPaidOut: status === 'paid',
+                payoutId: payout.id,
+                createdAt: orderListing.createdAt,
+              },
+            });
+            totalEarnings += netAmount;
+          } catch (error) {
+            // Skip if duplicate (orderId, listingId) combination already exists
+            console.log(
+              `⚠️  Skipping duplicate earning for order ${orderListing.orderId}, listing ${orderListing.listingId}`,
+            );
+          }
+        }
+
+        // Update payout amount to match actual earnings
+        await prisma.vendorPayout.update({
+          where: { id: payout.id },
+          data: { amount: totalEarnings },
         });
 
         vendorPayoutCount++;
