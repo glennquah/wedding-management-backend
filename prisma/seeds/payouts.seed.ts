@@ -164,6 +164,7 @@ export async function seedPayouts(prisma: PrismaClient) {
               },
             });
             totalEarnings += netAmount;
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
           } catch (error) {
             // Skip if duplicate (orderId, listingId) combination already exists
             console.log(
