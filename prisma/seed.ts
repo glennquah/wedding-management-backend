@@ -3,6 +3,7 @@ import { seedAlbums } from './seeds/albums.seed';
 import { seedCalendarConnections } from './seeds/calendar-connections.seed';
 import { seedCashGifts } from './seeds/cash-gifts.seed';
 import { seedCouples } from './seeds/couples.seed';
+import { seedDatingPartnerCommissions } from './seeds/dating-partner-commissions.seed';
 import { seedEmailHistory } from './seeds/email-history.seed';
 import { seedEmailTemplates } from './seeds/email-templates.seed';
 import { seedGuestbook } from './seeds/guestbook.seed';
@@ -10,6 +11,7 @@ import { seedGuests } from './seeds/guests.seed';
 import { seedListings } from './seeds/listings.seed';
 import { seedMicrosites } from './seeds/microsites.seed';
 import { seedOrders } from './seeds/orders.seed';
+import { seedPayouts } from './seeds/payouts.seed';
 import { seedPhotos } from './seeds/photos.seed';
 import { seedUsers } from './seeds/users.seed';
 import { seedVendors } from './seeds/vendors.seed';
@@ -36,6 +38,9 @@ async function main() {
     await prisma.emailNotificationHistory.deleteMany();
     await prisma.emailTemplate.deleteMany();
     await prisma.notificationDetails.deleteMany();
+    await prisma.vendorEarning.deleteMany();
+    await prisma.vendorPayout.deleteMany();
+    await prisma.datingPartnerCommission.deleteMany();
     await prisma.payment.deleteMany();
     await prisma.order.deleteMany();
     await prisma.listing.deleteMany();
@@ -92,6 +97,12 @@ async function main() {
 
   // 10. Seed orders (depends on weddings and listings)
   await seedOrders(prisma);
+
+  // 10.5. Seed vendor payouts (depends on vendors and orders)
+  await seedPayouts(prisma);
+
+  // 10.6. Seed dating partner commissions (depends on admins and orders)
+  await seedDatingPartnerCommissions(prisma);
 
   // 11. Seed guests (depends on weddings)
   await seedGuests(prisma);
@@ -181,6 +192,12 @@ async function main() {
   console.log(
     '- Order status: 70% paid, 10% completed, 15% pending, 5% cancelled',
   );
+  console.log(
+    '- Vendor payouts: 2-3 payouts per vendor per month over last 6 months',
+  );
+  console.log('- Payout status: 75% paid, 15% pending, 10% failed');
+  console.log('- Dating partner commissions: ~20 commissions');
+  console.log('- Commission status: 80% succeeded, 15% pending, 5% failed');
   console.log(
     '- ~80 primary guests per wedding (some with accompanying guests)',
   );
