@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Listing, WeddingStyle, WeddingType } from '@prisma/client';
 import { WeddingService } from 'src/common/wedding-service.enum';
 import { VendorService } from 'src/vendor/vendor.service';
@@ -96,6 +100,17 @@ export class ListingService {
     const listing = await this.prisma.listing.findUnique({ where: { id } });
     if (!listing || listing.vendorId !== vendorId) {
       throw new NotFoundException('Listing not found or not owned by vendor');
+    }
+
+    // Check if there are any orders associated with this listing
+    const orderCount = await this.prisma.orderListing.count({
+      where: { listingId: id },
+    });
+
+    if (orderCount > 0) {
+      throw new BadRequestException(
+        'Cannot delete this listing because there are existing orders associated with it.',
+      );
     }
 
     await this.prisma.listing.delete({ where: { id } });

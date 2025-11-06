@@ -17,6 +17,7 @@ import { CollaboratorResponseDto } from './dto/collaborator-response.dto';
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { InviteCollaboratorDto } from './dto/invite-collaborator.dto';
 import { InvitePartnerDto } from './dto/invite-partner.dto';
+import { RegisterDatingUserDto } from './dto/register-dating-user.dto';
 import { UpdateAdminDto } from './dto/update-admin.dto';
 
 @Injectable()
@@ -35,6 +36,7 @@ export class AdminService {
     return {
       ...userResponse,
       isSuspended: admin.isSuspended,
+      isDatingPartnerRegistered: admin.isDatingPartnerRegistered,
       onboardedDate: admin.onboardedDate,
       weddings:
         admin.weddings?.map(
@@ -787,5 +789,88 @@ export class AdminService {
         },
       },
     });
+  }
+
+  async registerDatingUser(
+    dto: RegisterDatingUserDto,
+  ): Promise<AdminResponseDto> {
+    // Check if user with this email already exists
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+    });
+
+    let userId: number;
+    const frontendUrl = process.env.FRONTEND_URL || 'https://knotly.app';
+
+    if (existingUser) {
+      userId = existingUser.id;
+
+      const existingAdmin = await this.prisma.admin.findUnique({
+        where: { userId: existingUser.id },
+      });
+
+      if (existingAdmin) {
+        throw new ConflictException(
+          'This user is already registered in Knotly.',
+        );
+      } else {
+        // User exists, but admin profile doesnt
+        await this.prisma.admin.create({
+          data: {
+            userId: existingUser.id,
+            onboardedDate: new Date(),
+            isDatingPartnerRegistered: true,
+          },
+        });
+      }
+    } else {
+      // Create new user and admin account
+      // Generate a temporary password (will be changed via password reset)
+      const tempPassword = Math.random().toString(36).slice(-8);
+
+      const newUser = await this.userService.create({
+        name: dto.name,
+        email: dto.email,
+        password: await hash(tempPassword, 10),
+        role: UserRole.ADMIN,
+      });
+
+      userId = newUser.id;
+
+      // Create admin profile
+      await this.prisma.admin.create({
+        data: {
+          userId: newUser.id,
+          onboardedDate: new Date(),
+          isDatingPartnerRegistered: true,
+        },
+      });
+
+      // Generate password reset token (7 days for partner invites)
+      const token = await this.jwtService.signAsync(
+        {
+          sub: newUser.id,
+          email: newUser.email,
+        },
+        {
+          expiresIn: '7d',
+          secret: process.env.JWT_SECRET_KEY,
+        },
+      );
+
+      const resetLink = `${frontendUrl}/reset-password?token=${token}`;
+
+      // Send register dating user email with password reset link
+      await this.emailService.sendRegisterDatingUserEmail(
+        dto.email,
+        resetLink,
+        dto.name,
+      );
+    }
+
+    // Fetch and return the created partner
+    const datingUser = await this.findById(userId);
+
+    return datingUser;
   }
 }

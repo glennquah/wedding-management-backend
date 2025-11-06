@@ -10,6 +10,6 @@ import { InvoiceGeneratorService } from './invoice-generator.service';
   imports: [PrismaModule, JwtModule],
   controllers: [PaymentController],
   providers: [PaymentService, ScheduledPayoutService, InvoiceGeneratorService],
-  exports: [PaymentService],
+  exports: [PaymentService, InvoiceGeneratorService],
 })
 export class PaymentModule {}

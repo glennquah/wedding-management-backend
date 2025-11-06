@@ -793,4 +793,25 @@ export class PaymentService {
       currency: 'SGD',
     };
   }
+
+  async createDatingPartnerPayout(
+    amount: number,
+    currency: string,
+  ): Promise<Stripe.Transfer> {
+    const partnerStripeId = process.env.PARTNER_STRIPE_ACCOUNT_ID;
+    if (!partnerStripeId) {
+      throw new InternalServerErrorException(
+        'Dating partner Stripe Account ID is not configured.',
+      );
+    }
+
+    const transfer = await this.stripe.transfers.create({
+      amount: Math.round(amount * 100),
+      currency: currency.toLowerCase(),
+      destination: partnerStripeId,
+      description: 'Instant Dating Partner Commission Payout',
+    });
+
+    return transfer;
+  }
 }

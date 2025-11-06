@@ -1,5 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { EmailTemplateType, Guest, OrderStatus } from '@prisma/client';
+import {
+  DatingPartnerCommission,
+  EmailTemplateType,
+  Guest,
+  OrderStatus,
+} from '@prisma/client';
 import * as sgMail from '@sendgrid/mail';
 import * as fs from 'fs';
 import * as Handlebars from 'handlebars';
@@ -18,9 +23,11 @@ import {
   CollaboratorAddedData,
   CollaboratorGratitudeCardData,
   CreateAccountData,
+  DatingPlatformPayoutData,
   EmailTemplateData,
   GuestGratitudeCardData,
   PasswordResetData,
+  RegisterDatingUserData,
   RsvpInvitationData,
   SuperAdminOnboardingData,
   VendorBookingConfirmationData,
@@ -111,6 +118,14 @@ export class EmailNotificationService {
         {
           name: EmailTemplateType.VENDOR_BOOKING_REJECTION,
           file: 'vendor-booking-rejection.html',
+        },
+        {
+          name: EmailTemplateType.REGISTER_DATING_USER,
+          file: 'create-dating-user-account.html',
+        },
+        {
+          name: EmailTemplateType.DATING_PLATFORM_PAYOUT,
+          file: 'dating-platform-payout.html',
         },
       ];
 
@@ -216,6 +231,19 @@ The Knotly Team`;
     };
 
     await this.sendVerifyEmailTemplateType(to, templateData, weddingId);
+  }
+
+  async sendRegisterDatingUserEmail(
+    to: string,
+    resetPasswordUrl: string,
+    name: string,
+  ): Promise<void> {
+    const templateData: RegisterDatingUserData = {
+      name,
+      resetPasswordUrl,
+    };
+
+    await this.sendRegisterDatingUserTemplate(to, templateData);
   }
 
   async sendCreateAccountEmail(
@@ -398,6 +426,62 @@ The Knotly Team`;
 
     If you don't want to join this wedding planning team, you can safely ignore this email. This link will expire in 7 days.
 
+    ---
+    Knotly - Your Perfect Wedding, Perfectly Planned
+    Website: https://knotly.app`;
+  }
+
+  async sendRegisterDatingUserTemplate(
+    to: string,
+    templateData: RegisterDatingUserData,
+  ): Promise<void> {
+    const html = this.renderTemplate(
+      EmailTemplateType.REGISTER_DATING_USER,
+      templateData,
+    );
+    const text = this.generateRegisterDatingUserPlainText(templateData);
+
+    await this.sendEmail(
+      to,
+      "Welcome to Knotly! Let's Start Your Wedding Journey",
+      text,
+      html,
+      EmailTemplateType.REGISTER_DATING_USER,
+    );
+  }
+
+  private generateRegisterDatingUserPlainText(
+    templateData: RegisterDatingUserData,
+  ): string {
+    const greeting = `Hello ${templateData.name}!`;
+
+    const bannerTitle = `Your Wedding Journey Starts Now!`;
+    const bannerSubtitle = `Welcome to Knotly, from our partners at Ai Stead Mai.`;
+
+    const message1 = `We're thrilled to have you! As a partner of Ai Stead Mai, we're here to help you take the next exciting step: planning your perfect wedding.`;
+
+    const message2 = `An account has been created for you on Knotly, your all-in-one platform for finding vendors, managing your guest list, tracking budgets, and bringing your dream day to life.`;
+
+    const action = `To get started, click the button below to set the password for your new account. Once you're in, you can start planning!`;
+
+    const ctaLink = `Set Your Password: ${templateData.resetPasswordUrl}`;
+
+    const footerNote = `If you did not request this, you can safely ignore this email. This secure link will expire in 7 days.`;
+
+    return `${bannerTitle}
+  ${bannerSubtitle}
+  
+  ${greeting}
+  
+  ${message1}
+  
+  ${message2}
+  
+  ${action}
+  
+  ${ctaLink}
+  
+  ${footerNote}
     ---
     Knotly - Your Perfect Wedding, Perfectly Planned
     Website: https://knotly.app`;
@@ -1360,6 +1444,81 @@ Website: https://knotly.app`;
     Website: https://knotly.app`;
   }
 
+  async sendDatingPlatformPayoutEmail(
+    to: string,
+    data: DatingPartnerCommission,
+    pdfBuffer: Buffer,
+    filename: string,
+  ): Promise<void> {
+    const templateData: DatingPlatformPayoutData = {
+      partnerName: process.env.PARTNER_CONTACT_NAME,
+      commissionId: data.id,
+      payoutDate: data.updatedAt.toLocaleDateString(),
+      stripeTransferId: data.stripeTransferId,
+      currency: data.currency,
+      commissionRatePercent: (data.commissionRate * 100).toFixed(1),
+      commissionAmount: data.commissionAmount.toFixed(2),
+    };
+
+    const html = this.renderTemplate(
+      EmailTemplateType.DATING_PLATFORM_PAYOUT,
+      templateData,
+    );
+    const text = this.generateDatingPlatformPayoutPlainText(
+      templateData,
+      process.env.PARTNER_CONTACT_NAME,
+    );
+
+    // Create pdf attachment object
+    const attachment = {
+      content: pdfBuffer.toString('base64'),
+      filename: filename,
+      type: 'application/pdf',
+      disposition: 'attachment',
+    };
+
+    await this.sendEmail(
+      to,
+      `Your Commission Payout from Knotly (ID: ${data.stripeTransferId})`,
+      text,
+      html,
+      EmailTemplateType.DATING_PLATFORM_PAYOUT,
+      undefined,
+      undefined,
+      [attachment],
+    );
+  }
+
+  private generateDatingPlatformPayoutPlainText(
+    templateData: DatingPlatformPayoutData,
+    partnerName: string,
+  ): string {
+    const greeting = `Hello ${partnerName}!`;
+    const message1 = `You have received a new commission payout. This payment has been successfully transferred to your connected Stripe account.`;
+    const message2 = `A full, itemized commission statement (PDF) is attached to this email for your records.`;
+    const footerNote = `Thank you for your partnership! If you have any questions about this payout, please contact us at support@knotly.app.`;
+
+    return `
+    ${greeting}
+    ${message1}
+
+    ---
+    Commission Details:
+    Commission ID: #${templateData.commissionId}
+    Payout Date: ${templateData.payoutDate}
+    Stripe Transfer ID: ${templateData.stripeTransferId}
+    Commission Rate: ${templateData.commissionRatePercent}%
+    Commission Earned: ${templateData.currency} ${templateData.commissionAmount} 
+    ---
+
+    ${message2}
+    ${footerNote}
+
+    ---
+    Knotly - Your Perfect Wedding, Perfectly Planned
+    Website: https://knotly.app`;
+  }
+
   async sendEmail(
     to: string,
     subject: string,
@@ -1368,8 +1527,9 @@ Website: https://knotly.app`;
     type: EmailTemplateType,
     weddingId?: number,
     vendorId?: number,
+    attachments?: any[],
   ): Promise<void> {
-    const msg = {
+    const msg: any = {
       to,
       from: {
         email: 'hello.knotly@gmail.com',
@@ -1379,6 +1539,10 @@ Website: https://knotly.app`;
       text,
       html,
     };
+
+    if (attachments && attachments.length > 0) {
+      msg.attachments = attachments;
+    }
 
     try {
       await sgMail.send(msg);
