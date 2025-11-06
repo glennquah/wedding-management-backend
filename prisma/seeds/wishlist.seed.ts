@@ -123,15 +123,32 @@ export async function seedWishlist(prisma: PrismaClient) {
   ];
 
   // Create 25 wishlist items with 80% (20 out of 25) reserved
+  // Joshua Goh should reserve the most items (8 items)
   let totalValue = 0;
   let reservedValue = 0;
   const itemsToCreate = 25;
   const reservedCount = 20; // 80% of 25
 
+  // Create a special guest name for Joshua Goh
+  const joshuaGoh = 'Joshua Goh';
+  const joshuaReservedCount = 8; // Joshua reserves 8 items
+
   for (let i = 0; i < itemsToCreate; i++) {
     const itemTemplate = wishlistItems[i % wishlistItems.length];
     const isReserved = i < reservedCount;
-    const reservedByGuest = isReserved ? guests[i % guests.length] : null;
+
+    let reservedByName = null;
+    if (isReserved) {
+      // First 8 reserved items go to Joshua Goh
+      if (i < joshuaReservedCount) {
+        reservedByName = joshuaGoh;
+      } else {
+        // Remaining reserved items distributed among other guests
+        // This ensures no one else gets more than 2-3 items
+        reservedByName =
+          guests[(i - joshuaReservedCount) % guests.length]?.name;
+      }
+    }
 
     // Add some variation to prices
     const priceVariation = Math.random() * 100 - 50; // -$50 to +$50
@@ -145,7 +162,7 @@ export async function seedWishlist(prisma: PrismaClient) {
             : itemTemplate.title,
         itemUrl: itemTemplate.itemUrl,
         isReserved: isReserved,
-        reservedByName: reservedByGuest?.name || null,
+        reservedByName: reservedByName,
         weddingId: wedding.id,
       },
     });
@@ -158,6 +175,9 @@ export async function seedWishlist(prisma: PrismaClient) {
 
   console.log(`✅ Created ${itemsToCreate} wishlist items`);
   console.log(`✅ ${reservedCount} items reserved (80% completion)`);
+  console.log(
+    `✅ Joshua Goh reserved the most items: ${joshuaReservedCount} items`,
+  );
   console.log(`✅ Estimated total wishlist value: $${totalValue.toFixed(2)}`);
   console.log(`✅ Estimated reserved value: $${reservedValue.toFixed(2)}`);
 }

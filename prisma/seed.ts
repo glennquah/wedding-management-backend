@@ -190,8 +190,9 @@ async function main() {
   );
   console.log('\n🎁 WEDDING WRAPPED DATA (Wedding ID 2: Glenn & Jes Chan):');
   console.log('- 50 confirmed guests, 25 attended');
-  console.log('- Cash gifts: $20,000+ total (Ryan Tang gifted $10,888.88)');
+  console.log('- Cash gifts: $30,000+ total (Ryan Tang gifted $10,888.88)');
   console.log('- Wishlist: 25 items with 80% completion (20 reserved)');
+  console.log('- Wishlist top contributor: Joshua Goh (reserved 8 items)');
   console.log('- Budget: $50,000 allocated, $65,000 spent (130% usage)');
   console.log('- Album: 40 photos uploaded');
   console.log('- Face detection: 50 faces across photos');
