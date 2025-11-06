@@ -54,33 +54,49 @@ export async function seedGuests(prisma: PrismaClient) {
 
   for (let i = 0; i < weddings.length; i++) {
     const wedding = weddings[i];
-    const primaryGuestCount = 80; // Reduce primary guests to make room for accompanying guests
+
+    // Special handling for wedding ID 2 (Glenn & Jes Chan's wedding)
+    const isGlennJesWedding = wedding.id === 2;
+    const primaryGuestCount = isGlennJesWedding ? 50 : 80;
 
     for (let j = 0; j < primaryGuestCount; j++) {
-      const name = `${guestNames[j % guestNames.length]} ${j > guestNames.length ? j : ''}`;
+      let name =
+        `${guestNames[j % guestNames.length]} ${j > guestNames.length ? j : ''}`.trim();
+
+      // Add Ryan Tang as a special guest for Glenn & Jes wedding
+      if (isGlennJesWedding && j === 0) {
+        name = 'Ryan Tang';
+      }
+
+      // For Glenn & Jes wedding: all confirmed, half attended
+      const confirmationStatus = isGlennJesWedding
+        ? ConfirmationStatus.CONFIRMED
+        : Math.random() > 0.2
+          ? ConfirmationStatus.CONFIRMED
+          : ConfirmationStatus.PENDING;
+
+      const attendance = isGlennJesWedding ? j < 25 : false;
 
       // Create primary guest
       const primaryGuest = await prisma.guest.create({
         data: {
-          name: name.trim(),
+          name: name,
           email: `guest${i + 1}_${j + 1}@example.com`,
           allergies:
             Math.random() > 0.7
               ? allergies[Math.floor(Math.random() * allergies.length)]
               : null,
           group: groups[Math.floor(Math.random() * groups.length)],
-          confirmationStatus:
-            Math.random() > 0.2
-              ? ConfirmationStatus.CONFIRMED
-              : ConfirmationStatus.PENDING,
+          confirmationStatus: confirmationStatus,
+          attendance: attendance,
           weddingId: wedding.id,
         },
       });
 
       totalPrimaryGuests++;
 
-      // 30% chance to have accompanying guests
-      if (Math.random() < 0.3) {
+      // 30% chance to have accompanying guests (not for Glenn & Jes wedding for simplicity)
+      if (!isGlennJesWedding && Math.random() < 0.3) {
         const numAccompanying = Math.floor(Math.random() * 3) + 1; // 1-3 accompanying guests
 
         for (let k = 0; k < numAccompanying; k++) {
@@ -112,7 +128,7 @@ export async function seedGuests(prisma: PrismaClient) {
     }
 
     console.log(
-      `✅ Created ~${primaryGuestCount} primary guests with accompanying guests for ${wedding.name}`,
+      `✅ Created ~${primaryGuestCount} primary guests ${!isGlennJesWedding ? 'with accompanying guests ' : ''}for ${wedding.name}`,
     );
   }
 

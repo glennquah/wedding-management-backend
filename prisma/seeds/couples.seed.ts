@@ -20,8 +20,8 @@ export async function seedCouples(
     {
       name1: 'Glenn Quah',
       email1: 'quah.glenn@gmail.com',
-      name2: 'Sarah Wong',
-      email2: 'sarah.wong@email.com',
+      name2: 'Jes Chan',
+      email2: 'jes.chan@email.com',
       weddingIndex: 1,
       weddings: [1, 2, 3],
     },
