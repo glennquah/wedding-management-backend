@@ -59,6 +59,8 @@ jobs:
           PARTNER_COMMISSION_RATE: ${{ secrets.PARTNER_COMMISSION_RATE }}
           PARTNER_CONTACT_NAME: ${{ secrets.PARTNER_CONTACT_NAME }}
           PARTNER_CONTACT_EMAIL: ${{ secrets.PARTNER_CONTACT_EMAIL }}
+          PARTNER_API_KEY: ${{ secrets.PARTNER_API_KEY }}
+          PARTNER_API_URL: ${{ secrets.PARTNER_API_URL }}
         run: |
           cd infra
           npx cdk deploy --require-approval never

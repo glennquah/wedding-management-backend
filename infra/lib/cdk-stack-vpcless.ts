@@ -41,6 +41,8 @@ export class CdkStack extends cdk.Stack {
         PARTNER_COMMISSION_RATE: process.env.PARTNER_COMMISSION_RATE,
         PARTNER_CONTACT_NAME: process.env.PARTNER_CONTACT_NAME,
         PARTNER_CONTACT_EMAIL: process.env.PARTNER_CONTACT_EMAIL,
+        PARTNER_API_URL: process.env.PARTNER_API_URL,
+        PARTNER_API_KEY: process.env.PARTNER_API_KEY,
       },
       memorySize: 512,
       timeout: cdk.Duration.seconds(30),
