@@ -5,9 +5,16 @@ import { PaymentModule } from '../payment/payment.module';
 import { PrismaModule } from '../prisma/prisma.module';
 import { OrderController } from './order.controller';
 import { OrderService } from './order.service';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
-  imports: [PrismaModule, JwtModule, PaymentModule, EmailNotificationModule],
+  imports: [
+    PrismaModule,
+    JwtModule,
+    PaymentModule,
+    EmailNotificationModule,
+    HttpModule,
+  ],
   controllers: [OrderController],
   providers: [OrderService],
   exports: [OrderService],

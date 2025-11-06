@@ -1,16 +1,22 @@
 import { PrismaClient } from '@prisma/client';
 import { seedAlbums } from './seeds/albums.seed';
 import { seedCalendarConnections } from './seeds/calendar-connections.seed';
+import { seedCashGifts } from './seeds/cash-gifts.seed';
 import { seedCouples } from './seeds/couples.seed';
+import { seedDatingPartnerCommissions } from './seeds/dating-partner-commissions.seed';
 import { seedEmailHistory } from './seeds/email-history.seed';
 import { seedEmailTemplates } from './seeds/email-templates.seed';
+import { seedGuestbook } from './seeds/guestbook.seed';
 import { seedGuests } from './seeds/guests.seed';
 import { seedListings } from './seeds/listings.seed';
 import { seedMicrosites } from './seeds/microsites.seed';
 import { seedOrders } from './seeds/orders.seed';
+import { seedPayouts } from './seeds/payouts.seed';
+import { seedPhotos } from './seeds/photos.seed';
 import { seedUsers } from './seeds/users.seed';
 import { seedVendors } from './seeds/vendors.seed';
 import { seedWeddings } from './seeds/weddings.seed';
+import { seedWishlist } from './seeds/wishlist.seed';
 
 // Recommendation system seeds
 import { seedRecommendationCouples } from './seeds/couples.recommendation.seed';
@@ -32,10 +38,14 @@ async function main() {
     await prisma.emailNotificationHistory.deleteMany();
     await prisma.emailTemplate.deleteMany();
     await prisma.notificationDetails.deleteMany();
+    await prisma.vendorEarning.deleteMany();
+    await prisma.vendorPayout.deleteMany();
+    await prisma.datingPartnerCommission.deleteMany();
     await prisma.payment.deleteMany();
     await prisma.order.deleteMany();
     await prisma.listing.deleteMany();
     await prisma.microsite.deleteMany();
+    await prisma.weddingWrapped.deleteMany();
     await prisma.album.deleteMany();
     await prisma.googleCalendarConnection.deleteMany();
     await prisma.guest.deleteMany();
@@ -88,8 +98,26 @@ async function main() {
   // 10. Seed orders (depends on weddings and listings)
   await seedOrders(prisma);
 
+  // 10.5. Seed vendor payouts (depends on vendors and orders)
+  await seedPayouts(prisma);
+
+  // 10.6. Seed dating partner commissions (depends on admins and orders)
+  await seedDatingPartnerCommissions(prisma);
+
   // 11. Seed guests (depends on weddings)
   await seedGuests(prisma);
+
+  // 11.5. Seed cash gifts (depends on guests and weddings)
+  await seedCashGifts(prisma);
+
+  // 11.6. Seed wishlist items (depends on weddings and guests)
+  await seedWishlist(prisma);
+
+  // 11.7. Seed photos and face detections (depends on albums and guests)
+  await seedPhotos(prisma);
+
+  // 11.8. Seed guestbook well wishes (depends on weddings and guests)
+  await seedGuestbook(prisma);
 
   // 12. Seed Google Calendar connections (depends on weddings, couples, and guests)
   await seedCalendarConnections(prisma);
@@ -149,7 +177,7 @@ async function main() {
   console.log('- 20 Vendor users');
   console.log('- 5 Weddings');
   console.log('- 1 Microsite');
-  console.log('- 1 Album');
+  console.log('- 2 Albums (Tom & Jerry, Glenn & Jes Chan)');
   console.log('- 25 Notification Details (5 for weddings, 20 for vendors)');
   console.log(
     '- 127 Email Templates (2 SuperAdmin + 125 for notification details)',
@@ -165,12 +193,30 @@ async function main() {
     '- Order status: 70% paid, 10% completed, 15% pending, 5% cancelled',
   );
   console.log(
+    '- Vendor payouts: 2-3 payouts per vendor per month over last 6 months',
+  );
+  console.log('- Payout status: 75% paid, 15% pending, 10% failed');
+  console.log('- Dating partner commissions: ~20 commissions');
+  console.log('- Commission status: 80% succeeded, 15% pending, 5% failed');
+  console.log(
     '- ~80 primary guests per wedding (some with accompanying guests)',
   );
   console.log('- ~30% of primary guests have 1-3 accompanying guests each');
   console.log(
     '- Accompanying guests have individual confirmation status and dietary requirements',
   );
+  console.log('\n🎁 WEDDING WRAPPED DATA (Wedding ID 2: Glenn & Jes Chan):');
+  console.log('- 50 confirmed guests, 25 attended');
+  console.log('- Cash gifts: $30,000+ total (Ryan Tang gifted $10,888.88)');
+  console.log('- Wishlist: 25 items with 80% completion (20 reserved)');
+  console.log('- Wishlist top contributor: Joshua Goh (reserved 8 items)');
+  console.log('- Budget: $50,000 allocated, $65,000 spent (130% usage)');
+  console.log('- Album: 40 photos uploaded');
+  console.log('- Face detection: 50 faces across photos');
+  console.log(
+    '- Person clusters: 10 persons (Ryan Tang appears most - 15 times)',
+  );
+  console.log('- Well wishes: 35 guestbook entries');
   console.log(`\n✨ DATE OPTIMIZER TEST DATA (All Weddings):`);
   console.log(`- All main couples have mock calendar connections`);
   console.log(`- 5 key attendees added per wedding`);

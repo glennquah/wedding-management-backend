@@ -120,3 +120,24 @@ export class BatchPayoutResultDto {
   @ApiProperty()
   currency: string;
 }
+
+export class VendorInfoDto {
+  @ApiProperty()
+  name: string;
+
+  @ApiProperty()
+  email: string;
+}
+
+export class VendorDetailsDto {
+  @ApiProperty()
+  userId: number;
+
+  @ApiProperty({ type: VendorInfoDto })
+  user: VendorInfoDto;
+}
+
+export class AllVendorsPayoutResponseDto extends VendorPayoutResponseDto {
+  @ApiProperty({ type: VendorDetailsDto })
+  vendor: VendorDetailsDto;
+}

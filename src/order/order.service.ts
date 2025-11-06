@@ -14,6 +14,8 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { OrderListingDetailResponseDto } from './dto/order-listing-detail-response.dto';
 import { OrderResponseDto } from './dto/order-response.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
+import { HttpService } from '@nestjs/axios';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class OrderService {
@@ -22,6 +24,7 @@ export class OrderService {
     private paymentService: PaymentService,
     private emailService: EmailNotificationService,
     private invoiceGeneratorService: InvoiceGeneratorService,
+    private httpService: HttpService,
   ) {}
 
   private sendCommissionInvoice(commissionLog: DatingPartnerCommission) {
@@ -58,6 +61,56 @@ export class OrderService {
     })();
   }
 
+  private notifyPartnerOfCommission(
+    commissionLog: DatingPartnerCommission,
+    adminUserEmail: string,
+    listingName: string,
+    purchaseDate: Date,
+  ) {
+    (async () => {
+      try {
+        const apiUrl = process.env.PARTNER_API_URL;
+        const apiKey = process.env.PARTNER_API_KEY;
+
+        if (!apiUrl || !apiKey) {
+          console.error(
+            'PARTNER_API_URL or PARTNER_API_KEY not set. Cannot notify partner.',
+          );
+          return;
+        }
+
+        const payload = {
+          userEmail: adminUserEmail,
+          itemPurchasedName: listingName,
+          purchaseAmount: commissionLog.grossAmount,
+          commissionAmount: commissionLog.commissionAmount,
+          purchaseDate: purchaseDate.toISOString(),
+        };
+
+        const headers = {
+          'X-API-KEY': apiKey,
+          'Content-Type': 'application/json',
+        };
+
+        // Use firstValueFrom to convert the Observable from HttpService into a Promise
+        await firstValueFrom(
+          this.httpService.post(`${apiUrl}/commissions/transactions`, payload, {
+            headers: headers,
+          }),
+        );
+
+        console.log(
+          `Successfully notified partner for commission ${commissionLog.id}`,
+        );
+      } catch (error) {
+        console.error(
+          `Failed to notify partner for commission ${commissionLog.id}`,
+          error.response?.data || error.message,
+        );
+      }
+    })();
+  }
+
   private async createAndPayDatingCommission(
     order: Order,
     orderListing: OrderListing,
@@ -83,13 +136,25 @@ export class OrderService {
       // 2. Find the referred admin
       const wedding = await this.prisma.wedding.findUnique({
         where: { id: order.weddingId },
-        include: { mainCouple: true },
+        include: {
+          mainCouple: {
+            include: {
+              user: true,
+            },
+          },
+        },
       });
+
+      const listing = await this.prisma.listing.findUnique({
+        where: { id: orderListing.listingId },
+        select: { listingName: true },
+      });
+
       const referredAdmin = wedding?.mainCouple.find(
         (admin) => admin.isDatingPartnerRegistered === true,
       );
 
-      if (!referredAdmin) return;
+      if (!referredAdmin || !referredAdmin.user) return;
 
       const commissionRate = parseFloat(process.env.PARTNER_COMMISSION_RATE);
       const commissionAmount = grossAmount * commissionRate;
@@ -126,6 +191,13 @@ export class OrderService {
           });
         console.log(
           `Instant commission payout ${newCommissionLog.id} succeeded: ${transfer.id}`,
+        );
+
+        this.notifyPartnerOfCommission(
+          updatedCommissionLog,
+          referredAdmin.user.email,
+          listing.listingName,
+          order.purchaseDate || order.createdAt,
         );
 
         this.sendCommissionInvoice(updatedCommissionLog);

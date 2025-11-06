@@ -43,6 +43,18 @@ import {
   TopProductData,
   VendorTopProductsResponseDto,
 } from './dto/vendor-top-products-response.dto';
+import {
+  WeddingWrappedResponseDto,
+  GuestInsights,
+  GiftSupportInsights,
+  PlanningJourneyInsights,
+  EmotionalTouchInsights,
+  SquadBreakdownItem,
+  WellWishItem,
+  PhotoItem,
+  PersonClusterItem,
+  WishlistItemDetail,
+} from './dto/wedding-wrapped-response.dto';
 
 @Injectable()
 export class AnalyticsService {
@@ -1115,6 +1127,547 @@ export class AnalyticsService {
       periodType: period,
       totalVendors: vendors.length,
       totalCouples: admins.length,
+    };
+  }
+
+  /**
+   * Generate and save Wedding Wrapped analytics for a wedding
+   */
+  async generateWeddingWrapped(
+    weddingId: number,
+  ): Promise<WeddingWrappedResponseDto> {
+    // Verify wedding exists
+    const wedding = await this.prisma.wedding.findUnique({
+      where: { id: weddingId },
+      include: {
+        guests: {
+          include: {
+            cashGifts: true,
+          },
+        },
+        orders: {
+          where: {
+            orderStatus: {
+              in: [OrderStatus.PAID, OrderStatus.COMPLETED],
+            },
+          },
+          include: {
+            listings: {
+              include: {
+                listing: {
+                  include: {
+                    vendor: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        wishlistItems: true,
+        album: {
+          include: {
+            photoEntities: {
+              include: {
+                faces: true,
+              },
+            },
+            personClusters: true,
+          },
+        },
+        guestbook: true,
+      },
+    });
+
+    if (!wedding) {
+      throw new NotFoundException(`Wedding with ID ${weddingId} not found`);
+    }
+
+    // === GUEST INSIGHTS ===
+    const allGuests = wedding.guests;
+    const totalInvited = allGuests.length;
+    const totalConfirmed = allGuests.filter(
+      (g) => g.confirmationStatus === ConfirmationStatus.CONFIRMED,
+    ).length;
+    const totalAttended = allGuests.filter((g) => g.attendance).length;
+
+    // First guest to arrive
+    const guestsWithCheckIn = allGuests
+      .filter((g) => g.checkInTime)
+      .sort((a, b) => a.checkInTime!.getTime() - b.checkInTime!.getTime());
+    const firstGuest = guestsWithCheckIn[0];
+
+    // Fastest RSVP (confirmed guests with creation time)
+    const confirmedGuests = allGuests.filter(
+      (g) => g.confirmationStatus === ConfirmationStatus.CONFIRMED,
+    );
+    let fastestRsvpGuest = null;
+    let fastestRsvpDuration = null;
+    if (confirmedGuests.length > 0) {
+      const guestsWithDuration = confirmedGuests
+        .map((g) => ({
+          guest: g,
+          duration:
+            Math.abs(g.updatedAt.getTime() - g.createdAt.getTime()) /
+            (1000 * 60 * 60), // hours
+        }))
+        .sort((a, b) => a.duration - b.duration);
+
+      fastestRsvpGuest = guestsWithDuration[0].guest;
+      fastestRsvpDuration = Math.round(guestsWithDuration[0].duration);
+    }
+
+    // Peak attendance time (simplified - using check-in times)
+    let peakTime = null;
+    let peakGuestCount = null;
+    if (guestsWithCheckIn.length > 0) {
+      // Group by hour
+      const hourlyCheckIns = new Map<string, number>();
+      guestsWithCheckIn.forEach((g) => {
+        const hour = g.checkInTime!.toISOString().substring(0, 13); // YYYY-MM-DDTHH
+        hourlyCheckIns.set(hour, (hourlyCheckIns.get(hour) || 0) + 1);
+      });
+
+      let maxCount = 0;
+      let maxHour = '';
+      hourlyCheckIns.forEach((count, hour) => {
+        if (count > maxCount) {
+          maxCount = count;
+          maxHour = hour;
+        }
+      });
+
+      if (maxHour) {
+        peakTime = new Date(maxHour + ':00:00Z');
+        peakGuestCount = maxCount;
+      }
+    }
+
+    // Squad breakdown by group
+    const groupMap = new Map<string, number>();
+    allGuests.forEach((g) => {
+      const group = g.group || 'Ungrouped';
+      groupMap.set(group, (groupMap.get(group) || 0) + 1);
+    });
+    const squadBreakdown: SquadBreakdownItem[] = Array.from(groupMap.entries())
+      .map(([group, count]) => ({ group, count }))
+      .sort((a, b) => b.count - a.count);
+
+    const guestInsights: GuestInsights = {
+      totalInvited,
+      totalConfirmed,
+      totalAttended,
+      firstGuestName: firstGuest?.name,
+      firstGuestTime: firstGuest?.checkInTime,
+      fastestRsvpName: fastestRsvpGuest?.name,
+      fastestRsvpDuration,
+      peakTime,
+      peakGuestCount,
+      squadBreakdown,
+    };
+
+    // === GIFT & SUPPORT INSIGHTS ===
+    const wishlistItems = wedding.wishlistItems;
+
+    // Top cash gift contributor
+    const allCashGifts = allGuests.flatMap((g) =>
+      g.cashGifts.map((cg) => ({ ...cg, guestName: g.name })),
+    );
+    const sortedCashGifts = allCashGifts.sort((a, b) => b.amount - a.amount);
+    const topContributor = sortedCashGifts[0];
+    const totalGiftValue = allCashGifts.reduce((sum, cg) => sum + cg.amount, 0);
+
+    // Wishlist completion
+    const totalWishlistItems = wishlistItems.length;
+    const reservedItems = wishlistItems.filter(
+      (item) => item.isReserved,
+    ).length;
+    const wishlistCompletion =
+      totalWishlistItems > 0 ? (reservedItems / totalWishlistItems) * 100 : 0;
+
+    // Map wishlist items to details
+    const wishlistItemDetails: WishlistItemDetail[] = wishlistItems.map(
+      (item) => ({
+        title: item.title,
+        itemUrl: item.itemUrl,
+        isReserved: item.isReserved,
+        reservedByName: item.reservedByName || undefined,
+      }),
+    );
+
+    // Find who reserved the most wishlist items
+    const reserverMap = new Map<string, number>();
+    wishlistItems.forEach((item) => {
+      if (item.isReserved && item.reservedByName) {
+        reserverMap.set(
+          item.reservedByName,
+          (reserverMap.get(item.reservedByName) || 0) + 1,
+        );
+      }
+    });
+
+    let topWishlistContributorName = null;
+    let topWishlistContributorCount = null;
+    if (reserverMap.size > 0) {
+      const sorted = Array.from(reserverMap.entries()).sort(
+        (a, b) => b[1] - a[1],
+      );
+      topWishlistContributorName = sorted[0][0];
+      topWishlistContributorCount = sorted[0][1];
+    }
+
+    const giftSupportInsights: GiftSupportInsights = {
+      topContributorName: topContributor?.guestName,
+      topContribution: topContributor?.amount,
+      topWishlistContributorName,
+      topWishlistContributorCount,
+      wishlistCompletion: Math.round(wishlistCompletion * 100) / 100,
+      totalGiftValue,
+      wishlistItems: wishlistItemDetails,
+    };
+
+    // === PLANNING JOURNEY INSIGHTS ===
+    const planningDays = wedding.date
+      ? Math.floor(
+          (wedding.date.getTime() - wedding.createdAt.getTime()) /
+            (1000 * 60 * 60 * 24),
+        )
+      : Math.floor(
+          (Date.now() - wedding.createdAt.getTime()) / (1000 * 60 * 60 * 24),
+        );
+
+    // Top vendor category by spending
+    const categorySpending = new Map<string, number>();
+    wedding.orders.forEach((order) => {
+      order.listings.forEach((ol) => {
+        const vendor = ol.listing.vendor;
+        if (vendor.serviceOffered) {
+          const current = categorySpending.get(vendor.serviceOffered) || 0;
+          // Split order amount evenly across listings (simplified)
+          categorySpending.set(
+            vendor.serviceOffered,
+            current + order.totalAmount / order.listings.length,
+          );
+        }
+      });
+    });
+
+    let topVendorCategory = null;
+    let topVendorAmount = null;
+    if (categorySpending.size > 0) {
+      const sorted = Array.from(categorySpending.entries()).sort(
+        (a, b) => b[1] - a[1],
+      );
+      topVendorCategory = sorted[0][0] as any;
+      topVendorAmount = sorted[0][1];
+    }
+
+    const totalSpent = wedding.currentSpending;
+    const allocatedBudget = wedding.allocatedBudget;
+    const budgetUtilization =
+      allocatedBudget > 0 ? (totalSpent / allocatedBudget) * 100 : 0;
+
+    const planningJourneyInsights: PlanningJourneyInsights = {
+      planningDays,
+      topVendorCategory,
+      topVendorAmount,
+      budgetUtilization: Math.round(budgetUtilization * 100) / 100,
+      totalSpent,
+      allocatedBudget,
+    };
+
+    // === EMOTIONAL TOUCH INSIGHTS ===
+    const guestbookNotes = (wedding.guestbook?.guestNotes || []) as any[];
+    const totalWellWishes = guestbookNotes.length;
+
+    // Map well wishes
+    const wellWishes: WellWishItem[] = guestbookNotes.map((note) => ({
+      guestName: note.guestName || 'Anonymous',
+      message: note.message || '',
+      timestamp: note.timestamp || new Date().toISOString(),
+    }));
+
+    const totalPhotos = wedding.album?.photoEntities.length || 0;
+    const totalFacesDetected =
+      wedding.album?.photoEntities.reduce(
+        (sum, photo) => sum + photo.faces.length,
+        0,
+      ) || 0;
+    const totalPeopleClusters = wedding.album?.personClusters.length || 0;
+
+    // Map photos with face counts
+    const photos: PhotoItem[] =
+      wedding.album?.photoEntities.map((photo) => ({
+        url: photo.url,
+        facesCount: photo.faces.length,
+      })) || [];
+
+    // Map person clusters with appearance counts and find most frequent
+    const personClusters: PersonClusterItem[] =
+      wedding.album?.personClusters.map((cluster) => ({
+        label: cluster.label || undefined,
+        appearanceCount: wedding.album!.photoEntities.filter((photo) =>
+          photo.faces.some((face) => face.personClusterId === cluster.id),
+        ).length,
+        thumbnailUrl: cluster.thumbnailUrl || undefined,
+      })) || [];
+
+    // Sort by appearance count to find most frequent
+    const sortedClusters = [...personClusters].sort(
+      (a, b) => b.appearanceCount - a.appearanceCount,
+    );
+    const mostFrequentPerson = sortedClusters[0];
+
+    const emotionalTouchInsights: EmotionalTouchInsights = {
+      totalWellWishes,
+      wellWishes,
+      totalPhotos,
+      photos,
+      totalFacesDetected,
+      totalPeopleClusters,
+      mostFrequentPersonName: mostFrequentPerson?.label,
+      mostFrequentPersonCount: mostFrequentPerson?.appearanceCount,
+      mostFrequentPersonPhoto: mostFrequentPerson?.thumbnailUrl,
+      personClusters,
+    };
+
+    // === SAVE TO DATABASE ===
+    const weddingWrapped = await this.prisma.weddingWrapped.upsert({
+      where: { weddingId },
+      update: {
+        totalInvited,
+        totalConfirmed,
+        totalAttended,
+        firstGuestName: firstGuest?.name,
+        firstGuestTime: firstGuest?.checkInTime,
+        fastestRsvpName: fastestRsvpGuest?.name,
+        fastestRsvpDuration,
+        peakTime,
+        peakGuestCount,
+        squadBreakdown: squadBreakdown as any,
+        topContributorName: topContributor?.guestName,
+        topContribution: topContributor?.amount,
+        wishlistCompletion: Math.round(wishlistCompletion * 100) / 100,
+        totalGiftValue,
+        planningDays,
+        topVendorCategory,
+        topVendorAmount,
+        budgetUtilization: Math.round(budgetUtilization * 100) / 100,
+        totalSpent,
+        allocatedBudget,
+        totalWellWishes,
+        totalPhotos,
+        totalFacesDetected,
+        totalPeopleClusters,
+        generatedAt: new Date(),
+      },
+      create: {
+        weddingId,
+        totalInvited,
+        totalConfirmed,
+        totalAttended,
+        firstGuestName: firstGuest?.name,
+        firstGuestTime: firstGuest?.checkInTime,
+        fastestRsvpName: fastestRsvpGuest?.name,
+        fastestRsvpDuration,
+        peakTime,
+        peakGuestCount,
+        squadBreakdown: squadBreakdown as any,
+        topContributorName: topContributor?.guestName,
+        topContribution: topContributor?.amount,
+        wishlistCompletion: Math.round(wishlistCompletion * 100) / 100,
+        totalGiftValue,
+        planningDays,
+        topVendorCategory,
+        topVendorAmount,
+        budgetUtilization: Math.round(budgetUtilization * 100) / 100,
+        totalSpent,
+        allocatedBudget,
+        totalWellWishes,
+        totalPhotos,
+        totalFacesDetected,
+        totalPeopleClusters,
+      },
+    });
+
+    return this.toWeddingWrappedDto(
+      weddingWrapped,
+      guestInsights,
+      giftSupportInsights,
+      planningJourneyInsights,
+      emotionalTouchInsights,
+    );
+  }
+
+  /**
+   * Get saved Wedding Wrapped analytics for a wedding
+   */
+  async getWeddingWrapped(
+    weddingId: number,
+  ): Promise<WeddingWrappedResponseDto> {
+    const weddingWrapped = await this.prisma.weddingWrapped.findUnique({
+      where: { weddingId },
+    });
+
+    if (!weddingWrapped) {
+      throw new NotFoundException(
+        `Wedding Wrapped not found for wedding ID ${weddingId}. Please generate it first.`,
+      );
+    }
+
+    // Fetch live data for photos, well wishes, wishlist, and person clusters
+    const wedding = await this.prisma.wedding.findUnique({
+      where: { id: weddingId },
+      include: {
+        album: {
+          include: {
+            photoEntities: {
+              include: {
+                faces: true,
+              },
+            },
+            personClusters: true,
+          },
+        },
+        guestbook: true,
+        wishlistItems: true,
+      },
+    });
+
+    // Parse squad breakdown from JSON
+    const squadBreakdown = (weddingWrapped.squadBreakdown as any) || [];
+
+    const guestInsights: GuestInsights = {
+      totalInvited: weddingWrapped.totalInvited,
+      totalConfirmed: weddingWrapped.totalConfirmed,
+      totalAttended: weddingWrapped.totalAttended,
+      firstGuestName: weddingWrapped.firstGuestName,
+      firstGuestTime: weddingWrapped.firstGuestTime,
+      fastestRsvpName: weddingWrapped.fastestRsvpName,
+      fastestRsvpDuration: weddingWrapped.fastestRsvpDuration,
+      peakTime: weddingWrapped.peakTime,
+      peakGuestCount: weddingWrapped.peakGuestCount,
+      squadBreakdown,
+    };
+
+    // Map wishlist items from live data
+    const wishlistItemDetails: WishlistItemDetail[] =
+      wedding?.wishlistItems.map((item) => ({
+        title: item.title,
+        itemUrl: item.itemUrl,
+        isReserved: item.isReserved,
+        reservedByName: item.reservedByName || undefined,
+      })) || [];
+
+    // Calculate top wishlist contributor from live data
+    const reserverMap = new Map<string, number>();
+    wedding?.wishlistItems.forEach((item) => {
+      if (item.isReserved && item.reservedByName) {
+        reserverMap.set(
+          item.reservedByName,
+          (reserverMap.get(item.reservedByName) || 0) + 1,
+        );
+      }
+    });
+
+    let topWishlistContributorName = null;
+    let topWishlistContributorCount = null;
+    if (reserverMap.size > 0) {
+      const sorted = Array.from(reserverMap.entries()).sort(
+        (a, b) => b[1] - a[1],
+      );
+      topWishlistContributorName = sorted[0][0];
+      topWishlistContributorCount = sorted[0][1];
+    }
+
+    const giftSupportInsights: GiftSupportInsights = {
+      topContributorName: weddingWrapped.topContributorName,
+      topContribution: weddingWrapped.topContribution,
+      topWishlistContributorName,
+      topWishlistContributorCount,
+      wishlistCompletion: weddingWrapped.wishlistCompletion,
+      totalGiftValue: weddingWrapped.totalGiftValue,
+      wishlistItems: wishlistItemDetails,
+    };
+
+    const planningJourneyInsights: PlanningJourneyInsights = {
+      planningDays: weddingWrapped.planningDays,
+      topVendorCategory: weddingWrapped.topVendorCategory,
+      topVendorAmount: weddingWrapped.topVendorAmount,
+      budgetUtilization: weddingWrapped.budgetUtilization,
+      totalSpent: weddingWrapped.totalSpent,
+      allocatedBudget: weddingWrapped.allocatedBudget,
+    };
+
+    // Fetch live emotional touch data
+    const guestbookNotes = (wedding?.guestbook?.guestNotes || []) as any[];
+    const wellWishes: WellWishItem[] = guestbookNotes.map((note) => ({
+      guestName: note.guestName || 'Anonymous',
+      message: note.message || '',
+      timestamp: note.timestamp || new Date().toISOString(),
+    }));
+
+    const photos: PhotoItem[] =
+      wedding?.album?.photoEntities.map((photo) => ({
+        url: photo.url,
+        facesCount: photo.faces.length,
+      })) || [];
+
+    const personClusters: PersonClusterItem[] =
+      wedding?.album?.personClusters.map((cluster) => ({
+        label: cluster.label || undefined,
+        appearanceCount: wedding.album!.photoEntities.filter((photo) =>
+          photo.faces.some((face) => face.personClusterId === cluster.id),
+        ).length,
+        thumbnailUrl: cluster.thumbnailUrl || undefined,
+      })) || [];
+
+    const sortedClusters = [...personClusters].sort(
+      (a, b) => b.appearanceCount - a.appearanceCount,
+    );
+    const mostFrequentPerson = sortedClusters[0];
+
+    const emotionalTouchInsights: EmotionalTouchInsights = {
+      totalWellWishes: weddingWrapped.totalWellWishes,
+      wellWishes,
+      totalPhotos: weddingWrapped.totalPhotos,
+      photos,
+      totalFacesDetected: weddingWrapped.totalFacesDetected,
+      totalPeopleClusters: weddingWrapped.totalPeopleClusters,
+      mostFrequentPersonName: mostFrequentPerson?.label,
+      mostFrequentPersonCount: mostFrequentPerson?.appearanceCount,
+      mostFrequentPersonPhoto: mostFrequentPerson?.thumbnailUrl,
+      personClusters,
+    };
+
+    return this.toWeddingWrappedDto(
+      weddingWrapped,
+      guestInsights,
+      giftSupportInsights,
+      planningJourneyInsights,
+      emotionalTouchInsights,
+    );
+  }
+
+  /**
+   * Helper method to transform WeddingWrapped entity to DTO
+   */
+  private toWeddingWrappedDto(
+    weddingWrapped: any,
+    guestInsights: GuestInsights,
+    giftSupportInsights: GiftSupportInsights,
+    planningJourneyInsights: PlanningJourneyInsights,
+    emotionalTouchInsights: EmotionalTouchInsights,
+  ): WeddingWrappedResponseDto {
+    return {
+      id: weddingWrapped.id,
+      weddingId: weddingWrapped.weddingId,
+      guestInsights,
+      giftSupportInsights,
+      planningJourneyInsights,
+      emotionalTouchInsights,
+      generatedAt: weddingWrapped.generatedAt,
+      createdAt: weddingWrapped.createdAt,
+      updatedAt: weddingWrapped.updatedAt,
     };
   }
 }

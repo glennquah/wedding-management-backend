@@ -308,7 +308,17 @@ export class AdminService {
   async getMyWeddings(userId: number): Promise<Wedding[]> {
     const admin = await this.prisma.admin.findUnique({
       where: { userId },
-      include: { weddings: true },
+      include: {
+        weddings: {
+          include: {
+            mainCouple: {
+              include: {
+                user: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     if (!admin) {

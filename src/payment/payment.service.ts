@@ -7,23 +7,25 @@ import Stripe from 'stripe';
 import { OrderStatus } from '../common/order-status.enum';
 import { PaymentStatus } from '../common/payment-status.enum';
 import { PrismaService } from '../prisma/prisma.service';
+import {
+  StripeAccountStatusDto,
+  StripeConnectAccountResponseDto,
+} from '../vendor/dto/stripe-connect.dto';
 import { CheckoutSessionResponseDto } from './dto/checkout-session-response.dto';
 import { CreateCheckoutSessionDto } from './dto/create-checkout-session.dto';
+import { AllDatingPartnerCommissionResponseDto } from './dto/dating-partner-commission-response.dto';
 import { PaymentResponseDto } from './dto/payment-response.dto';
-import {
-  StripeConnectAccountResponseDto,
-  StripeAccountStatusDto,
-} from '../vendor/dto/stripe-connect.dto';
 import {
   VendorEarningResponseDto,
   VendorEarningsSummaryDto,
 } from './dto/vendor-earning-response.dto';
 import {
-  VendorPayoutResponseDto,
-  CreatePayoutDto,
+  AllVendorsPayoutResponseDto,
   BatchPayoutDto,
   BatchPayoutResultDto,
+  CreatePayoutDto,
   PayoutResultDto,
+  VendorPayoutResponseDto,
 } from './dto/vendor-payout-response.dto';
 
 @Injectable()
@@ -813,5 +815,81 @@ export class PaymentService {
     });
 
     return transfer;
+  }
+
+  async getAllVendorsPayout(): Promise<AllVendorsPayoutResponseDto[]> {
+    const payouts = await this.prisma.vendorPayout.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
+
+    // Fetch vendor information for each payout
+    const payoutsWithVendorInfo = await Promise.all(
+      payouts.map(async (payout) => {
+        const vendor = await this.prisma.vendor.findUnique({
+          where: { userId: payout.vendorId },
+          select: {
+            userId: true,
+            user: {
+              select: {
+                name: true,
+                email: true,
+              },
+            },
+          },
+        });
+
+        return {
+          ...payout,
+          vendor,
+        } as AllVendorsPayoutResponseDto;
+      }),
+    );
+
+    return payoutsWithVendorInfo;
+  }
+
+  async getAllDatingPartnerPayout(): Promise<
+    AllDatingPartnerCommissionResponseDto[]
+  > {
+    const commissions = await this.prisma.datingPartnerCommission.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
+
+    // Fetch admin information for each commission
+    const commissionsWithAdminInfo = await Promise.all(
+      commissions.map(async (commission) => {
+        const admin = await this.prisma.admin.findUnique({
+          where: { userId: commission.adminId },
+          select: {
+            userId: true,
+            user: {
+              select: {
+                name: true,
+                email: true,
+              },
+            },
+          },
+        });
+
+        return {
+          ...commission,
+          admin,
+        } as AllDatingPartnerCommissionResponseDto;
+      }),
+    );
+
+    return commissionsWithAdminInfo;
+  }
+
+  async getDatingPartnerCommission(commissionId: number) {
+    const commission = await this.prisma.datingPartnerCommission.findUnique({
+      where: { id: commissionId },
+    });
+
+    if (!commission) {
+      throw new BadRequestException('Dating partner commission not found');
+    }
+
+    return commission;
   }
 }

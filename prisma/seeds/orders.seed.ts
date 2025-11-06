@@ -20,10 +20,16 @@ export async function seedOrders(prisma: PrismaClient) {
   const weddingSpending = new Map<number, number>();
   const weddingBudgetLimits = new Map<number, number>();
 
-  // Initialize wedding spending tracker and budget limits (80% of allocated budget)
+  // Initialize wedding spending tracker and budget limits
   weddings.forEach((wedding) => {
     weddingSpending.set(wedding.id, 0);
-    weddingBudgetLimits.set(wedding.id, wedding.allocatedBudget * 0.8);
+    // Wedding ID 2 (Glenn & Jes) should have 130% budget usage (65000)
+    // Other weddings should have 80% budget usage
+    const budgetMultiplier = wedding.id === 2 ? 1.3 : 0.8;
+    weddingBudgetLimits.set(
+      wedding.id,
+      wedding.allocatedBudget * budgetMultiplier,
+    );
   });
 
   // Configuration: Orders increase from 4/month to 14/month over 9 months (~90 orders per vendor)
@@ -199,6 +205,7 @@ export async function seedOrders(prisma: PrismaClient) {
             orderStatus,
             remark: `Order for vendor ${vendor.userId} - Month ${numberOfMonths - monthIndex}`,
             purchaseDate: purchaseDate,
+            createdAt: purchaseDate, // Set createdAt to match purchaseDate for realistic data
           },
         });
 
@@ -216,6 +223,7 @@ export async function seedOrders(prisma: PrismaClient) {
               listingId: listing.id,
               bookedSlots: [selectedAvailability],
               bookingStatus: orderStatus, // Match the order status
+              createdAt: purchaseDate, // Set createdAt to match order purchaseDate
             },
           });
         }
@@ -341,6 +349,7 @@ export async function seedOrders(prisma: PrismaClient) {
             orderStatus,
             remark: `Upcoming order for vendor ${vendor.userId} - ${monthsAhead} months ahead`,
             purchaseDate: finalPurchaseDate,
+            createdAt: finalPurchaseDate, // Set createdAt to match purchaseDate
           },
         });
 
@@ -362,6 +371,7 @@ export async function seedOrders(prisma: PrismaClient) {
               listingId: listing.id,
               bookedSlots: [futureSlot],
               bookingStatus: orderStatus,
+              createdAt: finalPurchaseDate, // Set createdAt to match order purchaseDate
             },
           });
         }
