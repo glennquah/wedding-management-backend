@@ -83,34 +83,61 @@ export class GuestInsights {
   squadBreakdown: SquadBreakdownItem[];
 }
 
+export class WishlistItemDetail {
+  @ApiProperty({
+    description: 'Wishlist item title',
+    example: 'KitchenAid Stand Mixer',
+  })
+  title: string;
+
+  @ApiProperty({
+    description: 'Item URL',
+    example: 'https://www.amazon.com/kitchenaid-mixer',
+  })
+  itemUrl: string;
+
+  @ApiProperty({
+    description: 'Whether the item is reserved',
+    example: true,
+  })
+  isReserved: boolean;
+
+  @ApiProperty({
+    description: 'Name of person who reserved it',
+    example: 'John Doe',
+    nullable: true,
+  })
+  reservedByName?: string;
+}
+
 export class GiftSupportInsights {
   @ApiProperty({
-    description: 'Most popular wishlist item',
-    example: 'Honeymoon Fund',
-    nullable: true,
-  })
-  mostWantedItem?: string;
-
-  @ApiProperty({
-    description: 'Number of reservations for most wanted item',
-    example: 15,
-    nullable: true,
-  })
-  mostWantedItemCount?: number;
-
-  @ApiProperty({
-    description: 'Name of guest with highest contribution',
-    example: 'Anonymous',
+    description: 'Name of guest with highest cash gift contribution',
+    example: 'Ryan Tang',
     nullable: true,
   })
   topContributorName?: string;
 
   @ApiProperty({
-    description: 'Amount of highest contribution',
-    example: 500.0,
+    description: 'Amount of highest cash gift contribution',
+    example: 10888.88,
     nullable: true,
   })
   topContribution?: number;
+
+  @ApiProperty({
+    description: 'Name of guest who reserved the most wishlist items',
+    example: 'Sarah Johnson',
+    nullable: true,
+  })
+  topWishlistContributorName?: string;
+
+  @ApiProperty({
+    description: 'Number of wishlist items reserved by top contributor',
+    example: 5,
+    nullable: true,
+  })
+  topWishlistContributorCount?: number;
 
   @ApiProperty({
     description: 'Wishlist completion percentage',
@@ -119,10 +146,16 @@ export class GiftSupportInsights {
   wishlistCompletion: number;
 
   @ApiProperty({
-    description: 'Total value of gifts and support received',
-    example: 12500.0,
+    description: 'Total value of cash gifts received',
+    example: 31081.88,
   })
   totalGiftValue: number;
+
+  @ApiProperty({
+    description: 'All wishlist items with reservation details',
+    type: [WishlistItemDetail],
+  })
+  wishlistItems: WishlistItemDetail[];
 }
 
 export class PlanningJourneyInsights {
@@ -166,6 +199,62 @@ export class PlanningJourneyInsights {
   allocatedBudget: number;
 }
 
+export class WellWishItem {
+  @ApiProperty({
+    description: 'Name of the guest who left the well wish',
+    example: 'John Doe',
+  })
+  guestName: string;
+
+  @ApiProperty({
+    description: 'The well wish message',
+    example: 'Wishing you both a lifetime of love and happiness!',
+  })
+  message: string;
+
+  @ApiProperty({
+    description: 'Timestamp when the well wish was created',
+    example: '2024-06-15T14:30:00Z',
+  })
+  timestamp: string;
+}
+
+export class PhotoItem {
+  @ApiProperty({
+    description: 'Photo URL',
+    example: 'https://images.unsplash.com/photo-1519741497674-611481863552',
+  })
+  url: string;
+
+  @ApiProperty({
+    description: 'Number of faces detected in this photo',
+    example: 5,
+  })
+  facesCount: number;
+}
+
+export class PersonClusterItem {
+  @ApiProperty({
+    description: 'Person label/name',
+    example: 'Ryan Tang',
+    nullable: true,
+  })
+  label?: string;
+
+  @ApiProperty({
+    description: 'Number of times this person appears in photos',
+    example: 15,
+  })
+  appearanceCount: number;
+
+  @ApiProperty({
+    description: 'Sample photo URL showing this person',
+    example: 'https://images.unsplash.com/photo-1519741497674-611481863552',
+    nullable: true,
+  })
+  thumbnailUrl?: string;
+}
+
 export class EmotionalTouchInsights {
   @ApiProperty({
     description: 'Total number of well-wishes and messages received',
@@ -174,10 +263,22 @@ export class EmotionalTouchInsights {
   totalWellWishes: number;
 
   @ApiProperty({
+    description: 'List of all well wishes',
+    type: [WellWishItem],
+  })
+  wellWishes: WellWishItem[];
+
+  @ApiProperty({
     description: 'Total number of photos uploaded',
     example: 342,
   })
   totalPhotos: number;
+
+  @ApiProperty({
+    description: 'List of all photo URLs with face counts',
+    type: [PhotoItem],
+  })
+  photos: PhotoItem[];
 
   @ApiProperty({
     description: 'Total number of faces detected in photos',
@@ -190,6 +291,33 @@ export class EmotionalTouchInsights {
     example: 98,
   })
   totalPeopleClusters: number;
+
+  @ApiProperty({
+    description: 'Person who appeared most frequently in photos',
+    example: 'Ryan Tang',
+    nullable: true,
+  })
+  mostFrequentPersonName?: string;
+
+  @ApiProperty({
+    description: 'Number of times the most frequent person appeared',
+    example: 15,
+    nullable: true,
+  })
+  mostFrequentPersonCount?: number;
+
+  @ApiProperty({
+    description: 'Sample photo URL of the most frequent person',
+    example: 'https://images.unsplash.com/photo-1519741497674-611481863552',
+    nullable: true,
+  })
+  mostFrequentPersonPhoto?: string;
+
+  @ApiProperty({
+    description: 'List of all person clusters with appearance counts',
+    type: [PersonClusterItem],
+  })
+  personClusters: PersonClusterItem[];
 }
 
 export class WeddingWrappedResponseDto {

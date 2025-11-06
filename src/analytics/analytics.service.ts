@@ -50,6 +50,10 @@ import {
   PlanningJourneyInsights,
   EmotionalTouchInsights,
   SquadBreakdownItem,
+  WellWishItem,
+  PhotoItem,
+  PersonClusterItem,
+  WishlistItemDetail,
 } from './dto/wedding-wrapped-response.dto';
 
 @Injectable()
@@ -1264,23 +1268,6 @@ export class AnalyticsService {
     // === GIFT & SUPPORT INSIGHTS ===
     const wishlistItems = wedding.wishlistItems;
 
-    // Most wanted wishlist item (by title frequency - simplified)
-    const itemTitleMap = new Map<string, number>();
-    wishlistItems.forEach((item) => {
-      if (item.isReserved) {
-        itemTitleMap.set(item.title, (itemTitleMap.get(item.title) || 0) + 1);
-      }
-    });
-    let mostWantedItem = null;
-    let mostWantedItemCount = null;
-    if (itemTitleMap.size > 0) {
-      const sorted = Array.from(itemTitleMap.entries()).sort(
-        (a, b) => b[1] - a[1],
-      );
-      mostWantedItem = sorted[0][0];
-      mostWantedItemCount = sorted[0][1];
-    }
-
     // Top cash gift contributor
     const allCashGifts = allGuests.flatMap((g) =>
       g.cashGifts.map((cg) => ({ ...cg, guestName: g.name })),
@@ -1297,13 +1284,45 @@ export class AnalyticsService {
     const wishlistCompletion =
       totalWishlistItems > 0 ? (reservedItems / totalWishlistItems) * 100 : 0;
 
+    // Map wishlist items to details
+    const wishlistItemDetails: WishlistItemDetail[] = wishlistItems.map(
+      (item) => ({
+        title: item.title,
+        itemUrl: item.itemUrl,
+        isReserved: item.isReserved,
+        reservedByName: item.reservedByName || undefined,
+      }),
+    );
+
+    // Find who reserved the most wishlist items
+    const reserverMap = new Map<string, number>();
+    wishlistItems.forEach((item) => {
+      if (item.isReserved && item.reservedByName) {
+        reserverMap.set(
+          item.reservedByName,
+          (reserverMap.get(item.reservedByName) || 0) + 1,
+        );
+      }
+    });
+
+    let topWishlistContributorName = null;
+    let topWishlistContributorCount = null;
+    if (reserverMap.size > 0) {
+      const sorted = Array.from(reserverMap.entries()).sort(
+        (a, b) => b[1] - a[1],
+      );
+      topWishlistContributorName = sorted[0][0];
+      topWishlistContributorCount = sorted[0][1];
+    }
+
     const giftSupportInsights: GiftSupportInsights = {
-      mostWantedItem,
-      mostWantedItemCount,
       topContributorName: topContributor?.guestName,
       topContribution: topContributor?.amount,
+      topWishlistContributorName,
+      topWishlistContributorCount,
       wishlistCompletion: Math.round(wishlistCompletion * 100) / 100,
       totalGiftValue,
+      wishlistItems: wishlistItemDetails,
     };
 
     // === PLANNING JOURNEY INSIGHTS ===
@@ -1357,8 +1376,15 @@ export class AnalyticsService {
     };
 
     // === EMOTIONAL TOUCH INSIGHTS ===
-    const guestbookNotes = wedding.guestbook?.guestNotes || [];
+    const guestbookNotes = (wedding.guestbook?.guestNotes || []) as any[];
     const totalWellWishes = guestbookNotes.length;
+
+    // Map well wishes
+    const wellWishes: WellWishItem[] = guestbookNotes.map((note) => ({
+      guestName: note.guestName || 'Anonymous',
+      message: note.message || '',
+      timestamp: note.timestamp || new Date().toISOString(),
+    }));
 
     const totalPhotos = wedding.album?.photoEntities.length || 0;
     const totalFacesDetected =
@@ -1368,11 +1394,40 @@ export class AnalyticsService {
       ) || 0;
     const totalPeopleClusters = wedding.album?.personClusters.length || 0;
 
+    // Map photos with face counts
+    const photos: PhotoItem[] =
+      wedding.album?.photoEntities.map((photo) => ({
+        url: photo.url,
+        facesCount: photo.faces.length,
+      })) || [];
+
+    // Map person clusters with appearance counts and find most frequent
+    const personClusters: PersonClusterItem[] =
+      wedding.album?.personClusters.map((cluster) => ({
+        label: cluster.label || undefined,
+        appearanceCount: wedding.album!.photoEntities.filter((photo) =>
+          photo.faces.some((face) => face.personClusterId === cluster.id),
+        ).length,
+        thumbnailUrl: cluster.thumbnailUrl || undefined,
+      })) || [];
+
+    // Sort by appearance count to find most frequent
+    const sortedClusters = [...personClusters].sort(
+      (a, b) => b.appearanceCount - a.appearanceCount,
+    );
+    const mostFrequentPerson = sortedClusters[0];
+
     const emotionalTouchInsights: EmotionalTouchInsights = {
       totalWellWishes,
+      wellWishes,
       totalPhotos,
+      photos,
       totalFacesDetected,
       totalPeopleClusters,
+      mostFrequentPersonName: mostFrequentPerson?.label,
+      mostFrequentPersonCount: mostFrequentPerson?.appearanceCount,
+      mostFrequentPersonPhoto: mostFrequentPerson?.thumbnailUrl,
+      personClusters,
     };
 
     // === SAVE TO DATABASE ===
@@ -1389,8 +1444,6 @@ export class AnalyticsService {
         peakTime,
         peakGuestCount,
         squadBreakdown: squadBreakdown as any,
-        mostWantedItem,
-        mostWantedItemCount,
         topContributorName: topContributor?.guestName,
         topContribution: topContributor?.amount,
         wishlistCompletion: Math.round(wishlistCompletion * 100) / 100,
@@ -1419,8 +1472,6 @@ export class AnalyticsService {
         peakTime,
         peakGuestCount,
         squadBreakdown: squadBreakdown as any,
-        mostWantedItem,
-        mostWantedItemCount,
         topContributorName: topContributor?.guestName,
         topContribution: topContributor?.amount,
         wishlistCompletion: Math.round(wishlistCompletion * 100) / 100,
@@ -1463,6 +1514,25 @@ export class AnalyticsService {
       );
     }
 
+    // Fetch live data for photos, well wishes, wishlist, and person clusters
+    const wedding = await this.prisma.wedding.findUnique({
+      where: { id: weddingId },
+      include: {
+        album: {
+          include: {
+            photoEntities: {
+              include: {
+                faces: true,
+              },
+            },
+            personClusters: true,
+          },
+        },
+        guestbook: true,
+        wishlistItems: true,
+      },
+    });
+
     // Parse squad breakdown from JSON
     const squadBreakdown = (weddingWrapped.squadBreakdown as any) || [];
 
@@ -1479,13 +1549,44 @@ export class AnalyticsService {
       squadBreakdown,
     };
 
+    // Map wishlist items from live data
+    const wishlistItemDetails: WishlistItemDetail[] =
+      wedding?.wishlistItems.map((item) => ({
+        title: item.title,
+        itemUrl: item.itemUrl,
+        isReserved: item.isReserved,
+        reservedByName: item.reservedByName || undefined,
+      })) || [];
+
+    // Calculate top wishlist contributor from live data
+    const reserverMap = new Map<string, number>();
+    wedding?.wishlistItems.forEach((item) => {
+      if (item.isReserved && item.reservedByName) {
+        reserverMap.set(
+          item.reservedByName,
+          (reserverMap.get(item.reservedByName) || 0) + 1,
+        );
+      }
+    });
+
+    let topWishlistContributorName = null;
+    let topWishlistContributorCount = null;
+    if (reserverMap.size > 0) {
+      const sorted = Array.from(reserverMap.entries()).sort(
+        (a, b) => b[1] - a[1],
+      );
+      topWishlistContributorName = sorted[0][0];
+      topWishlistContributorCount = sorted[0][1];
+    }
+
     const giftSupportInsights: GiftSupportInsights = {
-      mostWantedItem: weddingWrapped.mostWantedItem,
-      mostWantedItemCount: weddingWrapped.mostWantedItemCount,
       topContributorName: weddingWrapped.topContributorName,
       topContribution: weddingWrapped.topContribution,
+      topWishlistContributorName,
+      topWishlistContributorCount,
       wishlistCompletion: weddingWrapped.wishlistCompletion,
       totalGiftValue: weddingWrapped.totalGiftValue,
+      wishlistItems: wishlistItemDetails,
     };
 
     const planningJourneyInsights: PlanningJourneyInsights = {
@@ -1497,11 +1598,45 @@ export class AnalyticsService {
       allocatedBudget: weddingWrapped.allocatedBudget,
     };
 
+    // Fetch live emotional touch data
+    const guestbookNotes = (wedding?.guestbook?.guestNotes || []) as any[];
+    const wellWishes: WellWishItem[] = guestbookNotes.map((note) => ({
+      guestName: note.guestName || 'Anonymous',
+      message: note.message || '',
+      timestamp: note.timestamp || new Date().toISOString(),
+    }));
+
+    const photos: PhotoItem[] =
+      wedding?.album?.photoEntities.map((photo) => ({
+        url: photo.url,
+        facesCount: photo.faces.length,
+      })) || [];
+
+    const personClusters: PersonClusterItem[] =
+      wedding?.album?.personClusters.map((cluster) => ({
+        label: cluster.label || undefined,
+        appearanceCount: wedding.album!.photoEntities.filter((photo) =>
+          photo.faces.some((face) => face.personClusterId === cluster.id),
+        ).length,
+        thumbnailUrl: cluster.thumbnailUrl || undefined,
+      })) || [];
+
+    const sortedClusters = [...personClusters].sort(
+      (a, b) => b.appearanceCount - a.appearanceCount,
+    );
+    const mostFrequentPerson = sortedClusters[0];
+
     const emotionalTouchInsights: EmotionalTouchInsights = {
       totalWellWishes: weddingWrapped.totalWellWishes,
+      wellWishes,
       totalPhotos: weddingWrapped.totalPhotos,
+      photos,
       totalFacesDetected: weddingWrapped.totalFacesDetected,
       totalPeopleClusters: weddingWrapped.totalPeopleClusters,
+      mostFrequentPersonName: mostFrequentPerson?.label,
+      mostFrequentPersonCount: mostFrequentPerson?.appearanceCount,
+      mostFrequentPersonPhoto: mostFrequentPerson?.thumbnailUrl,
+      personClusters,
     };
 
     return this.toWeddingWrappedDto(
