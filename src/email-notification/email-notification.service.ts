@@ -33,6 +33,7 @@ import {
   VendorBookingConfirmationData,
   VendorBookingRejectionData,
   VendorGratitudeCardData,
+  VendorListingDeletionData,
   VendorStatusData,
   VendorSuspensionData,
   VerifyEmailData,
@@ -126,6 +127,10 @@ export class EmailNotificationService {
         {
           name: EmailTemplateType.DATING_PLATFORM_PAYOUT,
           file: 'dating-platform-payout.html',
+        },
+        {
+          name: EmailTemplateType.VENDOR_LISTING_DELETION,
+          file: 'vendor-listing-deletion.html',
         },
       ];
 
@@ -1513,6 +1518,64 @@ Website: https://knotly.app`;
 
     ${message2}
     ${footerNote}
+
+    ---
+    Knotly - Your Perfect Wedding, Perfectly Planned
+    Website: https://knotly.app`;
+  }
+
+  async sendVendorListingDeletionEmail(
+    vendorId: number,
+    listingName: string,
+    dateRemoved: string,
+    reasonForRemoval: string,
+  ): Promise<void> {
+    const vendor = await this.prisma.vendor.findUnique({
+      where: { userId: vendorId },
+      include: {
+        user: true,
+      },
+    });
+
+    const templateData: VendorListingDeletionData = {
+      vendorName: vendor.user.name,
+      listingName: listingName,
+      dateRemoved: dateRemoved,
+      reasonForRemoval: reasonForRemoval,
+    };
+
+    const html = this.renderTemplate(
+      EmailTemplateType.VENDOR_LISTING_DELETION,
+      templateData,
+    );
+    const text = this.generateVendorListingDeletionPlainText(templateData);
+
+    await this.sendEmail(
+      vendor.user.email,
+      'Vendor Listing Deletion - Knotly',
+      text,
+      html,
+      EmailTemplateType.VENDOR_LISTING_DELETION,
+      undefined,
+      vendorId,
+    );
+  }
+
+  private generateVendorListingDeletionPlainText(
+    templateData: VendorListingDeletionData,
+  ): string {
+    return `Hello ${templateData.vendorName}!
+
+    We are writing to inform you that your listing, "${templateData.listingName}", has been removed from the Knotly platform by an administrator.
+
+    Removed Listing Details:
+    - Listing Name: ${templateData.listingName}
+    - Date Removed: ${templateData.dateRemoved}
+
+    Reason for Removal:
+    ${templateData.reasonForRemoval}
+
+    If you have any questions, believe this is an error, or wish to discuss this further, please reply directly to this email. Our support team will review your inquiry and get back to you.
 
     ---
     Knotly - Your Perfect Wedding, Perfectly Planned

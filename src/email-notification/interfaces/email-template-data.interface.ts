@@ -150,6 +150,13 @@ export interface DatingPlatformPayoutData {
   currency: string;
 }
 
+export interface VendorListingDeletionData {
+  vendorName: string;
+  listingName: string;
+  dateRemoved: string;
+  reasonForRemoval: string;
+}
+
 export type EmailTemplateData =
   | PasswordResetData
   | WelcomeEmailData
@@ -170,4 +177,5 @@ export type EmailTemplateData =
   | VendorBookingConfirmationData
   | VendorBookingRejectionData
   | RegisterDatingUserData
-  | DatingPlatformPayoutData;
+  | DatingPlatformPayoutData
+  | VendorListingDeletionData;
