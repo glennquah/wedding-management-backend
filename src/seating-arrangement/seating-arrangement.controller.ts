@@ -66,7 +66,6 @@ export class SeatingArrangementController {
   }
 
   @Get()
-  @UseGuards(JwtGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Get seating arrangement for a wedding' })
   @ApiParam({ name: 'weddingId', type: 'number', description: 'Wedding ID' })
