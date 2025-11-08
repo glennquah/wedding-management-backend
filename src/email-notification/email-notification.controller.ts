@@ -14,6 +14,7 @@ import { EmailTemplateResponse } from '../ai-service/interfaces/email-template-r
 import { BroadcastRsvpInvitationDto } from './dto/broadcast-rsvp-invitation.dto';
 import { GenerateAiEmailTemplateDto } from './dto/generate-ai-email-template.dto';
 import { SendBulkEmailDto } from './dto/send-bulk-email.dto';
+import { SendVendorListingDeletionDto } from './dto/send-listing-deletion-email.dto';
 import { SendRsvpInvitationDto } from './dto/send-rsvp-invitation.dto';
 import { SendSingleEmailDto } from './dto/send-single-email.dto';
 import { EmailNotificationService } from './email-notification.service';
@@ -155,5 +156,22 @@ export class EmailNotificationController {
     @Param('weddingId', ParseIntPipe) weddingId: number,
   ): Promise<void> {
     await this.emailNotificationService.broadcastVendorGratitude(weddingId);
+  }
+
+  @Post('send-vendor-listing-deletion')
+  @ApiOperation({ summary: 'Send listing deletion notice to a vendor' })
+  @ApiResponse({
+    status: 201,
+    description: 'The listing deletion email has been successfully sent.',
+  })
+  async sendListingDeletionEmail(
+    @Body() payload: SendVendorListingDeletionDto,
+  ): Promise<void> {
+    await this.emailNotificationService.sendVendorListingDeletionEmail(
+      payload.vendorId,
+      payload.listingName,
+      payload.dateRemoved,
+      payload.reasonForRemoval,
+    );
   }
 }
