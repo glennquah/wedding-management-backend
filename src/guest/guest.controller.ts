@@ -22,11 +22,11 @@ import { GuestService } from './guest.service';
 
 @ApiTags('guests')
 @Controller('guests')
-@UseGuards(JwtGuard, RolesGuard)
 export class GuestController {
   constructor(private guestService: GuestService) {}
 
   @Post()
+  @UseGuards(JwtGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Create a new guest' })
   @ApiResponse({
@@ -41,6 +41,7 @@ export class GuestController {
   }
 
   @Post('bulk')
+  @UseGuards(JwtGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Create multiple guests' })
   @ApiResponse({
@@ -57,6 +58,7 @@ export class GuestController {
   }
 
   @Get('')
+  @UseGuards(JwtGuard, RolesGuard)
   @Roles(UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Get all guests for all weddings' })
   @ApiResponse({
@@ -91,6 +93,7 @@ export class GuestController {
   }
 
   @Get(':id')
+  @UseGuards(JwtGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Get a guest by ID' })
   @ApiResponse({
@@ -107,6 +110,7 @@ export class GuestController {
   }
 
   @Put(':id')
+  @UseGuards(JwtGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Update a guest' })
   @ApiResponse({
@@ -125,6 +129,7 @@ export class GuestController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Delete a guest' })
   @ApiResponse({
@@ -137,6 +142,7 @@ export class GuestController {
   }
 
   @Delete('wedding/:weddingId')
+  @UseGuards(JwtGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Delete all guests for a specific wedding' })
   @ApiResponse({
@@ -150,6 +156,7 @@ export class GuestController {
   }
 
   @Put(':id/confirm')
+  @UseGuards(JwtGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Confirm guest attendance' })
   @ApiResponse({
@@ -168,6 +175,7 @@ export class GuestController {
   }
 
   @Put(':id/reject')
+  @UseGuards(JwtGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Reject guest attendance' })
   @ApiResponse({
@@ -202,6 +210,7 @@ export class GuestController {
   }
 
   @Put(':id/check-in')
+  @UseGuards(JwtGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Check in a guest' })
   @ApiResponse({
@@ -218,6 +227,7 @@ export class GuestController {
   }
 
   @Delete(':id/check-in')
+  @UseGuards(JwtGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ summary: 'Remove guest check-in' })
   @ApiResponse({
