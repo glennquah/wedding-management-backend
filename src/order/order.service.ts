@@ -38,16 +38,16 @@ export class OrderService {
         return;
       }
 
-      const { buffer, filename } =
-        await this.invoiceGeneratorService.generateDatingPartnerCommissionInvoice(
-          commissionLog,
-        );
+      // const { buffer, filename } =
+      //   await this.invoiceGeneratorService.generateDatingPartnerCommissionInvoice(
+      //     commissionLog,
+      //   );
 
       await this.emailService.sendDatingPlatformPayoutEmail(
         partnerEmail,
         commissionLog,
-        buffer,
-        filename,
+        // buffer,
+        // filename,
       );
 
       console.log(`Commission invoice email sent for ${commissionLog.id}`);

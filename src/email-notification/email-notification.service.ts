@@ -1452,8 +1452,8 @@ Website: https://knotly.app`;
   async sendDatingPlatformPayoutEmail(
     to: string,
     data: DatingPartnerCommission,
-    pdfBuffer: Buffer,
-    filename: string,
+    // pdfBuffer: Buffer,
+    // filename: string,
   ): Promise<void> {
     const templateData: DatingPlatformPayoutData = {
       partnerName: process.env.PARTNER_CONTACT_NAME,
@@ -1475,12 +1475,12 @@ Website: https://knotly.app`;
     );
 
     // Create pdf attachment object
-    const attachment = {
-      content: pdfBuffer.toString('base64'),
-      filename: filename,
-      type: 'application/pdf',
-      disposition: 'attachment',
-    };
+    // const attachment = {
+    //   content: pdfBuffer.toString('base64'),
+    //   filename: filename,
+    //   type: 'application/pdf',
+    //   disposition: 'attachment',
+    // };
 
     await this.sendEmail(
       to,
@@ -1490,7 +1490,7 @@ Website: https://knotly.app`;
       EmailTemplateType.DATING_PLATFORM_PAYOUT,
       undefined,
       undefined,
-      [attachment],
+      // [attachment],
     );
   }
 
