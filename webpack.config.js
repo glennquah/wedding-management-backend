@@ -33,6 +33,7 @@ module.exports = {
         const lazyImports = [
           '@nestjs/microservices/microservices-module',
           '@nestjs/websockets/socket-module',
+          'brotli',
         ];
         return lazyImports.includes(resource);
       },
@@ -44,8 +45,19 @@ module.exports = {
           to: path.resolve(__dirname, 'dist/node_modules/.prisma/client'),
         },
         {
-          from: path.resolve(__dirname, 'src/email-notification/email-templates'),
+          from: path.resolve(
+            __dirname,
+            'src/email-notification/email-templates',
+          ),
           to: path.resolve(__dirname, 'dist/email-templates'),
+        },
+        {
+          from: path.resolve(__dirname, 'public'),
+          to: path.resolve(__dirname, 'dist/public'),
+        },
+        {
+          from: path.resolve(__dirname, 'node_modules/pdfkit/js/data'),
+          to: path.resolve(__dirname, 'dist/node_modules/pdfkit/js/data'),
         },
       ],
     }),
