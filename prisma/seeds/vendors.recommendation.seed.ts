@@ -261,7 +261,7 @@ export async function seedRecommendationVendors(
     const onboardingStatus = VendorOnboardingStatus.ONBOARDED;
     const isSuspended = false;
 
-    const email = `vendor${i}@recommendation.com`;
+    const fixedUserId = 10000 + i;
 
     // Calculate signup date (spread over 12 months, older to newer)
     const monthIndex = Math.floor(i / (200 / numberOfMonths));
@@ -274,8 +274,9 @@ export async function seedRecommendationVendors(
 
     const vendor = await prisma.user.create({
       data: {
+        id: fixedUserId,
         name: vendorName,
-        email,
+        email: `vendor${i}@recommendation.com`,
         password: hashedPassword,
         role: UserRole.VENDOR,
         createdAt: createdDate,
