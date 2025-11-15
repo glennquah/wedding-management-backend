@@ -25,161 +25,45 @@
     </text>
 
     <!-- Relationships -->
-    <line x1="190" y1="180" x2="190" y2="390"
-              stroke="#333" stroke-width="2" marker-end="url(#arrow-one)" />
-    <text x="190" y="280" font-family="Arial" font-size="11" fill="#333" text-anchor="middle"
-          style="background: white; padding: 2px;">1:1</text>
-    <line x1="190" y1="180" x2="540" y2="140"
-              stroke="#333" stroke-width="2" marker-end="url(#arrow-one)" />
-    <text x="365" y="155" font-family="Arial" font-size="11" fill="#333" text-anchor="middle"
-          style="background: white; padding: 2px;">1:1</text>
-    <line x1="190" y1="180" x2="890" y2="180"
-              stroke="#333" stroke-width="2" marker-end="url(#arrow-one)" />
-    <text x="540" y="175" font-family="Arial" font-size="11" fill="#333" text-anchor="middle"
-          style="background: white; padding: 2px;">1:1</text>
-    <line x1="190" y1="390" x2="190" y2="840"
-              stroke="#333" stroke-width="2" marker-start="url(#arrow-bidirectional-start)" marker-end="url(#arrow-bidirectional-end)" stroke-dasharray="5,5"/>
-    <text x="190" y="610" font-family="Arial" font-size="11" fill="#333" text-anchor="middle"
-          style="background: white; padding: 2px;">M:N</text>
-    <line x1="190" y1="390" x2="890" y2="400"
-              stroke="#333" stroke-width="2" marker-end="url(#arrow-one)" />
-    <text x="540" y="390" font-family="Arial" font-size="11" fill="#333" text-anchor="middle"
-          style="background: white; padding: 2px;">1:1</text>
-    <line x1="190" y1="390" x2="540" y2="380"
-              stroke="#333" stroke-width="2" marker-end="url(#arrow-one)" />
-    <text x="365" y="380" font-family="Arial" font-size="11" fill="#333" text-anchor="middle"
-          style="background: white; padding: 2px;">1:1</text>
-    <line x1="190" y1="390" x2="1290" y2="610"
-              stroke="#333" stroke-width="2" marker-end="url(#arrow-one)" />
-    <text x="740" y="495" font-family="Arial" font-size="11" fill="#333" text-anchor="middle"
-          style="background: white; padding: 2px;">1:N</text>
-    <line x1="190" y1="840" x2="540" y2="840"
-              stroke="#333" stroke-width="2" marker-end="url(#arrow-one)" />
-    <text x="365" y="835" font-family="Arial" font-size="11" fill="#333" text-anchor="middle"
-          style="background: white; padding: 2px;">1:N</text>
-    <line x1="190" y1="840" x2="1290" y2="820"
-              stroke="#333" stroke-width="2" marker-end="url(#arrow-one)" />
-    <text x="740" y="825" font-family="Arial" font-size="11" fill="#333" text-anchor="middle"
-          style="background: white; padding: 2px;">1:N</text>
-    <line x1="190" y1="840" x2="190" y2="1240"
-              stroke="#333" stroke-width="2" marker-end="url(#arrow-one)" />
-    <text x="190" y="1035" font-family="Arial" font-size="11" fill="#333" text-anchor="middle"
-          style="background: white; padding: 2px;">1:1</text>
-    <line x1="190" y1="840" x2="190" y2="1480"
-              stroke="#333" stroke-width="2" marker-end="url(#arrow-one)" />
-    <text x="190" y="1155" font-family="Arial" font-size="11" fill="#333" text-anchor="middle"
-          style="background: white; padding: 2px;">1:1</text>
-    <line x1="190" y1="840" x2="540" y2="1490"
-              stroke="#333" stroke-width="2" marker-end="url(#arrow-one)" />
-    <text x="365" y="1160" font-family="Arial" font-size="11" fill="#333" text-anchor="middle"
-          style="background: white; padding: 2px;">1:N</text>
-    <line x1="190" y1="840" x2="190" y2="1710"
-              stroke="#333" stroke-width="2" marker-end="url(#arrow-one)" />
-    <text x="190" y="1270" font-family="Arial" font-size="11" fill="#333" text-anchor="middle"
-          style="background: white; padding: 2px;">1:1</text>
-    <line x1="190" y1="840" x2="540" y2="1710"
-              stroke="#333" stroke-width="2" marker-end="url(#arrow-one)" />
-    <text x="365" y="1270" font-family="Arial" font-size="11" fill="#333" text-anchor="middle"
-          style="background: white; padding: 2px;">1:1</text>
-    <line x1="190" y1="840" x2="890" y2="1470"
-              stroke="#333" stroke-width="2" marker-end="url(#arrow-one)" />
-    <text x="540" y="1150" font-family="Arial" font-size="11" fill="#333" text-anchor="middle"
-          style="background: white; padding: 2px;">1:1</text>
-    <line x1="190" y1="840" x2="1290" y2="1480"
-              stroke="#333" stroke-width="2" marker-end="url(#arrow-one)" />
-    <text x="740" y="1155" font-family="Arial" font-size="11" fill="#333" text-anchor="middle"
-          style="background: white; padding: 2px;">1:1</text>
-    <line x1="190" y1="840" x2="190" y2="1930"
-              stroke="#333" stroke-width="2" marker-end="url(#arrow-one)" />
-    <text x="190" y="1380" font-family="Arial" font-size="11" fill="#333" text-anchor="middle"
-          style="background: white; padding: 2px;">1:1</text>
-    <line x1="190" y1="840" x2="890" y2="820"
-              stroke="#333" stroke-width="2" marker-end="url(#arrow-one)" />
-    <text x="540" y="825" font-family="Arial" font-size="11" fill="#333" text-anchor="middle"
-          style="background: white; padding: 2px;">1:N</text>
-    <line x1="190" y1="840" x2="1290" y2="1950"
-              stroke="#333" stroke-width="2" marker-end="url(#arrow-one)" />
-    <text x="740" y="1390" font-family="Arial" font-size="11" fill="#333" text-anchor="middle"
-          style="background: white; padding: 2px;">1:1</text>
-    <line x1="540" y1="840" x2="890" y2="400"
-              stroke="#333" stroke-width="2" marker-end="url(#arrow-one)" />
-    <text x="715" y="615" font-family="Arial" font-size="11" fill="#333" text-anchor="middle"
-          style="background: white; padding: 2px;">1:1</text>
-    <line x1="540" y1="840" x2="890" y2="820"
-              stroke="#333" stroke-width="2" marker-end="url(#arrow-one)" />
-    <text x="715" y="825" font-family="Arial" font-size="11" fill="#333" text-anchor="middle"
-          style="background: white; padding: 2px;">1:N</text>
-    <path d="M 680,810 L 720,810 L 720,850 L 680,850"
-                  stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)"/>
-    <text x="730" y="830" font-family="Arial" font-size="11" fill="#333">1:N</text>
-    <line x1="890" y1="180" x2="1290" y2="170"
-              stroke="#333" stroke-width="2" marker-end="url(#arrow-one)" />
-    <text x="1090" y="170" font-family="Arial" font-size="11" fill="#333" text-anchor="middle"
-          style="background: white; padding: 2px;">1:N</text>
-    <line x1="890" y1="180" x2="1290" y2="610"
-              stroke="#333" stroke-width="2" marker-end="url(#arrow-one)" />
-    <text x="1090" y="390" font-family="Arial" font-size="11" fill="#333" text-anchor="middle"
-          style="background: white; padding: 2px;">1:N</text>
-    <line x1="890" y1="180" x2="190" y2="1240"
-              stroke="#333" stroke-width="2" marker-end="url(#arrow-one)" />
-    <text x="540" y="705" font-family="Arial" font-size="11" fill="#333" text-anchor="middle"
-          style="background: white; padding: 2px;">1:1</text>
-    <line x1="1290" y1="820" x2="890" y2="590"
-              stroke="#333" stroke-width="2" marker-end="url(#arrow-one)" />
-    <text x="1090" y="700" font-family="Arial" font-size="11" fill="#333" text-anchor="middle"
-          style="background: white; padding: 2px;">1:N</text>
-    <line x1="1290" y1="170" x2="890" y2="590"
-              stroke="#333" stroke-width="2" marker-end="url(#arrow-one)" />
-    <text x="1090" y="375" font-family="Arial" font-size="11" fill="#333" text-anchor="middle"
-          style="background: white; padding: 2px;">1:N</text>
-    <line x1="1290" y1="820" x2="1690" y2="590"
-              stroke="#333" stroke-width="2" marker-end="url(#arrow-one)" />
-    <text x="1490" y="700" font-family="Arial" font-size="11" fill="#333" text-anchor="middle"
-          style="background: white; padding: 2px;">1:N</text>
-    <line x1="890" y1="590" x2="1290" y2="610"
-              stroke="#333" stroke-width="2" marker-end="url(#arrow-one)" />
-    <text x="1090" y="595" font-family="Arial" font-size="11" fill="#333" text-anchor="middle"
-          style="background: white; padding: 2px;">1:1</text>
-    <line x1="540" y1="380" x2="540" y2="590"
-              stroke="#333" stroke-width="2" marker-end="url(#arrow-one)" />
-    <text x="540" y="480" font-family="Arial" font-size="11" fill="#333" text-anchor="middle"
-          style="background: white; padding: 2px;">1:N</text>
-    <line x1="1290" y1="170" x2="540" y2="590"
-              stroke="#333" stroke-width="2" marker-end="url(#arrow-one)" />
-    <text x="915" y="375" font-family="Arial" font-size="11" fill="#333" text-anchor="middle"
-          style="background: white; padding: 2px;">1:N</text>
-    <line x1="190" y1="1240" x2="540" y2="1250"
-              stroke="#333" stroke-width="2" marker-end="url(#arrow-one)" />
-    <text x="365" y="1240" font-family="Arial" font-size="11" fill="#333" text-anchor="middle"
-          style="background: white; padding: 2px;">1:N</text>
-    <line x1="190" y1="1240" x2="890" y2="1260"
-              stroke="#333" stroke-width="2" marker-end="url(#arrow-one)" />
-    <text x="540" y="1245" font-family="Arial" font-size="11" fill="#333" text-anchor="middle"
-          style="background: white; padding: 2px;">1:N</text>
-    <line x1="540" y1="1710" x2="890" y2="1720"
-              stroke="#333" stroke-width="2" marker-end="url(#arrow-one)" />
-    <text x="715" y="1710" font-family="Arial" font-size="11" fill="#333" text-anchor="middle"
-          style="background: white; padding: 2px;">1:N</text>
-    <line x1="540" y1="1710" x2="1690" y2="1710"
-              stroke="#333" stroke-width="2" marker-end="url(#arrow-one)" />
-    <text x="1115" y="1705" font-family="Arial" font-size="11" fill="#333" text-anchor="middle"
-          style="background: white; padding: 2px;">1:N</text>
-    <line x1="890" y1="1720" x2="1290" y2="1720"
-              stroke="#333" stroke-width="2" marker-end="url(#arrow-one)" />
-    <text x="1090" y="1715" font-family="Arial" font-size="11" fill="#333" text-anchor="middle"
-          style="background: white; padding: 2px;">1:N</text>
-    <line x1="1690" y1="1710" x2="1290" y2="1720"
-              stroke="#333" stroke-width="2" marker-end="url(#arrow-one)" />
-    <text x="1490" y="1710" font-family="Arial" font-size="11" fill="#333" text-anchor="middle"
-          style="background: white; padding: 2px;">1:N</text>
-    <line x1="190" y1="1930" x2="540" y2="1950"
-              stroke="#333" stroke-width="2" marker-end="url(#arrow-one)" />
-    <text x="365" y="1935" font-family="Arial" font-size="11" fill="#333" text-anchor="middle"
-          style="background: white; padding: 2px;">1:N</text>
-    <line x1="190" y1="1930" x2="890" y2="1940"
-              stroke="#333" stroke-width="2" marker-end="url(#arrow-one)" />
-    <text x="540" y="1930" font-family="Arial" font-size="11" fill="#333" text-anchor="middle"
-          style="background: white; padding: 2px;">1:N</text>
+    <path d="M 190,260 L 190,290 L 190,290 L 190,320" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 330,180 L 365,180 L 365,140 L 400,140" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 330,180 L 540,180 L 540,180 L 750,180" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 190,460 L 190,605 L 190,605 L 190,750" stroke="#333" stroke-width="2" fill="none" marker-start="url(#arrow-bidirectional-start)" marker-end="url(#arrow-bidirectional-end)" stroke-dasharray="5,5"/>
+    <path d="M 330,390 L 540,390 L 540,400 L 750,400" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 330,390 L 365,390 L 365,380 L 400,380" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 330,390 L 740,390 L 740,610 L 1150,610" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 330,840 L 365,840 L 365,840 L 400,840" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 330,840 L 740,840 L 740,820 L 1150,820" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 190,930 L 190,1055 L 190,1055 L 190,1180" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 190,930 L 190,1170 L 190,1170 L 190,1410" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 190,930 L 190,1170 L 540,1170 L 540,1410" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 190,930 L 190,1285 L 190,1285 L 190,1640" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 190,930 L 190,1285 L 540,1285 L 540,1640" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 330,840 L 540,840 L 540,1470 L 750,1470" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 330,840 L 740,840 L 740,1480 L 1150,1480" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 190,930 L 190,1400 L 190,1400 L 190,1870" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 330,840 L 540,840 L 540,820 L 750,820" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 190,930 L 190,1400 L 1290,1400 L 1290,1870" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 540,750 L 540,615 L 890,615 L 890,480" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 680,840 L 715,840 L 715,820 L 750,820" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 680,840 L 730,840 L 730,890 L 680,890" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)"/>
+    <path d="M 1030,180 L 1090,180 L 1090,170 L 1150,170" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 890,260 L 890,390 L 1290,390 L 1290,520" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 890,260 L 890,720 L 190,720 L 190,1180" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 1150,820 L 1090,820 L 1090,590 L 1030,590" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 1290,240 L 1290,380 L 890,380 L 890,520" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 1430,820 L 1490,820 L 1490,590 L 1550,590" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 1030,590 L 1090,590 L 1090,610 L 1150,610" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 540,440 L 540,480 L 540,480 L 540,520" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 1150,170 L 915,170 L 915,590 L 680,590" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 330,1240 L 365,1240 L 365,1250 L 400,1250" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 330,1240 L 540,1240 L 540,1260 L 750,1260" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 680,1710 L 715,1710 L 715,1720 L 750,1720" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 680,1710 L 1115,1710 L 1115,1710 L 1550,1710" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 1030,1720 L 1090,1720 L 1090,1720 L 1150,1720" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 1550,1710 L 1490,1710 L 1490,1720 L 1430,1720" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 330,1930 L 365,1930 L 365,1950 L 400,1950" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 330,1930 L 540,1930 L 540,1940 L 750,1940" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
 
     <!-- Model Boxes -->
     <!-- User -->
@@ -760,7 +644,7 @@
           font-size="10" fill="#000">topContributorName: String</text>
 
     <!-- Legend -->
-    <rect x="1610" y="100" width="300" height="420" fill="#FFFACD" stroke="#333" stroke-width="2" rx="5"/>
+    <rect x="1610" y="100" width="300" height="395" fill="#FFFACD" stroke="#333" stroke-width="2" rx="5"/>
     <text x="1760" y="125" font-family="Arial" font-size="16" font-weight="bold"
           text-anchor="middle" fill="#000">LEGEND</text>
     <line x1="1620" y1="135" x2="1900" y2="135" stroke="#333" stroke-width="1"/>
@@ -793,20 +677,16 @@
 
     <line x1="1620" y1="410" x2="1660" y2="410"
           stroke="#333" stroke-width="2" marker-end="url(#arrow-one)"/>
-    <text x="1670" y="415" font-family="Arial" font-size="11" fill="#000">One-to-One (1:1)</text>
+    <text x="1670" y="415" font-family="Arial" font-size="11" fill="#000">Directional (→)</text>
 
     <line x1="1620" y1="435" x2="1660" y2="435"
-          stroke="#333" stroke-width="2" marker-end="url(#arrow-one)"/>
-    <text x="1670" y="440" font-family="Arial" font-size="11" fill="#000">One-to-Many (1:N)</text>
-
-    <line x1="1620" y1="460" x2="1660" y2="460"
           stroke="#333" stroke-width="2" stroke-dasharray="5,5"
           marker-start="url(#arrow-bidirectional-start)" marker-end="url(#arrow-bidirectional-end)"/>
-    <text x="1670" y="465" font-family="Arial" font-size="11" fill="#000">Many-to-Many (M:N)</text>
+    <text x="1670" y="440" font-family="Arial" font-size="11" fill="#000">Bidirectional (↔)</text>
 
-    <line x1="1620" y1="480" x2="1900" y2="480" stroke="#333" stroke-width="1"/>
+    <line x1="1620" y1="455" x2="1900" y2="455" stroke="#333" stroke-width="1"/>
 
-    <text x="1620" y="500" font-family="Arial" font-size="10" fill="#555">PK = Primary Key</text>
-    <text x="1760" y="500" font-family="Arial" font-size="10" fill="#555">FK = Foreign Key</text>
+    <text x="1620" y="475" font-family="Arial" font-size="10" fill="#555">PK = Primary Key</text>
+    <text x="1760" y="475" font-family="Arial" font-size="10" fill="#555">FK = Foreign Key</text>
 
 </svg>
