@@ -1,0 +1,692 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1930" height="2270" viewBox="0 0 1930 2270">
+    <defs>
+        <!-- Arrow markers -->
+        <marker id="arrow-one" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L0,6 L9,3 z" fill="#333" />
+        </marker>
+        <marker id="arrow-bidirectional-start" markerWidth="10" markerHeight="10" refX="1" refY="3" orient="auto" markerUnits="strokeWidth">
+            <path d="M9,0 L9,6 L0,3 z" fill="#333" />
+        </marker>
+        <marker id="arrow-bidirectional-end" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L0,6 L9,3 z" fill="#333" />
+        </marker>
+    </defs>
+
+    <!-- Background -->
+    <rect width="1930" height="2270" fill="#ffffff"/>
+
+    <!-- Title -->
+    <text x="965" y="30" font-family="Arial" font-size="24" font-weight="bold" text-anchor="middle" fill="#2c3e50">
+        Wedding Management System - Entity Relationship Diagram
+    </text>
+    <text x="965" y="55" font-family="Arial" font-size="14" text-anchor="middle" fill="#7f8c8d">
+        Total Models: 35 | All Relationships Mapped
+    </text>
+
+    <!-- Relationships -->
+    <path d="M 190,260 L 190,290 L 190,290 L 190,320" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 330,180 L 365,180 L 365,140 L 400,140" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 330,180 L 540,180 L 540,180 L 750,180" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 190,460 L 190,605 L 190,605 L 190,750" stroke="#333" stroke-width="2" fill="none" marker-start="url(#arrow-bidirectional-start)" marker-end="url(#arrow-bidirectional-end)" stroke-dasharray="5,5"/>
+    <path d="M 330,390 L 540,390 L 540,400 L 750,400" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 330,390 L 365,390 L 365,380 L 400,380" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 330,390 L 740,390 L 740,610 L 1150,610" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 330,840 L 365,840 L 365,840 L 400,840" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 330,840 L 740,840 L 740,820 L 1150,820" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 190,930 L 190,1055 L 190,1055 L 190,1180" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 190,930 L 190,1170 L 190,1170 L 190,1410" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 190,930 L 190,1170 L 540,1170 L 540,1410" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 190,930 L 190,1285 L 190,1285 L 190,1640" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 190,930 L 190,1285 L 540,1285 L 540,1640" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 330,840 L 540,840 L 540,1470 L 750,1470" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 330,840 L 740,840 L 740,1480 L 1150,1480" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 190,930 L 190,1400 L 190,1400 L 190,1870" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 330,840 L 540,840 L 540,820 L 750,820" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 190,930 L 190,1400 L 1290,1400 L 1290,1870" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 540,750 L 540,615 L 890,615 L 890,480" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 680,840 L 715,840 L 715,820 L 750,820" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 680,840 L 730,840 L 730,890 L 680,890" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)"/>
+    <path d="M 1030,180 L 1090,180 L 1090,170 L 1150,170" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 890,260 L 890,390 L 1290,390 L 1290,520" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 890,260 L 890,720 L 190,720 L 190,1180" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 1150,820 L 1090,820 L 1090,590 L 1030,590" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 1290,240 L 1290,380 L 890,380 L 890,520" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 1430,820 L 1490,820 L 1490,590 L 1550,590" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 1030,590 L 1090,590 L 1090,610 L 1150,610" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 540,440 L 540,480 L 540,480 L 540,520" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 1150,170 L 915,170 L 915,590 L 680,590" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 330,1240 L 365,1240 L 365,1250 L 400,1250" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 330,1240 L 540,1240 L 540,1260 L 750,1260" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 680,1710 L 715,1710 L 715,1720 L 750,1720" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 680,1710 L 1115,1710 L 1115,1710 L 1550,1710" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 1030,1720 L 1090,1720 L 1090,1720 L 1150,1720" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 1550,1710 L 1490,1710 L 1490,1720 L 1430,1720" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 330,1930 L 365,1930 L 365,1950 L 400,1950" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+    <path d="M 330,1930 L 540,1930 L 540,1940 L 750,1940" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrow-one)" />
+
+    <!-- Model Boxes -->
+    <!-- User -->
+    <rect x="50" y="100" width="280" height="160"
+          fill="#DAE8FC" stroke="#333" stroke-width="2" rx="5"/>
+    <rect x="50" y="100" width="280" height="30"
+          fill="#DAE8FC" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="190" y="120" font-family="Arial" font-size="14"
+          font-weight="bold" text-anchor="middle" fill="#000">User</text>
+    <line x1="50" y1="130" x2="330" y2="130" stroke="#333" stroke-width="2"/>
+    <text x="60" y="150" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">id: Int (PK)</text>
+    <text x="60" y="170" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">name: String</text>
+    <text x="60" y="190" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">email: String (unique)</text>
+    <text x="60" y="210" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">password: String</text>
+    <text x="60" y="230" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">role: UserRole</text>
+    <!-- SuperAdmin -->
+    <rect x="400" y="100" width="280" height="80"
+          fill="#D5E8D4" stroke="#333" stroke-width="2" rx="5"/>
+    <rect x="400" y="100" width="280" height="30"
+          fill="#D5E8D4" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="540" y="120" font-family="Arial" font-size="14"
+          font-weight="bold" text-anchor="middle" fill="#000">SuperAdmin</text>
+    <line x1="400" y1="130" x2="680" y2="130" stroke="#333" stroke-width="2"/>
+    <text x="410" y="150" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">userId: Int (PK, FK)</text>
+    <!-- Vendor -->
+    <rect x="750" y="100" width="280" height="160"
+          fill="#D5E8D4" stroke="#333" stroke-width="2" rx="5"/>
+    <rect x="750" y="100" width="280" height="30"
+          fill="#D5E8D4" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="890" y="120" font-family="Arial" font-size="14"
+          font-weight="bold" text-anchor="middle" fill="#000">Vendor</text>
+    <line x1="750" y1="130" x2="1030" y2="130" stroke="#333" stroke-width="2"/>
+    <text x="760" y="150" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">userId: Int (PK, FK)</text>
+    <text x="760" y="170" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">rating: Float</text>
+    <text x="760" y="190" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">serviceOffered: WeddingService</text>
+    <text x="760" y="210" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">onboardingStatus: VendorOnboardingStatus</text>
+    <text x="760" y="230" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">stripeConnectAccountId: String</text>
+    <!-- Listing -->
+    <rect x="1150" y="100" width="280" height="140"
+          fill="#FFE6CC" stroke="#333" stroke-width="2" rx="5"/>
+    <rect x="1150" y="100" width="280" height="30"
+          fill="#FFE6CC" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="1290" y="120" font-family="Arial" font-size="14"
+          font-weight="bold" text-anchor="middle" fill="#000">Listing</text>
+    <line x1="1150" y1="130" x2="1430" y2="130" stroke="#333" stroke-width="2"/>
+    <text x="1160" y="150" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">id: Int (PK)</text>
+    <text x="1160" y="170" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">listingName: String</text>
+    <text x="1160" y="190" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">price: Float</text>
+    <text x="1160" y="210" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">vendorId: Int (FK)</text>
+    <!-- Admin -->
+    <rect x="50" y="320" width="280" height="140"
+          fill="#D5E8D4" stroke="#333" stroke-width="2" rx="5"/>
+    <rect x="50" y="320" width="280" height="30"
+          fill="#D5E8D4" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="190" y="340" font-family="Arial" font-size="14"
+          font-weight="bold" text-anchor="middle" fill="#000">Admin</text>
+    <line x1="50" y1="350" x2="330" y2="350" stroke="#333" stroke-width="2"/>
+    <text x="60" y="370" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">userId: Int (PK, FK)</text>
+    <text x="60" y="390" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">isSuspended: Boolean</text>
+    <text x="60" y="410" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">isDatingPartnerRegistered: Boolean</text>
+    <text x="60" y="430" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">mainWeddingId: Int (FK)</text>
+    <!-- Cart -->
+    <rect x="400" y="320" width="280" height="120"
+          fill="#FFE6CC" stroke="#333" stroke-width="2" rx="5"/>
+    <rect x="400" y="320" width="280" height="30"
+          fill="#FFE6CC" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="540" y="340" font-family="Arial" font-size="14"
+          font-weight="bold" text-anchor="middle" fill="#000">Cart</text>
+    <line x1="400" y1="350" x2="680" y2="350" stroke="#333" stroke-width="2"/>
+    <text x="410" y="370" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">id: Int (PK)</text>
+    <text x="410" y="390" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">total: Float</text>
+    <text x="410" y="410" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">adminId: Int (FK)</text>
+    <!-- GoogleCalendarConnection -->
+    <rect x="750" y="320" width="280" height="160"
+          fill="#F8CECC" stroke="#333" stroke-width="2" rx="5"/>
+    <rect x="750" y="320" width="280" height="30"
+          fill="#F8CECC" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="890" y="340" font-family="Arial" font-size="14"
+          font-weight="bold" text-anchor="middle" fill="#000">GoogleCalendarConnection</text>
+    <line x1="750" y1="350" x2="1030" y2="350" stroke="#333" stroke-width="2"/>
+    <text x="760" y="370" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">id: Int (PK)</text>
+    <text x="760" y="390" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">adminId: Int (FK)</text>
+    <text x="760" y="410" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">guestId: Int (FK)</text>
+    <text x="760" y="430" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">accessToken: String</text>
+    <text x="760" y="450" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">accessStatus: CalendarAccessStatus</text>
+    <!-- CartItem -->
+    <rect x="400" y="520" width="280" height="140"
+          fill="#FFE6CC" stroke="#333" stroke-width="2" rx="5"/>
+    <rect x="400" y="520" width="280" height="30"
+          fill="#FFE6CC" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="540" y="540" font-family="Arial" font-size="14"
+          font-weight="bold" text-anchor="middle" fill="#000">CartItem</text>
+    <line x1="400" y1="550" x2="680" y2="550" stroke="#333" stroke-width="2"/>
+    <text x="410" y="570" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">id: Int (PK)</text>
+    <text x="410" y="590" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">cartId: Int (FK)</text>
+    <text x="410" y="610" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">listingId: Int (FK)</text>
+    <text x="410" y="630" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">selectedSlots: Json</text>
+    <!-- OrderListing -->
+    <rect x="750" y="520" width="280" height="140"
+          fill="#FFE6CC" stroke="#333" stroke-width="2" rx="5"/>
+    <rect x="750" y="520" width="280" height="30"
+          fill="#FFE6CC" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="890" y="540" font-family="Arial" font-size="14"
+          font-weight="bold" text-anchor="middle" fill="#000">OrderListing</text>
+    <line x1="750" y1="550" x2="1030" y2="550" stroke="#333" stroke-width="2"/>
+    <text x="760" y="570" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">orderId: Int (PK, FK)</text>
+    <text x="760" y="590" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">listingId: Int (PK, FK)</text>
+    <text x="760" y="610" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">bookedSlots: Json</text>
+    <text x="760" y="630" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">bookingStatus: OrderStatus</text>
+    <!-- Review -->
+    <rect x="1150" y="520" width="280" height="180"
+          fill="#FFE6CC" stroke="#333" stroke-width="2" rx="5"/>
+    <rect x="1150" y="520" width="280" height="30"
+          fill="#FFE6CC" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="1290" y="540" font-family="Arial" font-size="14"
+          font-weight="bold" text-anchor="middle" fill="#000">Review</text>
+    <line x1="1150" y1="550" x2="1430" y2="550" stroke="#333" stroke-width="2"/>
+    <text x="1160" y="570" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">id: Int (PK)</text>
+    <text x="1160" y="590" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">rating: Int</text>
+    <text x="1160" y="610" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">vendorId: Int (FK)</text>
+    <text x="1160" y="630" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">adminId: Int (FK)</text>
+    <text x="1160" y="650" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">orderId: Int (FK)</text>
+    <text x="1160" y="670" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">listingId: Int (FK)</text>
+    <!-- Payment -->
+    <rect x="1550" y="520" width="280" height="140"
+          fill="#FFE6CC" stroke="#333" stroke-width="2" rx="5"/>
+    <rect x="1550" y="520" width="280" height="30"
+          fill="#FFE6CC" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="1690" y="540" font-family="Arial" font-size="14"
+          font-weight="bold" text-anchor="middle" fill="#000">Payment</text>
+    <line x1="1550" y1="550" x2="1830" y2="550" stroke="#333" stroke-width="2"/>
+    <text x="1560" y="570" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">id: Int (PK)</text>
+    <text x="1560" y="590" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">stripeCheckoutSessionId: String</text>
+    <text x="1560" y="610" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">amount: Float</text>
+    <text x="1560" y="630" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">orderId: Int (FK)</text>
+    <!-- Wedding -->
+    <rect x="50" y="750" width="280" height="180"
+          fill="#FFF2CC" stroke="#333" stroke-width="2" rx="5"/>
+    <rect x="50" y="750" width="280" height="30"
+          fill="#FFF2CC" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="190" y="770" font-family="Arial" font-size="14"
+          font-weight="bold" text-anchor="middle" fill="#000">Wedding</text>
+    <line x1="50" y1="780" x2="330" y2="780" stroke="#333" stroke-width="2"/>
+    <text x="60" y="800" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">id: Int (PK)</text>
+    <text x="60" y="820" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">name: String</text>
+    <text x="60" y="840" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">date: DateTime</text>
+    <text x="60" y="860" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">location: String</text>
+    <text x="60" y="880" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">allocatedBudget: Float</text>
+    <text x="60" y="900" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">weddingType: WeddingType</text>
+    <!-- Guest -->
+    <rect x="400" y="750" width="280" height="180"
+          fill="#E1D5E7" stroke="#333" stroke-width="2" rx="5"/>
+    <rect x="400" y="750" width="280" height="30"
+          fill="#E1D5E7" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="540" y="770" font-family="Arial" font-size="14"
+          font-weight="bold" text-anchor="middle" fill="#000">Guest</text>
+    <line x1="400" y1="780" x2="680" y2="780" stroke="#333" stroke-width="2"/>
+    <text x="410" y="800" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">id: Int (PK)</text>
+    <text x="410" y="820" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">name: String</text>
+    <text x="410" y="840" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">email: String</text>
+    <text x="410" y="860" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">confirmationStatus: ConfirmationStatus</text>
+    <text x="410" y="880" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">weddingId: Int (FK)</text>
+    <text x="410" y="900" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">primaryGuestId: Int (FK)</text>
+    <!-- CashGift -->
+    <rect x="750" y="750" width="280" height="140"
+          fill="#FFF2CC" stroke="#333" stroke-width="2" rx="5"/>
+    <rect x="750" y="750" width="280" height="30"
+          fill="#FFF2CC" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="890" y="770" font-family="Arial" font-size="14"
+          font-weight="bold" text-anchor="middle" fill="#000">CashGift</text>
+    <line x1="750" y1="780" x2="1030" y2="780" stroke="#333" stroke-width="2"/>
+    <text x="760" y="800" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">id: Int (PK)</text>
+    <text x="760" y="820" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">guestId: Int (FK)</text>
+    <text x="760" y="840" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">amount: Float</text>
+    <text x="760" y="860" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">weddingId: Int (FK)</text>
+    <!-- Order -->
+    <rect x="1150" y="750" width="280" height="140"
+          fill="#FFE6CC" stroke="#333" stroke-width="2" rx="5"/>
+    <rect x="1150" y="750" width="280" height="30"
+          fill="#FFE6CC" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="1290" y="770" font-family="Arial" font-size="14"
+          font-weight="bold" text-anchor="middle" fill="#000">Order</text>
+    <line x1="1150" y1="780" x2="1430" y2="780" stroke="#333" stroke-width="2"/>
+    <text x="1160" y="800" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">id: Int (PK)</text>
+    <text x="1160" y="820" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">orderStatus: OrderStatus</text>
+    <text x="1160" y="840" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">totalAmount: Float</text>
+    <text x="1160" y="860" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">weddingId: Int (FK)</text>
+    <!-- VendorEarning -->
+    <rect x="1550" y="750" width="280" height="160"
+          fill="#FFE6CC" stroke="#333" stroke-width="2" rx="5"/>
+    <rect x="1550" y="750" width="280" height="30"
+          fill="#FFE6CC" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="1690" y="770" font-family="Arial" font-size="14"
+          font-weight="bold" text-anchor="middle" fill="#000">VendorEarning</text>
+    <line x1="1550" y1="780" x2="1830" y2="780" stroke="#333" stroke-width="2"/>
+    <text x="1560" y="800" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">id: Int (PK)</text>
+    <text x="1560" y="820" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">vendorId: Int</text>
+    <text x="1560" y="840" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">orderId: Int</text>
+    <text x="1560" y="860" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">grossAmount: Float</text>
+    <text x="1560" y="880" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">platformFee: Float</text>
+    <!-- VendorPayout -->
+    <rect x="1150" y="980" width="280" height="140"
+          fill="#FFE6CC" stroke="#333" stroke-width="2" rx="5"/>
+    <rect x="1150" y="980" width="280" height="30"
+          fill="#FFE6CC" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="1290" y="1000" font-family="Arial" font-size="14"
+          font-weight="bold" text-anchor="middle" fill="#000">VendorPayout</text>
+    <line x1="1150" y1="1010" x2="1430" y2="1010" stroke="#333" stroke-width="2"/>
+    <text x="1160" y="1030" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">id: Int (PK)</text>
+    <text x="1160" y="1050" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">vendorId: Int</text>
+    <text x="1160" y="1070" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">stripeTransferId: String</text>
+    <text x="1160" y="1090" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">amount: Float</text>
+    <!-- DatingPartnerCommission -->
+    <rect x="1550" y="980" width="280" height="140"
+          fill="#FFE6CC" stroke="#333" stroke-width="2" rx="5"/>
+    <rect x="1550" y="980" width="280" height="30"
+          fill="#FFE6CC" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="1690" y="1000" font-family="Arial" font-size="14"
+          font-weight="bold" text-anchor="middle" fill="#000">DatingPartnerCommission</text>
+    <line x1="1550" y1="1010" x2="1830" y2="1010" stroke="#333" stroke-width="2"/>
+    <text x="1560" y="1030" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">id: Int (PK)</text>
+    <text x="1560" y="1050" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">adminId: Int</text>
+    <text x="1560" y="1070" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">orderId: Int</text>
+    <text x="1560" y="1090" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">commissionAmount: Float</text>
+    <!-- NotificationDetails -->
+    <rect x="50" y="1180" width="280" height="120"
+          fill="#F5F5F5" stroke="#333" stroke-width="2" rx="5"/>
+    <rect x="50" y="1180" width="280" height="30"
+          fill="#F5F5F5" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="190" y="1200" font-family="Arial" font-size="14"
+          font-weight="bold" text-anchor="middle" fill="#000">NotificationDetails</text>
+    <line x1="50" y1="1210" x2="330" y2="1210" stroke="#333" stroke-width="2"/>
+    <text x="60" y="1230" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">id: Int (PK)</text>
+    <text x="60" y="1250" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">weddingId: Int (FK)</text>
+    <text x="60" y="1270" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">vendorId: Int (FK)</text>
+    <!-- EmailTemplate -->
+    <rect x="400" y="1180" width="280" height="140"
+          fill="#F5F5F5" stroke="#333" stroke-width="2" rx="5"/>
+    <rect x="400" y="1180" width="280" height="30"
+          fill="#F5F5F5" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="540" y="1200" font-family="Arial" font-size="14"
+          font-weight="bold" text-anchor="middle" fill="#000">EmailTemplate</text>
+    <line x1="400" y1="1210" x2="680" y2="1210" stroke="#333" stroke-width="2"/>
+    <text x="410" y="1230" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">id: Int (PK)</text>
+    <text x="410" y="1250" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">name: String</text>
+    <text x="410" y="1270" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">subject: String</text>
+    <text x="410" y="1290" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">notificationDetailsId: Int (FK)</text>
+    <!-- EmailNotificationHistory -->
+    <rect x="750" y="1180" width="280" height="160"
+          fill="#F5F5F5" stroke="#333" stroke-width="2" rx="5"/>
+    <rect x="750" y="1180" width="280" height="30"
+          fill="#F5F5F5" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="890" y="1200" font-family="Arial" font-size="14"
+          font-weight="bold" text-anchor="middle" fill="#000">EmailNotificationHistory</text>
+    <line x1="750" y1="1210" x2="1030" y2="1210" stroke="#333" stroke-width="2"/>
+    <text x="760" y="1230" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">id: Int (PK)</text>
+    <text x="760" y="1250" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">to: String[]</text>
+    <text x="760" y="1270" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">subject: String</text>
+    <text x="760" y="1290" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">type: EmailTemplateType</text>
+    <text x="760" y="1310" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">notificationDetailsId: Int (FK)</text>
+    <!-- TokenBlacklist -->
+    <rect x="1150" y="1180" width="280" height="120"
+          fill="#F5F5F5" stroke="#333" stroke-width="2" rx="5"/>
+    <rect x="1150" y="1180" width="280" height="30"
+          fill="#F5F5F5" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="1290" y="1200" font-family="Arial" font-size="14"
+          font-weight="bold" text-anchor="middle" fill="#000">TokenBlacklist</text>
+    <line x1="1150" y1="1210" x2="1430" y2="1210" stroke="#333" stroke-width="2"/>
+    <text x="1160" y="1230" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">id: Int (PK)</text>
+    <text x="1160" y="1250" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">token: String (unique)</text>
+    <text x="1160" y="1270" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">expiresAt: DateTime</text>
+    <!-- Microsite -->
+    <rect x="50" y="1410" width="280" height="140"
+          fill="#FFF2CC" stroke="#333" stroke-width="2" rx="5"/>
+    <rect x="50" y="1410" width="280" height="30"
+          fill="#FFF2CC" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="190" y="1430" font-family="Arial" font-size="14"
+          font-weight="bold" text-anchor="middle" fill="#000">Microsite</text>
+    <line x1="50" y1="1440" x2="330" y2="1440" stroke="#333" stroke-width="2"/>
+    <text x="60" y="1460" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">id: Int (PK)</text>
+    <text x="60" y="1480" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">slug: String (unique)</text>
+    <text x="60" y="1500" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">coupleName: String</text>
+    <text x="60" y="1520" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">weddingId: Int (FK)</text>
+    <!-- WishlistItem -->
+    <rect x="400" y="1410" width="280" height="160"
+          fill="#FFF2CC" stroke="#333" stroke-width="2" rx="5"/>
+    <rect x="400" y="1410" width="280" height="30"
+          fill="#FFF2CC" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="540" y="1430" font-family="Arial" font-size="14"
+          font-weight="bold" text-anchor="middle" fill="#000">WishlistItem</text>
+    <line x1="400" y1="1440" x2="680" y2="1440" stroke="#333" stroke-width="2"/>
+    <text x="410" y="1460" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">id: Int (PK)</text>
+    <text x="410" y="1480" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">title: String</text>
+    <text x="410" y="1500" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">itemUrl: String</text>
+    <text x="410" y="1520" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">isReserved: Boolean</text>
+    <text x="410" y="1540" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">weddingId: Int (FK)</text>
+    <!-- Guestbook -->
+    <rect x="750" y="1410" width="280" height="120"
+          fill="#FFF2CC" stroke="#333" stroke-width="2" rx="5"/>
+    <rect x="750" y="1410" width="280" height="30"
+          fill="#FFF2CC" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="890" y="1430" font-family="Arial" font-size="14"
+          font-weight="bold" text-anchor="middle" fill="#000">Guestbook</text>
+    <line x1="750" y1="1440" x2="1030" y2="1440" stroke="#333" stroke-width="2"/>
+    <text x="760" y="1460" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">id: Int (PK)</text>
+    <text x="760" y="1480" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">guestNotes: Json[]</text>
+    <text x="760" y="1500" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">weddingId: Int (FK)</text>
+    <!-- SeatingArrangement -->
+    <rect x="1150" y="1410" width="280" height="140"
+          fill="#FFF2CC" stroke="#333" stroke-width="2" rx="5"/>
+    <rect x="1150" y="1410" width="280" height="30"
+          fill="#FFF2CC" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="1290" y="1430" font-family="Arial" font-size="14"
+          font-weight="bold" text-anchor="middle" fill="#000">SeatingArrangement</text>
+    <line x1="1150" y1="1440" x2="1430" y2="1440" stroke="#333" stroke-width="2"/>
+    <text x="1160" y="1460" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">id: Int (PK)</text>
+    <text x="1160" y="1480" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">weddingId: Int (FK)</text>
+    <text x="1160" y="1500" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">tables: Json</text>
+    <text x="1160" y="1520" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">groupPriorities: Json</text>
+    <!-- GratitudeCard -->
+    <rect x="50" y="1640" width="280" height="140"
+          fill="#FFF2CC" stroke="#333" stroke-width="2" rx="5"/>
+    <rect x="50" y="1640" width="280" height="30"
+          fill="#FFF2CC" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="190" y="1660" font-family="Arial" font-size="14"
+          font-weight="bold" text-anchor="middle" fill="#000">GratitudeCard</text>
+    <line x1="50" y1="1670" x2="330" y2="1670" stroke="#333" stroke-width="2"/>
+    <text x="60" y="1690" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">id: Int (PK)</text>
+    <text x="60" y="1710" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">signOffName: String</text>
+    <text x="60" y="1730" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">guestCardMessage: String</text>
+    <text x="60" y="1750" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">weddingId: Int (FK)</text>
+    <!-- Album -->
+    <rect x="400" y="1640" width="280" height="140"
+          fill="#FFF2CC" stroke="#333" stroke-width="2" rx="5"/>
+    <rect x="400" y="1640" width="280" height="30"
+          fill="#FFF2CC" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="540" y="1660" font-family="Arial" font-size="14"
+          font-weight="bold" text-anchor="middle" fill="#000">Album</text>
+    <line x1="400" y1="1670" x2="680" y2="1670" stroke="#333" stroke-width="2"/>
+    <text x="410" y="1690" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">id: Int (PK)</text>
+    <text x="410" y="1710" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">coupleName: String</text>
+    <text x="410" y="1730" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">albumURL: String</text>
+    <text x="410" y="1750" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">weddingId: Int (FK)</text>
+    <!-- Photo -->
+    <rect x="750" y="1640" width="280" height="160"
+          fill="#FFF2CC" stroke="#333" stroke-width="2" rx="5"/>
+    <rect x="750" y="1640" width="280" height="30"
+          fill="#FFF2CC" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="890" y="1660" font-family="Arial" font-size="14"
+          font-weight="bold" text-anchor="middle" fill="#000">Photo</text>
+    <line x1="750" y1="1670" x2="1030" y2="1670" stroke="#333" stroke-width="2"/>
+    <text x="760" y="1690" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">id: Int (PK)</text>
+    <text x="760" y="1710" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">url: String</text>
+    <text x="760" y="1730" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">albumId: Int (FK)</text>
+    <text x="760" y="1750" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">processingStatus: ProcessingStatus</text>
+    <text x="760" y="1770" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">isBlurry: Boolean</text>
+    <!-- PhotoFace -->
+    <rect x="1150" y="1640" width="280" height="160"
+          fill="#FFF2CC" stroke="#333" stroke-width="2" rx="5"/>
+    <rect x="1150" y="1640" width="280" height="30"
+          fill="#FFF2CC" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="1290" y="1660" font-family="Arial" font-size="14"
+          font-weight="bold" text-anchor="middle" fill="#000">PhotoFace</text>
+    <line x1="1150" y1="1670" x2="1430" y2="1670" stroke="#333" stroke-width="2"/>
+    <text x="1160" y="1690" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">id: Int (PK)</text>
+    <text x="1160" y="1710" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">photoId: Int (FK)</text>
+    <text x="1160" y="1730" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">encoding: Json</text>
+    <text x="1160" y="1750" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">x, y, width, height: Float</text>
+    <text x="1160" y="1770" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">personClusterId: Int (FK)</text>
+    <!-- PersonCluster -->
+    <rect x="1550" y="1640" width="280" height="140"
+          fill="#FFF2CC" stroke="#333" stroke-width="2" rx="5"/>
+    <rect x="1550" y="1640" width="280" height="30"
+          fill="#FFF2CC" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="1690" y="1660" font-family="Arial" font-size="14"
+          font-weight="bold" text-anchor="middle" fill="#000">PersonCluster</text>
+    <line x1="1550" y1="1670" x2="1830" y2="1670" stroke="#333" stroke-width="2"/>
+    <text x="1560" y="1690" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">id: Int (PK)</text>
+    <text x="1560" y="1710" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">albumId: Int (FK)</text>
+    <text x="1560" y="1730" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">label: String</text>
+    <text x="1560" y="1750" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">representativeEncoding: Json</text>
+    <!-- Checklist -->
+    <rect x="50" y="1870" width="280" height="120"
+          fill="#FFF2CC" stroke="#333" stroke-width="2" rx="5"/>
+    <rect x="50" y="1870" width="280" height="30"
+          fill="#FFF2CC" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="190" y="1890" font-family="Arial" font-size="14"
+          font-weight="bold" text-anchor="middle" fill="#000">Checklist</text>
+    <line x1="50" y1="1900" x2="330" y2="1900" stroke="#333" stroke-width="2"/>
+    <text x="60" y="1920" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">id: Int (PK)</text>
+    <text x="60" y="1940" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">weddingId: Int (FK)</text>
+    <text x="60" y="1960" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">currentStage: ChatbotStage</text>
+    <!-- ChecklistItem -->
+    <rect x="400" y="1870" width="280" height="160"
+          fill="#FFF2CC" stroke="#333" stroke-width="2" rx="5"/>
+    <rect x="400" y="1870" width="280" height="30"
+          fill="#FFF2CC" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="540" y="1890" font-family="Arial" font-size="14"
+          font-weight="bold" text-anchor="middle" fill="#000">ChecklistItem</text>
+    <line x1="400" y1="1900" x2="680" y2="1900" stroke="#333" stroke-width="2"/>
+    <text x="410" y="1920" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">id: Int (PK)</text>
+    <text x="410" y="1940" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">title: String</text>
+    <text x="410" y="1960" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">category: String</text>
+    <text x="410" y="1980" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">completed: Boolean</text>
+    <text x="410" y="2000" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">checklistId: Int (FK)</text>
+    <!-- ChatMessage -->
+    <rect x="750" y="1870" width="280" height="140"
+          fill="#FFF2CC" stroke="#333" stroke-width="2" rx="5"/>
+    <rect x="750" y="1870" width="280" height="30"
+          fill="#FFF2CC" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="890" y="1890" font-family="Arial" font-size="14"
+          font-weight="bold" text-anchor="middle" fill="#000">ChatMessage</text>
+    <line x1="750" y1="1900" x2="1030" y2="1900" stroke="#333" stroke-width="2"/>
+    <text x="760" y="1920" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">id: String (PK)</text>
+    <text x="760" y="1940" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">role: String</text>
+    <text x="760" y="1960" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">content: String</text>
+    <text x="760" y="1980" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">checklistId: Int (FK)</text>
+    <!-- WeddingWrapped -->
+    <rect x="1150" y="1870" width="280" height="160"
+          fill="#FFF2CC" stroke="#333" stroke-width="2" rx="5"/>
+    <rect x="1150" y="1870" width="280" height="30"
+          fill="#FFF2CC" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="1290" y="1890" font-family="Arial" font-size="14"
+          font-weight="bold" text-anchor="middle" fill="#000">WeddingWrapped</text>
+    <line x1="1150" y1="1900" x2="1430" y2="1900" stroke="#333" stroke-width="2"/>
+    <text x="1160" y="1920" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">id: Int (PK)</text>
+    <text x="1160" y="1940" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">weddingId: Int (FK)</text>
+    <text x="1160" y="1960" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">totalInvited: Int</text>
+    <text x="1160" y="1980" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">totalConfirmed: Int</text>
+    <text x="1160" y="2000" font-family="Monaco, Courier New, monospace"
+          font-size="10" fill="#000">topContributorName: String</text>
+
+    <!-- Legend -->
+    <rect x="1610" y="100" width="300" height="395" fill="#FFFACD" stroke="#333" stroke-width="2" rx="5"/>
+    <text x="1760" y="125" font-family="Arial" font-size="16" font-weight="bold"
+          text-anchor="middle" fill="#000">LEGEND</text>
+    <line x1="1620" y1="135" x2="1900" y2="135" stroke="#333" stroke-width="1"/>
+
+    <text x="1620" y="155" font-family="Arial" font-size="12" font-weight="bold" fill="#000">Color Code:</text>
+    <rect x="1620" y="165" width="20" height="20" fill="#DAE8FC" stroke="#333"/>
+    <text x="1645" y="180" font-family="Arial" font-size="11" fill="#000">User/Auth</text>
+
+    <rect x="1620" y="195" width="20" height="20" fill="#D5E8D4" stroke="#333"/>
+    <text x="1645" y="210" font-family="Arial" font-size="11" fill="#000">User Roles (Admin, Vendor)</text>
+
+    <rect x="1620" y="225" width="20" height="20" fill="#FFF2CC" stroke="#333"/>
+    <text x="1645" y="240" font-family="Arial" font-size="11" fill="#000">Wedding Features</text>
+
+    <rect x="1620" y="255" width="20" height="20" fill="#FFE6CC" stroke="#333"/>
+    <text x="1645" y="270" font-family="Arial" font-size="11" fill="#000">Marketplace/Orders</text>
+
+    <rect x="1620" y="285" width="20" height="20" fill="#E1D5E7" stroke="#333"/>
+    <text x="1645" y="300" font-family="Arial" font-size="11" fill="#000">Guest</text>
+
+    <rect x="1620" y="315" width="20" height="20" fill="#F8CECC" stroke="#333"/>
+    <text x="1645" y="330" font-family="Arial" font-size="11" fill="#000">Calendar</text>
+
+    <rect x="1620" y="345" width="20" height="20" fill="#F5F5F5" stroke="#333"/>
+    <text x="1645" y="360" font-family="Arial" font-size="11" fill="#000">System/Notifications</text>
+
+    <line x1="1620" y1="375" x2="1900" y2="375" stroke="#333" stroke-width="1"/>
+
+    <text x="1620" y="395" font-family="Arial" font-size="12" font-weight="bold" fill="#000">Relationships:</text>
+
+    <line x1="1620" y1="410" x2="1660" y2="410"
+          stroke="#333" stroke-width="2" marker-end="url(#arrow-one)"/>
+    <text x="1670" y="415" font-family="Arial" font-size="11" fill="#000">Directional (→)</text>
+
+    <line x1="1620" y1="435" x2="1660" y2="435"
+          stroke="#333" stroke-width="2" stroke-dasharray="5,5"
+          marker-start="url(#arrow-bidirectional-start)" marker-end="url(#arrow-bidirectional-end)"/>
+    <text x="1670" y="440" font-family="Arial" font-size="11" fill="#000">Bidirectional (↔)</text>
+
+    <line x1="1620" y1="455" x2="1900" y2="455" stroke="#333" stroke-width="1"/>
+
+    <text x="1620" y="475" font-family="Arial" font-size="10" fill="#555">PK = Primary Key</text>
+    <text x="1760" y="475" font-family="Arial" font-size="10" fill="#555">FK = Foreign Key</text>
+
+</svg>
