@@ -27,88 +27,84 @@ export class OrderService {
     private httpService: HttpService,
   ) {}
 
-  private sendCommissionInvoice(commissionLog: DatingPartnerCommission) {
-    (async () => {
-      try {
-        const partnerEmail = process.env.PARTNER_CONTACT_EMAIL;
+  private async sendCommissionInvoice(commissionLog: DatingPartnerCommission) {
+    try {
+      const partnerEmail = process.env.PARTNER_CONTACT_EMAIL;
 
-        if (!partnerEmail) {
-          console.error(
-            `PARTNER_CONTACT_EMAIL not set. Cannot send invoice for ${commissionLog.id}.`,
-          );
-          return;
-        }
-
-        const { buffer, filename } =
-          await this.invoiceGeneratorService.generateDatingPartnerCommissionInvoice(
-            commissionLog,
-          );
-
-        await this.emailService.sendDatingPlatformPayoutEmail(
-          partnerEmail,
-          commissionLog,
-          buffer,
-          filename,
-        );
-
-        console.log(`Commission invoice email sent for ${commissionLog.id}`);
-      } catch (emailError) {
+      if (!partnerEmail) {
         console.error(
-          `Failed to send commission invoice for ${commissionLog.id}.`,
-          emailError.stack,
+          `PARTNER_CONTACT_EMAIL not set. Cannot send invoice for ${commissionLog.id}.`,
         );
+        return;
       }
-    })();
+
+      // const { buffer, filename } =
+      //   await this.invoiceGeneratorService.generateDatingPartnerCommissionInvoice(
+      //     commissionLog,
+      //   );
+
+      await this.emailService.sendDatingPlatformPayoutEmail(
+        partnerEmail,
+        commissionLog,
+        // buffer,
+        // filename,
+      );
+
+      console.log(`Commission invoice email sent for ${commissionLog.id}`);
+    } catch (emailError) {
+      console.error(
+        `Failed to send commission invoice for ${commissionLog.id}.`,
+        emailError.stack,
+      );
+    }
   }
 
-  private notifyPartnerOfCommission(
+  private async notifyPartnerOfCommission(
     commissionLog: DatingPartnerCommission,
     adminUserEmail: string,
     listingName: string,
     purchaseDate: Date,
   ) {
-    (async () => {
-      try {
-        const apiUrl = process.env.PARTNER_API_URL;
-        const apiKey = process.env.PARTNER_API_KEY;
+    try {
+      const apiUrl = process.env.PARTNER_API_URL;
+      const apiKey = process.env.PARTNER_API_KEY;
 
-        if (!apiUrl || !apiKey) {
-          console.error(
-            'PARTNER_API_URL or PARTNER_API_KEY not set. Cannot notify partner.',
-          );
-          return;
-        }
-
-        const payload = {
-          userEmail: adminUserEmail,
-          itemPurchasedName: listingName,
-          purchaseAmount: commissionLog.grossAmount,
-          commissionAmount: commissionLog.commissionAmount,
-          purchaseDate: purchaseDate.toISOString(),
-        };
-
-        const headers = {
-          'X-API-KEY': apiKey,
-          'Content-Type': 'application/json',
-        };
-
-        // Use firstValueFrom to convert the Observable from HttpService into a Promise
-        await firstValueFrom(
-          this.httpService.post(`${apiUrl}/commissions/transactions`, payload, {
-            headers: headers,
-          }),
-        );
-
-        console.log(
-          `Successfully notified partner for commission ${commissionLog.id}`,
-        );
-      } catch (error) {
+      if (!apiUrl || !apiKey) {
         console.error(
-          `Failed to notify partner for commission ${commissionLog.id}`,
-          error.response?.data || error.message,
+          'PARTNER_API_URL or PARTNER_API_KEY not set. Cannot notify partner.',
         );
+        return;
       }
-    })();
+
+      const payload = {
+        userEmail: adminUserEmail,
+        itemPurchasedName: listingName,
+        purchaseAmount: commissionLog.grossAmount,
+        commissionAmount: commissionLog.commissionAmount,
+        purchaseDate: purchaseDate.toISOString(),
+      };
+
+      const headers = {
+        'X-API-KEY': apiKey,
+        'Content-Type': 'application/json',
+      };
+
+      // Use firstValueFrom to convert the Observable from HttpService into a Promise
+      await firstValueFrom(
+        this.httpService.post(`${apiUrl}/commissions/transactions`, payload, {
+          headers: headers,
+        }),
+      );
+
+      console.log(
+        `Successfully notified partner for commission ${commissionLog.id}`,
+      );
+    } catch (error) {
+      console.error(
+        `Failed to notify partner for commission ${commissionLog.id}`,
+        error.response?.data || error.message,
+      );
+    }
   }
 
   private async createAndPayDatingCommission(
@@ -193,14 +189,15 @@ export class OrderService {
           `Instant commission payout ${newCommissionLog.id} succeeded: ${transfer.id}`,
         );
 
-        this.notifyPartnerOfCommission(
-          updatedCommissionLog,
-          referredAdmin.user.email,
-          listing.listingName,
-          order.purchaseDate || order.createdAt,
-        );
-
-        this.sendCommissionInvoice(updatedCommissionLog);
+        await Promise.allSettled([
+          this.notifyPartnerOfCommission(
+            updatedCommissionLog,
+            referredAdmin.user.email,
+            listing.listingName,
+            order.purchaseDate || order.createdAt,
+          ),
+          this.sendCommissionInvoice(updatedCommissionLog),
+        ]);
       } catch (paymentError) {
         await this.prisma.datingPartnerCommission.update({
           where: { id: newCommissionLog.id },

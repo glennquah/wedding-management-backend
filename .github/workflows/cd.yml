@@ -54,6 +54,13 @@ jobs:
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
           GOOGLE_REDIRECT_URI: ${{ secrets.GOOGLE_REDIRECT_URI }}
+          DATING_PARTNER_API_KEY: ${{ secrets.DATING_PARTNER_API_KEY }}
+          PARTNER_STRIPE_ACCOUNT_ID: ${{ secrets.PARTNER_STRIPE_ACCOUNT_ID }}
+          PARTNER_COMMISSION_RATE: ${{ secrets.PARTNER_COMMISSION_RATE }}
+          PARTNER_CONTACT_NAME: ${{ secrets.PARTNER_CONTACT_NAME }}
+          PARTNER_CONTACT_EMAIL: ${{ secrets.PARTNER_CONTACT_EMAIL }}
+          PARTNER_API_KEY: ${{ secrets.PARTNER_API_KEY }}
+          PARTNER_API_URL: ${{ secrets.PARTNER_API_URL }}
         run: |
           cd infra
           npx cdk deploy --require-approval never

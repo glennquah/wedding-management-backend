@@ -15,6 +15,7 @@ async function bootstrap() {
     const nestApp = await NestFactory.create(
       AppModule,
       new ExpressAdapter(expressApp),
+      { rawBody: true },
     );
 
     nestApp.enableCors({
