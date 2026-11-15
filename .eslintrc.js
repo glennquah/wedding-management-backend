@@ -1,8 +1,8 @@
 module.exports = {
   parser: '@typescript-eslint/parser',
   parserOptions: {
-    project: 'tsconfig.json',
-    tsconfigRootDir: __dirname,
+    // The configured recommended rules do not require type information.
+    // Avoid loading every Prisma/Google API declaration just to run lint.
     sourceType: 'module',
   },
   plugins: ['@typescript-eslint/eslint-plugin'],

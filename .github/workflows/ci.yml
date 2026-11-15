@@ -26,6 +26,7 @@ jobs:
           --health-retries 5
 
     env:
+      NODE_OPTIONS: --max-old-space-size=4096
       # Isolated CI fixtures only; no production credentials are required.
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: password123

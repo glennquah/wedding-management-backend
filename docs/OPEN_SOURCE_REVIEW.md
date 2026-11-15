@@ -41,7 +41,7 @@ Changes include:
 
 ## Validation
 
-- Nest compilation and ESLint checks passed after the upgrade.
+- Nest compilation and ESLint checks passed after the upgrade. The first GitHub run hit the linter’s default 2 GB heap because the old config loaded the entire TypeScript project. Lint now uses the same enabled syntax rules without that unnecessary project load, and passed with a 2 GB heap locally; build/test CI receives a 4 GB heap.
 - All 6 e2e suites and 59 tests passed against a disposable local PostgreSQL 16 database with placeholder integration credentials and the existing mocked email service.
 - The Lambda webpack bundle compiled successfully.
 - Source scans, diff whitespace checks, local documentation links, and clean install/lockfile consistency were checked.
