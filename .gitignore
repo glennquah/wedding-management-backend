@@ -59,3 +59,13 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 /generated/prisma
 
 /infra/cdk.out
+# Local credentials and environment variants
+.env
+.env.*
+*.env
+!.env.example
+!**/.env.example
+*.pem
+*.key
+*.p12
+*.pfx

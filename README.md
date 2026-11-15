@@ -1,99 +1,111 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Knotly · Wedding Management API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+The NestJS API behind Knotly, an NUS IS4108 AI Solutioning Capstone wedding planning platform. It connects couples, collaborators, guests, vendors, and platform administrators through a shared PostgreSQL data model.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+Use it with the [frontend monorepo](https://github.com/glennquah/wedding-management-frontend-admin).
 
-## Description
+## Features
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- JWT authentication, refresh tokens, and role-based access for platform users.
+- Wedding and collaborator management, guest groups, RSVPs, attendance, and seating arrangements.
+- Customizable microsites, photo albums, guestbooks, gift wishlists, and gratitude cards.
+- Vendor onboarding, listings, carts, orders, ratings, Stripe payments, cash gifts, and payouts.
+- Email templates, invitations, notification history, planning checklists, and analytics.
+- AI-assisted content generation and integrations for seating optimization, recommendations, date scheduling, and photo processing.
+- Google Calendar integration and an optional partner-platform API.
 
-## Project setup
+## Stack and structure
 
-```bash
-$ npm install
+NestJS 10, TypeScript, Prisma 6, PostgreSQL 16, Swagger/OpenAPI, Jest, Stripe, SendGrid, Google APIs, and OpenAI. AWS CDK infrastructure and a Lambda entry point are included.
+
+```text
+src/                Feature modules, controllers, services, DTOs, and auth guards
+prisma/schema.prisma Database schema
+prisma/migrations/  Versioned database migrations
+prisma/seeds/       Development seed data
+public/             Static assets
+infra/              AWS CDK infrastructure
+test/              Integration/e2e tests and service mocks
 ```
 
-## Compile and run the project
+The [entity relationship diagram](wedding_management_erd.svg) documents the data model. Deployment diagrams are available in `deployment_architecture.drawio`.
+
+## Local setup
+
+Prerequisites: Node.js 22, npm, and Docker with Compose. Use your own development accounts for Stripe, OpenAI, SendGrid, and Google integrations.
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm ci
+cp .env.example .env
 ```
 
-## Run tests
+Edit `.env` before continuing. Generate independent JWT signing keys using `openssl rand -base64 32`. The example database credentials are local development values only. Stripe and OpenAI clients initialize during startup, and the email service requires a nonempty SendGrid key, so configure all three before starting even when you are not exercising those features. Email delivery also requires a verified sender; inspect the sender configuration in `src/email-notification` for your deployment.
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coveragee
-$ npm run test:cov
+docker compose up -d
+npm run generate:prisma:types
+npx prisma migrate deploy
+npm run dev
 ```
+
+- API: http://localhost:8080
+- Swagger UI: http://localhost:8080/api
+- OpenAPI JSON: http://localhost:8080/api-json
+
+On Windows, use `docker compose -f docker-compose.windows.yml up -d`. To stop the database while retaining data, run `docker compose down`. The existing npm `docker:dev:down` script includes `-v` and deletes the local database volume.
+
+### Optional development data
+
+```bash
+npm run prisma:seed:dev
+```
+
+Run seeds only against an isolated local database. They include predictable demo passwords and project-specific sample data; never seed a public deployment with those accounts. Review the seed files before running them. Use Prisma Studio (`npm run prisma:gui`) to inspect local data.
+
+### External integrations
+
+| Configuration | Purpose |
+| --- | --- |
+| `DATABASE_URL`, `POSTGRES_*` | Prisma connection and local Compose database |
+| `JWT_SECRET_KEY`, `JWT_REFRESH_KEY` | Independent access and refresh signing keys |
+| `FRONTEND_URL`, `ADMIN_FRONTEND_URL` | Customer and platform-admin links |
+| `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` | Payments and webhook signature verification |
+| `OPENAI_API_KEY` | AI content generation |
+| `SENDGRID_API_KEY` | Transactional email |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URI` | Calendar OAuth |
+| `FASTAPI_URL` | Separate AI service, not included in this repository |
+| `DATING_PARTNER_API_KEY`, `PARTNER_*` | Optional partner integration and commissions |
+
+Confirm the Google callback URL against the calendar controller and your OAuth registration. Without the AI service, its optimization, recommendation, and photo endpoints will fail. Ordinary API/database development does not provide those models.
+
+To forward Stripe test webhooks locally, authenticate the Stripe CLI and run `npm run stripe:start`. Copy the listener's signing secret into your local `STRIPE_WEBHOOK_SECRET`, then restart the API.
+
+## Development and checks
+
+| Command | Purpose |
+| --- | --- |
+| `npm run dev` | Generate Prisma client and start watch mode |
+| `npm run build` | Compile the NestJS application |
+| `npm run lint:check` | Check lint without modifying files |
+| `npm test -- --runInBand` | Run unit tests |
+| `npm run test:e2e` | Run the e2e suite |
+| `npm run test:cov` | Collect coverage |
+| `npm run prisma:gui` | Open Prisma Studio |
+
+Review `test/jest-e2e.json` and test setup before running integration tests; use a disposable database and test-service configuration. Prisma migration generation and schema push modify your database; use the checked-in migrations for initial setup.
 
 ## Deployment
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+Review `infra/`, `src/lambda.ts`, and `.github/workflows` before deploying. The existing infrastructure and CORS origins are specific to the original project. Configure your own AWS account, region, networking, database, allowed frontend origins, sender addresses, and secrets. Never reuse local seed credentials in production.
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+## Contributing and security
 
-```bash
-$ npm install -g mau
-$ mau deploy
-```
+Include the behavior change and validation steps in pull requests. Update API DTOs and Swagger annotations alongside endpoint changes, and regenerate the frontend client when needed. Never post secrets or real user data in public issues. See [SECURITY.md](SECURITY.md).
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## License and assets
 
-## Resources
+No project license has been selected; `package.json` currently declares `UNLICENSED`. Maintainers must choose an open-source license and confirm contributor and asset rights before release. Dependency licenses do not license this project's own code.
 
-Check out a few resources that may come in handy when working with NestJS:
+## Release review
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+See [the open-source preparation review](docs/OPEN_SOURCE_REVIEW.md) for credential-scan findings, dependency advisories, validation, and remaining release decisions.
