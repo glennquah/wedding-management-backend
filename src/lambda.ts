@@ -2,7 +2,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import { configure } from '@vendia/serverless-express';
-import { Context, Handler } from 'aws-lambda';
+import type { Context, Handler } from 'aws-lambda';
 import * as express from 'express';
 
 import { AppModule } from './app.module';
@@ -12,6 +12,7 @@ let cachedServer: Handler;
 async function bootstrap() {
   if (!cachedServer) {
     const expressApp = express();
+    expressApp.set('query parser', 'extended');
     const nestApp = await NestFactory.create(
       AppModule,
       new ExpressAdapter(expressApp),

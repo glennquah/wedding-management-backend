@@ -26,7 +26,7 @@ jobs:
           --health-retries 5
 
     env:
-      # FIXME: Standardize this when CD is set up & hide all the impt env vars in GitHub Secrets
+      # Isolated CI fixtures only; no production credentials are required.
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: password123
       POSTGRES_DB: wedding_management
@@ -34,8 +34,8 @@ jobs:
       FRONTEND_URL: http://localhost:3000
       SENDGRID_API_KEY: API_KEY_NOT_ACTUALLY_HERE
       PORT: ${{ secrets.PORT }}
-      JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
-      JWT_REFRESH_KEY: ${{ secrets.JWT_REFRESH_KEY }}
+      JWT_SECRET_KEY: ci-only-access-signing-key-do-not-deploy
+      JWT_REFRESH_KEY: ci-only-refresh-signing-key-do-not-deploy
       FASTAPI_URL: http://localhost:8001
       STRIPE_SECRET_KEY: API_KEY_NOT_ACTUALLY_HERE
       STRIPE_WEBHOOK_SECRET: API_KEY_NOT_ACTUALLY_HERE
@@ -48,11 +48,14 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20.x
+          node-version: 22.x
           cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Audit dependencies
+        run: npm audit --audit-level=high
 
       - name: Generate Prisma client
         run: npx prisma generate

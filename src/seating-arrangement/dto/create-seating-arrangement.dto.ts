@@ -19,7 +19,8 @@ export class CreateSeatingArrangementDto {
       ['John Doe', 'Jane Smith'],
       ['Bob Johnson', 'Alice Brown'],
     ],
-    type: [[String]],
+    type: 'array',
+    items: { type: 'array', items: { type: 'string' } },
   })
   @IsOptional()
   @IsArray()

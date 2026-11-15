@@ -16,7 +16,7 @@ Use it with the [frontend monorepo](https://github.com/glennquah/wedding-managem
 
 ## Stack and structure
 
-NestJS 10, TypeScript, Prisma 6, PostgreSQL 16, Swagger/OpenAPI, Jest, Stripe, SendGrid, Google APIs, and OpenAI. AWS CDK infrastructure and a Lambda entry point are included.
+NestJS 11 with Express 5, TypeScript, Prisma 6, PostgreSQL 16, Swagger/OpenAPI, Jest, Stripe, SendGrid, Google APIs, and OpenAI. AWS CDK infrastructure and a Lambda entry point are included. Lambda now targets Node.js 22, and both entry points preserve nested query parsing under Express 5.
 
 ```text
 src/                Feature modules, controllers, services, DTOs, and auth guards
@@ -32,7 +32,7 @@ The [entity relationship diagram](wedding_management_erd.svg) documents the data
 
 ## Local setup
 
-Prerequisites: Node.js 22, npm, and Docker with Compose. Use your own development accounts for Stripe, OpenAI, SendGrid, and Google integrations.
+Prerequisites: Node.js 22.22.3 or newer, npm, and Docker with Compose. Use your own development accounts for Stripe, OpenAI, SendGrid, and Google integrations.
 
 ```bash
 npm ci
@@ -44,7 +44,7 @@ Edit `.env` before continuing. Generate independent JWT signing keys using `open
 ```bash
 docker compose up -d
 npm run generate:prisma:types
-npx prisma migrate deploy
+npx prisma db push
 npm run dev
 ```
 
@@ -61,6 +61,8 @@ npm run prisma:seed:dev
 ```
 
 Run seeds only against an isolated local database. They include predictable demo passwords and project-specific sample data; never seed a public deployment with those accounts. Review the seed files before running them. Use Prisma Studio (`npm run prisma:gui`) to inspect local data.
+
+The checked-in migrations currently lag behind `schema.prisma` (including reviews, partner commissions, and Wedding Wrapped). For a fresh local development database, `prisma db push` creates the current schema. Before production deployment, reconcile that migration history with the actual database and generate/review the missing migrations; do not run schema push against production.
 
 ### External integrations
 
@@ -92,7 +94,7 @@ To forward Stripe test webhooks locally, authenticate the Stripe CLI and run `np
 | `npm run test:cov` | Collect coverage |
 | `npm run prisma:gui` | Open Prisma Studio |
 
-Review `test/jest-e2e.json` and test setup before running integration tests; use a disposable database and test-service configuration. Prisma migration generation and schema push modify your database; use the checked-in migrations for initial setup.
+Review `test/jest-e2e.json` and test setup before running integration tests; use a disposable database and test-service configuration. Prisma migration generation and schema push modify your database; use schema push only for disposable local development until the migration history has been reconciled.
 
 ## Deployment
 
@@ -105,6 +107,10 @@ Include the behavior change and validation steps in pull requests. Update API DT
 ## License and assets
 
 No project license has been selected; `package.json` currently declares `UNLICENSED`. Maintainers must choose an open-source license and confirm contributor and asset rights before release. Dependency licenses do not license this project's own code.
+
+## Dependency maintenance
+
+The npm overrides select patched transitive packages pinned by the CLI, Prisma, lint tooling, and query parsing dependencies. They do not alter CDK’s bundled matcher. Revisit them when updating the parent packages. CI fails on high or critical dependency advisories, and Dependabot checks for updates weekly.
 
 ## Release review
 

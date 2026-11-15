@@ -19,28 +19,37 @@ No tracked real `.env` files were found in current files or fetched history. Ign
 
 Development seeds and the CI PostgreSQL service contain predictable example passwords. These are development fixtures, not identified production credentials. Never run the seed accounts in a public deployment. If any deployed accounts use these passwords, reset or remove them before publication.
 
-## Dependency review
+## Dependency remediation
 
-`npm ci --ignore-scripts` completed successfully. `npm audit` reported **69 advisories**: 2 critical, 30 high, 20 moderate, and 17 low. These counts include transitive and development dependencies and can change as the registry updates. Packages marked critical: `handlebars`, `proxy-addr`.
+The initial audit reported 69 affected package entries, including 2 critical and 30 high. The updated dependency tree has **zero critical and zero high findings**. It retains **2 moderate and 12 low package entries**, caused by two underlying advisories:
 
-Dependency upgrades were not applied as part of the documentation/credential changes. Review `npm audit` and validate compatible fixes before operating a public deployment; some fixes require major-version changes.
+| Underlying package | Remaining issue | Status |
+| --- | --- | --- |
+| CDK's bundled `minimatch` | [Glob pattern amplification](https://github.com/advisories/GHSA-g3hv-75wg-m249) (moderate) | Latest AWS CDK 2.277.0 still bundles the affected version. npm overrides do not replace bundled dependencies. This is infrastructure tooling; avoid untrusted glob patterns. Await a patched CDK bundle. |
+| `deepmerge` | [Prototype poisoning of returned objects](https://github.com/advisories/GHSA-gcqx-w48m-w2h4) (low) | No patched release is published. It is pulled in by SendGrid and test/build tooling. Avoid passing untrusted objects to merge helpers and track the upstream fix. |
 
-## Critical dependency details
+These remaining entries are not suppressed or treated as resolved. Downgrading CDK as npm audit suggests reintroduces higher-severity issues, so the latest release is retained. No unreviewed fork or incompatible merge-library substitution was added to hide the low-severity findings.
 
-These are package advisory matches, not confirmed exploits in the application. Development-only packages can affect build tooling. Runtime exploitability depends on the vulnerable feature and inputs being reachable.
+Changes include:
 
-| Package | Locked versions | Dependency context | Critical advisories |
-| --- | --- | --- | --- |
-| `handlebars` | 4.7.8 | Includes runtime dependency | [Handlebars.js has JavaScript Injection via AST Type Confusion](https://github.com/advisories/GHSA-2w6w-674q-4c4q); [Handlebars: JavaScript Injection via AST Type Confusion in compile (bypass of CVE-2026-33937)](https://github.com/advisories/GHSA-8r5x-fm3f-whwj); [Handlebars: JavaScript Injection via Own Property Check Bypass](https://github.com/advisories/GHSA-p8wg-vrv2-v86f) |
-| `proxy-addr` | 2.0.7 | Includes runtime dependency | [proxy-addr vulnerable to IP spoofing via IPv4-mapped IPv6 trust subnet](https://github.com/advisories/GHSA-jqcg-44mw-7w3h) |
-
-The count is affected package entries, not a count of proven independent attacks. Update and test dependency fixes separately from this preparation.
+- Upgraded Handlebars and other compatible dependencies to patched releases; moved NestJS to 11.2.10 with Express 5 and Swagger 11.4.8.
+- Updated Google APIs, Prisma within v6, webpack, copy-webpack-plugin, and the Nest CLI/schematics. Replaced the unnecessary `aws-lambda` runtime dependency with `@types/aws-lambda` and a type-only import.
+- Added scoped security overrides for deepmerge-ts, minimatch, glob, qs, picomatch, Ajv, and tmp. Overrides are tracked in `package.json` and must be re-evaluated when parent dependencies catch up.
+- Updated Swagger array/object declarations for the new schema types. Both HTTP entry points explicitly preserve Express 4's nested query parsing behavior under Express 5.
+- Raised the development/CI Node baseline to 22.22.3 and the Lambda runtime to Node.js 22.
+- CI audits dependencies at the high severity threshold, uses local-only JWT test values, and Dependabot checks updates weekly.
 
 ## Validation
 
-- Prisma client generation and `npm run build` passed.
-- Diff whitespace checks passed; environment variants are ignored and the example template is visible to Git.
-- Database migrations, seed execution, payment/email integrations, and e2e tests were not run against external services.
+- Nest compilation and ESLint checks passed after the upgrade.
+- All 6 e2e suites and 59 tests passed against a disposable local PostgreSQL 16 database with placeholder integration credentials and the existing mocked email service.
+- The Lambda webpack bundle compiled successfully.
+- Source scans, diff whitespace checks, local documentation links, and clean install/lockfile consistency were checked.
+- Real Stripe, email, Google OAuth, AI services, AWS deployments, and production data were not used.
+
+### Existing database migration gap
+
+Applying only the checked-in migrations to an empty database leaves the current Prisma schema incomplete. The first e2e run exposed the missing `Admin.isDatingPartnerRegistered` field; reviews, commissions, and Wedding Wrapped schema changes are also absent from migration history. Tests use `prisma db push` only against the disposable local database, as the existing CI already does. The README now explains this local setup and the need to reconcile migration history before production deployment. This dependency PR does not invent or apply production migrations.
 
 ## Remaining release decisions
 
@@ -49,4 +58,4 @@ The count is affected package entries, not a count of proven independent attacks
 - Review sample names/emails and third-party infrastructure identifiers before publishing. Screenshots selected for the frontend README avoid email/account-management tables; the report itself is not copied into either repository.
 - Configure a private vulnerability-reporting channel and your own infrastructure before deployment.
 
-This preparation does not change repository visibility, rotate deployed secrets, deploy applications, or rewrite Git history. Dependency fixes remain follow-up work.
+This preparation does not change repository visibility, rotate deployed secrets, deploy applications, or rewrite Git history. Deployment credential rotation and license selection remain follow-up work.
