@@ -15,7 +15,8 @@ export class UpdateSeatingArrangementDto {
     description:
       'Seating tables as array of arrays. Index 0 = Table 1, Index 1 = Table 2, etc.',
     required: false,
-    type: [[String]],
+    type: 'array',
+    items: { type: 'array', items: { type: 'string' } },
     example: [
       ['John Doe', 'Jane Smith'],
       ['Bob Johnson', 'Alice Brown'],

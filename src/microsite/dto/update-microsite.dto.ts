@@ -50,8 +50,7 @@ export class UpdateMicrositeDto {
   @ApiProperty({
     description: 'Wedding schedule (stored as JSON)',
     required: false,
-    type: 'object',
-    isArray: true,
+    type: [ScheduleItemDto],
   })
   @IsOptional()
   schedule?: ScheduleItemDto[];
@@ -59,8 +58,7 @@ export class UpdateMicrositeDto {
   @ApiProperty({
     description: 'Frequently asked questions (stored as JSON)',
     required: false,
-    type: 'object',
-    isArray: true,
+    type: [FaqItemDto],
   })
   @IsOptional()
   faqs?: FaqItemDto[];

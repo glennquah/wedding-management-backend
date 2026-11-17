@@ -10,7 +10,7 @@ export class CdkStack extends cdk.Stack {
     super(scope, id, props);
 
     const nestJsLambda = new lambda.Function(this, 'NestJsApiLambda', {
-      runtime: lambda.Runtime.NODEJS_20_X,
+      runtime: lambda.Runtime.NODEJS_22_X,
       handler: 'main.handler',
       code: lambda.Code.fromAsset(path.join(__dirname, '../../dist'), {
         exclude: [
